@@ -1,0 +1,793 @@
+<?php
+  
+use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\DinningController;
+use App\Http\Controllers\FrontendController;
+use App\Http\Controllers\HomeController;
+use App\Http\Controllers\RoleController;
+use App\Http\Controllers\UserController;
+use App\Http\Controllers\ProductController;
+use App\Http\Controllers\PermissionController;
+use App\Http\Controllers\MenuController;
+use App\Http\Controllers\GalleryController;
+use App\Http\Controllers\ServiceController;
+use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\PageController;
+use App\Http\Controllers\RequisitionApprovalController;
+use App\Http\Controllers\SettingController;
+use App\Http\Controllers\SliderController;
+use App\Http\Controllers\RoomController;
+use App\Http\Controllers\OfferController;
+use App\Http\Controllers\EventController;
+use App\Http\Controllers\RoomServiceController;
+use App\Http\Controllers\DriverController;
+use App\Http\Controllers\LicneseTypeController;
+use App\Http\Controllers\UnitController;
+use App\Http\Controllers\CompanyController;
+use App\Http\Controllers\DepartmentController;
+use App\Http\Controllers\LocationController;
+use App\Http\Controllers\Admin\ProjectController;
+use App\Http\Controllers\SupportController;
+use App\Http\Controllers\Issue;
+use App\Http\Controllers\SupportTypeController;
+use App\Http\Controllers\VehicleController;
+use App\Http\Controllers\EmployeeController;
+use App\Http\Controllers\SupportdetailController;
+use App\Http\Controllers\AssignprojectDepartmentController;
+use App\Http\Controllers\TasktitleController;
+use App\Http\Controllers\Admin\DocumentController;
+use App\Http\Controllers\Admin\LandController;
+use App\Http\Controllers\Admin\DocumentTypeController;
+use App\Http\Controllers\Admin\DocumentHistoryController;
+use Illuminate\Support\Facades\Mail;
+use App\Http\Controllers\VendorController;
+use App\Http\Controllers\VehicleTypeController;
+use App\Http\Controllers\RequisitionController;
+use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\DepartmentApprovalController;
+use App\Http\Controllers\TransportApprovalController;
+use App\Http\Controllers\TripSheetController;
+use App\Http\Controllers\MaintenanceController;
+use App\Http\Controllers\MaintenanceTypeController;
+use App\Http\Controllers\MaintenanceVendorController;
+use App\Http\Controllers\MaintenanceScheduleController;
+use App\Http\Controllers\MaintenanceRequisitionController;
+use App\Http\Controllers\MaintenanceCategoryController;
+use Illuminate\Support\Facades\Auth;
+use App\Notifications\TestPushNotification;  
+// use NotificationChannels\WebPush\PushSubscriptionController;
+use App\Http\Controllers\PushSubscriptionController;
+use App\Http\Controllers\Reports\ReportController;
+use App\Http\Controllers\Reports\RequisitionReportController;
+use App\Http\Controllers\Reports\MaintenanceReportController;
+use App\Http\Controllers\Reports\TripFuelReportController;
+use App\Http\Controllers\Reports\VehicleUtilizationReportController;
+use App\Http\Controllers\Reports\DriverPerformanceReportController;
+use App\Http\Controllers\Admin\SubscriptionPlanController;
+use App\Http\Controllers\Admin\SubscriptionController;
+use App\Http\Controllers\Payment\StripeController;
+use App\Http\Controllers\Payment\ManualPaymentController;
+use App\Http\Controllers\Admin\SubscriptionApprovalController;
+use App\Http\Controllers\Admin\AdminPaymentController;
+use App\Http\Controllers\TranslationController;
+use App\Http\Controllers\LanguageController;
+
+// Route::get('/', fn () => redirect()->route('login'));
+
+Auth::routes();
+Route::prefix('maintenance-categories')->group(function () {
+    Route::get('/', [MaintenanceCategoryController::class, 'index'])->name('maintenance-categories.index'); // DataTable
+    Route::post('/', [MaintenanceCategoryController::class, 'store'])->name('maintenance-categories.store'); // Create / Update
+    Route::get('/{id}/edit', [MaintenanceCategoryController::class, 'edit'])->name('maintenance-categories.edit'); // Get data for edit
+    Route::delete('/{id}', [MaintenanceCategoryController::class, 'destroy'])->name('maintenance-categories.destroy'); // Delete
+});
+
+    //  Maintenance Requisition Routes
+     Route::resource('maintenance', MaintenanceRequisitionController::class);
+
+
+//   Route::prefix('maintenance-schedule')->middleware('auth')->group(function(){
+//     Route::get('/', [MaintenanceController::class,'index'])->name('maintenance.index');
+//     Route::get('/create', [MaintenanceController::class,'create'])->name('maintenance.create');
+//     Route::post('/store', [MaintenanceController::class,'storeSchedule'])->name('maintenance.store');
+//     Route::get('/record/{id}', [MaintenanceController::class,'recordForm'])->name('maintenance.record.form');
+//     Route::post('/record/{id}', [MaintenanceController::class,'recordMaintenance'])->name('maintenance.record');
+//     Route::post('/schedule/{id}/deactivate', [MaintenanceController::class,'markScheduleInactive'])->name('maintenance.schedule.deactivate');
+//     Route::get('/due/list', [MaintenanceController::class,'dueList'])->name('maintenance.due.list');
+// });
+
+Route::prefix('maintenance-types')->middleware('auth')->group(function(){
+    Route::get('/', [MaintenanceTypeController::class, 'index'])->name('maintenance.types.index');
+    Route::post('/store', [MaintenanceTypeController::class, 'store'])->name('maintenance-types.store');
+    Route::get('/edit/{maintenanceType}', [MaintenanceTypeController::class, 'edit'])->name('maintenance-types.edit');
+    Route::put('/update/{maintenanceType}', [MaintenanceTypeController::class, 'update'])->name('maintenance-types.update');
+    Route::delete('/delete/{maintenanceType}', [MaintenanceTypeController::class, 'destroy'])->name('maintenance-types.destroy');
+// and a named route for datatable:
+Route::get('maintenance-types-data', [MaintenanceTypeController::class,'data'])->name('maintenance.types.data');
+
+});
+
+
+// Maintenance Vendor Routes
+Route::prefix('maintenance-vendors')->middleware('auth')->group(function(){
+    Route::get('/', [MaintenanceVendorController::class, 'index'])->name('maintenance.vendors.index');
+    Route::post('/store', [MaintenanceVendorController::class, 'store'])->name('maintenance.vendors.store');
+    Route::get('/edit/{vendor}', [MaintenanceVendorController::class, 'edit'])->name('maintenance.vendors.edit');
+    Route::post('/update/{vendor}', [MaintenanceVendorController::class, 'update'])->name('maintenance.vendors.update');
+    Route::delete('/delete/{vendor}', [MaintenanceVendorController::class, 'destroy'])->name('maintenance.vendors.destroy');
+});
+
+// Maintenance Schedule Routes
+Route::prefix('maintenance-schedules')->middleware('auth')->group(function(){
+    Route::get('/', [MaintenanceScheduleController::class, 'index'])->name('maintenance.schedules.index');
+    Route::get('/create', [MaintenanceScheduleController::class, 'create'])->name('maintenance.schedules.create');
+    Route::post('/store', [MaintenanceScheduleController::class, 'store'])->name('maintenance.schedules.store');
+    Route::get('/edit/{schedule}', [MaintenanceScheduleController::class, 'edit'])->name('maintenance-schedules.edit');
+    Route::post('/update/{schedule}', [MaintenanceScheduleController::class, 'update'])->name('maintenance.schedules.update');
+    Route::delete('/delete/{schedule}', [MaintenanceScheduleController::class, 'destroy'])->name('maintenance-schedules.destroy');
+      // Optional: if you want a separate "show" page
+    Route::get('/{id}', [MaintenanceScheduleController::class, 'show'])->name('maintenance-schedules.show');
+    // AJAX helpers
+Route::post('maintenance-schedules/toggle-active/{id}', [MaintenanceScheduleController::class, 'toggleActive'])
+    ->name('maintenance-schedules.toggleActive');
+Route::get('maintenance-schedules/server/load', [MaintenanceScheduleController::class, 'server'])
+    ->name('maintenance.schedules.server');
+
+});
+
+
+
+
+Route::group(['middleware' => ['auth']], function() {
+Route::redirect('/', 'login');
+
+  // DataTables AJAX
+Route::get('roles/data', [RoleController::class, 'data'])->name('roles.data');
+    Route::resource('documents', '\App\Http\Controllers\Admin\DocumentController');
+Route::resource('roles', RoleController::class);
+    Route::get('roles', [RoleController::class, 'index'])->name('roles.index');
+
+
+
+    Route::resource('projects', ProjectController::class);
+
+    Route::get('document-types', [DocumentTypeController::class, 'index'])->name('document-types.index');
+    Route::get('document-types/create', [DocumentTypeController::class, 'create'])->name('document-types.create');
+    Route::post('document-types', [DocumentTypeController::class, 'store'])->name('document-types.store');
+    Route::get('document-types/{id}', [DocumentTypeController::class, 'show'])->name('document-types.show');
+    Route::get('document-types/{id}/edit', [DocumentTypeController::class, 'edit'])->name('document-types.edit');
+    Route::put('document-types/{id}', [DocumentTypeController::class, 'update'])->name('document-types.update');
+    Route::delete('document-types/{id}', [DocumentTypeController::class, 'destroy'])->name('document-types.destroy');
+
+    Route::prefix('document-history')->name('document.history.')->group(function() {
+        Route::get('/', [DocumentHistoryController::class, 'index'])->name('index');
+        Route::get('/search', [DocumentHistoryController::class, 'search'])->name('search');
+        Route::get('/export', [DocumentHistoryController::class, 'export'])->name('export');
+    });
+
+
+    Route::resource('vehicles', VehicleController::class);
+Route::resource('vendors', VendorController::class);
+    Route::post('documents/{id}/approve', [DocumentController::class, 'approve'])->name('documents.approve');
+    Route::post('documents/{id}/reject', [DocumentController::class, 'reject'])->name('documents.reject');
+    Route::get('documents/pending-approval', [DocumentController::class, 'pendingApproval'])->name('documents.pending-approval');
+
+    Route::get('documents/{id}/return-modal', [DocumentController::class, 'showReturnModal'])
+        ->name('documents.return-modal');
+    Route::post('documents/{id}/return', [DocumentController::class, 'returnDocument'])
+        ->name('documents.return');
+
+    });
+// Route::get('/', [FrontendController::class, 'index'])->name('home_view');
+
+  
+  
+Route::group(['middleware' => ['prevent-back-history']], function() {
+ // Server-side data endpoints for AJAX tables
+    Route::get('units/data', [UnitController::class, 'data'])->name('units.data');
+    Route::get('locations/data', [LocationController::class, 'data'])->name('locations.data');
+Route::get('departments/data', [DepartmentController::class, 'data'])->name('departments.data');
+    Route::get('drivers/data', [DriverController::class, 'data'])->name('drivers.data');
+
+
+
+    // Route::get('/', [DriverController::class, 'index'])->name('drivers.index');
+    // Route::post('drivers/store', [DriverController::class, 'store'])->name('drivers.store');
+    Route::get('drivers/list', [DriverController::class, 'list'])->name('drivers.list');
+    Route::resource('drivers', DriverController::class);
+    Route::resource('vehicle-type', VehicleTypeController::class);
+    Route::resource('requisitions', RequisitionController::class);
+    // routes/web.php
+// Route::get('/get-employee-details/{id}', [EmployeeController::class, 'getEmployeeDetails'])->name('employee.details');
+
+
+// Route::middleware(['auth'])->get('/test-push', function () {
+//     auth()->user()->notify(new TestPushNotification(
+//         "Test Notification",            // Title (required)
+//         "Web push is working successfully", // Message (optional)
+//         "info",                         // Type (optional)
+//         url('/dashboard')               // Link (optional)
+//     ));
+
+//     return 'Web push sent successfully';
+// });
+Route::get('/test-push', function () {
+    auth()->user()->notify(
+        new \App\Notifications\TestPushNotification()
+    );
+    return 'Push sent';
+});
+
+
+
+// Route::post('/push-subscribe', function(Request $request) {
+//     Auth::user()->updatePushSubscription($request->endpoint, $request->keys['p256dh'], $request->keys['auth']);
+//     return response()->json(['success' => true]);
+// });
+
+// Route::middleware('auth')->group(function () {
+// Route::post('/push-subscribe', [PushSubscriptionController::class, 'store'])
+//      ->middleware('auth');
+//     Route::post('push/unsubscribe', [PushSubscriptionController::class, 'destroy']);
+// // });
+
+Route::middleware('auth')->group(function() {
+    Route::post('push-subscribe', [PushSubscriptionController::class, 'store'])->name('push.subscribe');
+    Route::post('push-unsubscribe', [PushSubscriptionController::class, 'destroy'])->name('push.unsubscribe');
+    Route::get('/settings/notifications', [SettingController::class, 'notification'])
+        ->name('settings.notifications');
+    Route::get('/admin/push-subscribers', [PushSubscriptionController::class, 'index'])
+        ->name('admin.push.subscribers');
+});
+
+
+// report route
+
+// route::get('/report-manage',[ReportController::class,'index'])->name('report-manage');
+// Route::prefix('reports')->middleware(['auth'])->group(function () {
+//     Route::get('requisitions', [ReportController::class, 'requisitions'])->name('reports.requisitions');
+//     Route::get('requisitions/pdf', [ReportController::class, 'requisitionsPdf'])->name('reports.requisitions.pdf');
+//     Route::get('requisitions/excel', [ReportController::class, 'requisitionsExcel'])->name('reports.requisitions.excel');
+// });
+
+
+Route::middleware(['auth'])->prefix('admin/reports')->group(function () {
+
+    Route::get('requisitions', [RequisitionReportController::class, 'index'])
+        ->name('reports.requisitions');
+
+    Route::get('requisitions/excel', [RequisitionReportController::class, 'exportExcel'])
+        ->name('reports.requisitions.excel');
+
+    Route::get('requisitions/pdf', [RequisitionReportController::class, 'exportPdf'])
+        ->name('reports.requisitions.pdf');
+});
+
+// report Trip & Fuel Consumption Report
+Route::middleware(['auth','permission:Trip Fuel Consumption Report'])->group(function () {
+
+    Route::get('/reports/trips-fuel',
+        [TripFuelReportController::class, 'index']
+    )->name('reports.trips_fuel.index');
+
+    Route::get('/reports/trips-fuel/ajax',
+        [TripFuelReportController::class, 'ajax']
+    )->name('reports.trips_fuel.ajax');
+
+    Route::get('/reports/trips-fuel/excel',
+        [TripFuelReportController::class, 'excel']
+    )->middleware('role:Super Admin,Admin')
+    ->name('reports.trips_fuel.excel');
+
+    Route::get('/reports/trips-fuel/pdf',
+        [TripFuelReportController::class, 'pdf']
+    )->middleware('role:Super Admin,Admin')
+    ->name('reports.trips_fuel.pdf');
+});
+
+// ✅ Vehicle Utilization Report Route
+Route::middleware(['auth','permission:Vehicle Utilization Report'])->group(function () {
+    Route::get('/reports/vehicle-utilization',
+        [VehicleUtilizationReportController::class, 'index']
+    )->name('reports.vehicle_utilization.index');
+
+    Route::get('/reports/vehicle-utilization/ajax',
+        [VehicleUtilizationReportController::class, 'ajax']
+    )->name('reports.vehicle_utilization.ajax');
+
+    Route::get('/reports/vehicle-utilization/excel',
+        [VehicleUtilizationReportController::class, 'excel']
+    )->middleware('role:Super Admin,Admin')
+    ->name('reports.vehicle_utilization.excel');
+
+    Route::get('/reports/vehicle-utilization/pdf',
+        [VehicleUtilizationReportController::class, 'pdf']
+    )->middleware('role:Super Admin,Admin')
+    ->name('reports.vehicle_utilization.pdf');
+});
+
+
+// ✅ Driver Performance Report
+Route::middleware(['auth','permission:Driver Performance Report'])->group(function () {
+
+    Route::get('/reports/driver-performance',
+        [DriverPerformanceReportController::class, 'index']
+    )->name('reports.driver_performance.index');
+
+    Route::get('/reports/driver-performance/ajax',
+        [DriverPerformanceReportController::class, 'ajax']
+    )->name('reports.driver_performance.ajax');
+
+    Route::get('/reports/driver-performance/excel',
+        [DriverPerformanceReportController::class, 'excel']
+    )->middleware('role:Super Admin,Admin')
+    ->name('reports.driver_performance.excel');
+
+    Route::get('/reports/driver-performance/pdf',
+        [DriverPerformanceReportController::class, 'pdf']
+    )->middleware('role:Super Admin,Admin')
+    ->name('reports.driver_performance.pdf');
+});
+
+// Route::middleware(['auth','role:Super Admin,Admin,Manager'])->group(function () {
+
+    Route::get('/reports/maintenance',[MaintenanceReportController::class, 'index']
+    )->name('reports.maintenance.index');
+
+    Route::get('/reports/maintenance/ajax',[MaintenanceReportController::class, 'ajax']
+    )->name('reports.maintenance.ajax');
+
+    Route::get('/reports/maintenance/excel',[MaintenanceReportController::class, 'excel']
+    )->middleware('role:Super Admin,Admin')
+    ->name('reports.maintenance.excel');
+
+    Route::get('/reports/maintenance/pdf', [MaintenanceReportController::class, 'pdf']
+    )->middleware('role:Super Admin,Admin')->name('reports.maintenance.pdf');
+// });
+
+
+// route group with subscription check
+Route::middleware(['auth', 'subscription.active'])->group(function () {
+    Route::resource('vehicles', VehicleController::class);
+    Route::resource('drivers', DriverController::class);
+    Route::resource('trips', TripController::class);
+});
+
+// Admin Subscription Plan Management
+
+
+Route::middleware(['auth'])->prefix('admin')->as('admin.')->group(function () {
+        Route::resource('plans', SubscriptionPlanController::class)
+            ->except(['show','destroy']);
+    });
+
+// Subscription pricing page route
+Route::get('/pricing', [SubscriptionPlanController::class, 'price'])->name('pricing');
+
+// Subscription Routes
+Route::middleware('auth')->group(function () {
+    Route::get('/subscribe/{slug}', [SubscriptionController::class, 'select'])
+        ->name('subscription.select');
+
+    Route::post('/subscribe', [SubscriptionController::class, 'store'])
+        ->name('subscription.store');
+});
+
+// Subscription management routes
+Route::middleware(['auth'])->group(function () {
+
+    // Route::get('/subscription/plans', [SubscriptionController::class,'plans'])
+    //     ->name('subscription.plans');
+
+    Route::get('/subscription-expired', [SubscriptionController::class,'expired'])
+        ->name('subscription.expired');
+
+    // Stripe
+    // Route::post('/stripe/pay', [StripeController::class,'pay'])
+    //     ->name('stripe.pay');
+
+    Route::get('/payment/stripe', [StripeController::class,'pay'])
+    ->name('payment.stripe');
+
+        // Manual
+    Route::get('/payment/manual/{plan}', [ManualPaymentController::class, 'form'])->name('payment.manual');
+    
+    // AJAX store for manual payment
+    Route::post('/manual-payment/ajax-store', [ManualPaymentController::class, 'ajaxStore'])
+    ->name('manual.payment.ajax');
+
+    Route::get('/invoice/{payment}', [ManualPaymentController::class, 'invoice'])
+        ->name('invoice.download');
+
+
+    Route::get('/stripe/success', [StripeController::class,'success'])
+        ->name('stripe.success');
+
+
+
+    Route::post('/manual-payment/store', [ManualPaymentController::class,'store']);
+});
+
+// Admin Payment Approval
+// Route::get('/admin/payments/pending', [AdminPaymentController::class, 'pending'])->name('admin.payments.pending');
+// Route::get('/admin/payments/paid', [AdminPaymentController::class, 'paid']);
+Route::get('/admin/revenue/plans', [AdminRevenueController::class, 'byPlan']);
+Route::get('/admin/subscriptions/expiring', [AdminSubscriptionController::class, 'expiring']);
+
+
+Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () {
+
+    Route::get('payments/pending', [AdminPaymentController::class, 'pending'])
+        ->name('payments.pending');
+
+    Route::get('payments/paid', [AdminPaymentController::class, 'paid'])
+        ->name('payments.paid');
+        
+// DataTables AJAX
+Route::get('admin/payments/paid/data', [AdminPaymentController::class, 'paidData'])
+    ->name('payments.paid.data');
+
+Route::get('admin/payments/{payment}/invoice',[ManualPaymentController::class, 'invoice'])->name('payments.invoice');
+
+    Route::post('/payments/approve/{payment}', [AdminPaymentController::class, 'approve'])
+->name('payments.approve');
+
+// Route::post('payments/{payments}/reject', [AdminPaymentController::class, 'reject'])
+//     ->name('payments.reject');
+
+Route::post('payments/reject/{payment}',[PaymentController::class,'reject'])->name('payments.reject');
+
+        // Admin Subscription Expiring
+Route::get('/admin/subscriptions/expiring', [AdminPaymentController::class, 'expiring']);
+
+Route::get('/admin/revenue/plans', [AdminPaymentController::class, 'byPlan']);
+
+});
+
+Route::middleware(['auth','role:Admin'])->prefix('admin')->group(function () {
+    Route::get('/subscriptions/pending',
+        [SubscriptionApprovalController::class,'pending']);
+
+    Route::post('/subscriptions/approve/{payment}',
+        [SubscriptionApprovalController::class,'approve']);
+});
+
+Route::get('/get-employee-details/{id}', [EmployeeController::class, 'getEmployeeDetails'])->name('employee.details');
+
+Route::get('/requisitions/{id}/download', [RequisitionController::class, 'downloadPDF'])->name('requisitions.download');
+ // AJAX search
+    Route::get('/requisitions-search', [RequisitionController::class, 'index'])
+         ->name('requisitions.search');
+Route::post('/requisitions/validate', [RequisitionController::class, 'validateAjax'])
+     ->name('requisitions.validate');
+Route::get('/requisitions/export-excel', [RequisitionController::class, 'exportExcel'])->name('requisitions.export.excel');
+Route::get('/requisitions/export-pdf', [RequisitionController::class, 'exportPDF'])->name('requisitions.export.pdf');
+    
+
+// Requisition status update
+Route::post('/requisitions/update-status/{id}', 
+    [RequisitionController::class, 'updateStatus']
+)->name('requisitions.updateStatus');
+
+
+
+// Transport Admin Approval
+Route::post('/requisitions/transport-approve/{id}', 
+    [RequisitionApprovalController::class, 'transportApprove']
+)->name('requisitions.transport.approve');
+
+Route::post('/requisitions/transport-reject/{id}', 
+    [RequisitionApprovalController::class, 'transportReject']
+)->name('requisitions.transport.reject');
+
+
+// Admin Department Final Approval
+Route::post('/requisitions/admin-approve/{id}', 
+    [RequisitionApprovalController::class, 'adminApprove']
+)->name('requisitions.admin.approve');
+
+Route::post('/requisitions/admin-reject/{id}', 
+    [RequisitionApprovalController::class, 'adminReject']
+)->name('requisitions.admin.reject');
+
+
+
+
+// department head approval view
+Route::get('/department/approvals/ajax', 
+    [DepartmentApprovalController::class, 'ajax'])
+    ->name('department.approvals.ajax');
+ Route::prefix('department')->group(function () {
+
+        Route::get('/approvals', 
+            [DepartmentApprovalController::class, 'index']
+        )->name('department.approvals.index');
+
+        Route::get('/approvals/{id}', 
+            [DepartmentApprovalController::class, 'show']
+        )->name('department.approvals.show');
+
+        Route::post('/approvals/{id}/approve', 
+            [DepartmentApprovalController::class, 'approve']
+        )->name('department.approvals.approve');
+
+        Route::post('/approvals/{id}/reject', 
+            [DepartmentApprovalController::class, 'reject']
+        )->name('department.approvals.reject');
+
+    });
+
+ // Transport head approval view
+    // Route::middleware(['auth', 'role:transport_admin'])->group(function () {
+
+    Route::prefix('transport')->group(function () {
+
+        Route::get('/approvals', 
+            [TransportApprovalController::class, 'index']
+        )->name('transport.approvals.index');
+
+        // AJAX endpoint for transport approvals DataTable (must be above {id} route)
+        Route::get('/approvals/ajax', [TransportApprovalController::class, 'ajax'])
+        ->name('transport.approvals.ajax');
+
+        Route::get('/approvals/{id}', 
+            [TransportApprovalController::class, 'show']
+        )->name('transport.approvals.show');
+
+        Route::post('/approvals/{id}/assign', 
+            [TransportApprovalController::class, 'assignVehicleDriver']
+        )->name('transport.approvals.assign');
+
+        Route::post('/approvals/{id}/approve', 
+            [TransportApprovalController::class, 'approve']
+        )->name('transport.approvals.approve');
+
+        Route::post('/approvals/{id}/reject', 
+            [TransportApprovalController::class, 'reject']
+        )->name('transport.approvals.reject');
+
+    // Trip Sheet Management
+        Route::get('/trip-sheets', [TripSheetController::class, 'index'])
+        ->name('trip-sheets.index');
+
+        Route::get('/trip-sheet/{id}', [TripSheetController::class, 'show'])
+        ->name('trip-sheets.show');
+
+        Route::post('/trip-sheet/start/{id}', [TripSheetController::class, 'startTrip'])
+        ->name('trip-sheets.start');
+
+        Route::post('/trip-sheet/finish/{id}', [TripSheetController::class, 'finishTrip'])
+        ->name('trip-sheets.finish');
+
+   // Trip Sheet Routes
+Route::get('/trip-sheet/end/{id}', [TripSheetController::class, 'endTripForm'])->name('trip.end.form');
+Route::post('transport/trip-sheet/end/{id}', [TripSheetController::class, 'endTripSave'])->name('trip.end.save');
+Route::get('transport/trip-sheets/data', [TripSheetController::class, 'getData'])
+    ->name('trip-sheets.data');
+
+
+
+
+    });
+
+    // (within your department/transport group)
+Route::get('/transport/approvals/{id}/availability', [TransportApprovalController::class, 'availability'])
+    ->name('transport.approvals.availability');
+
+// });
+
+
+
+   Route::post('{id}/workflow/update', [RequisitionController::class, 'updateWorkflow'])
+        ->name('requisitions.workflow.update');
+
+// Route::post('requisitions/{id}/workflow/update', [RequisitionController::class, 'updateWorkflow'])
+//     ->name('requisitions.workflow.update')
+//     ->middleware('role:transport,admin'); // only transport and admin can update
+
+Route::group(['middleware' => 'role:employee,transport,admin'], function() {
+    Route::resource('requisitions', RequisitionController::class);
+});
+
+Route::post('requisitions/{id}/workflow/update', [RequisitionController::class, 'updateWorkflow'])
+    ->name('requisitions.workflow.update')
+    ->middleware('auth','role:transport,admin'); // only transport & admin
+
+
+
+
+    Route::get('/get-departments-by-unit', [DriverController::class, 'getDepartmentsByUnit'])->name('getDepartmentsByUnit');
+Route::get('/get-employee-info', [DriverController::class, 'getEmployeeInfo'])->name('getEmployeeInfo');
+
+Route::get('/home', [HomeController::class, 'index'])->name('home');
+Route::get('/contactlistview', [HomeController::class, 'contactlistview'])->name('contactlistview');
+Route::any('/contactlistviewdelete/{id}', [FrontendController::class, 'contactlistviewdelete'])->name('contactlistviewdelete');
+
+
+// AJAX data endpoint for live refresh
+Route::get('/admin/dashboard/data', [HomeController::class, 'data'])->name('admin.dashboard.data');
+
+// Unread notifications for admin dropdown (returns array of notifications)
+Route::get('/notifications/unread', [NotificationController::class, 'unread'])->name('admin.notifications.unread');
+// Unread notifications count (if needed elsewhere)
+Route::get('/admin/notifications/unread-count', function(){
+    return response()->json(['count' => \App\Models\Notification::where('user_id', auth()->id())->where('is_read', 0)->count()]);
+})->name('notifications.unread');
+
+
+
+    Route::resource('supports', SupportController::class);
+Route::any('emergency-task', [SupportController::class,'emergencytask'])->name('emergency-task');
+Route::any('pendingsupport', [SupportController::class,'pendingsupport'])->name('pendingsupport');
+    // Support details routes (guard against missing controller)
+    if (class_exists(\App\Http\Controllers\SupportdetailController::class)) {
+        Route::resource('support-details', \App\Http\Controllers\SupportdetailController::class);
+
+        // export to excel
+        Route::post('task-entry-export-button', [\App\Http\Controllers\SupportdetailController::class, 'exportButton'])->name('task-entry.export-button');
+
+        Route::get('/support-details/{id}', [\App\Http\Controllers\SupportdetailController::class, 'show']);
+        Route::get('/support-details/history/{id}', [\App\Http\Controllers\SupportdetailController::class, 'history'])->name('support-details.history');
+    }
+
+    // Support type routes (guarded)
+    if (class_exists(\App\Http\Controllers\SupportTypeController::class)) {
+        Route::resource('support_type', \App\Http\Controllers\SupportTypeController::class);
+    }
+    Route::get('user-profile', [UserController::class,'userprofile'])->name('user-profile');
+    Route::post('profile-update', [UserController::class,'updateProfile'])->name('profile-update');
+    Route::post('profile-password-update', [UserController::class,'profilepasswordupdate'])->name('profile-password-update');
+    Route::resource('units', UnitController::class);
+   
+// Maintenance Route
+  
+
+
+    // Debug-only endpoint: returns same payload as units.data but only when APP_DEBUG=true.
+    // Useful to verify the JSON output without auth redirects during local troubleshooting.
+    if (config('app.debug')) {
+        Route::get('units/data-debug', [UnitController::class, 'dataDebug'])->name('units.data.debug');
+    }
+    Route::resource('company', CompanyController::class);
+    Route::resource('departments', DepartmentController::class);
+    
+    // AJAX helpers for unit-wise selects used by employee create/edit forms
+    // Note: removed 'departments/unit-wise-company' as it's not used and caused routing conflicts
+    Route::get('unit-wise-department', [DepartmentController::class, 'unitWiseDepartment'])->name('unit-wise-department');
+    Route::resource('locations', LocationController::class);
+    
+    Route::resource('projects', ProjectController::class);
+    Route::resource('lands', LandController::class);
+    // Route::resource('document-types', DocumentTypeController::class);
+    Route::resource('employees', EmployeeController::class);
+
+
+    // If you want custom data endpoint for DataTables:
+        Route::get('license-types/data', [LicneseTypeController::class, 'data'])->name('license-types.data');
+        Route::resource('license-types', LicneseTypeController::class);
+
+    // Categories resource (some views expect routes like categories.index)
+    if (class_exists(\App\Http\Controllers\CategoryController::class)) {
+        Route::resource('categories', \App\Http\Controllers\CategoryController::class);
+    }
+
+// import
+    Route::post('import', [EmployeeController::class, 'import'])->name('employee.import');
+
+
+// import Upload Task Master Data
+    Route::post('import-task', [SupportController::class, 'import'])->name('import-task.import');
+
+    // importuser
+    Route::post('importuser', [EmployeeController::class, 'importuser'])->name('employee.importuser');
+    // category Import
+    Route::post('import-category', [CategoryController::class, 'import'])->name('category.import-category');
+
+
+Route::post('export', [EmployeeController::class,'export'])->name('employee.export');
+Route::post('export', [RequisitionController::class,'exportExcel'])->name('requisitions.export');
+// sample_import-file
+Route::post('sample_import-file', [SupportController::class,'importexcelfile'])->name('support.sample_import-file');
+
+
+Route::get('notifications', [NotificationController::class, 'index'])
+    ->name('admin.notifications.all');
+
+
+Route::post('menus/reorder', [MenuController::class, 'menuoder'])->name('menus.reorder');
+
+// routes/web.php
+Route::middleware(['auth'])->group(function () {
+    // Display the permissions page
+    Route::get('/permissions', [PermissionController::class, 'index'])->name('permissions.index');
+    
+    // DataTables AJAX endpoint
+    Route::get('/permissions/list', [PermissionController::class, 'list'])->name('permissions.list');
+    // routes/web.php
+Route::post('/permissions/validate', [PermissionController::class, 'validatePermission'])->name('permissions.validate');
+    // CRUD routes
+    Route::resource('permissions', PermissionController::class);
+    // Route::post('/push/subscribe', [PushController::class, 'store']);
+
+//     Route::get('/test-push', function () {
+//     auth()->user()->notify(new \App\Notifications\RequisitionCreated());
+//     return 'Push Sent';
+// });
+
+    
+});
+    // Route::resource('permissions', PermissionController::class);
+    //  Route::get('permissions/list', [PermissionController::class, 'list'])->name('permissions.list'); // AJAX for DataTables
+    Route::resource('menus', MenuController::class);
+    Route::get('settings', [SettingController::class,'index'])->name('settings.index');
+    Route::post('settings/store', [SettingController::class,'store'])->name('settings.store');
+    Route::get('settings/languages', [SettingController::class,'loadLanguages'])->name('settings.languages');
+    Route::post('admin/language/clear-cache', [SettingController::class,'clearTranslationCache'])->name('admin.language.clear-cache');
+    Route::post('admin/language/sync', [SettingController::class,'syncLanguages'])->name('admin.language.sync');
+
+    Route::get('users/search', [\App\Http\Controllers\UserController::class, 'search'])->name('users.search');
+    // Route::delete('users/{id}', 'UserController@destroy')->name('users.destroy');
+    Route::delete('/users/{id}', [UserController::class, 'destroy'])->name('users.destroy');
+
+
+    Route::post('employee/importuser', [UserController::class, 'importUser'])->name('employee.importuser');
+    Route::post('employee/export', [UserController::class, 'exportUser'])->name('employee.export');
+    // Route::get('users/search', [UserController::class, 'search'])->name('users.search');
+    Route::get('users/getData', [UserController::class, 'getData'])->name('users.getData');
+    Route::get('users/data', [UserController::class, 'getData'])->name('users.data');
+    Route::post('users/validate', [UserController::class, 'validateUser'])->name('users.validate');
+    Route::post('users/ajaxSubmit', [App\Http\Controllers\UserController::class, 'ajaxSubmit'])->name('users.ajaxSubmit');
+
+});
+
+Route::get('/test-create', function() {
+    $projects = \App\Models\Project::select('id', 'project_name')->orderBy('project_name')->get();
+    $lands = \App\Models\Land::select('id', 'name')->orderBy('name')->get();
+    $documentTypes = \App\Models\DocumentType::select('id', 'name')->orderBy('name')->get();
+    
+    return view('admin.dashboard.documents.create_modal', 
+        compact('projects', 'lands', 'documentTypes'));
+});
+
+Route::resource('users', UserController::class);
+Route::post('/documents/export', [DocumentController::class, 'export'])->name('documents.export');
+
+Route::get('documents/{id}/history', [DocumentController::class, 'history'])->name('documents.history');
+
+Route::group(['middleware' => ['auth'], 'prefix' => 'documents'], function () {
+    Route::get('/{document}/show', [DocumentController::class, 'show'])->name('documents.show');
+    Route::get('/{document}/edit', [DocumentController::class, 'edit'])->name('documents.edit');
+    Route::post('/{document}/approve', [DocumentController::class, 'approve'])->name('documents.approve');
+    Route::post('/{document}/reject', [DocumentController::class, 'reject'])->name('documents.reject');
+});
+
+Route::get('/dashboard/recent-documents', [HomeController::class, 'getRecentDocuments'])
+    ->name('dashboard.recent-documents');
+Route::get('/dashboard/pending-approvals', [HomeController::class, 'getPendingApprovals'])
+    ->name('dashboard.pending-approvals');
+
+
+Route::get('/transport/approvals/ajax', [TransportApprovalController::class, 'ajax'])
+    ->name('transport.approvals.ajax');
+
+Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
+
+
+
+// Localization Routes for language management
+// No need for locale prefix in routes
+// Language switching route
+
+// Admin routes for managing translations
+Route::middleware(['auth'])->prefix('admin')->group(function () {
+    Route::post('/language/switch', [LanguageController::class, 'switch'])->name('admin.language.switch');
+    Route::get('/language/current', [LanguageController::class, 'current'])->name('language.current');
+    Route::get('/language/list', [LanguageController::class, 'list'])->name('language.list');
+    Route::get('/translations', [TranslationController::class, 'index'])->name('admin.translations');
+    Route::post('/translations', [TranslationController::class, 'store'])->name('translations.store');
+    Route::post('/translations/update', [TranslationController::class, 'update'])->name('translations.update');
+    Route::post('/translations/auto-translate', [TranslationController::class, 'autoTranslate'])->name('admin.translations.auto');
+    Route::get('translations/ajax', [TranslationController::class, 'ajaxTranslations'])->name('admin.translations.ajax');
+    Route::post('translations/create', [TranslationController::class, 'store'])->name('translations.create');
+
+});
