@@ -1,21 +1,18 @@
 @php
     use App\Models\Language;
     use Illuminate\Support\Facades\Cache;
-    use Illuminate\Support\Facades\DB;
 
     $currentLocale = app()->getLocale();
 
-    // Get available languages from settings
-    $settings = DB::table('settings')->first();
-    $availableLanguageCodes = json_decode($settings->available_languages ?? '["en"]', true);
-
-    $languages = Cache::remember('available_languages_' . md5(json_encode($availableLanguageCodes)), 3600, function () use ($availableLanguageCodes) {
+    // Get all active languages from database (not limited by settings)
+    // This ensures all active languages are displayed in the switcher
+    $languages = Cache::remember('available_languages', 3600, function () {
         return Language::where('is_active', 1)
-            ->whereIn('code', $availableLanguageCodes)
             ->orderBy('sort_order')
             ->get();
     });
 
+    // Find current language or default or first available
     $currentLanguage = $languages->where('code', $currentLocale)->first()
         ?? $languages->where('is_default', 1)->first()
         ?? $languages->first();
@@ -77,7 +74,7 @@
 }
 </style>
 
-@if($languages->count() >= 1)
+@if($languages->count() > 1)
 <li class="dropdown language-dropdown">
     <a href="#"
        class="dropdown-toggle"
