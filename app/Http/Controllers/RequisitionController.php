@@ -297,7 +297,7 @@ public function validateAjax(Request $request)
 
 
 
-    // Notification::send($users, new RequisitionCreated($requisition));
+    Notification::send($users, new RequisitionCreated($requisition));
 
         DB::commit();
         

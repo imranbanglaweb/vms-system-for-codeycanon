@@ -25,7 +25,7 @@ class MenuService
 
         // Load all parent menus
         $menus = Menu::where('menu_parent', 0)
-            ->orderBy('menu_order')
+            ->orderBy('id', 'ASC')
             ->get();
         
         $filtered = $menus->map(function ($menu) use ($user, $isSuperAdmin) {

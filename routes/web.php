@@ -86,15 +86,15 @@ Route::prefix('maintenance-categories')->group(function () {
      Route::resource('maintenance', MaintenanceRequisitionController::class);
 
 
-//   Route::prefix('maintenance-schedule')->middleware('auth')->group(function(){
-//     Route::get('/', [MaintenanceController::class,'index'])->name('maintenance.index');
-//     Route::get('/create', [MaintenanceController::class,'create'])->name('maintenance.create');
-//     Route::post('/store', [MaintenanceController::class,'storeSchedule'])->name('maintenance.store');
-//     Route::get('/record/{id}', [MaintenanceController::class,'recordForm'])->name('maintenance.record.form');
-//     Route::post('/record/{id}', [MaintenanceController::class,'recordMaintenance'])->name('maintenance.record');
-//     Route::post('/schedule/{id}/deactivate', [MaintenanceController::class,'markScheduleInactive'])->name('maintenance.schedule.deactivate');
-//     Route::get('/due/list', [MaintenanceController::class,'dueList'])->name('maintenance.due.list');
-// });
+  Route::prefix('maintenance-schedule')->middleware('auth')->group(function(){
+    Route::get('/', [MaintenanceController::class,'index'])->name('maintenance.index');
+    Route::get('/create', [MaintenanceController::class,'create'])->name('maintenance.create');
+    Route::post('/store', [MaintenanceController::class,'storeSchedule'])->name('maintenance.store');
+    Route::get('/record/{id}', [MaintenanceController::class,'recordForm'])->name('maintenance.record.form');
+    Route::post('/record/{id}', [MaintenanceController::class,'recordMaintenance'])->name('maintenance.record');
+    Route::post('/schedule/{id}/deactivate', [MaintenanceController::class,'markScheduleInactive'])->name('maintenance.schedule.deactivate');
+    Route::get('/due/list', [MaintenanceController::class,'dueList'])->name('maintenance.due.list');
+});
 
 Route::prefix('maintenance-types')->middleware('auth')->group(function(){
     Route::get('/', [MaintenanceTypeController::class, 'index'])->name('maintenance.types.index');
@@ -151,21 +151,6 @@ Route::resource('roles', RoleController::class);
 
     Route::resource('projects', ProjectController::class);
 
-    Route::get('document-types', [DocumentTypeController::class, 'index'])->name('document-types.index');
-    Route::get('document-types/create', [DocumentTypeController::class, 'create'])->name('document-types.create');
-    Route::post('document-types', [DocumentTypeController::class, 'store'])->name('document-types.store');
-    Route::get('document-types/{id}', [DocumentTypeController::class, 'show'])->name('document-types.show');
-    Route::get('document-types/{id}/edit', [DocumentTypeController::class, 'edit'])->name('document-types.edit');
-    Route::put('document-types/{id}', [DocumentTypeController::class, 'update'])->name('document-types.update');
-    Route::delete('document-types/{id}', [DocumentTypeController::class, 'destroy'])->name('document-types.destroy');
-
-    Route::prefix('document-history')->name('document.history.')->group(function() {
-        Route::get('/', [DocumentHistoryController::class, 'index'])->name('index');
-        Route::get('/search', [DocumentHistoryController::class, 'search'])->name('search');
-        Route::get('/export', [DocumentHistoryController::class, 'export'])->name('export');
-    });
-
-
     Route::resource('vehicles', VehicleController::class);
 Route::resource('vendors', VendorController::class);
     Route::post('documents/{id}/approve', [DocumentController::class, 'approve'])->name('documents.approve');
@@ -199,24 +184,6 @@ Route::get('departments/data', [DepartmentController::class, 'data'])->name('dep
     Route::resource('requisitions', RequisitionController::class);
     // routes/web.php
 // Route::get('/get-employee-details/{id}', [EmployeeController::class, 'getEmployeeDetails'])->name('employee.details');
-
-
-// Route::middleware(['auth'])->get('/test-push', function () {
-//     auth()->user()->notify(new TestPushNotification(
-//         "Test Notification",            // Title (required)
-//         "Web push is working successfully", // Message (optional)
-//         "info",                         // Type (optional)
-//         url('/dashboard')               // Link (optional)
-//     ));
-
-//     return 'Web push sent successfully';
-// });
-Route::get('/test-push', function () {
-    auth()->user()->notify(
-        new \App\Notifications\TestPushNotification()
-    );
-    return 'Push sent';
-});
 
 
 
@@ -382,12 +349,6 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/subscription-expired', [SubscriptionController::class,'expired'])
         ->name('subscription.expired');
 
-    // Stripe
-    // Route::post('/stripe/pay', [StripeController::class,'pay'])
-    //     ->name('stripe.pay');
-
-    Route::get('/payment/stripe', [StripeController::class,'pay'])
-    ->name('payment.stripe');
 
         // Manual
     Route::get('/payment/manual/{plan}', [ManualPaymentController::class, 'form'])->name('payment.manual');
@@ -491,8 +452,6 @@ Route::post('/requisitions/admin-reject/{id}',
 )->name('requisitions.admin.reject');
 
 
-
-
 // department head approval view
 Route::get('/department/approvals/ajax', 
     [DepartmentApprovalController::class, 'ajax'])
@@ -574,9 +533,6 @@ Route::get('transport/trip-sheets/data', [TripSheetController::class, 'getData']
 Route::get('/transport/approvals/{id}/availability', [TransportApprovalController::class, 'availability'])
     ->name('transport.approvals.availability');
 
-// });
-
-
 
    Route::post('{id}/workflow/update', [RequisitionController::class, 'updateWorkflow'])
         ->name('requisitions.workflow.update');
@@ -592,8 +548,6 @@ Route::group(['middleware' => 'role:employee,transport,admin'], function() {
 Route::post('requisitions/{id}/workflow/update', [RequisitionController::class, 'updateWorkflow'])
     ->name('requisitions.workflow.update')
     ->middleware('auth','role:transport,admin'); // only transport & admin
-
-
 
 
     Route::get('/get-departments-by-unit', [DriverController::class, 'getDepartmentsByUnit'])->name('getDepartmentsByUnit');
@@ -614,26 +568,7 @@ Route::get('/admin/notifications/unread-count', function(){
     return response()->json(['count' => \App\Models\Notification::where('user_id', auth()->id())->where('is_read', 0)->count()]);
 })->name('notifications.unread');
 
-
-
-    Route::resource('supports', SupportController::class);
-Route::any('emergency-task', [SupportController::class,'emergencytask'])->name('emergency-task');
-Route::any('pendingsupport', [SupportController::class,'pendingsupport'])->name('pendingsupport');
-    // Support details routes (guard against missing controller)
-    if (class_exists(\App\Http\Controllers\SupportdetailController::class)) {
-        Route::resource('support-details', \App\Http\Controllers\SupportdetailController::class);
-
-        // export to excel
-        Route::post('task-entry-export-button', [\App\Http\Controllers\SupportdetailController::class, 'exportButton'])->name('task-entry.export-button');
-
-        Route::get('/support-details/{id}', [\App\Http\Controllers\SupportdetailController::class, 'show']);
-        Route::get('/support-details/history/{id}', [\App\Http\Controllers\SupportdetailController::class, 'history'])->name('support-details.history');
-    }
-
-    // Support type routes (guarded)
-    if (class_exists(\App\Http\Controllers\SupportTypeController::class)) {
-        Route::resource('support_type', \App\Http\Controllers\SupportTypeController::class);
-    }
+ 
     Route::get('user-profile', [UserController::class,'userprofile'])->name('user-profile');
     Route::post('profile-update', [UserController::class,'updateProfile'])->name('profile-update');
     Route::post('profile-password-update', [UserController::class,'profilepasswordupdate'])->name('profile-password-update');
@@ -709,10 +644,10 @@ Route::post('/permissions/validate', [PermissionController::class, 'validatePerm
     Route::resource('permissions', PermissionController::class);
     // Route::post('/push/subscribe', [PushController::class, 'store']);
 
-//     Route::get('/test-push', function () {
-//     auth()->user()->notify(new \App\Notifications\RequisitionCreated());
-//     return 'Push Sent';
-// });
+    Route::get('/test-push', function () {
+    auth()->user()->notify(new \App\Notifications\RequisitionCreated());
+    return 'Push Sent';
+});
 
     
 });
@@ -740,19 +675,9 @@ Route::post('/permissions/validate', [PermissionController::class, 'validatePerm
 
 });
 
-Route::get('/test-create', function() {
-    $projects = \App\Models\Project::select('id', 'project_name')->orderBy('project_name')->get();
-    $lands = \App\Models\Land::select('id', 'name')->orderBy('name')->get();
-    $documentTypes = \App\Models\DocumentType::select('id', 'name')->orderBy('name')->get();
-    
-    return view('admin.dashboard.documents.create_modal', 
-        compact('projects', 'lands', 'documentTypes'));
-});
 
 Route::resource('users', UserController::class);
-Route::post('/documents/export', [DocumentController::class, 'export'])->name('documents.export');
 
-Route::get('documents/{id}/history', [DocumentController::class, 'history'])->name('documents.history');
 
 Route::group(['middleware' => ['auth'], 'prefix' => 'documents'], function () {
     Route::get('/{document}/show', [DocumentController::class, 'show'])->name('documents.show');
@@ -779,7 +704,7 @@ Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name
 // Language switching route
 
 // Admin routes for managing translations
-Route::middleware(['auth'])->prefix('admin')->group(function () {
+Route::middleware(['auth'])->prefix('Super Admin')->group(function () {
     Route::post('/language/switch', [LanguageController::class, 'switch'])->name('admin.language.switch');
     Route::get('/language/current', [LanguageController::class, 'current'])->name('language.current');
     Route::get('/language/list', [LanguageController::class, 'list'])->name('language.list');

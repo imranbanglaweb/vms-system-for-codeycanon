@@ -17,6 +17,7 @@ class CreateRequisitionsTable extends Migration
             $table->id();
             // requested_by references employees.id — foreign key added later in a follow-up migration
             $table->unsignedBigInteger('requested_by');
+            $table->unsignedBigInteger('company_id')->nullable();
             $table->unsignedBigInteger('approved_by_department')->nullable();
             $table->timestamp('department_approved_at')->nullable();
             $table->unsignedBigInteger('transport_admin_id')->nullable();
