@@ -49,7 +49,7 @@
 
             <ul class="features">
                 @if($plan->features)
-                    @foreach($plan->features as $feature)
+                    @foreach((array) $plan->features as $feature)
                         <li>✔ {{ $feature }}</li>
                     @endforeach
                 @endif

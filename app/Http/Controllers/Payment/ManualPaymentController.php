@@ -33,7 +33,15 @@ class ManualPaymentController extends Controller
         ]);
 
         $plan = SubscriptionPlan::findOrFail($request->plan_id);
-        // dd($plan->id);
+        $user = auth()->user();
+
+        // Validate that user has a company_id
+        if (!$user->company_id) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Your account is not associated with a company. Please contact an administrator.',
+            ], 422);
+        }
 
         DB::beginTransaction();
 
@@ -42,7 +50,7 @@ class ManualPaymentController extends Controller
              * 1️⃣ Create PENDING subscription
              */
             $subscription = Subscription::create([
-                'company_id'      => auth()->user()->company_id ?? 1,
+                'company_id'      => $user->company_id,
                 'user_id'         => auth()->id(),
                 'plan_id'         => $plan->id,
                 'starts_at'       => null,
@@ -56,7 +64,7 @@ class ManualPaymentController extends Controller
              * 2️⃣ Create PENDING payment
              */
             $payment = Payment::create([
-                 'company_id'      => auth()->user()->company_id ?? 1,
+                'company_id'      => $user->company_id,
                 'user_id'         => auth()->id(),
                 'subscription_id' => $subscription->id,
                 'plan_id'         => $plan->id,
@@ -84,6 +92,74 @@ class ManualPaymentController extends Controller
                 'message' => 'Something went wrong. Please try again.',
                 'error'   => $e->getMessage(), // remove in production
             ], 500);
+        }
+    }
+
+    /**
+     * Store manual payment request (non-AJAX)
+     */
+    public function store(Request $request)
+    {
+        $request->validate([
+            'plan_id' => 'required|exists:subscription_plans,id',
+            'trx_id'  => 'required|string',
+            'amount'  => 'required|numeric|min:1',
+        ]);
+
+        $plan = SubscriptionPlan::findOrFail($request->plan_id);
+        $user = auth()->user();
+
+        // Validate that user has a company_id
+        if (!$user->company_id) {
+            return redirect()->back()->with('error', 'Your account is not associated with a company. Please contact an administrator.');
+        }
+
+        DB::beginTransaction();
+
+        try {
+            /**
+             * 1️⃣ Create PENDING subscription
+             */
+            $subscription = Subscription::create([
+                'company_id'      => $user->company_id,
+                'user_id'         => auth()->id(),
+                'plan_id'         => $plan->id,
+                'starts_at'       => null,
+                'ends_at'         => null,
+                'status'          => 'pending',
+                'payment_method'  => 'manual',
+                'transaction_ref' => $request->trx_id,
+            ]);
+
+            /**
+             * 2️⃣ Create PENDING payment
+             */
+            $payment = Payment::create([
+                'company_id'      => $user->company_id,
+                'user_id'         => auth()->id(),
+                'subscription_id' => $subscription->id,
+                'plan_id'         => $plan->id,
+                'method'          => 'manual',
+                'amount'          => $request->amount,
+                'currency'        => 'BDT',
+                'transaction_id'  => $request->trx_id,
+                'status'          => 'pending',
+                'created_by'      => auth()->id(),
+            ]);
+
+            DB::commit();
+
+            return redirect()->route('invoice.download', $payment->id)->with('success', 'Manual payment request submitted successfully');
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            \Log::error('Manual payment store error', [
+                'user_id' => auth()->id(),
+                'error' => $e->getMessage()
+            ]);
+
+            return redirect()->back()->with('error', 'Something went wrong. Please try again: ' . $e->getMessage());
         }
     }
 

@@ -379,6 +379,13 @@ Route::middleware(['auth', 'subscription.active'])->group(function () {
 // ============================================================================
 
 Route::middleware(['auth'])->group(function () {
+        // Stripe
+    // Route::post('/stripe/pay', [StripeController::class,'pay'])
+    //     ->name('stripe.pay');
+
+    Route::get('/payment/stripe', [StripeController::class,'pay'])
+    ->name('payment.stripe');
+    
     // Manual Payment
     Route::get('/payment/manual/{plan}', [ManualPaymentController::class, 'form'])->name('payment.manual');
     Route::post('/manual-payment/ajax-store', [ManualPaymentController::class, 'ajaxStore'])->name('manual.payment.ajax');

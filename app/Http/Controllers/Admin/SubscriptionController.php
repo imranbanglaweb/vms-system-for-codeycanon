@@ -20,7 +20,7 @@ class SubscriptionController extends Controller
         $plan = SubscriptionPlan::findOrFail($request->plan_id);
 
         Subscription::create([
-            'company_id' => auth()->user()->company_id,
+            'company_id' => auth()->user()->company_id?:null,
             'plan_id'    => $plan->id,
             'start_date' => now(),
             'end_date'   => $plan->billing_cycle === 'yearly'
