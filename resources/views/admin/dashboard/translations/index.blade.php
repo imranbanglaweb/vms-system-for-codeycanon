@@ -43,7 +43,9 @@
         </div>
     </div>
 
-
+    <div class="progress mb-3" style="display: block;">
+        <div id="bulk-save-progress" class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">0%</div>
+    </div>
 
     <!-- Table -->
     <table class="table table-bordered align-middle">

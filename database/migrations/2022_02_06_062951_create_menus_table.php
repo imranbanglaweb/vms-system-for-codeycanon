@@ -22,7 +22,7 @@ class CreateMenusTable extends Migration
             $table->string('menu_type', 100)->nullable();
             $table->string('menu_location', 100)->nullable();
             $table->string('remarks', 250)->nullable();
-            $table->string('menu_icon', 250)->nullable();
+            $table->string('menu_icon', 300)->nullable();
             $table->string('menu_url', 250)->nullable();
             $table->string('menu_permission')->nullable();
             $table->integer('parent_id')->nullable();

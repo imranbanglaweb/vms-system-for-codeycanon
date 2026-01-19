@@ -669,5 +669,60 @@ $(document).ready(function () {
 
 @yield('scripts')
 
+<script>
+$(document).ready(function() {
+    // This script simulates a one-time loading process after the first login/seeding.
+    // It uses localStorage to ensure it only runs once per user/browser.
+    if (!localStorage.getItem('initial_load_complete')) {
+        
+        // Create and inject the progress bar HTML into the body
+        const progressBarHtml = `
+            <div id="initial-loading-overlay" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255, 255, 255, 0.95); z-index: 10000; display: flex; justify-content: center; align-items: center; flex-direction: column; backdrop-filter: blur(5px);">
+                <h3 style="font-weight: 300; color: #333;">Loading Default Language & Settings...</h3>
+                <div class="progress" style="width: 50%; max-width: 600px; margin-top: 20px; height: 25px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+                    <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 0%; border-radius: 15px;"></div>
+                </div>
+            </div>
+        `;
+        $('body').prepend(progressBarHtml);
+
+        const progressBar = $('#initial-loading-overlay .progress-bar');
+        let width = 0;
+
+        // Animate the progress bar to simulate loading
+        const interval = setInterval(function() {
+            width += Math.floor(Math.random() * 10) + 5; // Increment with some variability
+            if (width > 100) {
+                width = 100;
+            }
+            progressBar.css('width', width + '%');
+
+            // When loading is complete
+            if (width >= 100) {
+                clearInterval(interval);
+
+                // Show a completion alert
+                Swal.fire({
+                    title: 'Loading Complete!',
+                    icon: 'success',
+                    toast: true,
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    timer: 1500,
+                    timerProgressBar: true
+                }).then(() => {
+                    // Fade out the overlay, set the flag, and then reload the page
+                    $('#initial-loading-overlay').fadeOut(500, function() {
+                        localStorage.setItem('initial_load_complete', 'true');
+                        $(this).remove();
+                        location.reload();
+                    });
+                });
+            }
+        }, 300); // Adjust interval for desired speed
+    }
+});
+</script>
+
 	</body>
 </html>

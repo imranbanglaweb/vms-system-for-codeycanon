@@ -195,47 +195,85 @@ public function create(Request $request){
     public function autoTranslate(Request $request)
     {
         $validated = $request->validate([
-            'translation_id' => 'required|exists:translations,id',
-            'source_text' => 'required|string'
+            'translation_id' => 'sometimes|exists:translations,id',
+            'translation_ids' => 'sometimes|array',
+            'translation_ids.*' => 'exists:translations,id',
+            'source_text' => 'sometimes|string'
         ]);
-        
-        $translation = Translation::find($validated['translation_id']);
-        $sourceText = $validated['source_text'];
-        
+
         $languages = Language::where('is_active', true)
             ->where('code', '!=', 'en')
             ->get();
-            
-        $results = [];
-        
-        foreach ($languages as $language) {
-            try {
-                // Using Google Translate (install package: composer require stichoza/google-translate-php)
-                $translator = new GoogleTranslate();
-                $translator->setSource('en');
-                $translator->setTarget($language->code);
-                
-                $translatedText = $translator->translate($sourceText);
-                
-                // Save to database
-                $this->translationService->set(
-                    $translation->key,
-                    $translatedText,
-                    $translation->group,
-                    $language->code
-                );
-                
-                $results[$language->code] = $translatedText;
-                
-            } catch (\Exception $e) {
-                $results[$language->code] = null;
+
+        if (isset($validated['translation_ids'])) {
+            // Bulk translation
+            foreach ($validated['translation_ids'] as $id) {
+                $translation = Translation::find($id);
+                if ($translation) {
+
+                    $sourceText = $this->translationService->get($translation->key, $translation->group, [], 'en');
+
+                    if($sourceText){
+                        foreach ($languages as $language) {
+                            try {
+                                $translator = new GoogleTranslate();
+                                $translator->setSource('en');
+                                $translator->setTarget($language->code);
+                                
+                                $translatedText = $translator->translate($sourceText);
+                                
+                                $this->translationService->set(
+                                    $translation->key,
+                                    $translatedText,
+                                    $translation->group,
+                                    $language->code
+                                );
+                            } catch (\Exception $e) {
+                                // Log error but continue with other languages/translations
+                                \Log::error("Could not auto-translate key {$translation->key} to {$language->code}: " . $e->getMessage());
+                            }
+                        }
+                    }
+                }
             }
+        } elseif (isset($validated['translation_id'])) {
+            // Single translation
+            $translation = Translation::find($validated['translation_id']);
+            $sourceText = $validated['source_text'];
+            $results = [];
+
+            foreach ($languages as $language) {
+                try {
+                    $translator = new GoogleTranslate();
+                    $translator->setSource('en');
+                    $translator->setTarget($language->code);
+                    
+                    $translatedText = $translator->translate($sourceText);
+                    
+                    $this->translationService->set(
+                        $translation->key,
+                        $translatedText,
+                        $translation->group,
+                        $language->code
+                    );
+                    
+                    $results[$language->code] = $translatedText;
+                } catch (\Exception $e) {
+                    $results[$language->code] = null;
+                }
+            }
+            return response()->json([
+                'success' => true,
+                'translations' => $results
+            ]);
+        } else {
+            return response()->json([
+                'success' => false,
+                'message' => 'No translation ID(s) provided.'
+            ], 400);
         }
-        
-        return response()->json([
-            'success' => true,
-            'translations' => $results
-        ]);
+
+        return response()->json(['success' => true, 'message' => 'Auto-translation completed.']);
     }
 
     public function store(Request $request)

@@ -4,13 +4,16 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 use Carbon\Carbon;
 
 class CompanySeeder extends Seeder
 {
     public function run()
     {
+        Schema::disableForeignKeyConstraints();
         DB::table('companies')->truncate();
+        Schema::enableForeignKeyConstraints();
 
         $now = Carbon::now();
         $adminId = 1; // Super Admin

@@ -101,10 +101,11 @@ function inlineSave(id, notifyOnSave = true){
         body:JSON.stringify({translation_id:id,translations:data})
     })
     .then(r=>r.json())
-    .then(()=>{
+    .then((res)=>{
         inputs.forEach(i=>i.classList.remove('changed'));
         changed.delete(String(id));
         if(notifyOnSave) notify('Saved','success');
+        return res; // Pass response along
     });
 }
 
@@ -126,21 +127,21 @@ function inlineAutoTranslate(id, notifyOnTranslate = true){
         },
         body: JSON.stringify({
             translation_id: id,
-            source_text: sourceText // <-- ADDED: required by controller
+            source_text: sourceText
         })
     })
     .then(res => res.json())
-    .then(data => { 
+    .then(data => {
         if(data.success){
-            // <-- ADDED: populate input boxes directly from response
             for(const [lang, text] of Object.entries(data.translations)){
                 const input = document.querySelector(`.translation-input[data-id="${id}"][data-lang="${lang}"]`);
                 if(input) input.value = text || '';
             }
-
             if(notifyOnTranslate) notify('Translated','success');
+            return data;
         } else {
             if(notifyOnTranslate) notify('Translation failed','error');
+            throw new Error('Translation failed');
         }
     })
     .catch(err=>{
@@ -149,7 +150,6 @@ function inlineAutoTranslate(id, notifyOnTranslate = true){
         throw err;
     });
 }
-
 
 /* ===== BULK SAVE ===== */
 function updateBulkSaveButton() {
@@ -160,22 +160,15 @@ function updateBulkSaveButton() {
 document.getElementById('bulk-save-btn').onclick = () => {
     const selectedIds = Array.from(document.querySelectorAll('.row-check:checked'))
                              .map(cb => cb.dataset.id);
-    
+
     if (selectedIds.length === 0) return;
 
+    const progressContainer = document.querySelector('.progress');
     const progressBar = document.getElementById('bulk-save-progress');
-    const progressContainer = progressBar.closest('.progress');
-
-    if (progressContainer) {
-        progressContainer.classList.remove('d-none');
-        progressContainer.style.display = 'block';
-    }
+    progressContainer.style.display = 'block';
     progressBar.style.width = '0%';
     progressBar.innerHTML = '0%';
     progressBar.setAttribute('aria-valuenow', 0);
-    progressBar.classList.remove('bg-success', 'bg-danger');
-    progressBar.classList.add('progress-bar-animated', 'progress-bar-striped');
-    
     let completed = 0;
 
     const savePromises = selectedIds.map(id => {
@@ -186,41 +179,48 @@ document.getElementById('bulk-save-btn').onclick = () => {
                 progressBar.style.width = progress + '%';
                 progressBar.innerHTML = progress + '%';
                 progressBar.setAttribute('aria-valuenow', progress);
+            })
+            .catch(err => {
+                console.error(`Failed to save translation ID ${id}:`, err);
+                throw err;
             });
     });
 
-    Promise.all(savePromises).then(() => {
-        progressBar.classList.remove('progress-bar-animated', 'progress-bar-striped');
-        progressBar.classList.add('bg-success');
-        progressBar.innerHTML = 'Complete!';
-        notify('All translations saved successfully!', 'success');
 
-        setTimeout(() => {
-            progressContainer.style.display = 'none';
-            progressBar.classList.add('progress-bar-animated', 'progress-bar-striped');
-            progressBar.classList.remove('bg-success');
-        }, 2000);
+    Promise.all(savePromises)
+        .then(() => {
+            progressBar.classList.remove('progress-bar-animated', 'progress-bar-striped');
+            progressBar.classList.add('bg-success');
+            progressBar.innerHTML = 'Complete!';
+            notify('All translations saved successfully!', 'success');
 
-        document.querySelectorAll('.row-check:checked').forEach(cb => cb.checked = false);
-        document.getElementById('select-all').checked = false;
-        updateBulkSaveButton();
-    }).catch(err => {
-        progressBar.classList.remove('progress-bar-animated', 'progress-bar-striped');
-        progressBar.classList.add('bg-danger');
-        progressBar.innerHTML = 'Error!';
-        notify('An error occurred during bulk save.', 'error');
-        console.error(err);
+            setTimeout(() => {
+                progressContainer.style.display = 'none';
+                progressBar.classList.add('progress-bar-animated', 'progress-bar-striped');
+                progressBar.classList.remove('bg-success');
+            }, 2000);
 
-        setTimeout(() => {
-            progressContainer.style.display = 'none';
-            progressBar.classList.add('progress-bar-animated', 'progress-bar-striped');
-            progressBar.classList.remove('bg-danger');
-        }, 2000);
-    });
+            document.querySelectorAll('.row-check:checked').forEach(cb => cb.checked = false);
+            document.getElementById('select-all').checked = false;
+            updateBulkSaveButton();
+        })
+        .catch(err => {
+            progressBar.classList.remove('progress-bar-animated', 'progress-bar-striped');
+            progressBar.classList.add('bg-danger');
+            progressBar.innerHTML = 'Error!';
+            console.error('Bulk save error:', err);
+            notify('An error occurred during bulk save.', 'error');
+
+             setTimeout(() => {
+                progressContainer.style.display = 'none';
+                progressBar.classList.add('progress-bar-animated', 'progress-bar-striped');
+                progressBar.classList.remove('bg-danger');
+            }, 2000);
+        });
 };
 
 /* ===== BULK AUTO TRANSLATE ===== */
-document.getElementById('bulk-auto-btn').onclick = ()=>{
+document.getElementById('bulk-auto-btn').onclick = () => {
     const selectedIds = Array.from(document.querySelectorAll('.row-check:checked'))
                              .map(cb => cb.dataset.id);
     if(selectedIds.length === 0) {
@@ -228,63 +228,59 @@ document.getElementById('bulk-auto-btn').onclick = ()=>{
         return;
     }
 
-    Swal.fire({
-        title: 'Are you sure?',
-        text: "You are about to auto-translate " + selectedIds.length + " items. This action cannot be undone.",
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#3085d6',
-        cancelButtonColor: '#d33',
-        confirmButtonText: 'Yes, translate it!'
-    }).then((result) => {
-        if (result.isConfirmed) {
-            const progressBar = document.getElementById('bulk-save-progress');
-            const progressContainer = progressBar.closest('.progress');
+    const progressContainer = document.querySelector('.progress');
+    const progressBar = document.getElementById('bulk-save-progress');
+    progressContainer.style.display = 'block';
+    progressBar.style.width = '0%';
+    progressBar.innerHTML = '0%';
+    progressBar.setAttribute('aria-valuenow', 0);
+    let completed = 0;
 
-            if (progressContainer) {
-                progressContainer.classList.remove('d-none');
-                progressContainer.style.display = 'block';
-            }
-            progressBar.style.width = '0%';
-            progressBar.innerHTML = '0%';
-            progressBar.setAttribute('aria-valuenow', 0);
-            progressBar.classList.remove('bg-success', 'bg-danger');
-            progressBar.classList.add('progress-bar-animated', 'progress-bar-striped');
-
-            let completed = 0;
-
-            const translatePromises = selectedIds.map(id => {
-                return inlineAutoTranslate(id, false)
-                    .then(() => {
-                        completed++;
-                        const progress = Math.round((completed / selectedIds.length) * 100);
-                        progressBar.style.width = progress + '%';
-                        progressBar.innerHTML = progress + '%';
-                        progressBar.setAttribute('aria-valuenow', progress);
-                    })
-                    .catch(err => {
-                        console.error(`Failed to auto translate ID ${id}:`, err);
-                    });
+    const translatePromises = selectedIds.map(id => {
+        return inlineAutoTranslate(id, false)
+            .then(() => {
+                completed++;
+                const progress = Math.round((completed / selectedIds.length) * 100);
+                progressBar.style.width = progress + '%';
+                progressBar.innerHTML = progress + '%';
+                progressBar.setAttribute('aria-valuenow', progress);
+            })
+            .catch(err => {
+                console.error(`Failed to auto translate ID ${id}:`, err);
+                throw err;
             });
-
-            Promise.all(translatePromises).then(() => {
-                progressBar.classList.remove('progress-bar-animated', 'progress-bar-striped');
-                progressBar.classList.add('bg-success');
-                progressBar.innerHTML = 'Complete!';
-                notify('All translations completed successfully!', 'success');
-
-                setTimeout(() => {
-                    progressContainer.style.display = 'none';
-                    progressBar.classList.add('progress-bar-animated', 'progress-bar-striped');
-                    progressBar.classList.remove('bg-success');
-                }, 2000);
-
-                document.querySelectorAll('.row-check:checked').forEach(cb => cb.checked = false);
-                document.getElementById('select-all').checked = false;
-                updateBulkSaveButton();
-            });
-        }
     });
+
+    Promise.all(translatePromises)
+        .then(() => {
+            progressBar.classList.remove('progress-bar-animated', 'progress-bar-striped');
+            progressBar.classList.add('bg-success');
+            progressBar.innerHTML = 'Complete!';
+            notify('All translations completed successfully!', 'success');
+
+            setTimeout(() => {
+                progressContainer.style.display = 'none';
+                progressBar.classList.add('progress-bar-animated', 'progress-bar-striped');
+                progressBar.classList.remove('bg-success');
+            }, 2000);
+
+            document.querySelectorAll('.row-check:checked').forEach(cb => cb.checked = false);
+            document.getElementById('select-all').checked = false;
+            updateBulkSaveButton();
+        })
+        .catch(err => {
+            progressBar.classList.remove('progress-bar-animated', 'progress-bar-striped');
+            progressBar.classList.add('bg-danger');
+            progressBar.innerHTML = 'Error!';
+            console.error('Bulk auto translate error:', err);
+            notify('An error occurred during bulk auto translation.', 'error');
+
+             setTimeout(() => {
+                progressContainer.style.display = 'none';
+                progressBar.classList.add('progress-bar-animated', 'progress-bar-striped');
+                progressBar.classList.remove('bg-danger');
+            }, 2000);
+        });
 };
 
 /* ===== INSERT NEW TRANSLATION ===== */
@@ -429,3 +425,4 @@ submitBtn.onclick = function(){
     })
     .catch(()=>notify('Failed to add translation','error'));
 };
+

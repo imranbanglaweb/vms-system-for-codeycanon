@@ -165,19 +165,17 @@ $(document).ready(function () {
                 if (res.success) {
                     Swal.fire({
                         title: 'Success!',
-                        text: 'Language switched successfully!',
+                        text: 'Language switched. The page will now reload.',
                         icon: 'success',
                         timer: 1500,
                         showConfirmButton: false,
+                        timerProgressBar: true,
                         customClass: {
                             popup: 'premium-modal'
                         }
-                    });
-                    // Hide the dropdown
-                    $('.dropdown').removeClass('open');
-                    setTimeout(function () {
+                    }).then(() => {
                         location.reload();
-                    }, 1500);
+                    });
                 } else {
                     Swal.fire({
                         title: 'Error!',
