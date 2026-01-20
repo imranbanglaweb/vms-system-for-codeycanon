@@ -463,7 +463,7 @@ Route::middleware(['auth'])->group(function () {
     // Route::resource('users', UserController::class)->except(['show']);
     Route::get('users/search', [UserController::class, 'search'])->name('users.search');
     Route::get('users/getData', [UserController::class, 'getData'])->name('users.getData');
-    Route::get('users/data', [UserController::class, 'getData'])->name('users.data');
+    // Route::get('users/data', [UserController::class, 'getData'])->name('users.data');
     Route::post('users/validate', [UserController::class, 'validateUser'])->name('users.validate');
     Route::post('users/ajaxSubmit', [UserController::class, 'ajaxSubmit'])->name('users.ajaxSubmit');
     Route::delete('/users/{id}', [UserController::class, 'destroy'])->name('users.destroy');

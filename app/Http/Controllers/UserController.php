@@ -29,24 +29,62 @@ class UserController extends Controller
         return view('admin.dashboard.users.index');
     }
 
-    /* ------------------------------------------------------------------
+     /* ------------------------------------------------------------------
         DATATABLE SERVER-SIDE DATA
     ------------------------------------------------------------------ */
-    public function getData(Request $request)
-    {
-        if ($request->ajax()) {
-            $data = User::latest();
-            return DataTables::of($data)
-                ->addIndexColumn()
-                ->addColumn('action', function($row){
-                    $btn = '<a href="'.route('users.edit', $row->id).'" class="btn btn-primary btn-sm"><i class="fa fa-edit"></i></a>';
-                    $btn .= ' <button class="btn btn-danger btn-sm deleteUser" data-id="'.$row->id.'"><i class="fa fa-trash"></i></button>';
-                    return $btn;
-                })
-                ->rawColumns(['action'])
-                ->make(true);
-        }
-    }
+  public function getData()
+{
+    $users = User::select(['id', 'user_name', 'name', 'email', 'user_image'])->orderBy('id', 'DESC');
+
+    return DataTables::of($users)
+        ->addIndexColumn() // DT_RowIndex
+        // ->editColumn('user_image', function($row){
+        //     $imageUrl = asset('images/default.png');
+
+        //     if ($row->user_image && Storage::exists('users/'.$row->user_image)) {
+        //         $imageUrl = asset('storage/users/'.$row->user_image);
+        //     }
+
+        //     return '<img src="'.$imageUrl.'" width="40" height="40" class="rounded-circle" onerror="this.src=\''.asset('images/default.png').'\';">';
+        // })
+
+       ->editColumn('user_image', function($row){
+            return $row->user_image; // just the filename
+        })
+
+
+        ->addColumn('action', function ($row) {
+            return '
+                <button data-id="'.$row->id.'" class="btn btn-sm btn-danger deleteUser"><i class="fa fa-minus-circle"></i></button>
+                <a href="'.route('users.edit', $row->id).'" class="btn btn-sm btn-primary"><i class="fa fa-edit"></i></a>
+            ';
+        })
+
+   
+
+        ->rawColumns(['action','user_image'])
+        ->order(function ($query) {
+            // prevent ordering by DT_RowIndex
+            if (request()->has('order')) {
+                $order = request('order')[0];
+                $columnIndex = $order['column'];
+                $dir = $order['dir'];
+
+                // map column index to actual DB column
+                $columns = [
+                    0 => 'id',         // DT_RowIndex
+                    1 => 'user_name',
+                    2 => 'name',
+                    3 => 'email',
+                ];
+
+                if (isset($columns[$columnIndex])) {
+                    $query->orderBy($columns[$columnIndex], $dir);
+                }
+            }
+        })
+        ->make(true);
+}
 
 
     /* ------------------------------------------------------------------
