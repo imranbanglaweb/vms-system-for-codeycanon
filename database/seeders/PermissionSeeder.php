@@ -134,10 +134,11 @@ class PermissionSeeder extends Seeder
             'user.edit',
             'user.delete',
 
-            'role.manage',
-            'role.create',
-            'role.edit',
-            'role.delete',
+            'role-manage',
+            'role-list',
+            'role-create',
+            'role-edit',
+            'role-delete',
 
             'permission.manage',
             'permission.create',

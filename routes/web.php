@@ -90,6 +90,7 @@ use App\Http\Controllers\Admin\SubscriptionApprovalController;
 use App\Http\Controllers\Admin\AdminPaymentController;
 use App\Http\Controllers\Payment\StripeController;
 use App\Http\Controllers\Payment\ManualPaymentController;
+use App\Http\Controllers\Admin\PushTestController;
 
 // Organization Structure
 use App\Http\Controllers\CompanyController;
@@ -112,8 +113,10 @@ use App\Http\Controllers\LicneseTypeController;
 use App\Http\Controllers\SupportController;
 use App\Http\Controllers\TranslationController;
 use App\Http\Controllers\LanguageController;
+use App\Http\Controllers\EmailLogController;
 
 use App\Notifications\TestPushNotification;
+Route::resource('emaillogs', EmailLogController::class);
 
 // ============================================================================
 // 1. AUTHENTICATION ROUTES
@@ -130,8 +133,6 @@ Route::middleware(['auth'])->group(function () {
     
     // Home & Dashboard
     Route::get('/home', [HomeController::class, 'index'])->name('home');
-    Route::get('/contactlistview', [HomeController::class, 'contactlistview'])->name('contactlistview');
-    Route::any('/contactlistviewdelete/{id}', [FrontendController::class, 'contactlistviewdelete'])->name('contactlistviewdelete');
     
     // AJAX endpoints for dashboard
     Route::get('/admin/dashboard/data', [HomeController::class, 'data'])->name('admin.dashboard.data');
@@ -322,35 +323,36 @@ Route::middleware(['auth'])->prefix('admin/reports')->group(function () {
 });
 
 // Trip & Fuel Consumption Report
-Route::middleware(['auth', 'permission:Trip Fuel Consumption Report'])->group(function () {
-    Route::get('/reports/trips-fuel', [TripFuelReportController::class, 'index'])->name('reports.trips_fuel.index');
+Route::middleware(['auth'])->prefix('admin/reports')->group(function () {
+    Route::get('/reports/trips-fuel', [TripFuelReportController::class, 'index'])->name('trips_fuel.index');
     Route::get('/reports/trips-fuel/ajax', [TripFuelReportController::class, 'ajax'])->name('reports.trips_fuel.ajax');
     Route::get('/reports/trips-fuel/excel', [TripFuelReportController::class, 'excel'])->middleware('role:Super Admin,Admin')->name('reports.trips_fuel.excel');
     Route::get('/reports/trips-fuel/pdf', [TripFuelReportController::class, 'pdf'])->middleware('role:Super Admin,Admin')->name('reports.trips_fuel.pdf');
 });
 
 // Vehicle Utilization Report
-Route::middleware(['auth', 'permission:Vehicle Utilization Report'])->group(function () {
-    Route::get('/reports/vehicle-utilization', [VehicleUtilizationReportController::class, 'index'])->name('reports.vehicle_utilization.index');
+Route::middleware(['auth'])->prefix('admin/reports')->group(function () {
+    Route::get('/reports/vehicle-utilization', [VehicleUtilizationReportController::class, 'index'])->name('vehicle_utilization.index');
     Route::get('/reports/vehicle-utilization/ajax', [VehicleUtilizationReportController::class, 'ajax'])->name('reports.vehicle_utilization.ajax');
     Route::get('/reports/vehicle-utilization/excel', [VehicleUtilizationReportController::class, 'excel'])->middleware('role:Super Admin,Admin')->name('reports.vehicle_utilization.excel');
     Route::get('/reports/vehicle-utilization/pdf', [VehicleUtilizationReportController::class, 'pdf'])->middleware('role:Super Admin,Admin')->name('reports.vehicle_utilization.pdf');
 });
 
 // Driver Performance Report
-Route::middleware(['auth', 'permission:Driver Performance Report'])->group(function () {
-    Route::get('/reports/driver-performance', [DriverPerformanceReportController::class, 'index'])->name('reports.driver_performance.index');
+Route::middleware(['auth'])->prefix('admin/reports')->group(function () {
+    Route::get('/reports/driver-performance', [DriverPerformanceReportController::class, 'index'])->name('driver_performance.index');
     Route::get('/reports/driver-performance/ajax', [DriverPerformanceReportController::class, 'ajax'])->name('reports.driver_performance.ajax');
     Route::get('/reports/driver-performance/excel', [DriverPerformanceReportController::class, 'excel'])->middleware('role:Super Admin,Admin')->name('reports.driver_performance.excel');
     Route::get('/reports/driver-performance/pdf', [DriverPerformanceReportController::class, 'pdf'])->middleware('role:Super Admin,Admin')->name('reports.driver_performance.pdf');
 });
 
 // Maintenance Reports
-Route::get('/reports/maintenance', [MaintenanceReportController::class, 'index'])->name('reports.maintenance.index');
+Route::middleware(['auth'])->prefix('admin/reports')->group(function () {
+Route::get('/reports/maintenance', [MaintenanceReportController::class, 'index'])->name('maintenance.index');
 Route::get('/reports/maintenance/ajax', [MaintenanceReportController::class, 'ajax'])->name('reports.maintenance.ajax');
 Route::get('/reports/maintenance/excel', [MaintenanceReportController::class, 'excel'])->middleware('role:Super Admin,Admin')->name('reports.maintenance.excel');
 Route::get('/reports/maintenance/pdf', [MaintenanceReportController::class, 'pdf'])->middleware('role:Super Admin,Admin')->name('reports.maintenance.pdf');
-
+});
 // ============================================================================
 // 13. SUBSCRIPTIONS & PLANS
 // ============================================================================
@@ -458,6 +460,7 @@ Route::middleware(['auth'])->group(function () {
     
     // Users
     Route::resource('users', UserController::class);
+    // Route::resource('users', UserController::class)->except(['show']);
     Route::get('users/search', [UserController::class, 'search'])->name('users.search');
     Route::get('users/getData', [UserController::class, 'getData'])->name('users.getData');
     Route::get('users/data', [UserController::class, 'getData'])->name('users.data');
@@ -503,6 +506,9 @@ Route::middleware(['auth'])->group(function () {
         auth()->user()->notify(new \App\Notifications\RequisitionCreated());
         return 'Push Sent';
     });
+
+    Route::post('/admin/push/test', [PushTestController::class, 'send'])->name('admin.push.test');
+
 });
 
 // Notifications

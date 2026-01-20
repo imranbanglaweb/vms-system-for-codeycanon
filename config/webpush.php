@@ -17,6 +17,7 @@ return [
         'subject' => 'mailto:md.imran1200@gmail.com',
         'public_key' => env('VAPID_PUBLIC_KEY'),
         'private_key' => env('VAPID_PRIVATE_KEY'),
+        
     ],
 
 

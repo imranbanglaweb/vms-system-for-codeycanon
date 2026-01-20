@@ -163,18 +163,24 @@ document.getElementById('bulk-save-btn').onclick = () => {
     
     if (selectedIds.length === 0) return;
 
-    const progressBar = document.getElementById('bulk-save-progress');
-    const progressContainer = progressBar.closest('.progress');
+    const overlay = document.getElementById('progress-overlay');
+    const title = document.getElementById('progress-title');
+    const fill = document.getElementById('progress-fill');
+    const message = document.getElementById('progress-message');
+    const log = document.getElementById('progress-key');
+    const spinner = document.querySelector('.progress-spinner');
+    const checkmark = document.querySelector('.success-checkmark');
+    const barWrapper = document.querySelector('.progress-bar-wrapper');
 
-    if (progressContainer) {
-        progressContainer.classList.remove('d-none');
-        progressContainer.style.display = 'block';
-    }
-    progressBar.style.width = '0%';
-    progressBar.innerHTML = '0%';
-    progressBar.setAttribute('aria-valuenow', 0);
-    progressBar.classList.remove('bg-success', 'bg-danger');
-    progressBar.classList.add('progress-bar-animated', 'progress-bar-striped');
+    overlay.style.display = 'flex';
+    title.innerText = 'Saving...';
+    log.innerText = 'Initializing...';
+    fill.style.width = '0%';
+    fill.style.background = 'linear-gradient(90deg, #ef4444, #f97316)';
+    message.innerText = '0% Completed';
+    spinner.style.display = 'block';
+    if(checkmark) checkmark.style.display = 'none';
+    barWrapper.style.display = 'block';
     
     let completed = 0;
 
@@ -183,38 +189,49 @@ document.getElementById('bulk-save-btn').onclick = () => {
             .then(() => {
                 completed++;
                 const progress = Math.round((completed / selectedIds.length) * 100);
-                progressBar.style.width = progress + '%';
-                progressBar.innerHTML = progress + '%';
-                progressBar.setAttribute('aria-valuenow', progress);
+                fill.style.width = progress + '%';
+                message.innerText = progress + '% Completed';
+
+                const checkbox = document.querySelector(`.row-check[data-id="${id}"]`);
+                const row = checkbox?.closest('tr');
+                const key = row ? row.cells[1].innerText : id;
+                log.innerText = 'Processed: ' + key;
+
+                if (progress < 30) {
+                    fill.style.background = 'linear-gradient(90deg, #ef4444, #f97316)';
+                } else if (progress < 70) {
+                    fill.style.background = 'linear-gradient(90deg, #f97316, #eab308)';
+                } else {
+                    fill.style.background = 'linear-gradient(90deg, #22c55e, #10b981)';
+                }
             });
     });
 
     Promise.all(savePromises).then(() => {
-        progressBar.classList.remove('progress-bar-animated', 'progress-bar-striped');
-        progressBar.classList.add('bg-success');
-        progressBar.innerHTML = 'Complete!';
+        spinner.style.display = 'none';
+        barWrapper.style.display = 'none';
+        if(checkmark) checkmark.style.display = 'block';
+        title.innerText = 'Completed!';
+        message.innerText = '';
+        log.innerText = '';
         notify('All translations saved successfully!', 'success');
 
         setTimeout(() => {
-            progressContainer.style.display = 'none';
-            progressBar.classList.add('progress-bar-animated', 'progress-bar-striped');
-            progressBar.classList.remove('bg-success');
+            overlay.style.display = 'none';
         }, 2000);
 
         document.querySelectorAll('.row-check:checked').forEach(cb => cb.checked = false);
         document.getElementById('select-all').checked = false;
         updateBulkSaveButton();
     }).catch(err => {
-        progressBar.classList.remove('progress-bar-animated', 'progress-bar-striped');
-        progressBar.classList.add('bg-danger');
-        progressBar.innerHTML = 'Error!';
+        title.innerText = 'Error!';
+        message.innerText = 'An error occurred.';
+        log.innerText = '';
         notify('An error occurred during bulk save.', 'error');
         console.error(err);
 
         setTimeout(() => {
-            progressContainer.style.display = 'none';
-            progressBar.classList.add('progress-bar-animated', 'progress-bar-striped');
-            progressBar.classList.remove('bg-danger');
+            overlay.style.display = 'none';
         }, 2000);
     });
 };
@@ -238,18 +255,24 @@ document.getElementById('bulk-auto-btn').onclick = ()=>{
         confirmButtonText: 'Yes, translate it!'
     }).then((result) => {
         if (result.isConfirmed) {
-            const progressBar = document.getElementById('bulk-save-progress');
-            const progressContainer = progressBar.closest('.progress');
+            const overlay = document.getElementById('progress-overlay');
+            const title = document.getElementById('progress-title');
+            const fill = document.getElementById('progress-fill');
+            const message = document.getElementById('progress-message');
+            const log = document.getElementById('progress-key');
+            const spinner = document.querySelector('.progress-spinner');
+            const checkmark = document.querySelector('.success-checkmark');
+            const barWrapper = document.querySelector('.progress-bar-wrapper');
 
-            if (progressContainer) {
-                progressContainer.classList.remove('d-none');
-                progressContainer.style.display = 'block';
-            }
-            progressBar.style.width = '0%';
-            progressBar.innerHTML = '0%';
-            progressBar.setAttribute('aria-valuenow', 0);
-            progressBar.classList.remove('bg-success', 'bg-danger');
-            progressBar.classList.add('progress-bar-animated', 'progress-bar-striped');
+            overlay.style.display = 'flex';
+            title.innerText = 'Translating...';
+            log.innerText = 'Initializing...';
+            fill.style.width = '0%';
+            fill.style.background = 'linear-gradient(90deg, #ef4444, #f97316)';
+            message.innerText = '0% Completed';
+            spinner.style.display = 'block';
+            if(checkmark) checkmark.style.display = 'none';
+            barWrapper.style.display = 'block';
 
             let completed = 0;
 
@@ -258,9 +281,21 @@ document.getElementById('bulk-auto-btn').onclick = ()=>{
                     .then(() => {
                         completed++;
                         const progress = Math.round((completed / selectedIds.length) * 100);
-                        progressBar.style.width = progress + '%';
-                        progressBar.innerHTML = progress + '%';
-                        progressBar.setAttribute('aria-valuenow', progress);
+                        fill.style.width = progress + '%';
+                        message.innerText = progress + '% Completed';
+
+                        const checkbox = document.querySelector(`.row-check[data-id="${id}"]`);
+                        const row = checkbox?.closest('tr');
+                        const key = row ? row.cells[1].innerText : id;
+                        log.innerText = 'Processed: ' + key;
+
+                        if (progress < 30) {
+                            fill.style.background = 'linear-gradient(90deg, #ef4444, #f97316)';
+                        } else if (progress < 70) {
+                            fill.style.background = 'linear-gradient(90deg, #f97316, #eab308)';
+                        } else {
+                            fill.style.background = 'linear-gradient(90deg, #22c55e, #10b981)';
+                        }
                     })
                     .catch(err => {
                         console.error(`Failed to auto translate ID ${id}:`, err);
@@ -268,15 +303,16 @@ document.getElementById('bulk-auto-btn').onclick = ()=>{
             });
 
             Promise.all(translatePromises).then(() => {
-                progressBar.classList.remove('progress-bar-animated', 'progress-bar-striped');
-                progressBar.classList.add('bg-success');
-                progressBar.innerHTML = 'Complete!';
+                spinner.style.display = 'none';
+                barWrapper.style.display = 'none';
+                if(checkmark) checkmark.style.display = 'block';
+                title.innerText = 'Completed!';
+                message.innerText = '';
+                log.innerText = '';
                 notify('All translations completed successfully!', 'success');
 
                 setTimeout(() => {
-                    progressContainer.style.display = 'none';
-                    progressBar.classList.add('progress-bar-animated', 'progress-bar-striped');
-                    progressBar.classList.remove('bg-success');
+                    overlay.style.display = 'none';
                 }, 2000);
 
                 document.querySelectorAll('.row-check:checked').forEach(cb => cb.checked = false);

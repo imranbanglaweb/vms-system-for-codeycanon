@@ -24,6 +24,7 @@ public function up()
 
         $table->string('start_location')->nullable();
         $table->string('end_location')->nullable();
+        $table->string('distance')->nullable();
 
         $table->integer('start_km')->nullable();
         $table->integer('end_km')->nullable();

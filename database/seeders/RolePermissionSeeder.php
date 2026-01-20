@@ -70,7 +70,7 @@ class RolePermissionSeeder extends Seeder
 
             // Users / Roles
             'user.manage',
-            'role.manage',
+            'role-manage',
             'permission.manage',
 
             // Menu & Settings

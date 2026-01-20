@@ -19,7 +19,8 @@ class MaintenanceReportController extends Controller
 
         return view('admin.dashboard.reports.maintenance.index', [
             'vehicles' => Vehicle::select('id','vehicle_name')->get(),
-            'types' => MaintenanceType::select('id','name')->get()
+            'types' => MaintenanceType::select('id','name')->get(),
+            'records' => $records
         ]);
         
     }
@@ -79,7 +80,7 @@ class MaintenanceReportController extends Controller
 
     public function pdf()
     {
-        $records = MaintenanceRecord::with(['vehicle','type','vendor'])->get();
+        $records = MaintenanceRequisition::with(['vehicle','maintenanceType'])->get();
         $pdf = PDF::loadView('admin.dashboard.reports.maintenance.pdf', compact('records'));
         return $pdf->download('maintenance-report.pdf');
     }

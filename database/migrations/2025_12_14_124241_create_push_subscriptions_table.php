@@ -20,6 +20,7 @@ class CreatePushSubscriptionsTable extends Migration
             $table->string('public_key');
             $table->string('auth_token');
             $table->string('content_encoding')->nullable();
+            $table->unsignedInteger('created_by')->nullable();
             $table->timestamps();
         });
     }

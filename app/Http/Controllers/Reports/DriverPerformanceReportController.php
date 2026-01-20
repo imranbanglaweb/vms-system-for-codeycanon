@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Reports;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use App\Models\Trip;
+use App\Models\TripSheet;
 use App\Models\Driver;
 use DB;
 use PDF;
@@ -12,23 +12,46 @@ use Excel;
 
 class DriverPerformanceReportController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
+        $query = TripSheet::with('driver')
+            ->select(
+                'driver_id',
+                DB::raw('COUNT(id) as total_trips'),
+                DB::raw('SUM(end_km - start_km) as total_distance'),
+                // NOTE: The 'fuel_liter' column does not exist in the 'trip_sheets' table. Using 0 as a placeholder.
+                DB::raw('SUM(0) as total_fuel'),
+                // NOTE: 'delay_minutes' and 'incident_reported' columns do not exist. Using 0.
+                DB::raw('SUM(0) as delayed_trips'),
+                DB::raw('SUM(0) as incidents')
+            )
+            ->groupBy('driver_id');
+
+        // 🔐 RBAC – Manager sees only own department
+        if (auth()->user()->hasRole('Manager')) {
+            $query->where('department_id', auth()->user()->department_id);
+        }
+
+        $records = $query->paginate(15);
+
         return view('admin.dashboard.reports.driver_performance.index', [
-            'drivers' => Driver::select('id','driver_name')->get()
+            'drivers' => Driver::select('id','driver_name')->get(),
+            'records' => $records
         ]);
     }
 
     public function ajax(Request $request)
     {
-        $query = Trip::with('driver')
+        $query = TripSheet::with('driver')
             ->select(
                 'driver_id',
                 DB::raw('COUNT(id) as total_trips'),
-                DB::raw('SUM(distance_km) as total_distance'),
-                DB::raw('SUM(fuel_liter) as total_fuel'),
-                DB::raw('SUM(CASE WHEN delay_minutes > 0 THEN 1 ELSE 0 END) as delayed_trips'),
-                DB::raw('SUM(CASE WHEN incident_reported = 1 THEN 1 ELSE 0 END) as incidents')
+                DB::raw('SUM(end_km - start_km) as total_distance'),
+                // NOTE: The 'fuel_liter' column does not exist in the 'trip_sheets' table. Using 0 as a placeholder.
+                DB::raw('SUM(0) as total_fuel'),
+                // NOTE: 'delay_minutes' and 'incident_reported' columns do not exist. Using 0.
+                DB::raw('SUM(0) as delayed_trips'),
+                DB::raw('SUM(0) as incidents')
             )
             ->groupBy('driver_id');
 
@@ -41,7 +64,7 @@ class DriverPerformanceReportController extends Controller
             $query->where('driver_id', $request->driver_id);
 
         if ($request->from_date && $request->to_date)
-            $query->whereBetween('trip_start_date', [
+            $query->whereBetween('start_date', [
                 $request->from_date,
                 $request->to_date
             ]);
@@ -64,14 +87,16 @@ class DriverPerformanceReportController extends Controller
 
     public function pdf()
     {
-        $records = Trip::with('driver')
+        $records = TripSheet::with('driver')
             ->select(
                 'driver_id',
                 DB::raw('COUNT(id) as total_trips'),
-                DB::raw('SUM(distance_km) as total_distance'),
-                DB::raw('SUM(fuel_liter) as total_fuel'),
-                DB::raw('SUM(CASE WHEN delay_minutes > 0 THEN 1 ELSE 0 END) as delayed_trips'),
-                DB::raw('SUM(CASE WHEN incident_reported = 1 THEN 1 ELSE 0 END) as incidents')
+                DB::raw('SUM(end_km - start_km) as total_distance'),
+                // NOTE: The 'fuel_liter' column does not exist in the 'trip_sheets' table. Using 0 as a placeholder.
+                DB::raw('SUM(0) as total_fuel'),
+                // NOTE: 'delay_minutes' and 'incident_reported' columns do not exist. Using 0.
+                DB::raw('SUM(0) as delayed_trips'),
+                DB::raw('SUM(0) as incidents')
             )
             ->groupBy('driver_id')
             ->get();

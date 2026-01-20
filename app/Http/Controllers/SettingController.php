@@ -3,73 +3,36 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Http\Controllers\Controller;
-use App\Models\Menu;
 use App\Models\Setting;
-use Spatie\Permission\Models\Role;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Validation\Rule;
-use Notification;
-use GuzzleHttp\Client;
-use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Validator;
-use Yajra\DataTables\Facades\DataTables;
-use \DateTime;
-use Maatwebsite\Excel\Facades\Excel;
-use App\Exports\ReportExport;
-use App\Exports\ExportLandinventory;
-Use \Carbon\Carbon;
-Use Redirect;
-Use Session;
-
 class SettingController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
     public function index()
     {
-
-         // $menus = Menu::orderBy('menu_oder','ASC')->paginate(100);
+           // $menus = Menu::orderBy('menu_oder','ASC')->paginate(100);
 
         $settings = DB::table('settings')->where('id',1)->first();
         $languages = DB::table('languages')->orderBy('name')->get();
         return view('admin.dashboard.settings.index', compact('settings', 'languages'));
-
     }
 
     public function notification()
     {
-
         return view('admin.dashboard.settings.notifications');
-
     }
 
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
+
+    public function loadLanguages()
     {
-        //
+        // Logic to load languages for settings dropdown
+        if (class_exists(\App\Models\Language::class)) {
+            return \App\Models\Language::all();
+        }
+        return [];
     }
-
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
-    public function store(Request $request)
+ public function store(Request $request)
     {
 
           $validator = Validator::make($request->all(), [
@@ -172,11 +135,8 @@ class SettingController extends Controller
         }
     }
 
-    /**
-     * Sync languages
-     */
-    public function syncLanguages()
-    {
+        public function syncLanguages()
+        {
         try {
             // Get available languages from settings
             $settings = DB::table('settings')->where('id', 1)->first();
@@ -225,50 +185,5 @@ class SettingController extends Controller
         ];
         
         return $languages[$code] ?? ucfirst($code);
-    }
-
-    /**
-     * Display the specified resource.
-     *
-     * @param  \App\Models\Setting  $setting
-     * @return \Illuminate\Http\Response
-     */
-    public function show(Setting $setting)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  \App\Models\Setting  $setting
-     * @return \Illuminate\Http\Response
-     */
-    public function edit(Setting $setting)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\Setting  $setting
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, Setting $setting)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  \App\Models\Setting  $setting
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy(Setting $setting)
-    {
-        //
     }
 }
