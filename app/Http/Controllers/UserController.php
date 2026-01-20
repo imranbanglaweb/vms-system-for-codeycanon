@@ -32,27 +32,21 @@ class UserController extends Controller
     /* ------------------------------------------------------------------
         DATATABLE SERVER-SIDE DATA
     ------------------------------------------------------------------ */
-  public function getData()
-{
-    // Return a hardcoded JSON response for testing purposes
-    return response()->json([
-        'draw' => 1,
-        'recordsTotal' => 2,
-        'recordsFiltered' => 2,
-        'data' => [
-            [
-                'id' => 1,
-                'email' => 'test1@example.com',
-                'DT_RowIndex' => 1
-            ],
-            [
-                'id' => 2,
-                'email' => 'test2@example.com',
-                'DT_RowIndex' => 2
-            ]
-        ]
-    ]);
-}
+    public function getData(Request $request)
+    {
+        if ($request->ajax()) {
+            $data = User::latest();
+            return DataTables::of($data)
+                ->addIndexColumn()
+                ->addColumn('action', function($row){
+                    $btn = '<a href="'.route('users.edit', $row->id).'" class="btn btn-primary btn-sm"><i class="fa fa-edit"></i></a>';
+                    $btn .= ' <button class="btn btn-danger btn-sm deleteUser" data-id="'.$row->id.'"><i class="fa fa-trash"></i></button>';
+                    return $btn;
+                })
+                ->rawColumns(['action'])
+                ->make(true);
+        }
+    }
 
 
     /* ------------------------------------------------------------------
