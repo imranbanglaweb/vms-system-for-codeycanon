@@ -7,6 +7,8 @@ use Spatie\Permission\Models\Role;
 use Spatie\Permission\Models\Permission;
 use DB;
 use Yajra\DataTables\Facades\DataTables;   
+use App\Services\MenuService;
+use Carbon\Carbon;
 class RoleController extends Controller
 {
     /**
@@ -43,35 +45,46 @@ class RoleController extends Controller
 
         return DataTables::of($roles)
             ->addIndexColumn()
-            ->addColumn('actions', function($row){
+            ->editColumn('created_at', function ($row) {
+                    return Carbon::parse($row->created_at)
+                        ->format('d M Y, h:i A'); 
+                    // Example: 21 Jan 2026, 10:35 PM
+                })
+            ->addColumn('actions', function ($row) {
                 return '
-                    <a href="'.route("roles.show", $row->id).'" class="btn btn-sm btn-info"><i class="fa fa-eye"></i></a>
-                    <a href="'.route("roles.edit", $row->id).'" class="btn btn-sm btn-primary"><i class="fa fa-edit"></i></a>
-                    <button class="btn btn-sm btn-danger deleteBtn" data-id="'.$row->id.'"><i class="fa fa-minus-circle"></i></button>
+                    <a href="'.route('roles.show', $row->id).'" class="btn btn-sm btn-info" title="View">
+                        <i class="fa fa-eye"></i>
+                    </a>
+
+                    <a href="'.route('roles.edit', $row->id).'" class="btn btn-sm btn-primary" title="Edit">
+                        <i class="fa fa-edit"></i>
+                    </a>
+
+                    <button class="btn btn-sm btn-danger deleteRole"
+                            data-id="'.$row->id.'"
+                            title="Delete">
+                        <i class="fa fa-minus"></i>
+                    </button>
                 ';
             })
             ->rawColumns(['actions'])
             ->make(true);
+
     }
 
 
     public function create()
     {
-        // $permission = Permission::get();
-         // $permission = Permission::select('table_name')->groupBy('table_name')->get();
-
+        
             $permission        = Permission::get();
-
-         // $table_lists = Permission::select('table_name','id')->groupBy('table_name')->get();
-
-$table_lists = DB::table('permissions')
+            $table_lists = DB::table('permissions')
                  ->select('table_name','name', DB::raw('id as permission_id'))
                  ->get()
                   ->unique('table_name');
 
 $general_permissions = DB::table('permissions')
-                 // ->select('table_name', DB::raw('id as permission_id'))
-                 // ->where('table_name',null)
+                 ->select('table_name', DB::raw('id as permission_id'))
+                 ->where('table_name',null)
                   ->whereNull('table_name')
                  ->get()
                   ->unique('table_name');
@@ -108,14 +121,7 @@ $general_permissions = DB::table('permissions')
     public function show($id)
     
     {
-        // $role = Role::find($id);
-        // $rolePermissions = Permission::join("role_has_permissions","role_has_permissions.permission_id","=","permissions.id")
-        //     ->where("role_has_permissions.role_id",$id)
-        //     ->get();
-    
-        // return view('admin.dashboard.roles.show',compact('role','rolePermissions'));
-
-
+       
          $role = Role::find($id);
     if (!$role) {
         return redirect()->route('roles.index')->with('error', 'Role not found');
@@ -132,13 +138,24 @@ $general_permissions = DB::table('permissions')
  
     public function edit($id)
     {
-        $role = Role::find($id);
-        $permission = Permission::get();
-        $rolePermissions = DB::table("role_has_permissions")->where("role_has_permissions.role_id",$id)
-            ->pluck('role_has_permissions.permission_id','role_has_permissions.permission_id')
-            ->all();
-    
-        return view('admin.dashboard.roles.edit',compact('role','permission','rolePermissions'));
+        $role = Role::findOrFail($id);
+
+        // All permissions
+        $permissions = Permission::orderBy('name')->get();
+
+        // Group permissions by table_name (module)
+        $groupedPermissions = $permissions->groupBy(function ($permission) {
+            return $permission->table_name ?? 'general';
+        });
+
+        // Role assigned permissions
+        $rolePermissions = $role->permissions->pluck('id')->toArray();
+
+        return view('admin.dashboard.roles.edit', compact(
+            'role',
+            'groupedPermissions',
+            'rolePermissions'
+        ));
     }
     
     /**
@@ -170,10 +187,14 @@ $general_permissions = DB::table('permissions')
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+  public function destroy(Role $role)
     {
-        DB::table("roles")->where('id',$id)->delete();
-        return redirect()->route('roles.index')
-                        ->with('success','Role deleted successfully');
+        $role->delete();
+
+        return response()->json([
+           'status'  => 'success',
+            'message' => 'Role deleted successfully'
+        ]);
     }
+
 }

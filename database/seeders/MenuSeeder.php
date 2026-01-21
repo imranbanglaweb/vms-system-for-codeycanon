@@ -69,7 +69,7 @@ class MenuSeeder extends Seeder
 
                         'menu_name' => 'Roles & Permissions',
 
-                        'menu_slug' => 'menu.roles',
+                        'menu_slug' => 'Role-Permission-Manage',
 
                         'menu_icon' => 'fa-shield',
 

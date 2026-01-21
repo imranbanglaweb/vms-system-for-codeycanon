@@ -1,73 +1,136 @@
 @extends('admin.dashboard.master')
 
 @section('main_content')
-<section class="content-body" style="background-color: #f8f9fa; padding: 20px;">
-    <div class="container">
+<section class="content-body" style="background-color:#fff; padding:20px;">
+    <div class="container-fluid">
+
+        <!-- HEADER -->
         <div class="d-flex justify-content-between align-items-center mb-3">
-            <h2>Role Management</h2>
-            @can('role-create')
-            <a href="{{ route('roles.create') }}" class="btn btn-success pull-right"><i class="fa fa-plus"></i> Create Role</a>
-            @endcan
-            <br>
-            <br>
+            <h3 class="fw-bold text-dark">Role Management</h3>
+
+            <div>
+                @can('role-create')
+                    <a href="{{ route('permissions.index') }}" class="btn btn-outline-info me-2">
+                        <i class="fa fa-shield"></i> Permissions
+                    </a>
+
+                    <a href="{{ route('roles.create') }}" class="btn btn-success">
+                        <i class="fa fa-plus"></i> Create Role
+                    </a>
+                @endcan
+            </div>
         </div>
+
+        <!-- CARD -->
         <div class="card shadow-sm border-0">
             <div class="card-body">
-                <table id="rolesTable" class="table table-striped table-hover table-bordered" style="width:100%">
+
+                <table id="rolesTable" class="table table-hover table-bordered w-100">
                     <thead class="table-dark">
                         <tr>
-                            <th>#</th>
+                            <th width="50">#</th>
                             <th>Name</th>
-                            <th>Created At</th>
-                            <th width="200px">Actions</th>
+                            <th width="180">Created At</th>
+                            <th width="200">Actions</th>
                         </tr>
                     </thead>
                     <tbody></tbody>
                 </table>
+
             </div>
         </div>
+
     </div>
 </section>
 @endsection
 
+
 @push('scripts')
+<!-- REQUIRED LIBS -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<!-- DATATABLE & SWEETALERT SCRIPT -->
 <script>
-$(function() {
-    $('#rolesTable').DataTable({
-    processing: true,
-    serverSide: true,
-    ajax: '{{ route("roles.data") }}',
-    columns: [
-        { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false },
-        { data: 'name', name: 'name' },
-        { data: 'created_at', name: 'created_at' },
-        { data: 'actions', name: 'actions', orderable: false, searchable: false }
-    ]
+@if(session('success'))
+Swal.fire({
+    icon: 'success',
+    title: 'Success',
+    text: "{{ session('success') }}",
+    timer: 2000,
+    showConfirmButton: false
 });
+@endif
+</script>
+<script>
+$(document).ready(function () {
 
+    /* ==============================
+       DATATABLE INITIALIZATION
+    =============================== */
+    let table = $('#rolesTable').DataTable({
+        processing: true,
+        serverSide: true,
+        responsive: true,
+        ajax: "{{ route('roles.data') }}",
+        columns: [
+            { data: 'DT_RowIndex', orderable: false, searchable: false },
+            { data: 'name', name: 'name' },
+            { data: 'created_at', name: 'created_at' },
+            { data: 'actions', orderable: false, searchable: false }
+        ],
+        language: {
+            processing: "Loading roles..."
+        }
+    });
 
-    // Delete role
-    $(document).on('click', '.deleteBtn', function() {
+    /* ==============================
+       DELETE ROLE (SweetAlert)
+    =============================== */
+    $(document).on('click', '.deleteRole', function () {
         let id = $(this).data('id');
+
         Swal.fire({
-            title: 'Are you sure?',
+            title: 'Delete Role?',
+            text: "This action cannot be undone!",
             icon: 'warning',
             showCancelButton: true,
-            confirmButtonText: 'Yes, delete!'
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: 'Yes, delete it'
         }).then((result) => {
-            if(result.isConfirmed) {
+            if (result.isConfirmed) {
+
                 $.ajax({
-                    url: '/roles/' + id,
+                    url: "{{ route('roles.destroy', ':id') }}".replace(':id', id),
                     method: 'DELETE',
-                    data: {_token: "{{ csrf_token() }}"},
-                    success: function(res) {
-                        table.ajax.reload();
-                        Swal.fire('Deleted!', res.message, 'success');
+                    data: {
+                        _token: "{{ csrf_token() }}"
+                    },
+                    success: function (res) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Deleted',
+                            text: res.message,
+                            timer: 1500,
+                            showConfirmButton: false
+                        });
+                        table.ajax.reload(null, false);
+                    },
+                    error: function () {
+                        Swal.fire(
+                            'Failed!',
+                            'Unable to delete role.',
+                            'error'
+                        );
                     }
                 });
+
             }
         });
     });
+
 });
 </script>
 @endpush
