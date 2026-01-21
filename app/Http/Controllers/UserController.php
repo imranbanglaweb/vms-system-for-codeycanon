@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\User;
 use App\Models\Employee;
+use App\Models\Company;
 use Spatie\Permission\Models\Role;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -16,10 +17,13 @@ use Yajra\DataTables\Facades\DataTables;
 
 class UserController extends Controller
 {
-    public function __construct()
-    {
-        $this->middleware('auth');
-    }
+   
+
+        public function __construct()
+        {
+            $this->middleware('auth');
+        }
+
 
     /* ------------------------------------------------------------------
         INDEX PAGE VIEW
@@ -32,59 +36,47 @@ class UserController extends Controller
      /* ------------------------------------------------------------------
         DATATABLE SERVER-SIDE DATA
     ------------------------------------------------------------------ */
-  public function getData()
-{
-    $users = User::select(['id', 'user_name', 'name', 'email', 'user_image'])->orderBy('id', 'DESC');
+        public function getData(Request $request)
+        {
 
-    return DataTables::of($users)
-        ->addIndexColumn() // DT_RowIndex
-        // ->editColumn('user_image', function($row){
-        //     $imageUrl = asset('images/default.png');
+            $users = User::select([
+                'id',
+                'user_name',
+                'name',
+                'email',
+                'user_image'
+            ])->orderBy('id', 'DESC');
 
-        //     if ($row->user_image && Storage::exists('users/'.$row->user_image)) {
-        //         $imageUrl = asset('storage/users/'.$row->user_image);
-        //     }
+            return DataTables::of($users)
+                ->addIndexColumn() // DT_RowIndex
 
-        //     return '<img src="'.$imageUrl.'" width="40" height="40" class="rounded-circle" onerror="this.src=\''.asset('images/default.png').'\';">';
-        // })
+                ->editColumn('user_image', function ($row) {
+                    $imagePath = public_path('admin_resource/assets/images/user_image/' . $row->user_image);
+                    $imageUrl = asset('public/admin_resource/assets/images/default.png');
 
-       ->editColumn('user_image', function($row){
-            return $row->user_image; // just the filename
-        })
+                    if (!empty($row->user_image) && file_exists($imagePath)) {
+                        $imageUrl = asset('public/admin_resource/assets/images/user_image/' . $row->user_image);
+                    }
 
+                    return '<img src="'.$imageUrl.'" width="45" height="45"
+                            class="rounded-circle"
+                            onerror="this.onerror=null;this.src=\''.asset('public/admin_resource/assets/images/user_image/default.png').'\'">';
+                })
 
-        ->addColumn('action', function ($row) {
-            return '
-                <button data-id="'.$row->id.'" class="btn btn-sm btn-danger deleteUser"><i class="fa fa-minus-circle"></i></button>
-                <a href="'.route('users.edit', $row->id).'" class="btn btn-sm btn-primary"><i class="fa fa-edit"></i></a>
-            ';
-        })
+                ->addColumn('action', function ($row) {
+                    return '
+                        <button class="btn btn-sm btn-danger deleteUser" data-id="'.$row->id.'">
+                            <i class="fa fa-minus"></i>
+                        </button>
+                        <a href="'.route('users.edit',$row->id).'" class="btn btn-sm btn-primary">
+                            <i class="fa fa-edit"></i>
+                        </a>
+                    ';
+                })
 
-   
-
-        ->rawColumns(['action','user_image'])
-        ->order(function ($query) {
-            // prevent ordering by DT_RowIndex
-            if (request()->has('order')) {
-                $order = request('order')[0];
-                $columnIndex = $order['column'];
-                $dir = $order['dir'];
-
-                // map column index to actual DB column
-                $columns = [
-                    0 => 'id',         // DT_RowIndex
-                    1 => 'user_name',
-                    2 => 'name',
-                    3 => 'email',
-                ];
-
-                if (isset($columns[$columnIndex])) {
-                    $query->orderBy($columns[$columnIndex], $dir);
-                }
-            }
-        })
-        ->make(true);
-}
+                ->rawColumns(['user_image','action'])
+                ->make(true);
+        }
 
 
     /* ------------------------------------------------------------------
@@ -94,8 +86,9 @@ class UserController extends Controller
     {
         $roles = Role::orderBy('id', 'DESC')->get();
         $employees = Employee::orderBy('employee_order', 'ASC')->get();
+        $companies = Company::orderBy('id', 'DESC')->get();
 
-        return view('admin.dashboard.users.create', compact('roles','employees'));
+        return view('admin.dashboard.users.create', compact('roles','employees','companies'));
     }
 
     /* ------------------------------------------------------------------
@@ -105,6 +98,7 @@ class UserController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'employee_id' => 'required',
+            'company_id'  => 'required',
             'user_type'   => 'required',
             'user_name'   => 'required',
             'email'       => 'required|email|unique:users,email',
@@ -124,6 +118,7 @@ class UserController extends Controller
             $userData = [
                 'name'          => $request->user_name,
                 'employee_id'   => $request->employee_id,
+                'company_id'    => $request->company_id,
                 'user_name'     => $employee->employee_code,
                 'email'         => $request->email,
                 'password'      => Hash::make($request->password),
@@ -147,7 +142,7 @@ class UserController extends Controller
 
                 // Save to your correct path
                 $file->move(
-                    public_path('admin_resource/assets/images/user_image'),
+                    public_path('public/admin_resource/assets/images/user_image'),
                     $fileName
                 );
 

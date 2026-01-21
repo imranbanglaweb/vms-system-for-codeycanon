@@ -83,7 +83,16 @@
                                                         <input type="file" class="form-control" id="profileLastName" name="user_image" onchange="previewFile(this);">
                                                     </div>
 
-                                                     <img id="previewImg" src="{{ asset('public/admin_resource/assets/images/user_image/'.Auth::user()->user_image)}}" width="100" height="100">
+                                                    @php
+                                                        $userImage = Auth::user()->user_image;
+                                                        $imagePath = public_path('public/admin_resource/assets/images/user_image/' . $userImage);
+                                                        $imageUrl = asset('public/admin_resource/assets/images/default.png');
+
+                                                        if (!empty($userImage) && file_exists($imagePath)) {
+                                                            $imageUrl = asset('public/admin_resource/assets/images/user_image/' . $userImage);
+                                                        }
+                                                    @endphp
+                                                     <img id="previewImg" src="{{ $imageUrl }}" width="100" height="100" onerror="this.onerror=null;this.src='{{ asset('public/admin_resource/assets/images/default.png') }}'">
                                                 </div>
                                              
                                             </fieldset>

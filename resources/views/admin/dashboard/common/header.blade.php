@@ -47,11 +47,11 @@
 <style>
 
 	.logo img {
-		width: 50px !important;
-		height: 50px !important;
+		width: 100px !important;
+		height: 100px !important;
 		display: block;
 		text-align: center;
-		margin:0 auto
+		margin-top: -14px;
 	}
 	 /* Language Switcher Styles */
         .language-flag {

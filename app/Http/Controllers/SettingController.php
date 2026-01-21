@@ -7,6 +7,7 @@ use App\Models\Setting;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
 class SettingController extends Controller
 {
     public function index()
@@ -44,11 +45,12 @@ class SettingController extends Controller
             return response()->json(['errors' => $validator->errors()->all()], 400);
         }
 
-          if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()->all()], 400);
-        }
-
+        // Try to find the setting with ID 1, or create a new one if it doesn't exist.
         $setting = Setting::find(1);
+        if (!$setting) {
+            $setting = new Setting();
+            $setting->id = 1; // Explicitly set ID for the first record
+        }
 
         if ($request->file('site_logo')) {
             $imagePath = $request->file('site_logo');

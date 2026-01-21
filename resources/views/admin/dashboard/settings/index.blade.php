@@ -74,13 +74,13 @@
 
         {{-- TAB BUTTONS --}}
         <div class="mb-4">
-            <button class="btn btn-light tab-btn site_menu active">
+            <button class="btn btn-light tab-btn site_menu active" data-target=".site_settings">
                 <i class="fa fa-globe me-1"></i> Site Settings
             </button>
-            <button class="btn btn-light tab-btn admin_menu">
-                <i class="fa fa-user-shield me-1"></i> Admin Settings
+            <button class="btn btn-light tab-btn admin_menu" data-target=".admin_settings">
+                <i class="fa fa-user"></i>  Admin Settings
             </button>
-            <button class="btn btn-light tab-btn language_menu">
+            <button class="btn btn-light tab-btn language_menu" data-target=".language_settings">
                 <i class="fa fa-language me-1"></i> Language Settings
             </button>
         </div>
@@ -137,7 +137,7 @@
                 <div class="d-flex align-items-center gap-3 mb-3">
                     <input type="file" name="admin_logo">
                     @if(!empty($settings->admin_logo))
-                        <img src="{{ asset('admin_resource/assets/images/'.$settings->admin_logo) }}" width="80">
+                        <img src="{{ asset('public/admin_resource/assets/images/'.$settings->admin_logo) }}" width="80">
                     @endif
                 </div>
 
@@ -174,7 +174,7 @@
                                 <input class="form-check-input" type="checkbox"
                                        name="available_languages[]" value="{{ $lang->code }}"
                                        id="lang_{{ $lang->code }}"
-                                       checked>
+                                       {{ in_array($lang->code, $availableLanguages) ? 'checked' : '' }}>
                                 <label class="form-check-label" for="lang_{{ $lang->code }}">
                                     <span class="fi fi-{{ $lang->flag_icon ?? 'us' }} me-1"></span>
                                     {{ $lang->native_name }} ({{ strtoupper($lang->code) }})
@@ -242,35 +242,28 @@
 <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
-    // Default: show SITE settings
-    $(".admin_settings").hide();
-    $(".language_settings").hide();
+    $(document).ready(function() {
+        // Initialize: Hide all cards
+        $('.settings-card').hide();
 
-    $(".admin_menu").click(function() {
-        $(".tab-btn").removeClass("active");
-        $(this).addClass("active");
+        // Restore active tab from localStorage or default to Site Settings
+        let activeTab = localStorage.getItem('active_settings_tab') || '.site_settings';
+        if ($(activeTab).length === 0) activeTab = '.site_settings'; // Fallback
 
-        $(".site_settings").fadeOut(200);
-        $(".language_settings").fadeOut(200);
-        $(".admin_settings").delay(200).fadeIn(200);
-    });
+        $(activeTab).show();
+        $('.tab-btn').removeClass('active');
+        $('.tab-btn[data-target="' + activeTab + '"]').addClass('active');
 
-    $(".site_menu").click(function() {
-        $(".tab-btn").removeClass("active");
-        $(this).addClass("active");
-
-        $(".admin_settings").fadeOut(200);
-        $(".language_settings").fadeOut(200);
-        $(".site_settings").delay(200).fadeIn(200);
-    });
-
-    $(".language_menu").click(function() {
-        $(".tab-btn").removeClass("active");
-        $(this).addClass("active");
-
-        $(".site_settings").fadeOut(200);
-        $(".admin_settings").fadeOut(200);
-        $(".language_settings").delay(200).fadeIn(200);
+        // Generic Tab Switching Logic
+        $(".tab-btn").click(function(e) {
+            e.preventDefault();
+            $(".tab-btn").removeClass("active");
+            $(this).addClass("active");
+            var target = $(this).data('target');
+            $(".settings-card").hide();
+            $(target).fadeIn(300);
+            localStorage.setItem('active_settings_tab', target);
+        });
     });
 
     // AJAX SAVE
@@ -278,6 +271,8 @@
         e.preventDefault();
 
         let formData = new FormData(this);
+        let btn = $('.saved');
+        let originalText = btn.html();
 
         $.ajax({
             type:'POST',
@@ -285,6 +280,9 @@
             data: formData,
             contentType: false,
             processData: false,
+            beforeSend: function() {
+                btn.prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i> Saving...');
+            },
 
             success: (response) => {
                 Swal.fire({
@@ -299,6 +297,9 @@
 
             error: function(err){
                 console.log(err);
+            },
+            complete: function() {
+                btn.prop('disabled', false).html(originalText);
             }
         });
     });
