@@ -30,31 +30,7 @@
 <div class="pull-left">
   <br>
   <h2>Employee Manage</h2>
-<!-- 
-  <div>
-    <select class="form-control select_employee_file">
-      <option>Select Employee Export/Import</option>
-      <option value="Import">Import</option>
-      <option value="Export">Export</option>
-    </select>
-  </div> -->
 
-  <br>
-
-  <div id="showImport" class="myDiv">
-    <form action="{{ route('employee.import')}}" method="POST" enctype="multipart/form-data">
-      @csrf
-      <input type="file" name="file" required><br>
-      <button class="btn btn-info"><i class="fa fa-download"></i> Import</button>
-    </form>
-  </div>
-
-  <div id="showExport" class="myDiv">
-    <form action="{{ route('employee.export')}}" method="POST">
-      @csrf
-      <button class="btn btn-success"><i class="fa fa-file-excel-o"></i> Export</button>
-    </form>
-  </div>
 </div>
 
 @if(Session::get('success'))

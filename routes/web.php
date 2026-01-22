@@ -482,11 +482,13 @@ Route::middleware(['auth'])->group(function () {
     Route::get('roles/data', [RoleController::class, 'data'])->name('roles.data');
     Route::get('roles', [RoleController::class, 'index'])->name('roles.index');
     Route::resource('roles', RoleController::class);
-    
+    Route::post('roles/{id}/duplicate', [RoleController::class, 'duplicate'])
+    ->name('roles.duplicate');
     // Permissions
     Route::get('/permissions', [PermissionController::class, 'index'])->name('permissions.index');
     Route::get('/permissions/list', [PermissionController::class, 'list'])->name('permissions.list');
     Route::post('/permissions/validate', [PermissionController::class, 'validatePermission'])->name('permissions.validate');
+    
     Route::resource('permissions', PermissionController::class);
 });
 

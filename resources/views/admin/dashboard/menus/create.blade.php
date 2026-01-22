@@ -2,28 +2,18 @@
 
 @section('main_content')
 
-<section class="content-body" style="background-color: #f8f9fa;">
+<section class="content-body" style="background-color: #fff;">
 <div class="container-fluid">
 
 ```
 <div class="d-flex justify-content-between align-items-center mb-4">
-    <h2 class="fw-bold text-primary"><i class="fa fa-plus-circle me-2"></i>Add Menu</h2>
-    <a class="btn btn-dark" href="{{ route('menus.index') }}">
+    <h2 class="fw-bold text-primary"><i class="fa fa-plus-circle me-2"></i> Add Menu</h2>
+    <a class="btn btn-dark pull-right" href="{{ route('menus.index') }}">
         <i class="fa fa-arrow-left"></i> Back
     </a>
 </div>
-
-@if ($errors->any())
-<div class="alert alert-danger shadow-sm">
-    <strong class="text-danger">Whoops!</strong> Please correct the following:
-    <ul class="mt-2 mb-0">
-        @foreach ($errors->all() as $error)
-        <li>{{ $error }}</li>
-        @endforeach
-    </ul>
-</div>
-@endif
-
+<hr>
+<br>
 <div class="card shadow-lg border-0 rounded-4">
     <div class="card-body p-4">
         {!! Form::open(['route' => 'menus.store','method' => 'POST','id'=>'menuForm']) !!}
@@ -32,11 +22,13 @@
             <div class="col-md-6">
                 <label class="fw-bold">Menu Name <span class="text-danger">*</span></label>
                 {!! Form::text('menu_name', null, ['class'=>'form-control form-control-lg rounded-3','id'=>'menu_name','placeholder'=>'Enter menu name']) !!}
+                <span class="text-danger small error-text menu_name_error"></span>
             </div>
 
             <div class="col-md-6">
                 <label class="fw-bold">Menu URL / Slug</label>
                 {!! Form::text('menu_url', null, ['class'=>'form-control form-control-lg rounded-3','id'=>'menu_url','placeholder'=>'Auto-generated from name']) !!}
+                <span class="text-danger small error-text menu_url_error"></span>
             </div>
 
             <div class="col-md-12">
@@ -47,6 +39,7 @@
                     <option value="{{$menu->id}}">{{$menu->menu_name}}</option>
                     @endforeach
                 </select>
+                <span class="text-danger small error-text menu_parent_error"></span>
             </div>
 
             <div class="col-md-6">
@@ -57,6 +50,7 @@
                     <option value="{{$list->name}}">{{$list->name}}</option>
                     @endforeach
                 </select>
+                <span class="text-danger small error-text menu_permission_error"></span>
             </div>
 
             <div class="col-md-6 d-flex align-items-center">
@@ -69,6 +63,7 @@
                 <label class="fw-bold">Menu Type</label><br>
                 <label class="me-3"><input class="menu_location_backend" type="checkbox" name="menu_type" value="backend"><strong class="ms-1">Backend</strong></label>
                 <label><input class="menu_location" type="checkbox" name="menu_type" value="frontend"><strong class="ms-1">Frontend</strong></label>
+                <br><span class="text-danger small error-text menu_type_error"></span>
             </div>
 
             <div class="col-md-12 menu_location_div">
@@ -84,8 +79,9 @@
                 <div class="input-group">
                     <span class="input-group-text bg-light"><i id="iconPreview"></i></span>
                     <input type="text" name="menu_icon" class="form-control form-control-lg" placeholder="Type or pick icon" id="iconInput">
-                    <!-- <button type="button" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#iconModal"><i class="fa fa-icons"></i> Pick</button> -->
+                    <button type="button" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#iconModal"><i class="fa fa-icons"></i> Pick</button>
                 </div>
+                <span class="text-danger small error-text menu_icon_error"></span>
             </div>
 
             <div class="col-md-6">
@@ -104,7 +100,7 @@
         </div>
 
         <div class="text-center mt-4">
-            <button type="submit" class="btn btn-primary btn-lg px-5 rounded-pill shadow-sm">
+            <button type="submit" class="btn btn-primary btn-lg px-5 rounded-pill shadow-sm" id="submitBtn">
                 <i class="fa fa-save me-2"></i> Save Menu
             </button>
         </div>
@@ -135,6 +131,7 @@
 
 <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet"/>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
@@ -148,12 +145,18 @@ $(document).ready(function(){
     // Menu type toggle
     $(".menu_location_div").hide();
     $(".menu_location").click(function(){ 
-        $(".menu_location_div").show(300); 
-        $('.menu_location_backend').prop('checked', false); 
+        if($(this).is(':checked')){
+            $(".menu_location_div").slideDown(300); 
+            $('.menu_location_backend').prop('checked', false); 
+        } else {
+            $(".menu_location_div").slideUp(300);
+        }
     });
     $(".menu_location_backend").click(function(){ 
-        $(".menu_location_div").hide(); 
-        $('.menu_location').prop('checked', false); 
+        if($(this).is(':checked')){
+            $(".menu_location_div").slideUp(300); 
+            $('.menu_location').prop('checked', false); 
+        }
     });
 
     // Auto-generate slug
@@ -170,20 +173,23 @@ $(document).ready(function(){
         'fa-solid fa-paper-plane','fa-solid fa-calendar','fa-solid fa-play','fa-solid fa-pause','fa-solid fa-stop',
         'fa-solid fa-upload','fa-solid fa-download','fa-solid fa-magnifying-glass','fa-solid fa-microphone',
         'fa-solid fa-shield','fa-solid fa-phone','fa-solid fa-map','fa-solid fa-location-dot','fa-solid fa-clock',
-        'fa-solid fa-rss','fa-solid fa-link','fa-solid fa-lock-open','fa-solid fa-key','fa-solid fa-gift'
+        'fa-solid fa-rss','fa-solid fa-link','fa-solid fa-lock-open','fa-solid fa-key','fa-solid fa-gift',
+        'fa-solid fa-list', 'fa-solid fa-th', 'fa-solid fa-table', 'fa-solid fa-check', 'fa-solid fa-times'
     ];
 
     function renderIcons(filter=''){
         $('#iconList').html('');
         let filtered = faIcons.filter(i => i.includes(filter));
         if(filtered.length === 0){
-            $('#iconList').html('<p class="text-muted">No icons found.</p>');
+            $('#iconList').html('<div class="col-12 text-center text-muted py-3">No icons found.</div>');
         } else {
             filtered.forEach(icon => {
                 $('#iconList').append(`
-                    <div class="col-2 text-center mb-3">
-                        <i class="${icon} fs-2 iconPicker" style="cursor:pointer"></i>
-                        <div class="small mt-1 text-truncate">${icon}</div>
+                    <div class="col-3 col-md-2 text-center">
+                        <div class="p-3 bg-light rounded-3 iconPicker h-100 d-flex flex-column align-items-center justify-content-center" style="cursor:pointer; transition: all 0.2s;" data-icon-class="${icon}">
+                            <i class="${icon} fs-3 mb-2 text-secondary"></i>
+                            <div class="small text-truncate w-100 text-muted" style="font-size: 10px;">${icon.replace('fa-solid fa-', '')}</div>
+                        </div>
                     </div>
                 `);
             });
@@ -201,7 +207,7 @@ const iconModal = new bootstrap.Modal(iconModalEl, { backdrop: 'static', keyboar
     // Render icons on modal show
     $('#iconModal').on('shown.bs.modal', function () {
         renderIcons();
-        $('#iconSearch').val('');
+        $('#iconSearch').val('').focus();
     });
 
     // Search icons
@@ -211,18 +217,81 @@ const iconModal = new bootstrap.Modal(iconModalEl, { backdrop: 'static', keyboar
 
 // Pick icon
 $(document).on('click','.iconPicker',function(){
-    let classes = $(this).attr('class').split(' ')
-                    .filter(c => c !== 'iconPicker' && c !== 'fs-2')
-                    .join(' ');
-    $('#iconInput').val(classes);
-    $('#iconPreview').attr('class', classes);
+    // Get the icon class from the data attribute
+    let iconClass = $(this).data('icon-class');
+    $('#iconInput').val(iconClass);
+    $('#iconPreview').attr('class', iconClass + ' text-primary');
+    iconModal.hide();
+});
 
-    iconModal.hide(); // THIS WILL NOW WORK
+// Hover effect for icons
+$(document).on('mouseenter', '.iconPicker', function() {
+    $(this).removeClass('bg-light').addClass('bg-white shadow-sm border');
+    $(this).find('i').removeClass('text-secondary').addClass('text-primary');
+}).on('mouseleave', '.iconPicker', function() {
+    $(this).removeClass('bg-white shadow-sm border').addClass('bg-light');
+    $(this).find('i').removeClass('text-primary').addClass('text-secondary');
 });
 
     // Live preview typing
     $('#iconInput').on('input', function(){
         $('#iconPreview').attr('class', $(this).val().trim());
+    });
+
+    // AJAX Submit
+    $('#menuForm').on('submit', function(e){
+        e.preventDefault();
+        
+        // Reset errors
+        $('.error-text').text('');
+        $('input, select').removeClass('is-invalid');
+        $('#errorAlert').addClass('d-none');
+        
+        let btn = $('#submitBtn');
+        let originalBtnText = btn.html();
+        btn.html('<i class="fa fa-spinner fa-spin me-2"></i> Saving...').prop('disabled', true);
+
+        $.ajax({
+            url: $(this).attr('action'),
+            method: $(this).attr('method'),
+            data: new FormData(this),
+            processData: false,
+            dataType: 'json',
+            contentType: false,
+            success: function(data){
+                if(data.status === 'success'){
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Success!',
+                        text: data.message,
+                        showConfirmButton: false,
+                        timer: 1500
+                    }).then(() => {
+                        window.location.href = data.redirect_url;
+                    });
+                }
+            },
+            error: function(response){
+                btn.html(originalBtnText).prop('disabled', false);
+                
+                if(response.status === 422){
+                    $('#errorAlert').removeClass('d-none').addClass('d-flex');
+                    let errors = response.responseJSON.errors;
+                    $.each(errors, function(key, val){
+                        $('span.'+key+'_error').text(val[0]);
+                        $('[name="'+key+'"]').addClass('is-invalid');
+                    });
+                    // Scroll to top to see alert
+                    $('html, body').animate({ scrollTop: 0 }, 'fast');
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: response.responseJSON ? response.responseJSON.message : 'Something went wrong!',
+                    });
+                }
+            }
+        });
     });
 
 });

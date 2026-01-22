@@ -118,22 +118,23 @@ $general_permissions = DB::table('permissions')
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
-    
-    {
-       
-         $role = Role::find($id);
-    if (!$role) {
-        return redirect()->route('roles.index')->with('error', 'Role not found');
-    }
+   public function show(Role $role)
+{
+    $permissions = Permission::all();
 
-    // Get role permissions
-    $rolePermissions = $role->permissions;
+    $groupedPermissions = $permissions->groupBy(function ($permission) {
+        return $permission->table_name ?? 'general';
+    });
 
-    return view('admin.dashboard.roles.show', compact('role', 'rolePermissions'));
+    $rolePermissions = $role->permissions->pluck('id')->toArray();
 
+    return view('admin.dashboard.roles.show', compact(
+        'role',
+        'groupedPermissions',
+        'rolePermissions'
+    ));
+}
 
-    }
     
  
     public function edit($id)
@@ -165,28 +166,44 @@ $general_permissions = DB::table('permissions')
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
-    {
-        $this->validate($request, [
-            'name' => 'required',
-            'permission' => 'required',
-        ]);
-    
-        $role = Role::find($id);
-        $role->name = $request->input('name');
+   
+public function update(Request $request, $id)
+{
+    $request->validate([
+        'name' => 'required|string|max:255|unique:roles,name,' . $id,
+        'permissions' => 'required|array|min:1',
+    ]);
+
+    DB::beginTransaction();
+
+    try {
+        $role = Role::findOrFail($id);
+
+        // Update role name
+        $role->name = $request->name;
         $role->save();
-    
-        $role->syncPermissions($request->input('permission'));
-    
-        return redirect()->route('roles.index')
-                        ->with('success','Role updated successfully');
+
+        // Sync permissions
+        $permissions = Permission::whereIn('id', $request->permissions)->get();
+        $role->syncPermissions($permissions);
+
+        DB::commit();
+
+        return response()->json([
+            'status'  => true,
+            'message' => 'Role updated successfully!'
+        ]);
+
+    } catch (\Exception $e) {
+
+        DB::rollBack();
+
+        return response()->json([
+            'status'  => false,
+            'message' => 'Something went wrong while updating the role.'
+        ], 500);
     }
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
+}
   public function destroy(Role $role)
     {
         $role->delete();

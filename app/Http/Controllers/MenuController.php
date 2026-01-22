@@ -46,11 +46,12 @@ class MenuController extends Controller
         public function index(Request $request)
         {
         if ($request->ajax()) {
-        $menus = Menu::select(['id', 'menu_name', 'menu_type', 'menu_icon', 'menu_url', 'menu_permission','menu_order']);
+        $menus = Menu::select(['id', 'menu_name', 'menu_type', 'menu_icon', 'menu_url', 'menu_permission','menu_order','menu_color']);
             return DataTables::of($menus)
                 ->addIndexColumn() // adds DT_RowIndex for row number
                 ->addColumn('menu_icon', function($row) {
-                    return '<i class="'.$row->menu_icon.'"></i>';
+                    $color = $row->menu_color ?? '#000000';
+                    return '<i class="fa '.$row->menu_icon.'" style="color:'.$color.'; font-size:20px;"></i>';
                 })
                 ->addColumn('action', function($row){
                     $btn = '';
@@ -99,6 +100,9 @@ class MenuController extends Controller
         ]);
 
         if ($validator->fails()) {
+            if ($request->ajax()) {
+                return response()->json(['status' => 'error', 'errors' => $validator->errors()], 422);
+            }
               return redirect()->back()->withErrors($validator->errors());
             // return response()->json(['errors' => $validator->errors()->all()], 400);
         }
@@ -122,6 +126,8 @@ class MenuController extends Controller
             $menu->menu_icon     =  $request->menu_icon;
             $menu->menu_url     =  $request->menu_url;
             $menu->menu_permission     =  $request->menu_permission;
+            $menu->menu_color    =  $request->menu_color;
+            $menu->status        =  $request->status;
             $menu->created_by    = $user->id;
             $menu->save();
 
@@ -129,8 +135,16 @@ class MenuController extends Controller
            
             DB::commit();
              MenuService::clear();
+
+            if ($request->ajax()) {
+                return response()->json(['status' => 'success', 'message' => 'Menu Added Successfully', 'redirect_url' => route('menus.index')]);
+            }
+
         } catch (\Throwable $exception) {
             DB::rollback();
+            if ($request->ajax()) {
+                return response()->json(['status' => 'error', 'message' => $exception->getMessage()], 500);
+            }
             return response()->json(['errors' => array($exception->getMessage().__('voyager::generic.try_again'))], 422);
         }
    
@@ -186,6 +200,9 @@ class MenuController extends Controller
         ]);
 
         if ($validator->fails()) {
+            if ($request->ajax()) {
+                return response()->json(['status' => 'error', 'errors' => $validator->errors()], 422);
+            }
               return redirect()->back()->withErrors($validator->errors());
             // return response()->json(['errors' => $validator->errors()->all()], 400);
         }
@@ -209,14 +226,24 @@ class MenuController extends Controller
             $menu->menu_location =  $request->menu_location;
             $menu->menu_icon     =  $request->menu_icon;
             $menu->menu_url     =  $request->menu_url;
-            $menu->created_by    = $user->id;
+            $menu->menu_color    =  $request->menu_color;
+            $menu->status        =  $request->status;
+            $menu->updated_by    = $user->id;
             $menu->save();
 
             }
            
             DB::commit();
+
+            if ($request->ajax()) {
+                return response()->json(['status' => 'success', 'message' => 'Menu Updated Successfully', 'redirect_url' => route('menus.index')]);
+            }
+
         } catch (\Throwable $exception) {
             DB::rollback();
+            if ($request->ajax()) {
+                return response()->json(['status' => 'error', 'message' => $exception->getMessage()], 500);
+            }
             return response()->json(['errors' => array($exception->getMessage().__('voyager::generic.try_again'))], 422);
         }
    

@@ -28,55 +28,55 @@ class RolePermissionSeeder extends Seeder
             'dashboard',
 
             // Requisitions
-            'requisition.create',
-            'requisition.view',
-            'requisition.approve',
-            'requisition.export',
+            'requisition-create',
+            'requisition-view',
+            'requisition-approve',
+            'requisition-export',
 
             // Vehicle
-            'vehicle.manage',
-            'vehicle.create',
-            'vehicle.edit',
-            'vehicle.delete',
+            'vehicle-manage',
+            'vehicle-create',
+            'vehicle-edit',
+            'vehicle-delete',
 
             // Driver
-            'driver.manage',
-            'driver.create',
-            'driver.edit',
-            'driver.delete',
+            'driver-manage',
+            'driver-create',
+            'driver-edit',
+            'driver-delete',
 
             // Employee
-            'employee.manage',
-            'employee.create',
-            'employee.edit',
-            'employee.delete',
+            'employee-manage',
+            'employee-create',
+            'employee-edit',
+            'employee-delete',
 
             // Department / Unit
-            'department.manage',
-            'department.create',
-            'department.edit',
-            'unit.manage',
+            'department-manage',
+            'department-create',
+            'department-edit',
+            'unit-manage',
 
             // Maintenance
-            'maintenance.manage',
-            'maintenance.create',
-            'maintenance.edit',
-            'maintenance.approve',
+            'maintenance-manage',
+            'maintenance-create',
+            'maintenance-edit',
+            'maintenance-approve',
 
             // Reports
-            'report.requisition',
-            'report.maintenance',
-            'report.export',
+            'report-requisition',
+            'report-maintenance',
+            'report-export',
 
             // Users / Roles
-            'user.manage',
+            'user-manage',
             'role-manage',
-            'permission.manage',
+            'permission-manage',
 
             // Menu & Settings
-            'menu.manage',
-            'settings.manage',
-            'translation.manage',
+            'menu-manage',
+            'settings-manage',
+            'translation-manage',
         ];
 
         $admin->syncPermissions($adminPermissions);
@@ -86,25 +86,25 @@ class RolePermissionSeeder extends Seeder
             'dashboard',
 
             // Requisitions
-            'requisition.view',
-            'requisition.assign',
+            'requisition-view',
+            'requisition-assign',
 
             // Trips / Transport
-            'trip.manage',
-            'trip.start',
-            'trip.finish',
+            'trip-manage',
+            'trip-start',
+            'trip-finish',
 
             // Vehicle & Driver
-            'vehicle.manage',
-            'driver.manage',
+            'vehicle-manage',
+            'driver-manage',
 
             // Maintenance
-            'maintenance.view',
-            'maintenance.create',
+            'maintenance-view',
+            'maintenance-create',
 
             // Reports
-            'report.trip.fuel',
-            'report.vehicle.utilization',
+            'report-trip-fuel',
+            'report-vehicle-utilization',
         ];
 
         $transport->syncPermissions($transportPermissions);
@@ -114,14 +114,14 @@ class RolePermissionSeeder extends Seeder
             'dashboard',
 
             // Requisitions
-            'requisition.create',
-            'requisition.view',
+            'requisition-create',
+            'requisition-view',
 
             // Documents
-            'document.manage',
+            'document-manage',
 
             // Notifications
-            'notification.view',
+            'notification-view',
         ];
 
         $employee->syncPermissions($employeePermissions);

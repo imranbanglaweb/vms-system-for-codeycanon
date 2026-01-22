@@ -146,6 +146,9 @@ $(document).on('change', '#photo-input', function(e){
 
         e.preventDefault();
 
+        var $btn = $(this).find('button[type="submit"]');
+        var originalBtnText = $btn.html();
+
     // clear previous validation states
         $(this).find('.is-invalid').removeClass('is-invalid');
         $(this).find('.invalid-feedback').addClass('d-none').text('');
@@ -171,18 +174,22 @@ $(document).on('change', '#photo-input', function(e){
 
         if (unit_id  == '') {
             Swal.fire({
-                title: 'Please select a Unit',
+                title: 'Validation Error',
+                text: 'Please select a Unit',
                 icon: 'warning',
                 focusConfirm: true,
+                confirmButtonColor: '#f39c12',
             })
             return;
         }
 
         if (name  == '') {
             Swal.fire({
-                title: 'Please enter employee name',
+                title: 'Validation Error',
+                text: 'Please enter employee name',
                 icon: 'warning',
                 focusConfirm: true,
+                confirmButtonColor: '#f39c12',
             })
             return;
         }
@@ -196,6 +203,9 @@ $(document).on('change', '#photo-input', function(e){
             });
         }
 
+        // Loading state
+        $btn.prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i> Saving...');
+
         let formData = new FormData(this);
 
         $.ajax({
@@ -206,20 +216,28 @@ $(document).on('change', '#photo-input', function(e){
             processData: false,
             success: (response) => {
                 Swal.fire({
-                    title: 'Employee Added',
-                    html: '<span class="text-success">Information added successfully.</span>',
+                    title: 'Success!',
+                    text: 'Employee created successfully.',
                     icon: 'success',
-                    timer: 1800,
+                    timer: 2000,
                     showConfirmButton: false,
-                }).then(() => location.reload());
+                }).then(() => {
+                    window.location.href = "{{ route('employees.index') }}";
+                });
             },
             error: function(response){
-                console.log(response);
+                $btn.prop('disabled', false).html(originalBtnText);
+
                 if (response.status === 422 && response.responseJSON && response.responseJSON.errors) {
                     const errors = response.responseJSON.errors;
                     // show a summary alert
                     const firstKey = Object.keys(errors)[0];
-                    Swal.fire({title: 'Validation error', text: errors[firstKey][0], icon: 'error'});
+                    Swal.fire({
+                        title: 'Validation Error', 
+                        text: errors[firstKey][0], 
+                        icon: 'error',
+                        confirmButtonColor: '#d33'
+                    });
 
                     // mark fields and show inline messages
                     Object.keys(errors).forEach(function(field){
@@ -239,7 +257,12 @@ $(document).on('change', '#photo-input', function(e){
                         }
                     });
                 } else {
-                    Swal.fire({title: 'Error', text: 'An unexpected error occurred.', icon: 'error'});
+                    Swal.fire({
+                        title: 'Error!', 
+                        text: 'An unexpected error occurred. Please try again.', 
+                        icon: 'error',
+                        confirmButtonColor: '#d33'
+                    });
                 }
             }
         });

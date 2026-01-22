@@ -26,6 +26,7 @@ Use \Carbon\Carbon;
 Use Redirect;
 Use Session;
 use DataTables;
+use Illuminate\Support\Str;
 class PermissionController extends Controller
 {
     
@@ -75,63 +76,7 @@ class PermissionController extends Controller
         ->rawColumns(['action'])
         ->make(true);
 }
-//    public function list(Request $request)
-//     {
-//         // Start building the query
-//         $query = Permission::query();
-        
-//         // Handle search
-//         if ($request->has('search') && !empty($request->search['value'])) {
-//             $search = $request->search['value'];
-//             $query->where(function($q) use ($search) {
-//                 $q->where('name', 'like', '%' . $search . '%');
-//             });
-//         }
 
-//         // Handle sorting
-//         if ($request->has('order')) {
-//             $columns = $request->columns;
-//             $orderColumn = $columns[$request->order[0]['column']]['name'];
-//             $orderDirection = $request->order[0]['dir'];
-//             $query->orderBy($orderColumn, $orderDirection);
-//         } else {
-//             $query->orderBy('name', 'asc');
-//         }
-
-//         return DataTablesDataTables::of($query)
-//             ->addIndexColumn() // This adds DT_RowIndex
-//             ->addColumn('action', function($row) {
-//                 $actionBtn = '';
-                
-//                 // Edit button
-//                 if (auth()->user()->can('permission-edit')) {
-//                     $actionBtn .= '<a href="' . route('permissions.edit', $row->name) . '" class="btn btn-primary btn-sm me-1">';
-//                     $actionBtn .= '<i class="fa fa-edit"></i> Edit';
-//                     $actionBtn .= '</a>';
-//                 }
-                
-//                 // Delete button (using form for proper method spoofing)
-//                 if (auth()->user()->can('permission-delete')) {
-//                     $actionBtn .= '<form method="POST" action="' . route('permissions.destroy', $row->id) . '" style="display:inline;" class="delete-form">';
-//                     $actionBtn .= csrf_field();
-//                     $actionBtn .= method_field('DELETE');
-//                     $actionBtn .= '<button type="submit" class="btn btn-danger btn-sm delete-btn" data-url="' . route('permissions.destroy', $row->id) . '">';
-//                     $actionBtn .= '<i class="fa fa-trash"></i> Delete';
-//                     $actionBtn .= '</button>';
-//                     $actionBtn .= '</form>';
-//                 }
-                
-//                 return $actionBtn;
-//             })
-//             ->rawColumns(['action'])
-//             ->filter(function ($query) use ($request) {
-//                 // Additional filtering if needed
-//                 if ($request->has('name_filter') && !empty($request->name_filter)) {
-//                     $query->where('name', 'like', '%' . $request->name_filter . '%');
-//                 }
-//             })
-//             ->make(true);
-//     }
     public function create(Request $request)
     {
 
@@ -148,7 +93,10 @@ class PermissionController extends Controller
     ]);
 
     // Check if permission name already exists
-    $exists = Permission::where('name', $request->name)->exists();
+    $exists = Permission::where(
+        'name',
+        Str::of($request->name)->lower()->replace(' ', '-')
+    )->exists();
 
     if ($exists) {
         return response()->json([
@@ -171,67 +119,56 @@ class PermissionController extends Controller
     ]);
 }
     
+public function store(Request $request)
+{
+    $request->validate([
+        'name'        => 'required|string|max:255',
+        'table_name'  => 'nullable|string|max:255',
+        'key'         => 'nullable|string|max:255',
+        'description' => 'nullable|string',
+    ]);
 
-        public function store(Request $request)
-    {
-        // Validate the request
-        $validator = $request->validate([
-            'name' => 'required|string|max:255|unique:permissions,name',
-            'key' => 'nullable|string|max:100',
-            'table_name' => 'nullable|string|max:100',
-            'is_user_defined' => 'nullable|boolean',
-            'description' => 'nullable|string|max:500'
+    // Normalize name (lowercase + hyphen)
+    $name = Str::of($request->name)
+        ->lower()
+        ->replace(' ', '-');
+
+    // DUPLICATE CHECK (FINAL GUARD)
+    if (Permission::where('name', $name)->exists()) {
+        return response()->json([
+            'status'  => false,
+            'message' => 'This permission already exists!'
+        ], 422);
+    }
+
+    DB::beginTransaction();
+
+    try {
+        Permission::create([
+            'name'        => $name,
+            'table_name'  => $request->table_name,
+            'key'         => $request->key,
+            'description' => $request->description,
+            'guard_name'  => 'web',
         ]);
 
-        try {
-            DB::beginTransaction();
-            
-            // Prepare data
-            $data = [
-                'name' => $request->name,
-                'key' => $request->key,
-                'table_name' => $request->table_name,
-                'is_user_defined' => $request->has('is_user_defined') ? 1 : 0,
-                'description' => $request->description,
-                'guard_name' => 'web', // Default guard
-            ];
+        DB::commit();
 
-            // Create permission
-            $permission = Permission::create($data);
+        return response()->json([
+            'status'  => true,
+            'message' => 'Permission created successfully!'
+        ]);
 
-            DB::commit();
+    } catch (\Exception $e) {
+        DB::rollBack();
 
-            if ($request->ajax()) {
-                return response()->json([
-                    'success' => true,
-                    'message' => 'Permission created successfully!',
-                    'data' => $permission,
-                    'redirect' => route('permissions.index')
-                ], 201);
-            }
-
-            return redirect()->route('permissions.index')
-                ->with('success', 'Permission created successfully!');
-
-        } catch (\Exception $e) {
-            DB::rollBack();
-            
-            if ($request->ajax()) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Error creating permission: ' . $e->getMessage(),
-                    'errors' => ['general' => [$e->getMessage()]]
-                ], 500);
-            }
-
-            return back()->withInput()
-                ->with('danger', 'Error creating permission: ' . $e->getMessage());
-        }
+        return response()->json([
+            'status'  => false,
+            'message' => 'Failed to create permission.'
+        ], 500);
     }
-        public function show($id)
-        {
-            //
-        }
+}
+        
 
 
     public function edit(Permission $permission)

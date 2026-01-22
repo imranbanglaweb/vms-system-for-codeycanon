@@ -8,12 +8,12 @@
 }
 </style>
 
-<section role="main" class="content-body">
+<section class="content-body" style="background-color: #fff;">
     <div class="row">
         <div class="col-lg-12"><h2>Menu Manage</h2></div>
         <div class="col-lg-12 text-end">
             @can('menu-create')
-                <a class="btn btn-success" href="{{ route('menus.create') }}">
+                <a class="btn btn-success pull-right" href="{{ route('menus.create') }}">
                     <i class="fa fa-plus"></i> Add Menu
                 </a>
             @endcan
@@ -92,6 +92,10 @@
 <script>
 $(document).ready(function() {
 
+    setTimeout(function() {
+        $('#successMessage').fadeOut('fast');
+    }, 3000);
+
     var table = $('#menuTable').DataTable({
     processing: true,
     serverSide: true,
@@ -101,7 +105,7 @@ $(document).ready(function() {
         { data: 'DT_RowIndex', orderable: false, searchable: false },
         { data: 'menu_name' },
         { data: 'menu_type' },
-        { data: 'menu_icon', orderable: false, searchable: false },
+        { data: 'menu_icon', orderable: false, searchable: false, className: 'text-center' },
         { data: 'menu_url' },
         { data: 'action', orderable: false, searchable: false }
     ],

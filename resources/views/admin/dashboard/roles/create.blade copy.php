@@ -9,10 +9,8 @@
 <div class="sticky-top bg-body py-3 mb-3 border-bottom" style="z-index: 1000;">
     <div class="d-flex justify-content-between align-items-center">
         <h3 class="mb-0">
-            Edit Role
-            <span class="badge badge-success ml-2" id="permissionCount">
-                {{ count($rolePermissions) }} Selected
-            </span>
+            Create New Role
+            <span class="badge badge-success ml-2" id="permissionCount">0 Selected</span>
         </h3>
         <a href="{{ route('roles.index') }}" class="btn btn-outline-primary">← Back</a>
     </div>
@@ -23,9 +21,7 @@
 </div>
 
 {{-- FORM --}}
-<form id="roleEditForm">
-@csrf
-@method('PATCH')
+{!! Form::open(['route' => 'roles.store','method'=>'POST']) !!}
 
 <div class="card shadow-sm border-0">
 <div class="card-body">
@@ -33,11 +29,13 @@
 {{-- ROLE NAME --}}
 <div class="form-group">
     <label class="font-weight-bold">Role Name</label>
-    <input type="text"
-           name="name"
-           value="{{ $role->name }}"
-           class="form-control"
-           placeholder="e.g. Admin, Manager">
+    {!! Form::text('name', old('name'), [
+        'class' => 'form-control '.($errors->has('name') ? 'is-invalid' : ''),
+        'placeholder' => 'e.g. Admin, Manager'
+    ]) !!}
+    @error('name')
+        <div class="invalid-feedback">{{ $message }}</div>
+    @enderror
 </div>
 
 <hr>
@@ -53,20 +51,14 @@
 {{-- GENERAL PERMISSIONS --}}
 <h5 class="text-primary mb-3">General Permissions</h5>
 <div class="row permission-wrapper">
-@foreach($groupedPermissions as $group => $permissions)
-@if($group === 'general')
-    @foreach($permissions as $permission)
+@foreach($permission as $value)
+@if(empty($value->table_name))
     <div class="col-md-3 mb-2 permission-item">
         <label class="permission-box">
-            <input type="checkbox"
-                   name="permissions[]"
-                   value="{{ $permission->id }}"
-                   class="permission-checkbox"
-                   {{ in_array($permission->id, $rolePermissions) ? 'checked' : '' }}>
-            {{ $permission->name }}
+            <input type="checkbox" name="permissions[]" value="{{ $value->id }}" class="permission-checkbox">
+            {{ $value->name }}
         </label>
     </div>
-    @endforeach
 @endif
 @endforeach
 </div>
@@ -76,11 +68,11 @@
 {{-- MODULE PERMISSIONS --}}
 <h5 class="text-primary mb-3">Module Permissions</h5>
 
-@foreach($groupedPermissions as $group => $permissions)
-@if($group !== 'general')
+@foreach($table_lists as $list)
+@if(!empty($list->table_name))
 <div class="card mb-3 permission-group">
     <div class="card-header bg-light d-flex justify-content-between align-items-center">
-        <strong class="text-uppercase">{{ ucwords($group) }}</strong>
+        <strong class="text-uppercase">{{ ucwords($list->table_name) }}</strong>
         <label class="mb-0">
             <input type="checkbox" class="group-select">
             Select All
@@ -89,17 +81,18 @@
 
     <div class="card-body">
         <div class="row permission-wrapper">
-            @foreach($permissions as $permission)
+            @foreach($permission as $value)
+            @if($value->table_name == $list->table_name)
             <div class="col-md-3 mb-2 permission-item">
                 <label class="permission-box">
                     <input type="checkbox"
                            name="permissions[]"
-                           value="{{ $permission->id }}"
-                           class="permission-checkbox"
-                           {{ in_array($permission->id, $rolePermissions) ? 'checked' : '' }}>
-                    {{ $permission->name }}
+                           value="{{ $value->id }}"
+                           class="permission-checkbox">
+                    {{ $value->name }}
                 </label>
             </div>
+            @endif
             @endforeach
         </div>
     </div>
@@ -111,21 +104,22 @@
 
 <div class="card-footer text-center">
     <button type="submit" class="btn btn-success btn-lg px-5">
-        Update Role
+        Save Role
     </button>
 </div>
 </div>
-</form>
 
+{!! Form::close() !!}
 </div>
 
-{{-- SAME DARK MODE + UI --}}
+{{-- DARK MODE + PREMIUM UI --}}
 <style>
 :root {
     --bg: #ffffff;
     --text: #212529;
     --card: #ffffff;
 }
+
 @media (prefers-color-scheme: dark) {
     :root {
         --bg: #0f172a;
@@ -133,8 +127,15 @@
         --card: #1e293b;
     }
 }
-body { background: var(--bg); color: var(--text); }
-.card, .card-header { background: var(--card); }
+
+body {
+    background: var(--bg);
+    color: var(--text);
+}
+
+.card, .card-header {
+    background: var(--card);
+}
 
 .permission-box {
     display: block;
@@ -144,23 +145,21 @@ body { background: var(--bg); color: var(--text); }
     cursor: pointer;
     transition: .2s;
 }
-.permission-box:hover { background: rgba(0,0,0,.08); }
-.permission-box input { margin-right: 6px; }
+
+.permission-box:hover {
+    background: rgba(0,0,0,.08);
+}
+
+.permission-box input {
+    margin-right: 6px;
+}
 </style>
 
 {{-- JS --}}
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-<script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
 $(function () {
-
-    function updateCount() {
-        let count = $('.permission-checkbox:checked').length;
-        $('#permissionCount').text(count + ' Selected');
-    }
-
-    updateCount();
 
     // GLOBAL SELECT
     $('#selectAllGlobal').on('change', function () {
@@ -176,7 +175,13 @@ $(function () {
         updateCount();
     });
 
+    // COUNT BADGE
     $('.permission-checkbox').on('change', updateCount);
+
+    function updateCount() {
+        let count = $('.permission-checkbox:checked').length;
+        $('#permissionCount').text(count + ' Selected');
+    }
 
     // SEARCH
     $('#permissionSearch').on('keyup', function () {
@@ -186,33 +191,21 @@ $(function () {
         });
     });
 
-    // AJAX UPDATE
-    $('#roleEditForm').submit(function (e) {
-        e.preventDefault();
-
-        $.ajax({
-            url: "{{ route('roles.update', $role->id) }}",
-            method: "POST",
-            data: $(this).serialize(),
-            success: function (res) {
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Updated!',
-                    text: res.message,
-                    timer: 2000,
-                    showConfirmButton: false
-                }).then(() => {
-                    window.location.href = "{{ route('roles.index') }}";
-                });
-            },
-            error: function () {
-                Swal.fire('Error', 'Validation failed', 'error');
-            }
-        });
-    });
-
 });
 </script>
+
+{{-- SWEETALERT SUCCESS --}}
+@if(session('success'))
+<script>
+Swal.fire({
+    icon: 'success',
+    title: 'Success!',
+    text: "{{ session('success') }}",
+    timer: 2000,
+    showConfirmButton: false
+});
+</script>
+@endif
 
 </section>
 @endsection
