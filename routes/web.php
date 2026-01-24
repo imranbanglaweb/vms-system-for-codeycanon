@@ -427,23 +427,20 @@ Route::middleware(['auth', 'role:Admin'])->prefix('admin')->group(function () {
 
 Route::middleware(['auth'])->group(function () {
     // Units
-    Route::resource('units', UnitController::class);
     Route::get('units/data', [UnitController::class, 'data'])->name('units.data');
-    if (config('app.debug')) {
-        Route::get('units/data-debug', [UnitController::class, 'dataDebug'])->name('units.data.debug');
-    }
+    Route::resource('units', UnitController::class);
     
     // Companies
     Route::resource('company', CompanyController::class);
     
     // Departments
-    Route::resource('departments', DepartmentController::class);
     Route::get('departments/data', [DepartmentController::class, 'data'])->name('departments.data');
+    Route::resource('departments', DepartmentController::class);
     Route::get('unit-wise-department', [DepartmentController::class, 'unitWiseDepartment'])->name('unit-wise-department');
     
     // Locations
-    Route::resource('locations', LocationController::class);
     Route::get('locations/data', [LocationController::class, 'data'])->name('locations.data');
+    Route::resource('locations', LocationController::class);
 });
 
 // ============================================================================

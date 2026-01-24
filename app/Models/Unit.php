@@ -8,18 +8,17 @@ class Unit extends Model
 {
     use HasFactory, SoftDeletes;
     protected $fillable = [
-    // 'company_id',
+    'company_id',
     'unit_name',
     'unit_code',
-    // 'location',
-    // 'description',
+    'location',
     'status',
     'created_by',
     'updated_by'];
 
-    // public function company() { return $this->belongsTo(Company::class); }
-    // public function departments() { return $this->hasMany(Department::class); }
-    // public function locations() { return $this->hasMany(Location::class); }
-    // public function employees() { return $this->hasMany(Employee::class); }
-    // public function vehicles() { return $this->hasMany(Vehicle::class); }
+    public function company() { return $this->belongsTo(Company::class); }
+    public function departments() { return $this->hasMany(Department::class); }
+    public function locations() { return $this->hasMany(Location::class); }
+    public function employees() { return $this->hasMany(Employee::class); }
+    public function vehicles() { return $this->hasMany(Vehicle::class); }
 }

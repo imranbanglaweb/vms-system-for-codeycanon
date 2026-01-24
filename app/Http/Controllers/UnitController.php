@@ -37,7 +37,7 @@ class UnitController extends Controller
     public function index()
     {
 
-         $units = Unit::orderBy('id','DESC')->get();
+         $units = Unit::orderBy('id')->get();
         return view('admin.dashboard.unit.index',compact('units'));
 
 
@@ -48,7 +48,7 @@ class UnitController extends Controller
      */
     public function data(Request $request)
     {
-        Log::info('UnitController@data called', ['url' => $request->fullUrl(), 'ajax' => $request->ajax()]);
+        // Log::info('UnitController@data called', ['url' => $request->fullUrl(), 'ajax' => $request->ajax()]);
 
         if ($request->has('test')) {
             return response()->json(['ok' => true, 'message' => 'test payload']);
@@ -88,20 +88,9 @@ class UnitController extends Controller
                     "unit_name" => "required",
         ]);
 
-
-// return dd($request);
-
-        // if ($validator->fails()) {
-        //       return redirect()->back()->withErrors($validator->errors());
-        //     // return response()->json(['errors' => $validator->errors()->all()], 400);
-        // }
-
            if ($validator->fails()) {
             return response()->json(['errors' => $validator->errors()->all()], 400);
         }
-
-// return dd($request);
-
 
            if (!empty($request->unit_name)) {
                 $unit = Unit::updateOrCreate(

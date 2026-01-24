@@ -57,17 +57,17 @@
     }
 </style>
 
-<section role="main" class="content-body">
+<section role="main" class="content-body" style="background:#fff">
 <div class="container-fluid">
 
     <div class="d-flex justify-content-between align-items-center mb-3 mt-2">
         <h3 class="fw-bold text-primary mb-0"><i class="bi bi-person-plus-fill me-2"></i>Add New Driver</h3>
-        <a class="btn btn-outline-primary btn-sm px-3" href="{{ route('drivers.index') }}">
+        <a class="btn btn-primary btn-lg px-3 pull-right" href="{{ route('drivers.index') }}">
             <i class="bi bi-arrow-left-circle"></i> Back
         </a>
     </div>
 
-    {!! Form::open(['method'=>'POST','enctype'=>'multipart/form-data','id'=>'driver_add']) !!}
+    <form id="driver_add" method="POST" enctype="multipart/form-data">
     <div class="card shadow-sm border-0">
         <div class="card-body">
 
@@ -95,8 +95,8 @@
                         <option value="">Select Employee</option>
                         @foreach($employees as $emp)
                             @php
-                                $empValue = $emp->employee_code ?? $emp->employee_code ?? $emp->id;
-                                $empText = trim(($emp->name ?? '') . ' ' . ($emp->employee_code ?? $emp->employee_code ?? ''));
+                                $empValue = $emp->employee_code ?? $emp->id;
+                                $empText = trim(($emp->name ?? '') . ' ' . ($emp->employee_code ?? ''));
                                 if ($empText === '') { $empText = 'Employee ' . $emp->id; }
                             @endphp
                             <option value="{{ $empValue }}">{{ $empText }}</option>
@@ -197,12 +197,12 @@
 
             <div class="text-center mt-4">
                <button type="submit" class="btn btn-success btn-lg px-4">
-                    <i class="bi bi-check-circle-fill me-2"></i>Save Driver
+                    <i class="bi bi-check-circle-fill me-2"></i> Save Driver
                 </button>
             </div>
         </div>
     </div>
-    {!! Form::close() !!}
+    </form>
 </div>
 </section>
 
@@ -341,7 +341,7 @@
                 $('button[type=submit]').prop('disabled', true).html('<i class="bi bi-hourglass-split"></i> Saving...');
             },
             success: function (response) {
-                $('button[type=submit]').prop('disabled', false).html('<i class="bi bi-check-circle-fill me-2"></i>Save Driver');
+                $('button[type=submit]').prop('disabled', false).html('<i class="bi bi-check-circle-fill me-2"></i> Save Driver');
                 Swal.fire({
                     icon: 'success',
                     title: 'Driver Added Successfully!',
@@ -352,7 +352,7 @@
                 });
             },
             error: function (xhr) {
-                $('button[type=submit]').prop('disabled', false).html('<i class="bi bi-check-circle-fill me-2"></i>Save Driver');
+                $('button[type=submit]').prop('disabled', false).html('<i class="bi bi-check-circle-fill me-2"></i> Save Driver');
 
                 if (xhr.status === 422) {
                     let errors = xhr.responseJSON.errors;
@@ -386,8 +386,7 @@
         // reset form
         $('#licenseTypeForm')[0].reset();
         $('#lt-type-name-error').addClass('d-none').text('');
-        var modal = new bootstrap.Modal(document.getElementById('licenseTypeModal'));
-        modal.show();
+        $('#licenseTypeModal').modal('show');
     });
 
     $('#licenseTypeSaveBtn').on('click', function(){
@@ -415,9 +414,7 @@
                     // set selected
                     $select.val(type.id).trigger('change');
                     // close modal
-                    var modalEl = document.getElementById('licenseTypeModal');
-                    var modal = bootstrap.Modal.getInstance(modalEl);
-                    modal.hide();
+                    $('#licenseTypeModal').modal('hide');
                 }
                 $btn.prop('disabled', false).text('Save');
             },

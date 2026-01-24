@@ -34,7 +34,6 @@ class DepartmentController extends Controller
             ->addColumn('action', function($dept){
                 $edit = '<button class="btn btn-sm btn-primary editBtn" data-id="'.$dept->id.'"> <i class="fa fa-edit"></i></button>';
                 $delete = '<button class="btn btn-sm btn-danger deleteBtn" data-id="'.$dept->id.'"><i class="fa fa-minus-circle"></i></button>';
-                    return $edit.' '.$delete;
                 return $edit.' '.$delete;
             })
             ->make(true);
@@ -46,39 +45,74 @@ class DepartmentController extends Controller
         $rules = [
             'unit_id' => 'required|exists:units,id',
             'department_name' => 'required|string|max:255',
-            'department_code' => 'required|string|max:50|unique:departments,department_code,'.$request->id,
-            'status' => 'required|in:0,1'
+            'department_code' => 'required|string|max:50|unique:departments,department_code',
+            'department_short_name' => 'nullable|string|max:100',
+            'location' => 'nullable|string|max:255',
+            'description' => 'nullable|string',
+            'status' => 'required|in:0,1',
         ];
 
         $validator = Validator::make($request->all(), $rules);
 
         if($validator->fails()){
-            return response()->json(['errors'=>$validator->errors()], 422);
+            return response()->json(['errors' => $validator->errors()], 422);
         }
 
-        if($request->id){
-            // Update
-            $dept = Department::find($request->id);
-            if(!$dept){
-                return response()->json(['message'=>'Department not found'], 404);
-            }
-        } else {
-            $dept = new Department();
-            $dept->created_by = Auth::id() ?? 1;
+        $data = [
+            'unit_id' => $request->unit_id,
+            'department_name' => $request->department_name,
+            'department_code' => $request->department_code,
+            'department_short_name' => $request->department_short_name,
+            'location' => $request->location,
+            'description' => $request->description,
+            'status' => $request->status,
+            'updated_by' => Auth::id() ?? 1,
+        ];
+
+        $data['created_by'] = Auth::id() ?? 1;
+        Department::create($data);
+
+        return response()->json(['message' => 'Department created successfully']);
+    }
+
+    // Update
+    public function update(Request $request, $id)
+    {
+        $rules = [
+            'unit_id' => 'required|exists:units,id',
+            'department_name' => 'required|string|max:255',
+            'department_code' => 'required|string|max:50|unique:departments,department_code,'.$id,
+            'department_short_name' => 'nullable|string|max:100',
+            'location' => 'nullable|string|max:255',
+            'description' => 'nullable|string',
+            'status' => 'required|in:0,1',
+        ];
+
+        $validator = Validator::make($request->all(), $rules);
+
+        if($validator->fails()){
+            return response()->json(['errors' => $validator->errors()], 422);
         }
 
-        $dept->unit_id = $request->unit_id;
-        $dept->department_name = $request->department_name;
-        $dept->department_code = $request->department_code;
-        $dept->department_short_name = $request->department_short_name;
-        $dept->location = $request->location;
-        $dept->description = $request->description;
-        $dept->status = $request->status;
-        $dept->updated_by = Auth::id() ?? 1;
-        $dept->save();
+        $department = Department::find($id);
+        if (!$department) {
+            return response()->json(['message' => 'Department not found'], 404);
+        }
 
-        $msg = $request->id ? 'Department updated successfully' : 'Department created successfully';
-        return response()->json(['message'=>$msg]);
+        $data = [
+            'unit_id' => $request->unit_id,
+            'department_name' => $request->department_name,
+            'department_code' => $request->department_code,
+            'department_short_name' => $request->department_short_name,
+            'location' => $request->location,
+            'description' => $request->description,
+            'status' => $request->status,
+            'updated_by' => Auth::id() ?? 1,
+        ];
+
+        $department->update($data);
+
+        return response()->json(['message' => 'Department updated successfully']);
     }
 
     // Edit (return JSON)

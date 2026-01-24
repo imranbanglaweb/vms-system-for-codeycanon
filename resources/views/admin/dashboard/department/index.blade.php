@@ -31,39 +31,45 @@
       <form id="deptForm">
         <div class="modal-header">
           <h5 class="modal-title">Department</h5>
-          <button type="button" class="btn-close pull-right btn-danger" data-bs-dismiss="modal">Close</button>
+          <button type="button" class="btn-close pull-right btn-danger" data-dismiss="modal"><i class="fa fa-minus"></i></button>
           <br>
         </div>
         <div class="modal-body">
             <input type="hidden" name="id" id="deptId">
             <div class="mb-3">
-                <label>Unit</label>
+                <label>Select Unit</label>
                 <select name="unit_id" id="unit_id" class="form-select select2">
                     <option value="">Select Unit</option>
                     @foreach($units as $unit)
-                    <option value="{{ $unit->id }}">{{ $unit->unit_name }}</option>
+                    <option value="{{ $unit->id }}">{{ $unit->unit_name }}</option>/
                     @endforeach
                 </select>
+                <span class="text-danger" id="unit_id_error"></span>
             </div>
             <div class="mb-3">
                 <label>Name</label>
                 <input type="text" name="department_name" id="department_name" class="form-control">
+                <span class="text-danger" id="department_name_error"></span>
             </div>
             <div class="mb-3">
                 <label>Code</label>
                 <input type="text" name="department_code" id="department_code" class="form-control">
+                <span class="text-danger" id="department_code_error"></span>
             </div>
             <div class="mb-3">
                 <label>Short Name</label>
                 <input type="text" name="department_short_name" id="department_short_name" class="form-control">
+                <span class="text-danger" id="department_short_name_error"></span>
             </div>
             <div class="mb-3">
                 <label>Location</label>
                 <input type="text" name="location" id="location" class="form-control">
+                <span class="text-danger" id="location_error"></span>
             </div>
             <div class="mb-3">
                 <label>Description</label>
                 <textarea name="description" id="description" class="form-control"></textarea>
+                <span class="text-danger" id="description_error"></span>
             </div>
             <div class="mb-3">
                 <label>Status</label>
@@ -71,11 +77,12 @@
                     <option value="1">Active</option>
                     <option value="0">Inactive</option>
                 </select>
+                <span class="text-danger" id="status_error"></span>
             </div>
         </div>
         <div class="modal-footer">
             <button class="btn btn-primary" type="submit">Save</button>
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
         </div>
       </form>
     </div>
@@ -93,6 +100,10 @@
 <!-- Script -->
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-beta.1/dist/js/select2.min.js"></script>
 <script>
+function clearErrors() {
+    $('.text-danger').text('');
+    $('.form-control, .form-select').removeClass('is-invalid');
+}
 $(function(){
     var table = $('#departmentsTable').DataTable({
         processing:true,
@@ -109,19 +120,26 @@ $(function(){
         ]
     });
 
+    $('.select2').select2({
+        dropdownParent: $('#deptModal')
+    });
+
     // Add New
     $('#addNew').click(function(){
         $('#deptForm')[0].reset();
         $('#deptId').val('');
+        clearErrors();
+        $('#unit_id').val('').trigger('change');
         $('#deptModal').modal('show');
     });
 
     // Edit
     $(document).on('click','.editBtn', function(){
         var id = $(this).data('id');
+        clearErrors();
         $.get("departments/"+id+"/edit", function(data){
             $('#deptId').val(data.id);
-            $('#unit_id').val(data.unit_id);
+            $('#unit_id').val(data.unit_id).trigger('change');
             $('#department_name').val(data.department_name);
             $('#department_code').val(data.department_code);
             $('#department_short_name').val(data.department_short_name);
@@ -138,6 +156,7 @@ $(function(){
     $('#deptForm').off('submit').on('submit', function(e){
         e.preventDefault();
         var id = $('#deptId').val();
+        clearErrors();
         var url = id ? "departments/"+id : "{{ route('departments.store') }}";
         var method = id ? 'PUT' : 'POST';
 
@@ -151,12 +170,18 @@ $(function(){
                 table.ajax.reload();
             },
             error: function(xhr){
-                let errors = xhr.responseJSON?.errors;
-                let msg = xhr.responseJSON?.message || 'Validation failed';
-                if(errors){
-                    msg = Object.values(errors).flat().join('<br>');
+                if (xhr.status === 422) {
+                    let errors = xhr.responseJSON.errors;
+                    let errorMsg = 'Validation failed. Please check the form.';
+                    $.each(errors, function(key, value){
+                        $('#' + key + '_error').text(value[0]);
+                        $('[name="' + key + '"]').addClass('is-invalid');
+                    });
+                    Swal.fire('Error', errorMsg, 'error');
+                } else {
+                    let msg = xhr.responseJSON?.message || 'An error occurred.';
+                    Swal.fire('Error', msg, 'error');
                 }
-                Swal.fire('Error', msg, 'error');
             }
         });
     });

@@ -71,8 +71,8 @@ class LocationController extends Controller
     return DataTables::of($query)
         ->addIndexColumn()
         ->addColumn('action', function($row){
-            $editBtn = '<button class="btn btn-sm btn-primary editLocation" data-id="'.$row->l_id.'" data-name="'.$row->location_name.'" data-address="'.$row->address.'" data-unit="'.$row->unit_name.'"><i class="fa fa-edit"></i></button>';
-            $delBtn = '<button class="btn btn-sm btn-danger deleteUser" data-lid="'.$row->l_id.'"><i class="fa fa-minus"></i></button>';
+            $editBtn = '<a href="'.route('locations.edit', $row->l_id).'" class="btn btn-sm btn-primary"><i class="fa fa-edit"></i></a>';
+            $delBtn = '<button class="btn btn-sm btn-danger deleteUser" data-id="'.$row->l_id.'"><i class="fa fa-minus-circle"></i></button>';
             return $editBtn.' '.$delBtn;
         })
         ->filter(function ($query) {
@@ -108,8 +108,8 @@ class LocationController extends Controller
         $data['company_list'] = DB::table('companies')
                             // ->select('moujas.id as ID', 'moujas.mouja_name','projects.id')
                             ->where('unit_id',$unit_id)
-                            ->get();    
-        echo json_encode($data);
+                            ->get();
+        return response()->json($data);
 
     }
     public function store(Request $request)
@@ -165,14 +165,13 @@ class LocationController extends Controller
     Log::info('LocationController@store saved', ['location_id' => $location->id, 'payload' => $dataPayload]);
 
         // $setting->path = '/storage/'.$path;
-        return response()->json('Location Added Successfully');
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Location saved successfully'
+        ]);
     }
 
 
-    public function show(Category $category)
-    {
-        //
-    }
 
     /**
      * Show the form for editing the specified resource.
@@ -199,7 +198,7 @@ class LocationController extends Controller
      * @param  \App\Models\Category  $category
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Category $category)
+    public function show($id)
     {
         //
     }
@@ -212,19 +211,12 @@ class LocationController extends Controller
      */
     public function destroy($id)
     {
-        Log::info('LocationController@destroy called', ['id' => $id, 'user_id' => Auth::id()]);
         $location = Location::find($id);
-        $deleted = false;
         if ($location) {
             $location->delete();
-            $deleted = true;
+            return response()->json(['status' => 'success', 'message' => 'Location deleted successfully']);
         }
-        Log::info('LocationController@destroy result', ['id' => $id, 'deleted' => $deleted]);
-
-        // If AJAX, return JSON so front-end can handle it
-        if (request()->ajax()) {
-            return response()->json(['ok' => true, 'message' => 'Location deleted successfully']);
-        }
+        return response()->json(['status' => 'error', 'message' => 'Location not found'], 404);
 
     }
 

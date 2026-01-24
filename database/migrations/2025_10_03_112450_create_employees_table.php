@@ -17,6 +17,7 @@ class CreateEmployeesTable extends Migration
             $table->id();
             $table->foreignId('company_id')->nullable()->constrained('companies');
             $table->foreignId('unit_id')->nullable()->constrained('units');
+            $table->foreignId('location_id')->nullable()->constrained('locations');
             $table->foreignId('department_id')->nullable()->constrained('departments');
             $table->string('employee_code', 50)->unique()->nullable();
             $table->string('name');

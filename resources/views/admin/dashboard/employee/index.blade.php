@@ -62,6 +62,7 @@
       <thead>
         <tr>
           <th>No</th>
+          <th>Photo</th>
           <th>Employee Code</th>
           <th>Name</th>
           <th>Unit</th>
@@ -186,6 +187,7 @@ $(document).ready(function(){
     ajax: '{{ route("employees.index") }}',
     columns: [
       { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false },
+      { data: 'photo', name: 'photo', orderable: false, searchable: false },
       { data: 'employee_code', name: 'employee_code' },
       { data: 'name', name: 'name' },
       { data: 'unit_name', name: 'unit.unit_name' },

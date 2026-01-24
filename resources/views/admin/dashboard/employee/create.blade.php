@@ -6,10 +6,10 @@
 <div class="row">
     <div class="col-lg-12 margin-tb">
         <div class="pull-left">
-            <h2>Add Employee</h2>
+            <h2><i class="fa fa-plus mr-2"></i> Add Employee</h2>
         </div>
         <div class="pull-right">
-            <a class="btn btn-primary" href="{{ route('employees.index') }}"> Back</a>
+            <a class="btn btn-primary" href="{{ route('employees.index') }}"><i class="fa fa-arrow-left mr-2"></i> Back</a>
         </div>
     </div>
 </div>

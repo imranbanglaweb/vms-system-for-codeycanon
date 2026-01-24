@@ -43,8 +43,7 @@
         </div>
         <div class="form-group">
             <strong>Unit Description:</strong>
-            {!! Form::text('remarks', $unit_edit->remarks, array('placeholder' => 'Unit Remarks','class' => 'form-control remarks ','focus'=>'focus')) !!}
-            <input type="hidden" name="id" value="{{ $unit_edit->id }}">
+            {!! Form::textarea('description', $unit_edit->description, array('placeholder' => 'Unit description','class' => 'form-control','id'=>'description', 'rows'=>3)) !!}
         </div>
 
 
@@ -65,7 +64,7 @@
 <script src="//cdn.ckeditor.com/4.4.7/full/ckeditor.js"></script>
 <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <script>
-      CKEDITOR.replace( 'textarea' );
+      CKEDITOR.replace( 'description' );
   </script>
 <script>
 // In your Javascript (external.js resource or <script> tag)
@@ -84,6 +83,11 @@ $(document).ready(function() {
    $('#unit_edit').submit(function(e) {
 
        e.preventDefault();
+
+       // Update CKEditor instance to ensure data is in the textarea
+       for (instance in CKEDITOR.instances) {
+           CKEDITOR.instances[instance].updateElement();
+       }
 
        var unit_name  = $('.unit_name').val();
        // alert(unit_name);

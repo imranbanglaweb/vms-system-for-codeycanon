@@ -81,44 +81,6 @@ $(function(){
     $('#refresh-table').click(()=> table.ajax.reload(null,false));
     $('#table-search').keyup(function(){ table.search(this.value).draw(); });
 
-    // Clear form
-    function resetForm(){
-        $('#driverForm')[0].reset();
-        $('#driver_id').val('');
-    }
-
- 
-
-    // SUBMIT
-    $('#driverForm').submit(function(e){
-        e.preventDefault();
-
-        let data = {
-            id: $('#driver_id').val(),
-            name: $('#name').val(),
-            phone: $('#phone').val()
-        };
-
-        $('#saveDriverBtn').html('<i class="fa fa-spinner fa-spin"></i> Saving').prop('disabled', true);
-
-        $.post("{{ route('drivers.store') }}", data)
-        .done(res => {
-            $('#driverModal').modal('hide');
-            table.ajax.reload(null,false);
-            showToast("Driver saved successfully","success");
-        })
-        .fail(xhr => {
-            let msg = "Validation failed";
-            if(xhr.responseJSON?.errors){
-                msg = Object.values(xhr.responseJSON.errors).flat().join('<br>');
-            }
-            showToast(msg, "error");
-        })
-        .always(()=>{
-            $('#saveDriverBtn').html('<i class="fa fa-save"></i> Save').prop('disabled', false);
-        });
-    });
-
     // DELETE — WITH SWEETALERT2
     $(document).on('click','.deleteUser', function(){
         let id = $(this).data('did');
@@ -132,7 +94,7 @@ $(function(){
         }).then(result=>{
             if(result.isConfirmed){
                 $.ajax({
-                    url:"{{ url('drivers') }}/" + id,
+                    url: "{{ route('drivers.index') }}/" + id,
                     type:"POST",
                     data:{ _method:'DELETE' }
                 })

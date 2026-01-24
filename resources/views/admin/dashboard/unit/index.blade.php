@@ -71,7 +71,6 @@
                       <th>#</th>
                       <th>Unit Name</th>
                       <th>Unit Code</th>
-                      <th>Description</th>
                       <th>Action</th>
                   </tr>
               </thead>
@@ -106,6 +105,12 @@
             <label class="font-weight-bold">Unit Name <span class="text-danger">*</span></label>
             <input type="text" id="unit_name" name="unit_name" class="form-control form-control-lg" placeholder="Enter unit name">
             <div class="invalid-feedback" id="err_unit_name"></div>
+        </div>
+
+        <div class="form-group mb-4">
+            <label class="font-weight-bold">Unit Description <span class="text-danger">*</span></label>
+            <input type="text" id="unit_description" name="description" class="form-control form-control-lg" placeholder="Enter unit description">
+            <div class="invalid-feedback" id="err_unit_description"></div>
         </div>
 
         <div class="form-group mb-4">
@@ -178,7 +183,6 @@ $(function(){
           { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable:false, searchable:false },
           { data: 'unit_name', name: 'unit_name' },
           { data: 'unit_code', name: 'unit_code' },
-          { data: 'description', name: 'description' },
           { data: 'action', name: 'action', orderable:false, searchable:false }
       ],
       order: [[1,'asc']],

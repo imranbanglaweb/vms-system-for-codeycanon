@@ -3,12 +3,12 @@
         <div class="row">
             <div class="col-md-8">
                 <div class="form-row">
-                    <div class="form-group col-md-6">
+                    <div class="form-group col-md-4">
                         <label><strong><i class="fa fa-sitemap text-primary mr-1"></i> Unit</strong></label>
                         <select class="form-control unit_wise_company unit_id select2" name="unit_id">
                             <option value="">Please select</option>
                             @foreach($units as $unit)
-                                <option value="{{ $unit->id}}">{{ $unit->unit_name}}</option>
+                                <option value="{{ $unit->id}}" {{ (isset($employee_edit) && $employee_edit->unit_id == $unit->id) ? 'selected' : '' }}>{{ $unit->unit_name}}</option>
                             @endforeach
                         </select>
                         <div class="invalid-feedback d-none" data-field="unit_id"></div>
@@ -20,13 +20,30 @@
                         </select>
                         <div class="invalid-feedback d-none" data-field="company_id"></div>
                     </div> -->
+                    <div class="form-group col-md-4">
+                        <label><strong><i class="fa fa-map-marker-alt text-primary mr-1"></i> Location</strong></label>
+                        <select class="form-control select2" name="location_id">
+                            <option value="">Please select</option>
+                            @if(isset($locations))
+                                @foreach($locations as $location)
+                                    <option value="{{ $location->id }}" {{ (isset($employee_edit) && $employee_edit->location_id == $location->id) ? 'selected' : '' }}>{{ $location->location_name }}</option>
+                                @endforeach
+                            @endif
+                        </select>
+                        <div class="invalid-feedback d-none" data-field="location_id"></div>
+                    </div>
                 </div>
 
                 <div class="form-row">
-                    <div class="form-group col-md-6">
+                    <div class="form-group col-md-4">
                         <label><strong><i class="fa fa-layer-group text-primary mr-1"></i> Department</strong></label>
-                        <select class="form-control department_name" name="department_id">
+                        <select class="form-control department_name select2" name="department_id">
                             <option value="">Please select</option>
+                            @if(isset($departments))
+                                @foreach($departments as $department)
+                                    <option value="{{ $department->id }}" {{ (isset($employee_edit) && $employee_edit->department_id == $department->id) ? 'selected' : '' }}>{{ $department->department_name }}</option>
+                                @endforeach
+                            @endif
                         </select>
                         <div class="invalid-feedback d-none" data-field="department_id"></div>
                     </div>
@@ -60,9 +77,9 @@
                         <label><strong><i class="fa fa-briefcase text-primary mr-1"></i> Employee Type</strong></label>
                         <select name="employee_type" class="form-control select2" id="employee_type">
                             <option value="">Please select</option>
-                            <option value="Permanent">Permanent</option>
-                            <option value="Contract">Contract</option>
-                            <option value="Intern">Intern</option>
+                            <option value="Permanent" {{ (isset($employee_edit) && $employee_edit->employee_type == 'Permanent') ? 'selected' : '' }}>Permanent</option>
+                            <option value="Contract" {{ (isset($employee_edit) && $employee_edit->employee_type == 'Contract') ? 'selected' : '' }}>Contract</option>
+                            <option value="Intern" {{ (isset($employee_edit) && $employee_edit->employee_type == 'Intern') ? 'selected' : '' }}>Intern</option>
                         </select>
                         <div class="invalid-feedback d-none" data-field="employee_type"></div>
                     </div>
@@ -107,8 +124,8 @@
                     <div class="form-group col-md-6">
                         <label><strong>Status</strong></label>
                         <select name="status" class="form-control" id="status">
-                            <option value="Active">Active</option>
-                            <option value="Inactive">Inactive</option>
+                            <option value="Active" {{ (isset($employee_edit) && $employee_edit->status == 'Active') ? 'selected' : '' }}>Active</option>
+                            <option value="Inactive" {{ (isset($employee_edit) && $employee_edit->status == 'Inactive') ? 'selected' : '' }}>Inactive</option>
                         </select>
                         <div class="invalid-feedback d-none" data-field="status"></div>
                     </div>
@@ -121,7 +138,8 @@
                         <div class="form-group">
                             <label><strong>Photo</strong></label>
                             <div class="mb-2">
-                                <img id="photo-preview" src="{{ asset('public/uploads/default-avatar.png') }}" alt="preview" style="max-width:100%; height:150px; object-fit:cover;" />
+                                <!-- <img id="photo-preview" src="{{ asset('public/uploads/default-avatar.png') }}" alt="preview" style="max-width:100%; height:150px; object-fit:cover;" /> -->
+                            <i class="fa fa-user text-primary" style="font-size:34px; height:50px; object-fit:cover;"></i>
                             </div>
                             {!! Form::file('photo', ['class'=>'form-control-file','id'=>'photo-input']) !!}
                             <div class="invalid-feedback d-none" data-field="photo"></div>

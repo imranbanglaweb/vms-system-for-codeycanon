@@ -38,23 +38,10 @@
             <strong>Unit Code:</strong>
             {!! Form::text('unit_code', null, array('placeholder' => 'Unit Code','class' => 'form-control unit_code')) !!}
         </div>
-        <div class="form-group">
-            <strong>Unit Description:</strong>
-            {!! Form::text('remarks', null, array('placeholder' => 'Unit Description','class' => 'form-control remarks')) !!}
-        </div>
+   
 
     </div>
-{{--     <div class="col-xs-12 col-sm-12 col-md-12">
-        <div class="form-group">
-            <strong>Permission:</strong>
-            <br/>
-            @foreach($permission as $value)
-                <label>{{ Form::checkbox('permission[]', $value->id, false, array('class' => 'name')) }}
-                {{ $value->name }}</label>
-            <br/>
-            @endforeach
-        </div>
-    </div> --}}
+    
     <div class="col-xs-12 col-sm-12 col-md-12 text-center">
         <button type="submit" class="btn btn-primary">Submit</button>
     </div>
@@ -77,6 +64,11 @@
 
        e.preventDefault();
 
+       // Update CKEditor instance to ensure data is in the textarea
+       for (instance in CKEDITOR.instances) {
+           CKEDITOR.instances[instance].updateElement();
+       }
+
        var unit_name  = $('.unit_name').val();
        // alert(unit_name);
 
@@ -92,6 +84,7 @@
               allowEscapeKey: false,
 
             })
+            return;
        }
        let formData = new FormData(this);
        $('#image-input-error').text('');
