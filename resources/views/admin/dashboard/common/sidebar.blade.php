@@ -34,16 +34,14 @@
 
     @php
         $children = $menu->children ?? collect();
+        $currentRoute = request()->route() ? request()->route()->getName() : '';
 
-        // Get base route (users.index → users)
-        $menuBase = $menu->menu_url ? explode('.', $menu->menu_url)[0] : null;
-
-        // Check if any child route is active
+        // Parent active if any child belongs to same resource group
         $isActiveParent = false;
         foreach ($children as $child) {
             if ($child->menu_url) {
-                $childBase = explode('.', $child->menu_url)[0];
-                if (request()->routeIs($childBase . '.*')) {
+                $base = explode('.', $child->menu_url)[0];
+                if (str_starts_with($currentRoute, $base . '.')) {
                     $isActiveParent = true;
                     break;
                 }
@@ -53,7 +51,7 @@
 
     {{-- SINGLE MENU --}}
     @if($children->isEmpty())
-        <li class="{{ $menuBase && request()->routeIs($menuBase . '.*') ? 'nav-active' : '' }}">
+        <li class="{{ $menu->menu_url === $currentRoute ? 'nav-active' : '' }}">
             <a href="{{ $menu->menu_url && Route::has($menu->menu_url) ? route($menu->menu_url) : '#' }}">
                 <i class="fa {{ $menu->menu_icon }}"></i>
                 <span>{{ trans(ensure_menu_translation($menu->menu_name)) }}</span>
@@ -70,11 +68,7 @@
 
             <ul class="nav nav-children">
                 @foreach($children as $child)
-                    @php
-                        $childBase = $child->menu_url ? explode('.', $child->menu_url)[0] : null;
-                    @endphp
-
-                    <li class="{{ $childBase && request()->routeIs($childBase . '.*') ? 'nav-active' : '' }}">
+                    <li class="{{ $child->menu_url === $currentRoute ? 'nav-active' : '' }}">
                         <a href="{{ $child->menu_url && Route::has($child->menu_url) ? route($child->menu_url) : '#' }}">
                             <i class="fa {{ $child->menu_icon }}"></i>
                             {{ trans(ensure_menu_translation($child->menu_name)) }}

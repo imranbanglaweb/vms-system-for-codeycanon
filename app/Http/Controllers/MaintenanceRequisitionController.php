@@ -144,7 +144,8 @@ class MaintenanceRequisitionController extends Controller
 
     public function create()
     {
-                $vehicles = Vehicle::all();
+        $vehicles = Vehicle::all();
+        // dd($vehicles);
         $types = MaintenanceType::all();
         $employees = Employee::all();
         $categories  = MaintenanceCategory::all();
