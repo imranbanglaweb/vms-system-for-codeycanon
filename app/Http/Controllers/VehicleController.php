@@ -47,6 +47,12 @@ class VehicleController extends Controller
             ->addColumn('driver', function($row){
                 return $row->driver ? $row->driver->driver_name : '-';
             })
+            ->addColumn('vehicle_type', function($row){
+                return $row->vehicleType ? $row->vehicleType->name : '-';
+            })
+            ->addColumn('vendor', function($row){
+                return $row->vendor ? $row->vendor->name : '-';
+            })
             ->addColumn('status', function($row){
                 return $row->status == 1 
                     ? '<span class="badge bg-success">Active</span>'
@@ -131,14 +137,22 @@ class VehicleController extends Controller
 
 
         $company = auth()->user()->company;
-        $limit = $company->subscription->plan->max_vehicles;
-
-        if ($limit && $company->vehicles()->count() >= $limit) {
-            abort(403, 'Vehicle limit reached. Upgrade plan.');
+        
+        if ($company && $company->subscription && $company->subscription->plan) {
+            $limit = $company->subscription->plan->max_vehicles;
+            if ($limit && $company->vehicles()->count() >= $limit) {
+                abort(403, 'Vehicle limit reached. Upgrade plan.');
+            }
         }
+
+        // Auto generate vehicle number
+        $last = Vehicle::orderBy('id', 'desc')->first();
+        $number = $last ? $last->id + 1 : 1;
+        $vehicle_number = 'V-' . str_pad($number, 5, '0', STR_PAD_LEFT);
 
         $vehicle = Vehicle::create(array_merge($request->all(), [
             'created_by' => Auth::id(),
+            'vehicle_number' => $vehicle_number,
         ]));
 
         return response()->json([
@@ -184,6 +198,8 @@ class VehicleController extends Controller
                 'vendor_id'           => 'required|exists:vendors,id',
                 'seat_capacity'       => 'required|integer|min:1',
             ]);
+
+            $validated['updated_by'] = Auth::id();
 
             $vehicle->update($validated);
 

@@ -2,7 +2,7 @@
 
 @section('main_content')
 <section class="content-body" style="background-color:#fff;">
-    <div class="container">
+    <div class="container-fluid">
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h3 class="fw-bold text-primary"><i class="fa fa-tools me-2"></i> Maintenance Requisitions</h3>
             <a href="{{ route('maintenance.create') }}" class="btn btn-primary btn-sm pull-right">

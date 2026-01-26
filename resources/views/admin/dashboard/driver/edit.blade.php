@@ -88,15 +88,20 @@
                     </div>
                     <div class="col-md-4">
                         <label class="form-label">Employee ID</label><br>
-                        <select class="form-select select2" name="employee_code" id="employee_code">
+                        <select class="form-select select2" name="employee_id" id="employee_id">
                             <option value="">Select Employee</option>
                             @foreach($employees as $emp)
                                 @php
-                                    $empValue = $emp->employee_code ?? $emp->id;
-                                    $empText = trim(($emp->name ?? '') . ' ' . ($emp->employee_code ?? ''));
-                                    if ($empText === '') { $empText = 'Employee ' . $emp->id; }
+                                    $isSelected = false;
+                                    if (!empty($driver->employee_id) && $driver->employee_id == $emp->id) {
+                                        $isSelected = true;
+                                    } elseif (empty($driver->employee_id) && !empty($driver->employee_nid) && $driver->employee_nid == $emp->nid) {
+                                        $isSelected = true;
+                                    }
                                 @endphp
-                                <option value="{{ $empValue }}" {{ $driver->employee_code == $empValue ? 'selected' : '' }}>{{ $empText }}</option>
+                                <option value="{{ $emp->id }}" {{ $isSelected ? 'selected' : '' }}>
+                                    {{ $emp->name }} ({{ $emp->employee_code ?? $emp->id }})
+                                </option>
                             @endforeach
                         </select>
                     </div>
@@ -127,7 +132,15 @@
                                 <option value="">Select License Type</option>
                                 @if(!empty($licenseTypes) && $licenseTypes->count())
                                     @foreach($licenseTypes as $lt)
-                                        <option value="{{ $lt->id }}" {{ $driver->license_type_id == $lt->id ? 'selected' : '' }}>{{ $lt->type_name }}</option>
+                                        @php
+                                            $isLtSelected = false;
+                                            if (!empty($driver->license_type_id) && $driver->license_type_id == $lt->id) {
+                                                $isLtSelected = true;
+                                            } elseif (empty($driver->license_type_id) && !empty($driver->license_type) && $driver->license_type == $lt->type_name) {
+                                                $isLtSelected = true;
+                                            }
+                                        @endphp
+                                        <option value="{{ $lt->id }}" {{ $isLtSelected ? 'selected' : '' }}>{{ $lt->type_name }}</option>
                                     @endforeach
                                 @endif
                             </select>
@@ -184,12 +197,11 @@
                     </div>
                     <div class="col-md-4">
                         <label class="form-label">Photograph</label>
-                        <input type="file" name="photograph" class="form-control">
-                        @if($driver->photograph)
-                            <div class="mt-2">
-                                <img src="{{ asset($driver->photograph) }}" alt="Driver Photo" width="60" class="rounded">
-                            </div>
-                        @endif
+                        <input type="file" name="photograph" id="photograph" class="form-control" accept="image/*">
+                        <div class="mt-2">
+                            <img id="preview_image" src="{{ $driver->photograph ? asset('public/'.$driver->photograph) : asset('public/admin_resource/assets/images/no_image.png') }}" 
+                                 alt="Driver Photo" width="100" class="rounded border">
+                        </div>
                     </div>
                 </div>
 
@@ -225,13 +237,14 @@ $(function(){
         $.getJSON("{{ route('getDepartmentsByUnit') }}", {unit_id: unitId}, function(data){
             var $dept = $('#department_id').empty().append('<option value="">Select Department</option>');
             $.each(data.department_list || [], function(i,d){
-                $dept.append('<option value="'+d.id+'">'+d.department_name+'</option>');
+                var isSelected = (selectedDeptId && d.id == selectedDeptId) ? 'selected' : '';
+                $dept.append('<option value="'+d.id+'" '+isSelected+'>'+d.department_name+'</option>');
             });
             if (selectedDeptId) {
                 $dept.val(selectedDeptId);
             }
             // Re-trigger select2 update if needed
-            if ($.fn.select2 && $dept.hasClass('select2-hidden-accessible')) {
+            if ($.fn.select2) {
                 $dept.trigger('change');
             }
         });
@@ -242,12 +255,39 @@ $(function(){
         loadDepartments(id);
     });
 
+    // Employee auto-fill
+    $('#employee_id').on('change', function () {
+        var empId = $(this).val();
+        if (!empId) return;
+
+        $.get("{{ route('getEmployeeInfo') }}", { employee_id: empId }, function (data) {
+            if (!data || data.error) return;
+            
+            $('#driver_name').val(data.name || '');
+            $('#nid').val(data.nid || '');
+            $('#mobile').val(data.mobile || '');
+            if(data.joining_date) $('input[name="joining_date"]').val(data.joining_date);
+            if(data.date_of_birth) $('input[name="date_of_birth"]').val(data.date_of_birth);
+            $('#present_address').val(data.present_address || '');
+            $('#permanent_address').val(data.permanent_address || '');
+        });
+    });
+
     // Initial Load
     var initialUnit = "{{ $driver->unit_id }}";
     var initialDept = "{{ $driver->department_id }}";
     if(initialUnit) {
         loadDepartments(initialUnit, initialDept);
     }
+
+    // Photo Preview
+    $('#photograph').change(function(){
+        let reader = new FileReader();
+        reader.onload = (e) => { 
+            $('#preview_image').attr('src', e.target.result); 
+        }
+        if(this.files[0]) reader.readAsDataURL(this.files[0]);
+    });
 
     // submit update
     $('#driver_edit_form').submit(function(e){

@@ -145,8 +145,9 @@ Route::middleware(['auth'])->group(function () {
 // ============================================================================
 
 Route::middleware(['auth'])->group(function () {
-    Route::resource('vehicles', VehicleController::class);
     Route::resource('vehicle-type', VehicleTypeController::class);
+    Route::resource('vehicles', VehicleController::class);
+
 });
 
 // ============================================================================
@@ -255,6 +256,7 @@ Route::prefix('transport')->group(function () {
 // 9. MAINTENANCE MANAGEMENT
 // ============================================================================
 
+Route::get('admin/maintenance/history', [MaintenanceRequisitionController::class, 'history'])->name('admin-maintenance.history');
 Route::resource('maintenance', MaintenanceRequisitionController::class);
 
 // ============================================================================
@@ -262,9 +264,9 @@ Route::resource('maintenance', MaintenanceRequisitionController::class);
 // ============================================================================
 
 Route::prefix('maintenance-schedule')->middleware('auth')->group(function () {
-    Route::get('/', [MaintenanceController::class, 'index'])->name('maintenance.index');
-    Route::get('/create', [MaintenanceController::class, 'create'])->name('maintenance.create');
-    Route::post('/store', [MaintenanceController::class, 'storeSchedule'])->name('maintenance.store');
+    Route::get('/', [MaintenanceController::class, 'index'])->name('maintenance-schedules.index');
+    Route::get('/create', [MaintenanceController::class, 'create'])->name('maintenance-schedule.create');
+    Route::post('/store', [MaintenanceController::class, 'storeSchedule'])->name('maintenance-schedule.store');
     Route::get('/record/{id}', [MaintenanceController::class, 'recordForm'])->name('maintenance.record.form');
     Route::post('/record/{id}', [MaintenanceController::class, 'recordMaintenance'])->name('maintenance.record');
     Route::post('/schedule/{id}/deactivate', [MaintenanceController::class, 'markScheduleInactive'])->name('maintenance.schedule.deactivate');
@@ -276,7 +278,7 @@ Route::prefix('maintenance-schedule')->middleware('auth')->group(function () {
 // ============================================================================
 
 Route::prefix('maintenance-types')->middleware('auth')->group(function () {
-    Route::get('/', [MaintenanceTypeController::class, 'index'])->name('maintenance.types.index');
+    Route::get('/', [MaintenanceTypeController::class, 'index'])->name('maintenance-types.index');
     Route::post('/store', [MaintenanceTypeController::class, 'store'])->name('maintenance-types.store');
     Route::get('/edit/{maintenanceType}', [MaintenanceTypeController::class, 'edit'])->name('maintenance-types.edit');
     Route::put('/update/{maintenanceType}', [MaintenanceTypeController::class, 'update'])->name('maintenance-types.update');
@@ -285,7 +287,7 @@ Route::prefix('maintenance-types')->middleware('auth')->group(function () {
 });
 
 Route::prefix('maintenance-vendors')->middleware('auth')->group(function () {
-    Route::get('/', [MaintenanceVendorController::class, 'index'])->name('maintenance.vendors.index');
+    Route::get('/', [MaintenanceVendorController::class, 'index'])->name('maintenance-vendors.index');
     Route::post('/store', [MaintenanceVendorController::class, 'store'])->name('maintenance.vendors.store');
     Route::get('/edit/{vendor}', [MaintenanceVendorController::class, 'edit'])->name('maintenance.vendors.edit');
     Route::post('/update/{vendor}', [MaintenanceVendorController::class, 'update'])->name('maintenance.vendors.update');
@@ -348,7 +350,7 @@ Route::middleware(['auth'])->prefix('admin/reports')->group(function () {
 
 // Maintenance Reports
 Route::middleware(['auth'])->prefix('admin/reports')->group(function () {
-Route::get('/reports/maintenance', [MaintenanceReportController::class, 'index'])->name('maintenance.index');
+Route::get('/reports/maintenance', [MaintenanceReportController::class, 'index'])->name('maintenance-reports');
 Route::get('/reports/maintenance/ajax', [MaintenanceReportController::class, 'ajax'])->name('reports.maintenance.ajax');
 Route::get('/reports/maintenance/excel', [MaintenanceReportController::class, 'excel'])->middleware('role:Super Admin,Admin')->name('reports.maintenance.excel');
 Route::get('/reports/maintenance/pdf', [MaintenanceReportController::class, 'pdf'])->middleware('role:Super Admin,Admin')->name('reports.maintenance.pdf');

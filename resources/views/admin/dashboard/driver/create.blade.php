@@ -91,15 +91,12 @@
                 </div>
                 <div class="col-md-4">
                     <label class="form-label">Employee ID</label><br>
-                    <select class="form-select select2" name="employee_code" id="employee_code">
+                    <select class="form-select select2" name="employee_id" id="employee_id">
                         <option value="">Select Employee</option>
                         @foreach($employees as $emp)
-                            @php
-                                $empValue = $emp->employee_code ?? $emp->id;
-                                $empText = trim(($emp->name ?? '') . ' ' . ($emp->employee_code ?? ''));
-                                if ($empText === '') { $empText = 'Employee ' . $emp->id; }
-                            @endphp
-                            <option value="{{ $empValue }}">{{ $empText }}</option>
+                            <option value="{{ $emp->id }}">
+                                {{ $emp->name }} ({{ $emp->employee_code ?? $emp->id }})
+                            </option>
                         @endforeach
                     </select>
                 </div>
@@ -207,7 +204,7 @@
 </section>
 
 <!-- Modal: Add License Type -->
-<div class="modal fade" id="licenseTypeModal" tabindex="-1" aria-labelledby="licenseTypeModalLabel" aria-hidden="true">
+<div class="modal" id="licenseTypeModal" tabindex="-1" aria-labelledby="licenseTypeModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
@@ -228,8 +225,8 @@
                     <div class="mb-3">
                         <label class="form-label">Status</label>
                         <select name="status" class="form-select">
-                            <option value="Active">Active</option>
-                            <option value="Inactive">Inactive</option>
+                            <option value="1">Active</option>
+                            <option value="2">Inactive</option>
                         </select>
                     </div>
                 </form>
@@ -290,11 +287,11 @@
     });
 
     // Employee auto-fill (use the selected code value correctly)
-    $('#employee_code').on('change', function () {
-        var empCode = $(this).val();
-        if (!empCode) return;
+    $('#employee_id').on('change', function () {
+        var empId = $(this).val();
+        if (!empId) return;
 
-        $.get("{{ route('getEmployeeInfo') }}", { employee_code: empCode }, function (data) {
+        $.get("{{ route('getEmployeeInfo') }}", { employee_id: empId }, function (data) {
             if (!data || data.error) {
                 console.warn('Employee info not found', data);
                 return;
@@ -405,7 +402,7 @@
             data: formData,
             success: function(res){
                 // expected to return JSON with type.id and type.type_name
-                var type = res.type || res;
+                var type = res.data || res.type || res;
                 if (type && type.id) {
                     // add option to select and select it
                     var $select = $('#license_type_id');
@@ -415,6 +412,14 @@
                     $select.val(type.id).trigger('change');
                     // close modal
                     $('#licenseTypeModal').modal('hide');
+
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Success',
+                        text: res.message || 'License type added successfully',
+                        timer: 1500,
+                        showConfirmButton: false
+                    });
                 }
                 $btn.prop('disabled', false).text('Save');
             },

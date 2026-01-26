@@ -25,6 +25,7 @@
     <thead>
         <tr>
             <th>SL</th>
+            <th>Photo</th>
 			<th>Driver Name</th>
 			<th>Unit</th>
 			<th>Department</th>
@@ -64,13 +65,14 @@ $(function(){
         ajax: "{{ route('drivers.data') }}",
         columns:[
              { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable:false, searchable:false },
+    { data: 'photo', name: 'photo', orderable:false, searchable:false },
     { data: 'driver_name', name: 'driver_name' },
     { data: 'unit_name', name: 'unit_name' },
     { data: 'department_name', name: 'department_name' },
     { data: 'license_number', name: 'license_number' },
-    { data: 'license_type', name: 'license_type' },
+    { data: 'license_type_name', name: 'license_type_name' },
+    { data: 'mobile', name: 'mobile' },
     { data: 'joining_date', name: 'joining_date' },
-    { data: 'photo', name: 'photo', orderable:false, searchable:false },
     { data: 'action', name: 'action', orderable:false, searchable:false }
         ],
         order:[[1, 'asc']],

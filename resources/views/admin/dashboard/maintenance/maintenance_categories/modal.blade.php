@@ -1,11 +1,11 @@
 
-<div class="modal " id="categoryModal" tabindex="-1">
+<div class="modal" id="categoryModal" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content">
 
             <div class="modal-header bg-dark text-white">
                 <h5 class="modal-title fw-bold">Add / Edit Category</h5>
-                <!-- <button type="button" class="btn-close" data-bs-dismiss="modal"></button> -->
+                <button type="button" class="btn-close pull-right btn-danger" data-dismiss="modal">Close</button>
             </div>
 
             <div class="modal-body">

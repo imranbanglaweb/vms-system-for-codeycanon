@@ -26,6 +26,16 @@ class CreateMaintenanceCategoriesTable extends Migration
             $table->softDeletes();
             $table->timestamps();
         });
+
+        // Add foreign key to inventory_items here since this migration runs after inventory_items
+        if (Schema::hasTable('inventory_items')) {
+            Schema::table('inventory_items', function (Blueprint $table) {
+                $table->foreign('category_id')
+                    ->references('id')
+                    ->on('maintenance_categories')
+                    ->nullOnDelete();
+            });
+        }
     }
 
     /**
@@ -35,6 +45,12 @@ class CreateMaintenanceCategoriesTable extends Migration
      */
     public function down()
     {
+        // Drop the foreign key before dropping the parent table
+        if (Schema::hasTable('inventory_items')) {
+            Schema::table('inventory_items', function (Blueprint $table) {
+                $table->dropForeign(['category_id']);
+            });
+        }
         Schema::dropIfExists('maintenance_categories');
     }
 }

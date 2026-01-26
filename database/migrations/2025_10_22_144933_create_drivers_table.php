@@ -20,6 +20,7 @@ class CreateDriversTable extends Migration
             $table->unsignedBigInteger('company_id')->nullable();
             $table->unsignedBigInteger('department_id')->nullable();
             $table->unsignedBigInteger('unit_id')->nullable();
+            $table->unsignedBigInteger('employee_id')->nullable();
 
             // Driver Details
             $table->string('driver_name');

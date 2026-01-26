@@ -3,15 +3,12 @@
 @section('main_content')
 <section role="main" class="content-body" style=background-color:#fff;>
 <div class="container">
-<br>
-<br>
-<br>
-<br>
+
     <div class="d-flex justify-content-between align-items-center mb-3">
         <h4 class="fw-bold text-primary mb-0">
             <i class="fa fa-car"></i> {{ isset($vehicle) ? 'Edit Vehicle' : 'Add New Vehicle' }}
         </h4>
-        <a href="{{ route('vehicles.index') }}" class="btn btn-outline-primary btn-sm">
+        <a href="{{ route('vehicles.index') }}" class="btn-primary btn-lg pull-right">
             <i class="fa fa-arrow-left"></i> Back
         </a>
     </div>

@@ -391,11 +391,11 @@ class MenuSeeder extends Seeder
 
                     [
 
-                        'menu_name' => 'Vendor Manage',
+                        'menu_name' => 'Vendor List',
 
-                        'menu_slug' => 'vendor-manage',
+                        'menu_slug' => 'vendor-list',
 
-                        'menu_icon' => 'fa-book',
+                        'menu_icon' => 'fa-list',
 
                         'menu_url' => 'vendors.index',
 
@@ -409,17 +409,53 @@ class MenuSeeder extends Seeder
 
                     [
 
-                        'menu_name' => 'Vehicle Type Manage',
+                        'menu_name' => 'Add Vendor',
 
-                        'menu_slug' => 'vehicle-type-manage',
+                        'menu_slug' => 'add-vendor',
 
-                        'menu_icon' => 'fa-tags',
+                        'menu_icon' => 'fa-plus',
+
+                        'menu_url' => 'vendors.create',
+
+                        'menu_permission' => 'maintenance-vendor-manage',
+
+                        'menu_order' => 21,
+
+                        'menu_parent' => 17,
+
+                    ],
+
+                    [
+
+                        'menu_name' => 'Vehicle Type List',
+
+                        'menu_slug' => 'vehicle-type-list',
+
+                        'menu_icon' => 'fa-list',
 
                         'menu_url' => 'vehicle-type.index',
 
                         'menu_permission' => 'vehicle-manage',
 
-                        'menu_order' => 21,
+                        'menu_order' => 22,
+
+                        'menu_parent' => 17,
+
+                    ],
+
+                    [
+
+                        'menu_name' => 'Add Vehicle Type',
+
+                        'menu_slug' => 'add-vehicle-type',
+
+                        'menu_icon' => 'fa-plus',
+
+                        'menu_url' => 'vehicle-type.create',
+
+                        'menu_permission' => 'vehicle-manage',
+
+                        'menu_order' => 23,
 
                         'menu_parent' => 17,
 
@@ -441,7 +477,7 @@ class MenuSeeder extends Seeder
 
                         'menu_permission' => 'maintenance-manage',
 
-                        'menu_order' => 22,
+                        'menu_order' => 24,
 
                         'menu_parent' => 0,
 
@@ -451,7 +487,7 @@ class MenuSeeder extends Seeder
 
                         'menu_name' => 'Maintenance Requests',
 
-                        'menu_slug' => 'menu.maintenance.request',
+                        'menu_slug' => 'maintenance-requests',
 
                         'menu_icon' => 'fa-inbox',
 
@@ -459,9 +495,9 @@ class MenuSeeder extends Seeder
 
                         'menu_permission' => 'maintenance-manage',
 
-                        'menu_order' => 23,
+                        'menu_order' => 25,
 
-                        'menu_parent' => 22,
+                        'menu_parent' => 24,
 
                     ],
 
@@ -477,29 +513,13 @@ class MenuSeeder extends Seeder
 
                         'menu_permission' => 'maintenance-type-manage',
 
-                        'menu_order' => 24,
+                        'menu_order' => 26,
 
-                        'menu_parent' => 22,
-
-                    ],
-
-                    [
-
-                        'menu_name' => 'Maintenance History',
-
-                        'menu_slug' => 'menu.maintenance.history',
-
-                        'menu_icon' => 'fa-history',
-
-                        'menu_url' => 'maintenance.history',
-
-                        'menu_permission' => 'maintenance-manage',
-
-                        'menu_order' => 25,
-
-                        'menu_parent' => 22,
+                        'menu_parent' => 24,
 
                     ],
+
+                   
 
                     
 
@@ -515,9 +535,9 @@ class MenuSeeder extends Seeder
 
                         'menu_permission' => 'maintenance-vendor-manage',
 
-                        'menu_order' => 26,
+                        'menu_order' => 27,
 
-                        'menu_parent' => 22,
+                        'menu_parent' => 24,
 
                     ],
 
@@ -535,13 +555,28 @@ class MenuSeeder extends Seeder
 
                         'menu_permission' => 'maintenance-category-manage',
 
-                        'menu_order' => 27,
+                        'menu_order' => 28,
 
-                        'menu_parent' => 22,
+                        'menu_parent' => 24,
 
                     ],
+                     [
 
-        
+                        'menu_name' => 'Maintenance History',
+
+                        'menu_slug' => 'maintenance-history',
+
+                        'menu_icon' => 'fa-history',
+
+                        'menu_url' => 'admin-maintenance.history',
+
+                        'menu_permission' => 'maintenance-manage',
+
+                        'menu_order' => 29,
+
+                        'menu_parent' => 24,
+
+                    ],        
 
                     /* ================= VEHICLE REQUISITION ================= */
 
@@ -557,7 +592,7 @@ class MenuSeeder extends Seeder
 
                         'menu_permission' => 'requisition-view',
 
-                        'menu_order' => 28,
+                        'menu_order' => 30,
 
                         'menu_parent' => 0,
 
@@ -575,9 +610,9 @@ class MenuSeeder extends Seeder
 
                         'menu_permission' => 'requisition-create',
 
-                        'menu_order' => 29,
+                        'menu_order' => 31,
 
-                        'menu_parent' => 28,
+                        'menu_parent' => 30,
 
                     ],
 
@@ -593,9 +628,9 @@ class MenuSeeder extends Seeder
 
                         'menu_permission' => 'requisition-view',
 
-                        'menu_order' => 30,
+                        'menu_order' => 32,
 
-                        'menu_parent' => 28,
+                        'menu_parent' => 30,
 
                     ],
 
@@ -611,7 +646,7 @@ class MenuSeeder extends Seeder
 
                         'menu_permission' => 'requisition-approve',
 
-                        'menu_order' => 31,
+                        'menu_order' => 33,
 
                         'menu_parent' => 0,
 
@@ -629,9 +664,9 @@ class MenuSeeder extends Seeder
 
                         'menu_permission' => 'requisition-approve',
 
-                        'menu_order' => 32,
+                        'menu_order' => 34,
 
-                        'menu_parent' => 31,
+                        'menu_parent' => 33,
 
                     ],
 
@@ -647,9 +682,9 @@ class MenuSeeder extends Seeder
 
                         'menu_permission' => 'requisition-approved-view',
 
-                        'menu_order' => 33,
+                        'menu_order' => 35,
 
-                        'menu_parent' => 31,
+                        'menu_parent' => 33,
 
                     ],
 
@@ -669,7 +704,7 @@ class MenuSeeder extends Seeder
 
                         'menu_permission' => 'trip-manage',
 
-                        'menu_order' => 34,
+                        'menu_order' => 36,
 
                         'menu_parent' => 0,
 
@@ -693,7 +728,7 @@ class MenuSeeder extends Seeder
 
                             'menu_permission' => 'subscription-plan-manage',
 
-                            'menu_order' => 35,
+                            'menu_order' => 37,
 
                             'menu_parent' => 0,
 
@@ -715,7 +750,7 @@ class MenuSeeder extends Seeder
 
                             'menu_permission' => 'subscription-approve',
 
-                            'menu_order' => 36,
+                            'menu_order' => 38,
 
                             'menu_parent' => 0,
 
@@ -733,9 +768,9 @@ class MenuSeeder extends Seeder
 
                             'menu_permission' => 'subscription-approve',
 
-                            'menu_order' => 37,
+                            'menu_order' => 39,
 
-                            'menu_parent' => 36,
+                            'menu_parent' => 38,
 
                         ],
 
@@ -755,9 +790,9 @@ class MenuSeeder extends Seeder
 
                             'menu_permission' => 'payment-approve',
 
-                            'menu_order' => 38,
+                            'menu_order' => 40,
 
-                            'menu_parent' => 36,
+                            'menu_parent' => 38,
 
                         ],  
 
@@ -775,9 +810,9 @@ class MenuSeeder extends Seeder
 
                             'menu_permission' => 'payment-view',
 
-                            'menu_order' => 39,
+                            'menu_order' => 41,
 
-                            'menu_parent' => 36,
+                            'menu_parent' => 38,
 
                         ],  
 
@@ -795,9 +830,9 @@ class MenuSeeder extends Seeder
 
                             'menu_permission' => 'payment-view',
 
-                            'menu_order' => 40,
+                            'menu_order' => 42,
 
-                            'menu_parent' => 36,
+                            'menu_parent' => 38,
 
                         ],
 
@@ -810,77 +845,64 @@ class MenuSeeder extends Seeder
                     [
 
                         'menu_name' => 'Reports',
-
                         'menu_slug' => 'menu.reports',
-
-                        'menu_icon' => 'fa fa-file-text',
-
+                        'menu_icon' => 'fa-bar-chart',
                         'menu_url' => null,
-
                         'menu_permission' => 'report-requisition',
-
-                        'menu_order' => 41,
-
+                        'menu_order' => 43,
                         'menu_parent' => 0,
 
                     ],
 
                     [
-
                         'menu_name' => 'Requisition Report',
-
                         'menu_slug' => 'menu.report.requisition',
-
                         'menu_icon' => 'fa-file-text-o',
-
                         'menu_url' => 'reports.requisitions',
-
                         'menu_permission' => 'report-requisition',
-
-                        'menu_order' => 42,
-
-                        'menu_parent' => 41,
+                        'menu_order' => 44,
+                        'menu_parent' => 43,
 
                     ],
 
                      [
                         'menu_name' => 'Trip & Fuel Consumption Report',
                         'menu_slug' => 'Trip-Fuel-Consumption-Report',
-                        'menu_icon' => 'fa-truck',
+                        'menu_icon' => 'fa-line-chart',
                         'menu_url' => 'trips_fuel.index',
                         'menu_permission' => 'report-trip-fuel',
-                        'menu_order' => 43,
-                        'menu_parent' => 41,
+                        'menu_order' => 36,
+                        'menu_parent' => 43,
                     ],
 
                     [
                         'menu_name' => 'Vehicle Utilization Report',
                         'menu_slug' => 'Vehicle-Utilization-Report',
-                        'menu_icon' => 'fa-truck',
+                        'menu_icon' => 'fa-pie-chart',
                         'menu_url' => 'vehicle_utilization.index',
                         'menu_permission' => 'report-vehicle-utilization',
-                        'menu_order' => 44,
-                        'menu_parent' => 41,
+                        'menu_order' => 46,
+                        'menu_parent' => 43,
                     ],
                     
                     [
                         'menu_name' => 'Driver Performance Report',
                         'menu_slug' => 'Driver-Performance-Report',
-                        'menu_icon' => 'fa-truck',
+                        'menu_icon' => 'fa-tachometer',
                         'menu_url' => 'driver_performance.index',
                         'menu_permission' => 'report-driver-performance',
-                        'menu_order' => 45,
-                        'menu_parent' => 41,
+                        'menu_order' => 47,
+                        'menu_parent' => 43,
                     ],
                     
                     [
                         'menu_name' => 'Maintenance Reports',
                         'menu_slug' => 'Maintenance-Reports',
-                        'menu_icon' => 'fa-truck',
-                        'menu_url' => 'maintenance.index',
+                        'menu_icon' => 'fa-wrench',
+                        'menu_url' => 'maintenance-reports',
                         'menu_permission' => 'report-maintenance',
-                        'menu_order' => 46,
-                        'menu_parent' => 41,
+                        'menu_order' => 48,
+                        'menu_parent' => 43,
                     ],
                 
 
@@ -891,17 +913,11 @@ class MenuSeeder extends Seeder
                     [
 
                         'menu_name' => 'Email & Notification Settings',
-
                         'menu_slug' => 'email-notification',
-
-                        'menu_icon' => 'fa-envelope-o',
-
+                        'menu_icon' => 'fa-bell',
                         'menu_url' => null,
-
                         'menu_permission' => 'settings-notification',
-
-                        'menu_order' => 47,
-
+                        'menu_order' => 49,
                         'menu_parent' => 0,
 
                     ],
@@ -913,16 +929,12 @@ class MenuSeeder extends Seeder
                         'menu_name' => 'Notification Settings',
 
                         'menu_slug' => 'notification-settings',
-
-                        'menu_icon' => 'fa-bell',
-
+                        'menu_icon' => 'fa-cog',
                         'menu_url' => 'settings.notifications',
 
                         'menu_permission' => 'settings-notification',
-
-                        'menu_order' => 48,
-
-                        'menu_parent' => 47,
+                        'menu_order' => 50,
+                        'menu_parent' => 49,
 
                     ],
 
@@ -933,16 +945,12 @@ class MenuSeeder extends Seeder
                         'menu_name' => 'Push Subscribers',
 
                         'menu_slug' => 'push-subscribers',
-
-                        'menu_icon' => 'fas fa-bell',
-
+                        'menu_icon' => 'fa-rss',
                         'menu_url' => 'admin.push.subscribers',
 
                         'menu_permission' => 'notification-manage',
-
-                        'menu_order' => 49,
-
-                        'menu_parent' => 47,
+                        'menu_order' => 51,
+                        'menu_parent' => 49,
 
                     ],
 

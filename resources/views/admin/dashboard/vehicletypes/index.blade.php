@@ -8,9 +8,12 @@
         <h4 class="fw-bold text-primary mb-0">
             <i class="fa fa-list"></i> Vehicle Types
         </h4>
-        <a href="{{ route('vehicle-type.create') }}" class="btn btn-primary btn-sm">
+        <a href="{{ route('vehicle-type.create') }}" class="btn btn-primary btn-sm pull-right">
             <i class="fa fa-plus-circle"></i> Add Vehicle Type
         </a>
+        <br>
+        <br>
+        
     </div>
 
     <div class="card shadow-sm border-0 rounded-3">

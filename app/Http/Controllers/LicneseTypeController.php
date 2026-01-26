@@ -42,7 +42,6 @@ class LicneseTypeController extends Controller
         $request->validate([
             'type_name' => 'required|string|max:191|unique:licnese_types,type_name',
             'description' => 'nullable|string',
-            'status' => 'nullable|integer|in:0,1'
         ]);
 
         $data = $request->only(['type_name', 'description']);

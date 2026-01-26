@@ -34,10 +34,8 @@
 
 @include('admin.dashboard.maintenance.maintenance_categories.modal')
 
-
-	<!-- Core JS Files - Use only one version of jQuery -->
-	<script src="{{ asset('public/admin_resource/assets/vendor/jquery/jquery.js') }}"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+@push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
 $(document).ready(function () {
 
@@ -152,4 +150,5 @@ $(document).ready(function () {
 
 });
 </script>
+@endpush
 @endsection

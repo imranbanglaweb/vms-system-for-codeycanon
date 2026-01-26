@@ -48,6 +48,7 @@ class DriverController extends Controller
     $validated = $request->validate([
         'unit_id'            => 'required|exists:units,id',
         'department_id'      => 'required|exists:departments,id',
+        'employee_id'        => 'nullable|exists:employees,id',
         // 'employee_nid'       => 'required',
         'driver_name'        => 'required|string|max:255',
         'license_number'     => 'required|string|max:255|unique:drivers,license_number',
@@ -111,6 +112,54 @@ class DriverController extends Controller
         return view('admin.dashboard.driver.edit', compact('driver','units','departments','licenseTypes','employees'));
     }
 
+    public function update(Request $request, $id)
+    {
+        $driver = Driver::findOrFail($id);
+
+        $validated = $request->validate([
+            'unit_id'            => 'required|exists:units,id',
+            'department_id'      => 'required|exists:departments,id',
+            'employee_id'        => 'nullable|exists:employees,id',
+            'driver_name'        => 'required|string|max:255',
+            'license_number'     => 'required|string|max:255|unique:drivers,license_number,' . $driver->id,
+            'license_type_id'    => 'nullable|exists:licnese_types,id',
+            'license_issue_date' => 'nullable|date',
+            'joining_date'       => 'nullable|date',
+            'date_of_birth'      => 'nullable|date',
+            'nid'                => 'nullable|string|max:50',
+            'mobile'             => 'nullable|string|max:20',
+            'present_address'    => 'nullable|string|max:500',
+            'permanent_address'  => 'nullable|string|max:500',
+            'working_time_slot'  => 'nullable|string|max:50',
+            'leave_status'       => 'nullable|boolean',
+            'photograph'         => 'nullable|image|mimes:jpeg,jpg,png,gif|max:2048',
+        ]);
+
+        if ($request->hasFile('photograph')) {
+            // Delete old photo if exists
+            if ($driver->photograph && file_exists(public_path($driver->photograph))) {
+                @unlink(public_path($driver->photograph));
+            }
+            $file = $request->file('photograph');
+            $filename = time().'_'.$file->getClientOriginalName();
+            $file->move(public_path('uploads/drivers'), $filename);
+            $validated['photograph'] = 'uploads/drivers/'.$filename;
+        }
+
+        $validated['updated_by'] = auth()->id() ?? 1;
+
+        if (!empty($validated['license_type_id'])) {
+            $lt = Licnese_type::find($validated['license_type_id']);
+            if ($lt) {
+                $validated['license_type'] = $lt->type_name;
+            }
+        }
+
+        $driver->update($validated);
+
+        return response()->json(['status' => 'success', 'message' => 'Driver updated successfully!']);
+    }
+
     public function getEmployeeDetails($id)
     {
         $employee = Employee::find($id);
@@ -164,7 +213,7 @@ class DriverController extends Controller
             'driver_name',
             'license_number',
             'nid',
-            'employee_nid',
+            'employee_id',
             'license_type_id',       // If this is an ID, rename column to license_type_id
             'license_issue_date',
             'date_of_birth',
@@ -199,7 +248,7 @@ class DriverController extends Controller
             // Show Driver Photo
             ->addColumn('photo', function($row){
                 if ($row->photograph) {
-                    $url = asset('uploads/drivers/' . $row->photograph);
+                    $url = asset('public/' . $row->photograph);
                     return '<img src="'. $url .'" width="40" height="40" class="rounded-circle" />';
                 }
                 return '<span class="badge bg-secondary">No Photo</span>';
@@ -235,21 +284,12 @@ class DriverController extends Controller
 
     public function getEmployeeInfo(Request $request)
     {
-        $employee_code = $request->get('employee_code');
-        if (!$employee_code) {
+        $id = $request->get('employee_id');
+        if (!$id) {
             return response()->json(['error' => 'Missing parameter'], 400);
         }
 
-        $employee = Employee::where('employee_code', $employee_code)->first();
-        if (!$employee) {
-            // try fallback by employee_code if employee_nid not present
-            $employee = Employee::where('employee_code', $employee_code)->first();
-        }
-
-        if (!$employee && is_numeric($employee_code)) {
-            // last-resort: try by numeric id
-            $employee = Employee::find((int)$employee_code);
-        }
+        $employee = Employee::find($id);
 
         if (!$employee) {
             return response()->json(['error' => 'Not found'], 404);

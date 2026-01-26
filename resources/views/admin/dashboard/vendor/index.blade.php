@@ -3,34 +3,27 @@
 @section('main_content')
 
 <section role="main" class="content-body" style="background-color:#fff;">
-    <div class="card shadow-lg border-0">
-        <div class="">
+    <div class="container-fluid">
+        <div class="d-flex justify-content-between align-items-center">
+            <h4 class="fw-bold text-primary">
             <br>
-            <h4 class="mb-0"><i class="bi bi-truck"></i> Vendor Management</h4>
-
-            <div class="btn-group">
-                <a href="{{ route('vendors.create') }}" class="btn btn-success pull-right">
-                    <i class="bi bi-plus-circle"></i> Add Vendor
-                </a>
-            </div>
+                <i class="fa fa-store"></i> Vendor List
+            </h4>
+            <a href="{{ route('vendors.create') }}" class="btn btn-success btn-sm pull-right">
+                <i class="fa fa-plus-circle"></i> Add Vendor
+            </a>
         </div>
         <br>
+        <br>
+        @if(session('success'))
+            <div class="alert alert-success">{{ session('success') }}</div>
+        @endif
 
-        <div class="card-body position-relative">
-
-            <!-- 🔄 Loading Overlay -->
-            <div id="loadingOverlay" 
-                 class="position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center bg-white" 
-                 style="z-index:10; display:none;">
-                <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
-                    <span class="visually-hidden">Loading...</span>
-                </div>
-            </div>
-
-            <!-- 📋 Vendor DataTable -->
+        <div class="card shadow-sm border-0 rounded-3">
+            <div class="card-body">
             <div class="table-responsive">
-                <table id="vendorsTable" class="table table-bordered table-striped align-middle text-center">
-                    <thead class="table-light">
+                <table id="vendorsTable" class="table table-striped table-bordered align-middle" style="width:100%">
+                    <thead class="bg-primary text-white text-center">
                         <tr>
                             <th>ID</th>
                             <th>Vendor Name</th>
@@ -41,27 +34,29 @@
                             <th>Action</th>
                         </tr>
                     </thead>
+                    <tbody></tbody>
                 </table>
             </div>
         </div>
+    </div>
     </div>
 </section>
 
 @endsection
 
 @push('scripts')
+<script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.7/js/dataTables.bootstrap5.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
-$(document).ready(function () {
-    $('#loadingOverlay').show();
-
+$(function () {
     let table = $('#vendorsTable').DataTable({
         processing: true,
         serverSide: true,
         ajax: "{{ route('vendors.index') }}",
         columns: [
-            { data: 'id', name: 'id' },
+            { data: 'id', name: 'id', className: 'text-center' },
             { data: 'name', name: 'name' },
             { data: 'contact_person', name: 'contact_person' },
             { data: 'contact_number', name: 'contact_number' },
@@ -69,10 +64,11 @@ $(document).ready(function () {
             { 
                 data: 'status', 
                 name: 'status',
+                className: 'text-center',
                 render: function (data) {
                     return data === 'Active'
-                        ? `<span class="btn btn-success"><i class="fa fa-check-circle"></i> ${data}</span>`
-                        : `<span class="btn btn-secondary"><i class="fa fa-minus-circle"></i> ${data}</span>`;
+                        ? `<span class="badge bg-success">Active</span>`
+                        : `<span class="badge bg-danger">Inactive</span>`;
                 }
             },
             {
@@ -80,91 +76,80 @@ $(document).ready(function () {
                 name: 'action',
                 orderable: false, 
                 searchable: false,
+                className: 'text-center',
                 render: function (data, type, row) {
                     let editUrl = "{{ route('vendors.edit', ':id') }}".replace(':id', row.id);
                     return `
-                        <a href="${editUrl}" class="btn btn-primary me-1">
-                            <i class="fa fa-pencil-square"></i>
+                        <a href="${editUrl}" class="btn btn-primary btn-sm">
+                            <i class="fa fa-edit"></i>
                         </a>
-                        <button type="button" class="btn btn-danger" onclick="deleteVendor(${row.id})">
-                            <i class="fa fa-minus"></i>
+                        <button type="button" class="btn btn-danger btn-sm deleteVendorBtn" data-id="${row.id}">
+                            <i class="fa fa-trash"></i>
                         </button>`;
                 }
             }
         ],
-        drawCallback: function () {
-            $('#loadingOverlay').hide();
+        language: {
+            processing: '<div class="spinner-border text-primary" role="status"></div>'
         }
+    });
+
+    // Delete Vendor
+    $(document).on('click', '.deleteVendorBtn', function() {
+        let id = $(this).data('id');
+        let url = "{{ route('vendors.destroy', ':id') }}".replace(':id', id);
+
+        Swal.fire({
+            title: "Are you sure?",
+            text: "This vendor will be permanently removed!",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#d33",
+            cancelButtonColor: "#3085d6",
+            confirmButtonText: "Yes, delete it!"
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    url: url,
+                    type: 'DELETE',
+                    data: { _token: '{{ csrf_token() }}' },
+                    success: function (response) {
+                        Swal.fire({
+                            title: "Deleted!",
+                            text: "Vendor deleted successfully.",
+                            icon: "success",
+                            timer: 1500,
+                            showConfirmButton: false
+                        });
+                        table.ajax.reload(null, false);
+                    },
+                    error: function () {
+                        Swal.fire({
+                            title: "Error!",
+                            text: "Failed to delete vendor.",
+                            icon: "error"
+                        });
+                    }
+                });
+            }
+        });
     });
 });
-
-
-/* ============================
-   🗑️ DELETE WITH SweetAlert2  
-============================ */
-function deleteVendor(id) {
-    Swal.fire({
-        title: "Are you sure?",
-        text: "This vendor will be permanently removed!",
-        icon: "warning",
-        showCancelButton: true,
-        confirmButtonColor: "#d33",
-        cancelButtonColor: "#3085d6",
-        confirmButtonText: "Yes, delete it!"
-    }).then((result) => {
-        if (result.isConfirmed) {
-
-            $.ajax({
-                // url: `/vendors/${id}`,
-                url:"{{ route('vendors.destroy', ':id') }}".replace(':id', id),
-
-                type: 'DELETE',
-                data: { _token: '{{ csrf_token() }}' },
-
-                success: function (response) {
-                    Swal.fire({
-                        title: "Deleted!",
-                        text: "Vendor deleted successfully.",
-                        icon: "success",
-                        timer: 1500
-                    });
-
-                    $('#vendorsTable').DataTable().ajax.reload(null, false);
-                },
-
-                error: function () {
-                    Swal.fire({
-                        title: "Error!",
-                        text: "Failed to delete vendor.",
-                        icon: "error"
-                    });
-                }
-            });
-
-        }
-    });
-}
 </script>
 @endpush
 
 @push('styles')
-<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/dataTables.bootstrap5.min.css" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+<link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
 
 <style>
-    .card {
-        border-radius: 12px;
-    }
-    .card-header {
-        border-top-left-radius: 12px !important;
-        border-top-right-radius: 12px !important;
-        background: #0d6efd;
-    }
-    .btn-group .btn {
-        border-radius: 20px !important;
-        margin-left: 5px;
-    }
     .table th, .table td {
         vertical-align: middle !important;
+        font-size: 15px;
+    }
+    .badge {
+        font-size: 15px;
     }
 </style>
 @endpush

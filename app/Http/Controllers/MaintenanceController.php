@@ -16,6 +16,8 @@ class MaintenanceController extends Controller
 {
     public function index()
     {
+
+    // return dd('maintenance index');
         // show due + history
         $dueSoon = MaintenanceSchedule::with('vehicle','maintenanceType','vendor')
             ->where('active', true)

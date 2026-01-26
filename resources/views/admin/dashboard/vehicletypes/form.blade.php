@@ -7,7 +7,8 @@
 <div class="container">
 
     <div class="card shadow-sm p-4 mx-auto" style="max-width: 800px;">
-         <a href="{{ route('vehicle-type.index') }}" class="btn btn-outline-primary btn-sm">
+        
+        <a href="{{ route('vehicle-type.index') }}" class="btn btn-primary btn-lg pull-right">
             <i class="fa fa-arrow-left"></i> Back
         </a>
         <h4 class="fw-bold mb-3 text-primary">

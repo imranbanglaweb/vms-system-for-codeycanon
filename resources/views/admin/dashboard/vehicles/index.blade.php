@@ -2,13 +2,10 @@
 
 @section('main_content')
 <section role="main" class="content-body" style=background-color:#fff;>
-<div class="container">
-<br>
-<br>
-<br>
-<br>
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h4 class="fw-bold text-primary mb-0">
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center">
+        <h4 class="fw-bold text-primary">
+            <br>
             <i class="fa fa-car"></i> Vehicles
         </h4>
         <a href="{{ route('vehicles.create') }}" class="btn btn-success btn-sm pull-right">
@@ -16,7 +13,7 @@
         </a>
     </div>
 <br>
-<hr>
+<br>
     @if(session('success'))
         <div class="alert alert-success">{{ session('success') }}</div>
     @endif
@@ -24,15 +21,19 @@
     <div class="card shadow-sm border-0 rounded-3">
         <div class="card-body">
             <div class="table-responsive">
-                <table id="vehicleTable" class="table table-striped table-bordered align-middle">
+                <table id="vehicleTable" class="table table-striped table-bordered align-middle" style="width:100%">
                     <thead class="bg-primary text-white text-center">
                         <tr>
-                            <!-- <th>#</th> -->
+                            <th>SL</th>
+                            <th>Vehicle No</th>
                             <th>Vehicle Name</th>
+                            <th>Type</th>
                             <th>Department</th>
                             <th>License Plate</th>
                             <th>Driver</th>
-                            <th>Status</th>
+                            <th>Vendor</th>
+                            <th>Ownership</th>
+                            <th>Capacity</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
@@ -65,12 +66,16 @@ $(function() {
         serverSide: true,
         ajax: "{{ route('vehicles.index') }}",
         columns: [
-            // { data: 'DT_RowIndex', name: 'DT_RowIndex', className: 'text-center', width: '3%' },
+            { data: 'DT_RowIndex', name: 'DT_RowIndex', className: 'text-center', width: '5%', orderable: false, searchable: false },
+            { data: 'vehicle_number', name: 'vehicle_number' },
             { data: 'vehicle_name', name: 'vehicle_name' },
+            { data: 'vehicle_type', name: 'vehicle_type' },
             { data: 'department', name: 'department' },
             { data: 'license_plate', name: 'license_plate' },
             { data: 'driver', name: 'driver' },
-            { data: 'status', name: 'status', className: 'text-center' },
+            { data: 'vendor', name: 'vendor' },
+            { data: 'ownership', name: 'ownership' },
+            { data: 'seat_capacity', name: 'seat_capacity', className: 'text-center' },
             { data: 'action', name: 'action', orderable: false, searchable: false, className: 'text-center' }
         ],
         language: {

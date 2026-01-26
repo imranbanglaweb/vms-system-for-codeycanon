@@ -46,7 +46,7 @@
                         <input type="date" name="maintenance_date" class="form-control" value="{{ optional($requisition->maintenance_date)->format('Y-m-d') ?? $requisition->maintenance_date }}">
                     </div>
 
-                    <div class="col-md-4">
+                    <div class="col-md-3">
                         <label class="form-label">Vehicle</label>
                         <select name="vehicle_id" class="form-control">
                             @foreach($vehicles as $v)
@@ -57,7 +57,7 @@
                         </select>
                     </div>
 
-                    <div class="col-md-4">
+                    <div class="col-md-3">
                         <label class="form-label">Employee</label>
                         <select name="employee_id" class="form-control">
                             @foreach($employees as $emp)
@@ -68,13 +68,23 @@
                         </select>
                     </div>
 
-                    <div class="col-md-4">
+                    <div class="col-md-3">
                         <label class="form-label">Maintenance Type</label>
                         <select name="maintenance_type_id" class="form-control">
                             @foreach($types as $t)
                                 <option value="{{ $t->id }}" {{ $requisition->maintenance_type_id == $t->id ? 'selected' : '' }}>
                                     {{ $t->name }}
                                 </option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label">Maintenance Vendor</label>
+                        <select name="vendor_id" class="form-control">
+                            <option value="">Select Vendor (Optional)</option>
+                            @foreach($vendors as $vendor)
+                                <option value="{{ $vendor->id }}" {{ $requisition->vendor_id == $vendor->id ? 'selected' : '' }}>{{ $vendor->name }}</option>
                             @endforeach
                         </select>
                     </div>
@@ -168,7 +178,7 @@
 
             <div class="mb-4">
                 <button type="submit" id="saveBtn" class="btn btn-primary"><i class="fa fa-save"></i> Update Requisition</button>
-                <a href="{{ route('requisitions.index') }}" class="btn btn-secondary">Cancel</a>
+                <a href="{{ route('maintenance.index') }}" class="btn btn-secondary">Cancel</a>
             </div>
         </form>
     </div>
@@ -276,5 +286,5 @@ $(document).ready(function(){
 
 });
 </script>
-
+ 
 @endsection

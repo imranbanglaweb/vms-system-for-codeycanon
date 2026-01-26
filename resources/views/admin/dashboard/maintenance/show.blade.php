@@ -60,11 +60,12 @@
             <h3 class="fw-bold text-primary">
                 <i class="fa fa-eye me-2"></i> Requisition Details
             </h3>
-            <a href="{{ route('maintenance.index') }}" class="btn btn-secondary btn-sm">
+            <a href="{{ route('maintenance.index') }}" class="btn btn-primary btn-lg pull-right">
                 <i class="fa fa-arrow-left"></i> Back
             </a>
         </div>
-
+<hr>
+<br>
         <!-- BASIC INFO CARD -->
         <div class="card shadow-sm mb-4">
             <div class="card-header bg-primary text-white">

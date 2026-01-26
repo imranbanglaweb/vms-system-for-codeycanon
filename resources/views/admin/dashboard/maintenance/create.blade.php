@@ -2,523 +2,426 @@
 
 @section('main_content')
 
+@push('styles')
 <style>
-
-  /* Input and Select styling */
-input.form-control,
-select.form-select {
-    color: #000;              /* Black text */
-    font-size: 1.2rem;        /* Increase font size */
-    font-weight: 500;          /* Slightly bold for readability */
-    background-color: #fff;    /* Keep white background */
-    padding: 0.5rem 0.75rem;   /* Add padding for better look */
-}
-
-/* Floating labels text */
-.form-floating > label {
-    font-size: 1.2rem;           /* Increase label size */
-    font-weight: 500;
-    color: #000;              /* Slightly darker gray for better readability */
-}
-
-/* Table inputs */
-#itemsTable input,
-#itemsTable select {
-    font-size: 1.2rem;
-    color: #000;
-}
-
-/* Cost summary inputs */
-#chargeAmount,
-#totalPartsCost,
-#grandTotal {
-    font-size: 1.1rem;
-    font-weight: 500;
-    color: #000;
-}
-
-/* Body & Card */
-body {
-    background-color: #f8f9fa;
-}
-.card {
-    background-color: #fff;
-    padding: 1.5rem;
-    border-radius: 1rem;
-    box-shadow: 0 0.5rem 1rem rgba(0,0,0,0.1);
-}
-.card-header {
-    background-color: #fff;
-    border-bottom: 1px solid #e5e5e5;
-}
-.form-floating .form-control:focus {
-    border-color: #0d6efd;
-    box-shadow: 0 0 0 0.2rem rgba(13,110,253,.25);
-}
-.table thead th {
-    vertical-align: middle;
-    text-align: center;
-}
-.table tbody td {
-    vertical-align: middle;
-}
-.table-hover tbody tr:hover {
-    background-color: #f1f4f8;
-}
-.removeRow {
-    cursor: pointer;
-}
-input.border-danger, select.border-danger {
-    border-color: #dc3545 !important;
-    animation: shake 0.3s;
-}
-@keyframes shake {
-    0% { transform: translateX(0px); }
-    25% { transform: translateX(-5px); }
-    50% { transform: translateX(5px); }
-    75% { transform: translateX(-5px); }
-    100% { transform: translateX(0px); }
-}
-.btn-primary {
-    background-color: #0d6efd;
-    border: none;
-}
-.btn-success {
-    background-color: #198754;
-    border: none;
-}
+    .content-body { background-color: #ffffff; min-height: 100vh; }
+    .card { border: 1px solid #eef2f7; box-shadow: 0 0.75rem 1.5rem rgba(18,38,63,.03); border-radius: 0.5rem; }
+    .card-header { background-color: transparent; border-bottom: 1px solid #eef2f7; padding: 1.5rem; }
+    .card-body { padding: 1.5rem; }
+    .form-label { font-weight: 500; color: #343a40; margin-bottom: 0.5rem; }
+    .form-control, .form-select { border-color: #dee2e6; padding: 0.6rem 1rem; border-radius: 0.4rem; }
+    .form-control:focus, .form-select:focus { border-color: #727cf5; box-shadow: 0 0 0 0.2rem rgba(114, 124, 245, 0.25); }
+    .table thead th { background-color: #f8f9fa; border-bottom: 2px solid #eef2f7; color: #6c757d; font-weight: 600; text-transform: uppercase; font-size: 0.8rem; letter-spacing: 0.5px; }
+    .btn-primary { background-color: #727cf5; border-color: #727cf5; box-shadow: 0 2px 6px 0 rgba(114, 124, 245, 0.5); }
+    .btn-primary:hover { background-color: #5f6af3; border-color: #5f6af3; }
+    .total-display { font-size: 1.5rem; font-weight: 700; color: #727cf5; }
+    .select2-container .select2-selection--single { height: 42px !important; border: 1px solid #dee2e6; padding: 6px; }
+    .select2-container--default .select2-selection--single .select2-selection__arrow { top: 8px; }
+    .is-invalid + .select2-container .select2-selection--single { border-color: #dc3545; }
+    .status-badge { padding: 2px 6px; border-radius: 4px; font-size: 0.75rem; color: #fff; }
+    .status-pending { background-color: #ffc107; }
+    .status-approved { background-color: #28a745; }
+    .status-rejected { background-color: #dc3545; }
 </style>
+@endpush
 
-<section class="content-body py-5">
-    <div class="container">
-
-        {{-- Header --}}
+<section class="content-body">
+    <div class="container-fluid py-4">
+        <!-- Header -->
         <div class="d-flex justify-content-between align-items-center mb-4">
-            <h3 class="fw-bold text-primary"><i class="fa fa-tools me-2"></i> Create Maintenance Requisition</h3>
-            <a href="{{ route('maintenance.index') }}" class="btn btn-outline-secondary btn-sm">
-                <i class="fa fa-arrow-left me-1"></i> Back
-            </a>
+            <div>
+                <h3 class="fw-bold text-dark mb-1">Create Requisition</h3>
+                <p class="">
+                    <strong>
+                    Fill in the details to create a new maintenance requisition.
+                    </strong>
+                </p>
+            </div>
+            <a href="{{ route('maintenance.index') }}" class="btn btn-primary">
+            <i class="fa fa-arrow-left me-1"></i> Back to List</a>
         </div>
 
-        {{-- Form --}}
-        <form id="requisitionForm" action="{{ route('maintenance.store') }}" method="POST">
+        <form id="requisitionForm" action="{{ route('maintenance.store') }}" method="POST" novalidate>
             @csrf
-            <div class="card shadow-sm rounded-3 border-0">
-                <div class="card-header py-3">
-                    <h4 class="mb-0 fw-bold"><strong>Requisition Details</strong></h4>
+            
+            <!-- Main Info Card -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Requisition Information</h5>
                 </div>
                 <div class="card-body">
-
                     <div class="row g-4">
-
-                        {{-- Left Column --}}
-                        <div class="col-md-6">
-                            <div class="form-floating">
-                                <select name="requisition_type" class="form-select  select2" id="requisitionType">
-                                    <option value="">Select Type</option>
-                                    <option value="Maintenance">Maintenance</option>
-                                    <option value="Breakdown">Breakdown</option>
-                                    <option value="Inspection">Inspection</option>
-                                </select>
-                                <label for="requisitionType">Requisition Type</label>
-                            </div>
-
-                            <div class="form-floating mb-3">
-                                <select name="priority" class="form-select  select2" id="priority">
-                                    <option value="">Select Priority</option>
-                                    <option value="Low">Low</option>
-                                    <option value="Medium">Medium</option>
-                                    <option value="High">High</option>
-                                    <option value="Urgent">Urgent</option>
-                                </select>
-                                <label for="priority">Priority</label>
-                            </div>
-
-                            <div class="form-floating mb-3">
-                                <select name="employee_id" class="form-select select2" id="employeeSelect">
-                                    <option value="">Select Employee</option>
-                                    @foreach($employees as $emp)
-                                        <option value="{{ $emp->id }}">{{ $emp->name }}</option>
-                                    @endforeach
-                                </select>
-                                <label for="employeeSelect">Requisition For (Employee)</label>
-                            </div>
-
-                            <div class="form-floating mb-3">
-                                <select name="vehicle_id" class="form-select  select2" id="vehicleSelect">
-                                    <option value="">Select Vehicle</option>
-                                    @foreach($vehicles as $v)
-                                        <option value="{{ $v->id }}">{{ $v->vehicle_name }} - {{ $v->model }}</option>
-                                    @endforeach
-                                </select>
-                                <label for="vehicleSelect">Vehicle</label>
-                            </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Requisition Type <span class="text-danger">*</span></label>
+                            <select name="requisition_type" class="form-select select2" required>
+                                <option value="">Select Type</option>
+                                <option value="Maintenance">Maintenance</option>
+                                <option value="Breakdown">Breakdown</option>
+                                <option value="Inspection">Inspection</option>
+                            </select>
                         </div>
-
-                        {{-- Right Column --}}
-                        <div class="col-md-6">
-                            <div class="form-floating mb-3">
-                                <select name="maintenance_type_id" class="form-select  select2" id="maintenanceType">
-                                    <option value="">Select Type</option>
-                                    @foreach($types as $t)
-                                        <option value="{{ $t->id }}">{{ $t->name }}</option>
-                                    @endforeach
-                                </select>
-                                <label for="maintenanceType">Maintenance Type</label>
-                            </div>
-
-                            <div class="form-floating mb-3">
-                                <input type="date" name="maintenance_date" class="form-control" id="maintenanceDate">
-                                <label for="maintenanceDate">Maintenance Date</label>
-                            </div>
-
-                            <div class="form-floating mb-3">
-                                <input type="text" name="service_title" class="form-control" id="serviceTitle">
-                                <label for="serviceTitle">Service Title</label>
-                            </div>
-
-                            <div class="form-floating mb-3">
-                                <select name="charge_bear_by" class="form-select" id="chargeBearBy">
-                                    <option value="">Select</option>
-                                    <option>Company</option>
-                                    <option>Employee</option>
-                                    <option>Department</option>
-                                </select>
-                                <label for="chargeBearBy">Charge Bear By</label>
-                            </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Priority <span class="text-danger">*</span></label>
+                            <select name="priority" class="form-select select2" required>
+                                <option value="">Select Priority</option>
+                                <option value="Low">Low</option>
+                                <option value="Medium">Medium</option>
+                                <option value="High">High</option>
+                                <option value="Urgent">Urgent</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Requested By <span class="text-danger">*</span></label>
+                            <select name="employee_id" class="form-select select2" required>
+                                <option value="">Select Employee</option>
+                                @foreach($employees as $emp)
+                                    <option value="{{ $emp->id }}">{{ $emp->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Vehicle <span class="text-danger">*</span></label>
+                            <select name="vehicle_id" class="form-select select2" required>
+                                <option value="">Select Vehicle</option>
+                                @foreach($vehicles as $v)
+                                    <option value="{{ $v->id }}">{{ $v->vehicle_name }} - {{ $v->model }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Maintenance Type <span class="text-danger">*</span></label>
+                            <select name="maintenance_type_id" class="form-select select2" required>
+                                <option value="">Select Type</option>
+                                @foreach($types as $t)
+                                    <option value="{{ $t->id }}">{{ $t->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Maintenance Vendor</label>
+                            <select name="vendor_id" class="form-select select2">
+                                <option value="">Select Vendor (Optional)</option>
+                                @foreach($vendors as $vendor)
+                                    <option value="{{ $vendor->id }}">{{ $vendor->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Maintenance Date <span class="text-danger">*</span></label>
+                            <input type="date" name="maintenance_date" class="form-control" value="{{ date('Y-m-d') }}" required>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Service Title <span class="text-danger">*</span></label>
+                            <input type="text" name="service_title" class="form-control" placeholder="e.g. Regular Service 5000km" required>
                         </div>
                     </div>
+                </div>
+            </div>
 
-                    <hr class="my-4">
-
-                    {{-- Maintenance Items --}}
-                    <h5 class="fw-bold mb-3">Maintenance Items</h5>
+            <!-- Items Card -->
+            <div class="card mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="card-title mb-0">Parts & Items</h5>
+                    <div>
+                        <button type="button" class="btn btn-outline-primary btn-sm me-2" id="addManualItem"><i class="fa fa-plus me-1"></i> Add Manual Item</button>
+                        <button type="button" class="btn btn-primary btn-sm" data-toggle="modal" data-target="#inventoryModal"><i class="fa fa-box me-1"></i> Add from Inventory</button>
+                    </div>
+                </div>
+                <div class="card-body p-0">
                     <div class="table-responsive">
-                        <table class="table table-hover align-middle text-center" id="itemsTable">
-                            <thead class="table-light">
+                        <table class="table table-hover mb-0" id="itemsTable">
+                            <thead>
                                 <tr>
-                                    <th>Category</th>
-                                    <th>Item</th>
-                                    <th>Qty</th>
-                                    <th>Unit Price</th>
-                                    <th>Total</th>
-                                    <th></th>
+                                    <th style="width: 20%;">Category</th>
+                                    <th style="width: 30%;">Item Name</th>
+                                    <th style="width: 15%;">Quantity</th>
+                                    <th style="width: 15%;">Unit Price</th>
+                                    <th style="width: 15%;">Total</th>
+                                    <th style="width: 5%;"></th>
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr>
-                                    <td>
-                                        <select name="items[0][category_id]" class="form-select categorySelect">
-                                            <option value="">Select</option>
-                                            @foreach($categories as $cat)
-                                                <option value="{{ $cat->id }}">{{ $cat->category_name }}</option>
-                                            @endforeach
-                                        </select>
-                                    </td>
-                                    <td>
-                                        <input type="text" name="items[0][item_name]" class="form-control itemName" placeholder="Item Name">
-                                    </td>
-                                    <td>
-                                        <input type="number" name="items[0][qty]" class="form-control qty text-center" value="1" min="1">
-                                    </td>
-                                    <td>
-                                        <input type="number" name="items[0][unit_price]" class="form-control unitPrice text-end" value="0" step="0.01">
-                                    </td>
-                                    <td>
-                                        <input type="number" name="items[0][total_price]" class="form-control totalPrice text-end" readonly>
-                                    </td>
-                                    <td>
-                                        <button type="button" class="btn btn-danger btn-sm removeRow"><i class="fa fa-minus"></i></button>
-                                    </td>
-                                </tr>
+                                <!-- Rows will be added here -->
                             </tbody>
+                            <tfoot>
+                                <tr>
+                                    <td colspan="4" class="text-end fw-bold">Parts Total:</td>
+                                    <td class="fw-bold text-end" id="partsTotalDisplay">0.00</td>
+                                    <td></td>
+                                </tr>
+                            </tfoot>
                         </table>
                     </div>
-                    <button type="button" id="addRow" class="btn btn-primary btn-sm mb-4"><i class="fa fa-plus me-1"></i> Add Item</button>
-
-                    <hr class="my-4">
-
-                    {{-- Cost Summary --}}
-                    <div class="row g-3 text-center">
-                        <div class="col-md-4">
-                            <div class="form-floating">
-                                <input type="number" name="charge_amount" id="chargeAmount" class="form-control text-end" value="0" step="0.01">
-                                <label for="chargeAmount">Charge Amount</label>
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="form-floating">
-                                <input type="number" id="totalPartsCost" class="form-control text-end" readonly>
-                                <label for="totalPartsCost">Total Parts Cost</label>
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="form-floating">
-                                <input type="number" id="grandTotal" class="form-control text-end" readonly>
-                                <label for="grandTotal">Grand Total Cost</label>
-                            </div>
-                        </div>
+                    <div id="emptyState" class="text-center py-5 text-muted">
+                        <i class="fa fa-box-open fa-3x mb-3 opacity-50"></i>
+                        <p>No items added yet. Add items from inventory or manually.</p>
                     </div>
-
-                    <hr class="my-4">
-                    <div class="text-end">
-                        <button type="submit" class="btn btn-success px-5 py-2"><i class="fa fa-check me-1"></i> Submit Requisition</button>
-                    </div>
-
                 </div>
+            </div>
+
+            <!-- Cost & Remarks Card -->
+            <div class="card mb-4">
+                <div class="card-body">
+                    <div class="row g-4">
+                        <div class="col-md-6">
+                            <label class="form-label">Remarks / Notes</label>
+                            <textarea name="remarks" class="form-control" rows="4" placeholder="Any additional notes..."></textarea>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="bg-light p-4 rounded">
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label">Charge Bear By</label>
+                                        <select name="charge_bear_by" class="form-select">
+                                            <option value="Company">Company</option>
+                                            <option value="Vendor">Vendor</option>
+                                            <option value="Employee">Employee</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">Service Charge</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text">$</span>
+                                            <input type="number" name="charge_amount" id="chargeAmount" class="form-control text-end" value="0" step="0.01">
+                                        </div>
+                                    </div>
+                                </div>
+                                <hr>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <h5 class="mb-0">Grand Total</h5>
+                                    <div class="total-display">$<span id="grandTotalDisplay">0.00</span></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Submit Actions -->
+            <div class="d-flex justify-content-end gap-2 mb-5">
+                <a href="{{ route('maintenance.index') }}" class="btn btn-light border px-4">Cancel</a>
+                <button type="submit" class="btn btn-primary px-4" id="submitBtn"><i class="fa fa-save me-1"></i> Create Requisition</button>
             </div>
         </form>
     </div>
 </section>
 
-<!-- SweetAlert2 -->
- 	<!-- Core JS Files - Use only one version of jQuery -->
-<script src="{{ asset('public/admin_resource/assets/vendor/jquery/jquery.js') }}"></script>
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<!-- Inventory Modal -->
+<div class="modal" id="inventoryModal" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Select from Inventory</h5>
+                <button type="button" class="btn-close pull-right btn-danger" data-dismiss="modal">Close</button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <input type="text" id="inventorySearch" class="form-control" placeholder="Search items...">
+                </div>
+                <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
+                    <table class="table table-hover table-bordered">
+                        <thead class="table-light sticky-top">
+                            <tr>
+                                <th>Item Name</th>
+                                <th>Stock</th>
+                                <th>Price</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="inventoryTableBody">
+                            @foreach($inventoryItems as $item)
+                            <tr class="inventory-row" data-stock="{{ $item->stock_qty }}">
+                                <td class="item-name">{{ $item->name }}</td>
+                                <td>{{ $item->stock_qty }}</td>
+                                <td>{{ number_format($item->unit_price, 2) }}</td>
+                                <td>
+                                    <button type="button" class="btn btn-sm btn-primary select-inventory-item"
+                                        data-id="{{ $item->id }}"
+                                        data-name="{{ $item->name }}"
+                                        data-price="{{ $item->unit_price }}"
+                                        data-category="{{ $item->category_id }}">
+                                        Select
+                                    </button>
+                                </td>
+                            </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@push('scripts')
+<script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-$(document).ready(function () {
+$(document).ready(function(){
+    $('.select2').select2({ width: '100%' });
+    let rowIndex = 0;
 
-    // Initialize Select2 for static fields
-    $('.select2').select2();
+    // Category options
+    let categoryOptions = '<option value="">Select Category</option>';
+    @foreach($categories as $cat)
+        categoryOptions += '<option value="{{ $cat->id }}">{{ $cat->category_name }}</option>';
+    @endforeach
 
-    let row = 1;
+    // Prevent duplicate inventory items
+    let selectedItemIds = [];
 
-    // Add new row
-    $("#addRow").on("click", function () {
-        let newRow = `
-            <tr>
-                <td>
-                    <select name="items[${row}][category_id]" class="form-select categorySelect select2Dynamic">
-                        <option value="">Select</option>
-                        @foreach($categories as $cat)
-                            <option value="{{ $cat->id }}">{{ $cat->category_name }}</option>
-                        @endforeach
-                    </select>
-                </td>
-                <td><input type="text" name="items[${row}][item_name]" class="form-control itemName"></td>
-                <td><input type="number" name="items[${row}][qty]" class="form-control qty text-center" value="1"></td>
-                <td><input type="number" name="items[${row}][unit_price]" class="form-control unitPrice text-end" value="0"></td>
-                <td><input type="number" name="items[${row}][total_price]" class="form-control totalPrice text-end" readonly></td>
-                <td><button type="button" class="btn btn-danger btn-sm removeRow"><i class="fa fa-minus"></i></button></td>
-            </tr>
-        `;
+    function addRow(name='', price=0, categoryId='', stock=0, inventoryId=''){
+        if(inventoryId && selectedItemIds.includes(inventoryId)){
+            Swal.fire('Error','Item already added!','error');
+            return;
+        }
 
-        $("#itemsTable tbody").append(newRow);
+        let html = `<tr class="item-row" data-stock="${stock}" data-inventory="${inventoryId}">
+            <td><select name="items[${rowIndex}][category_id]" class="form-select">${categoryOptions}</select></td>
+            <td><input type="text" name="items[${rowIndex}][item_name]" class="form-control" value="${name}" required></td>
+            <td><input type="number" name="items[${rowIndex}][qty]" class="form-control qty" value="1" min="1" required></td>
+            <td><input type="number" name="items[${rowIndex}][unit_price]" class="form-control price" value="${price}" step="0.01" required></td>
+            <td><input type="text" class="form-control total text-end" readonly value="${price}"></td>
+            <td class="text-center"><button type="button" class="btn btn-danger btn-sm removeRow"><i class="fa fa-times"></i></button></td>
+        </tr>`;
 
-        // Re-init Select2 for dynamically added dropdowns
-        $(".select2Dynamic").select2({
-            width: "100%"
-        });
+        $('#itemsTable tbody').append(html);
+        $('#emptyState').hide();
+        if(categoryId){
+            $(`select[name="items[${rowIndex}][category_id]"]`).val(categoryId);
+        }
+        if(inventoryId) selectedItemIds.push(inventoryId);
+        rowIndex++;
+        calculate();
+    }
 
-        row++;
+    // Manual add
+    $('#addManualItem').click(()=>addRow());
+
+    // Inventory select
+    $('.select-inventory-item').click(function(){
+        let btn = $(this);
+        let row = btn.closest('tr');
+        let name = btn.data('name');
+        let price = parseFloat(btn.data('price'));
+        let category = btn.data('category');
+        let stock = parseInt(row.data('stock'));
+        let id = btn.data('id');
+        addRow(name, price, category, stock, id);
+        $('#inventoryModal').modal('hide');
     });
 
     // Remove row
-    $(document).on("click", ".removeRow", function () {
-        $(this).closest("tr").remove();
-        calculateTotals();
+    $(document).on('click','.removeRow',function(){
+        let row = $(this).closest('tr');
+        let inventoryId = row.data('inventory');
+        if(inventoryId){
+            selectedItemIds = selectedItemIds.filter(i=>i!=inventoryId);
+        }
+        row.remove();
+        if($('#itemsTable tbody tr').length===0) $('#emptyState').show();
+        calculate();
     });
 
-    // Value change triggers calculation
-    $(document).on("input", ".qty, .unitPrice, #chargeAmount", function () {
-        calculateTotals();
-    });
+    // Quantity / price input change
+    $(document).on('input','.qty, .price, #chargeAmount', calculate);
 
-    function calculateTotals() {
-        let totalParts = 0;
+    function calculate(){
+        let partsTotal = 0;
+        $('.item-row').each(function(){
+            let qty = parseFloat($(this).find('.qty').val())||0;
+            let price = parseFloat($(this).find('.price').val())||0;
+            let stock = parseInt($(this).data('stock'))||0;
 
-        $("#itemsTable tbody tr").each(function () {
-            let qty = $(this).find(".qty").val() || 0;
-            let price = $(this).find(".unitPrice").val() || 0;
-            let total = qty * price;
+            if(qty>stock && stock>0){
+                Swal.fire('Error','Quantity exceeds available stock!','error');
+                $(this).find('.qty').val(stock);
+                qty=stock;
+            }
 
-            $(this).find(".totalPrice").val(total.toFixed(2));
-            totalParts += total;
+            let total = qty*price;
+            $(this).find('.total').val(total.toFixed(2));
+            partsTotal += total;
         });
-
-        $("#totalPartsCost").val(totalParts.toFixed(2));
-
-        let chargeAmount = parseFloat($("#chargeAmount").val()) || 0;
-        $("#grandTotal").val((totalParts + chargeAmount).toFixed(2));
+        let charge = parseFloat($('#chargeAmount').val())||0;
+        let grandTotal = partsTotal + charge;
+        $('#partsTotalDisplay').text(partsTotal.toFixed(2));
+        $('#grandTotalDisplay').text(grandTotal.toFixed(2));
     }
 
-    // AJAX Submit
-    $("#requisitionForm").on("submit", function (e) {
-        e.preventDefault();
-
-        let form = $(this);
-        let formData = form.serialize();
-
-        // Validate required fields
-        let requiredFields = [
-            "#requisitionType", "#priority", "#vehicleSelect",
-            "#maintenanceType", "#maintenanceDate", "#serviceTitle"
-        ];
-
-        let missing = false;
-        requiredFields.forEach(function (f) {
-            if ($(f).val() === "") missing = true;
+    // Inventory search
+    $('#inventorySearch').on('keyup',function(){
+        var value = $(this).val().toLowerCase();
+        $("#inventoryTableBody tr").filter(function(){
+            $(this).toggle($(this).text().toLowerCase().indexOf(value)>-1)
         });
+    });
 
-        if (missing) {
-            Swal.fire("Required Fields Missing", "Please fill all fields!", "warning");
-            return;
-        }
+    // Form submit with inline validation
+    $('#requisitionForm').on('submit', function(e){
+        e.preventDefault();
+        let form = $(this);
+        let valid = true;
+
+        form.find('.is-invalid').removeClass('is-invalid');
+        form.find('.invalid-feedback').remove();
+
+        // Validate main fields
+        form.find('[required]').each(function(){
+            let el = $(this);
+            if(!el.val()){
+                valid = false;
+                el.addClass('is-invalid');
+                let msg = 'This field is required.';
+                if(el.hasClass('select2-hidden-accessible')){
+                    el.next('.select2-container').after('<div class="invalid-feedback d-block">'+msg+'</div>');
+                } else el.after('<div class="invalid-feedback d-block">'+msg+'</div>');
+            }
+        });
 
         // Validate items
-        let invalidRow = false;
-        $("#itemsTable tbody tr").each(function () {
-            let category = $(this).find(".categorySelect").val();
-            let itemName = $(this).find(".itemName").val();
-            let qty = $(this).find(".qty").val();
-            let unitPrice = $(this).find(".unitPrice").val();
-
-            if (!category || !itemName || !qty || !unitPrice) {
-                invalidRow = true;
-                return false;
-            }
-        });
-
-        if (invalidRow) {
-            Swal.fire("Invalid Item", "Please complete all item rows!", "warning");
-            return;
+        if($('#itemsTable tbody tr').length===0){
+            Swal.fire('Error','Please add at least one item.','error');
+            valid=false;
         }
 
-        // AJAX request
-        $.ajax({
-            url: form.attr("action"),
-            method: "POST",
-            data: formData,
-            success: function (res) {
-                Swal.fire("Success", res.message, "success");
+        if(!valid) return;
 
-                // Reload or redirect
-                setTimeout(() => {
-                    window.location.href = "{{ route('maintenance.index') }}";
-                }, 1500);
+        let btn = $('#submitBtn');
+        btn.prop('disabled',true).html('<i class="fa fa-spinner fa-spin"></i> Saving...');
+
+        $.ajax({
+            url: form.attr('action'),
+            method:'POST',
+            data: form.serialize(),
+            success:function(res){
+                if(res.status==='success'){
+                    Swal.fire({icon:'success',title:'Success',text:res.message,timer:1500,showConfirmButton:false})
+                        .then(()=>window.location.href=res.redirect_url);
+                } else {
+                    Swal.fire('Error',res.message||'Something went wrong','error');
+                    btn.prop('disabled',false).html('<i class="fa fa-save me-1"></i> Create Requisition');
+                }
             },
-            error: function (xhr) {
-                Swal.fire("Error", "Something went wrong!", "error");
+            error:function(xhr){
+                btn.prop('disabled',false).html('<i class="fa fa-save me-1"></i> Create Requisition');
+                if(xhr.status===422){
+                    let errors = xhr.responseJSON.errors;
+                    $.each(errors,function(key,value){
+                        let name = key.includes('.') ? key.replace(/\./g,'[')+']' : key;
+                        let el = form.find(`[name="${name}"]`);
+                        el.addClass('is-invalid');
+                        let msg=value[0];
+                        if(el.hasClass('select2-hidden-accessible')){
+                            el.next('.select2-container').after('<div class="invalid-feedback d-block">'+msg+'</div>');
+                        } else el.after('<div class="invalid-feedback d-block">'+msg+'</div>');
+                    });
+                } else {
+                    Swal.fire('Error','An error occurred.','error');
+                }
             }
         });
     });
-
 });
 </script>
-
-
-
-<!-- <script>
-let row = 1;
-
-// Add new row
-document.getElementById("addRow").addEventListener("click", function () {
-    let table = document.querySelector("#itemsTable tbody");
-    let newRow = `
-        <tr>
-            <td>
-                <select name="items[${row}][category_id]" class="form-select categorySelect">
-                    <option value="">Select</option>
-                    @foreach($categories as $cat)
-                        <option value="{{ $cat->id }}">{{ $cat->category_name }}</option>
-                    @endforeach
-                </select>
-            </td>
-            <td><input type="text" name="items[${row}][item_name]" class="form-control itemName"></td>
-            <td><input type="number" name="items[${row}][qty]" class="form-control qty text-center" value="1" min="1"></td>
-            <td><input type="number" name="items[${row}][unit_price]" class="form-control unitPrice text-end" value="0" step="0.01"></td>
-            <td><input type="number" name="items[${row}][total_price]" class="form-control totalPrice text-end" readonly></td>
-            <td class="text-center"><button type="button" class="btn btn-danger btn-sm removeRow"><i class="fa fa-minus"></i></button></td>
-        </tr>
-    `;
-    table.insertAdjacentHTML('beforeend', newRow);
-    row++;
-});
-
-// Remove row
-document.addEventListener("click", function (e) {
-    if (e.target.closest(".removeRow")) {
-        e.target.closest("tr").remove();
-        calculateTotals();
-    }
-});
-
-// Auto calculation
-document.addEventListener("input", function (e) {
-    if (e.target.classList.contains("qty") ||
-        e.target.classList.contains("unitPrice") ||
-        e.target.id === "chargeAmount") {
-        calculateTotals();
-    }
-});
-
-function calculateTotals() {
-    let totalParts = 0;
-    document.querySelectorAll("#itemsTable tbody tr").forEach((tr) => {
-        let qty = tr.querySelector(".qty").value || 0;
-        let price = tr.querySelector(".unitPrice").value || 0;
-        let total = qty * price;
-        tr.querySelector(".totalPrice").value = total.toFixed(2);
-        totalParts += total;
-    });
-    document.getElementById("totalPartsCost").value = totalParts.toFixed(2);
-    let chargeAmount = parseFloat(document.getElementById("chargeAmount").value || 0);
-    document.getElementById("grandTotal").value = (totalParts + chargeAmount).toFixed(2);
-}
-
-// Form validation on submit
-document.getElementById("requisitionForm").addEventListener("submit", function(e) {
-    e.preventDefault(); // Prevent default submit
-
-    // Required fields
-    let requisitionType = document.getElementById("requisitionType").value;
-    let priority = document.getElementById("priority").value;
-    let vehicle = document.getElementById("vehicleSelect").value;
-    let maintenanceType = document.getElementById("maintenanceType").value;
-    let maintenanceDate = document.getElementById("maintenanceDate").value;
-    let serviceTitle = document.getElementById("serviceTitle").value;
-
-    if (!requisitionType || !priority || !vehicle || !maintenanceType || !maintenanceDate || !serviceTitle) {
-        Swal.fire({
-            icon: 'warning',
-            title: 'Missing Required Fields',
-            text: 'Please fill all required fields before submitting!',
-        });
-        return;
-    }
-
-    // At least one item
-    let items = document.querySelectorAll("#itemsTable tbody tr");
-    if (items.length === 0) {
-        Swal.fire({
-            icon: 'warning',
-            title: 'No Items Added',
-            text: 'Please add at least one maintenance item!',
-        });
-        return;
-    }
-
-    // Validate each item row
-    for (let tr of items) {
-        let category = tr.querySelector(".categorySelect").value;
-        let itemName = tr.querySelector(".itemName").value;
-        let qty = tr.querySelector(".qty").value;
-        let unitPrice = tr.querySelector(".unitPrice").value;
-
-        // alert(itemName);
-
-        if (!category || !itemName || !qty || !unitPrice) {
-            Swal.fire({
-                icon: 'warning',
-                title: 'Invalid Item Row',
-                text: 'Please fill all fields in each item row!',
-            });
-            return;
-        }
-    }
-
-    // All validations passed, submit form
-    this.submit();
-});
-</script> -->
+@endpush
 @endsection

@@ -14,11 +14,13 @@ use App\Models\MaintenanceRequisitionItem;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Yajra\DataTables\DataTables;
+use App\Models\InventoryItem; // 👈 ADD THIS MODEL
 class MaintenanceRequisitionController extends Controller
 {
     
     public function index(Request $request)
     {
+        
     if ($request->ajax()) {
 
         $query = MaintenanceRequisition::with(['vehicle','employee'])
@@ -90,6 +92,56 @@ class MaintenanceRequisitionController extends Controller
     return view('admin.dashboard.maintenance.index');
     }
 
+    public function history(Request $request)
+    {
+        if ($request->ajax()) {
+            // Fetch requisitions that are processed (e.g., Approved, Rejected, Completed)
+            // Adjust the status array based on your workflow's "final" states
+            $query = MaintenanceRequisition::with(['vehicle', 'employee'])
+                ->where('status', '!=', 'Pending') 
+                ->select('maintenance_requisitions.*');
+
+            if ($request->vehicle) {
+                $query->whereHas('vehicle', function ($q) use ($request) {
+                    $q->where('vehicle_no', 'like', "%{$request->vehicle}%");
+                });
+            }
+
+            if ($request->employee) {
+                $query->whereHas('employee', function ($q) use ($request) {
+                    $q->where('name', 'like', "%{$request->employee}%");
+                });
+            }
+
+            return DataTables::of($query)
+                ->addIndexColumn()
+                ->addColumn('vehicle', function($row){
+                    return $row->vehicle->vehicle_name ?? '-';
+                })
+                ->addColumn('employee', function($row){
+                    return $row->employee->name ?? '-';
+                })
+                ->addColumn('grand_total', function($row){
+                    return '$' . number_format($row->total_cost ?? 0, 2);
+                })
+                ->addColumn('status', function($row){
+                    $color = match($row->status) {
+                        'Approved' => 'green',
+                        'Rejected' => 'red',
+                        'Completed' => 'blue',
+                        default     => 'gray'
+                    };
+                    return '<span style="color:'.$color.';font-weight:bold;">'.$row->status.'</span>';
+                })
+                ->addColumn('actions', function($row){
+                    return '<a href="'.route("maintenance.show",$row->id).'" class="btn btn-info btn-sm"><i class="fa fa-eye"></i> View</a>';
+                })
+                ->rawColumns(['status','actions'])
+                ->make(true);
+        }
+        return view('admin.dashboard.maintenance.history');
+    }
+
     public function create()
     {
                 $vehicles = Vehicle::all();
@@ -99,7 +151,16 @@ class MaintenanceRequisitionController extends Controller
         $vendors = MaintenanceVendor::get();
         // dd($vendors);
         $schedules = MaintenanceSchedule::all();
-    return view('admin.dashboard.maintenance.create', compact('vehicles','types','vendors','schedules', 'employees','categories'));
+         $inventoryItems = InventoryItem::where('stock_qty', '>', 0)->get(); // 👈 ADD THIS
+    return view('admin.dashboard.maintenance.create', compact(
+        'vehicles',
+        'types',
+        'vendors',
+        'schedules',
+        'employees',
+        'categories',
+        'inventoryItems' // 👈 ADD THIS
+    ));
     }
 
     private function generateRequisitionNo()
@@ -111,6 +172,22 @@ class MaintenanceRequisitionController extends Controller
 
     public function store(Request $request)
     {
+        $request->validate([
+            'requisition_type' => 'required|string',
+            'priority' => 'required|string',
+            'employee_id' => 'required|exists:employees,id',
+            'vehicle_id' => 'required|exists:vehicles,id',
+            'maintenance_type_id' => 'required|exists:maintenance_types,id',
+            'maintenance_date' => 'required|date',
+            'vendor_id' => 'nullable|exists:maintenance_vendors,id',
+            'service_title' => 'required|string|max:255',
+            'items' => 'required|array|min:1',
+            'items.*.category_id' => 'required|exists:maintenance_categories,id',
+            'items.*.item_name' => 'required|string|max:255',
+            'items.*.qty' => 'required|numeric|min:1',
+            'items.*.unit_price' => 'required|numeric|min:0',
+        ]);
+
         DB::transaction(function () use ($request) {
 
             // Parent record
@@ -121,6 +198,7 @@ class MaintenanceRequisitionController extends Controller
                 'employee_id' => $request->employee_id,
                 'vehicle_id' => $request->vehicle_id,
                 'maintenance_type_id' => $request->maintenance_type_id,
+                'vendor_id' => $request->vendor_id,
                 'maintenance_date' => $request->maintenance_date,
                 'service_title' => $request->service_title,
                 'charge_bear_by' => $request->charge_bear_by,
@@ -155,7 +233,11 @@ class MaintenanceRequisitionController extends Controller
             ]);
         });
 
-        return redirect()->route('requisitions.index')->with('success', 'Requisition Created Successfully!');
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Requisition Created Successfully!',
+            'redirect_url' => route('maintenance.index')
+        ]);
     }
     // edit function
     public function edit($id)
@@ -176,6 +258,20 @@ class MaintenanceRequisitionController extends Controller
         {
             $requisition = MaintenanceRequisition::with('items')->findOrFail($id);
 
+            $request->validate([
+                'requisition_type' => 'required|string',
+                'priority' => 'required|string',
+                'employee_id' => 'required|exists:employees,id',
+                'vehicle_id' => 'required|exists:vehicles,id',
+                'maintenance_type_id' => 'required|exists:maintenance_types,id',
+                'vendor_id' => 'nullable|exists:maintenance_vendors,id',
+                'maintenance_date' => 'required|date',
+                'service_title' => 'required|string|max:255',
+                'items' => 'sometimes|array',
+                'items.*.category_id' => 'required|with:items|exists:maintenance_categories,id',
+                'items.*.item_name' => 'required|with:items|string|max:255',
+            ]);
+
             DB::transaction(function () use ($request, $requisition) {
                 // Update main requisition
                 $requisition->update([
@@ -184,6 +280,7 @@ class MaintenanceRequisitionController extends Controller
                     'employee_id' => $request->employee_id,
                     'vehicle_id' => $request->vehicle_id,
                     'maintenance_type_id' => $request->maintenance_type_id,
+                    'vendor_id' => $request->vendor_id,
                     'maintenance_date' => $request->maintenance_date,
                     'service_title' => $request->service_title,
                     'charge_bear_by' => $request->charge_bear_by,
@@ -196,21 +293,23 @@ class MaintenanceRequisitionController extends Controller
                 // Delete old items
                 $requisition->items()->delete();
 
-                // Insert updated items
-                foreach ($request->items as $row) {
-                    $total = $row['qty'] * $row['unit_price'];
+                if ($request->has('items')) {
+                    // Insert updated items
+                    foreach ($request->items as $row) {
+                        $total = ($row['qty'] ?? 0) * ($row['unit_price'] ?? 0);
 
-                    MaintenanceRequisitionItem::create([
-                        'requisition_id' => $requisition->id,
-                        'category_id' => $row['category_id'],
-                        'item_name' => $row['item_name'],
-                        'qty' => $row['qty'],
-                        'unit_price' => $row['unit_price'],
-                        'total_price' => $total,
-                        'created_by' => Auth::id(),
-                    ]);
+                        MaintenanceRequisitionItem::create([
+                            'requisition_id' => $requisition->id,
+                            'category_id' => $row['category_id'],
+                            'item_name' => $row['item_name'],
+                            'qty' => $row['qty'] ?? 1,
+                            'unit_price' => $row['unit_price'] ?? 0,
+                            'total_price' => $total,
+                            'created_by' => Auth::id(),
+                        ]);
 
-                    $total_parts_cost += $total;
+                        $total_parts_cost += $total;
+                    }
                 }
 
                 // Update totals
@@ -220,7 +319,11 @@ class MaintenanceRequisitionController extends Controller
                 ]);
             });
 
-            return redirect()->route('requisitions.index')->with('success', 'Requisition updated successfully!');
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Requisition updated successfully!',
+                'redirect_url' => route('maintenance.index')
+            ]);
         }
 
 

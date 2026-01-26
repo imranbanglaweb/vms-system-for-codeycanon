@@ -8,9 +8,10 @@
         <h4 class="fw-bold text-primary mb-0">
             <i class="fa fa-car"></i> {{ isset($vehicle) ? 'Edit Vehicle' : 'Add New Vehicle' }}
         </h4>
-        <a href="{{ route('vehicles.index') }}" class="btn btn-outline-primary btn-sm">
-            <i class="fa fa-arrow-left"></i> Back
-        </a>
+       
+         <div class="pull-right">
+            <a class="btn btn-primary btn-lg  pull-right" href="{{ route('vehicles.index') }}"> Back</a>
+        </div>
     </div>
 
     <div class="card shadow-sm border-0 rounded-3 mx-auto">
