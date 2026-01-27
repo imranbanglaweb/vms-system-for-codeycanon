@@ -9,13 +9,22 @@ class VehicleTypeSeeder extends Seeder
 {
     public function run()
     {
-        $types = ['Car', 'Microbus', 'Bus', 'Pickup'];
+        $types = [
+            ['name' => 'Car', 'status' => 1],
+            ['name' => 'Microbus', 'status' => 1],
+            ['name' => 'Bus', 'status' => 1],
+            ['name' => 'Pickup', 'status' => 1],
+            ['name' => 'Truck', 'status' => 1],
+            ['name' => 'Van', 'status' => 1],
+            ['name' => 'SUV', 'status' => 1],
+            ['name' => 'Motorcycle', 'status' => 1],
+        ];
 
         foreach ($types as $type) {
-            VehicleType::create([
-                'name' => $type,
-                'status' => 1
-            ]);
+            VehicleType::updateOrCreate(
+                ['name' => $type['name']],
+                ['status' => $type['status']]
+            );
         }
     }
 }

@@ -7,6 +7,7 @@ use App\Models\Department;
 use App\Models\Unit;
 use App\Models\Employee;
 use App\Models\Licnese_type;
+use App\Models\Vehicle;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\View;
@@ -307,4 +308,22 @@ class DriverController extends Controller
             'nid' => $employee->nid ?? '',
         ]);
     }
+
+    public function getByVehicle($vehicleId)
+    {
+        // Get the vehicle and find its associated driver via driver_id
+        $vehicle = Vehicle::find($vehicleId);
+        
+        if ($vehicle && $vehicle->driver_id) {
+            $drivers = Driver::where('id', $vehicle->driver_id)->get();
+        } else {
+            $drivers = collect();
+        }
+
+        return response()->json([
+            'status' => 'success',
+            'drivers' => $drivers
+        ]);
+    }
+
 }

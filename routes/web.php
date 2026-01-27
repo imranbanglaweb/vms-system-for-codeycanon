@@ -180,8 +180,7 @@ Route::middleware(['auth'])->group(function () {
 // ============================================================================
 
 Route::middleware(['prevent-back-history'])->group(function () {
-    // Requisition CRUD & DataTable
-    Route::resource('requisitions', RequisitionController::class);
+    
     
     // AJAX endpoints
     Route::get('/requisitions-search', [RequisitionController::class, 'index'])->name('requisitions.search');
@@ -192,6 +191,18 @@ Route::middleware(['prevent-back-history'])->group(function () {
     Route::get('/requisitions/{id}/download', [RequisitionController::class, 'downloadPDF'])->name('requisitions.download');
     Route::get('/requisitions/export-excel', [RequisitionController::class, 'exportExcel'])->name('requisitions.export.excel');
     Route::get('/requisitions/export-pdf', [RequisitionController::class, 'exportPDF'])->name('requisitions.export.pdf');
+    Route::get('/get-drivers-by-vehicle/{vehicleId}', [RequisitionController::class, 'getDriversByVehicle']);
+Route::get('/requisitions/vehicles/by-capacity', [RequisitionController::class, 'getVehiclesByCapacity'])->name('vehicles.by.capacity');
+
+
+Route::get('/employee/details/{id}', [EmployeeController::class, 'details'])->name('employee.details');
+
+Route::get('/vehicles/by-capacity', [VehicleController::class, 'byCapacity'])->name('vehicles.by.capacity');
+
+Route::get('/drivers/by-vehicle/{vehicle}', [DriverController::class, 'getByVehicle'])
+    ->name('drivers.by.vehicle');
+   
+Route::resource('requisitions', RequisitionController::class);
     
     // Status & Workflow
     Route::post('/requisitions/update-status/{id}', [RequisitionController::class, 'updateStatus'])->name('requisitions.updateStatus');

@@ -215,4 +215,17 @@ class VehicleController extends Controller
         $vehicle->delete();
         return redirect()->route('vehicles.index')->with('success', 'Vehicle deleted successfully!');
     }
+
+    public function byCapacity(Request $request)
+{
+    $count = $request->passenger_count;
+
+    $vehicles = Vehicle::where('capacity', '>=', $count)->get();
+
+    return response()->json([
+        'status' => 'success',
+        'vehicles' => $vehicles
+    ]);
+}
+
 }

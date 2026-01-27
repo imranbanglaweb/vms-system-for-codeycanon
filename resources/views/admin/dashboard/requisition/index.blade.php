@@ -1,17 +1,17 @@
 @extends('admin.dashboard.master')
 
 @section('main_content')
-<section role="main" class="content-body">
+<section role="main" class="content-body" style="background:#fff">
 
     <div class="container-fluid">
 
         {{-- Header --}}
         <div class="">
             <h2 class="fw-bold text-primary">
-                <i class="fa fa-clipboard-list me-2"></i>Requisition Management
+                <i class="fa fa-clipboard-list"></i>Requisition Management
             </h2>
-            <a href="{{ route('requisitions.create') }}" class="btn btn-primary btn-lg">
-                <i class="fa fa-plus-circle me-2"></i> Create
+            <a href="{{ route('requisitions.create') }}" class="btn btn-primary btn-lg pull-right">
+                <i class="fa fa-plus-circle me-2"></i> Add Requisition
             </a>
         </div>
 
@@ -284,7 +284,7 @@
 
     // Export data
     function exportData(format) {
-        const formData = $('#searchForm').serialize() + '&export_format=' + format;
+        const formData = $('#searchForm').serialize();
         
         Swal.fire({
             title: 'Exporting Data',
@@ -294,7 +294,13 @@
             allowOutsideClick: false
         });
 
-        window.location.href = "{{ route('requisitions.export') }}?" + formData;
+        let url = "";
+        if (format === 'pdf') {
+            url = "{{ route('requisitions.export.pdf') }}";
+        } else {
+            url = "{{ route('requisitions.export.excel') }}";
+        }
+        window.location.href = url + "?" + formData;
         
         setTimeout(() => {
             Swal.close();

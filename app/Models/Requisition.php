@@ -50,7 +50,7 @@ public const STATUS_COMPLETED = 'Completed';
     public function creator(){ return $this->belongsTo(Employee::class,'requested_by'); }
     public function passengers(){ return $this->hasMany(RequisitionPassenger::class); }
     public function approvals(){ return $this->hasMany(RequisitionApproval::class); }
-    public function vehicle(){ return $this->belongsTo(Vehicle::class); }
+ 
     public function driver(){ return $this->belongsTo(Driver::class); }
     public function logs(){ return $this->hasMany(RequisitionLogHistory::class); }
     public function notifications(){ return $this->hasMany(Notification::class); }
@@ -108,6 +108,7 @@ public function assignedDriver() { return $this->belongsTo(\App\Models\Driver::c
 public function vehicleType() {
     return $this->belongsTo(VehicleType::class, 'vehicle_type');
 }
+   public function vehicle(){ return $this->belongsTo(Vehicle::class); }
     
 
     

@@ -48,7 +48,7 @@
     }
 </style>
 
-<section role="main" class="content-body">
+<section role="main" class="content-body" style="background:#fff">
 
 <div class="container-fluid p-4">
     <div class="card shadow-sm border-0">
@@ -113,29 +113,26 @@
                 <!-- ============================ -->
                 <div class="row mb-4">
 
-                    <div class="col-md-6">
-                        <label class="form-label"><i class="fa fa-car text-primary me-1"></i> Vehicle Type</label>
+                    <div class="col-md-4">
+                        <label class="form-label"><i class="fa fa-car text-primary me-1"></i> Vehicle</label>
                         <select id="vehicle_type" name="vehicle_type" class="form-select form-select-lg select2">
                             <option value="">Select vehicle</option>
                             @foreach($vehicles as $id => $name)
-                                <option value="{{ $name->id }}">{{ $name->name }}</option>
+                                <option value="{{ $name->id }}">{{ $name->vehicle_name }}</option>
                             @endforeach
                         </select>
                         <small class="text-danger error-text vehicle_id_error"></small>
                     </div>
 
-                    <!-- <div class="col-md-4">
-                        <label class="form-label"><i class="fa fa-user text-primary me-1"></i> Driver</label>
-                        <select name="driver_id" class="form-select form-select-lg select2">
-                            <option value="">Select driver</option>
-                            @foreach($drivers as $id => $name)
-                                <option value="{{ $id }}">{{ $name->driver_name }}</option>
-                            @endforeach
-                        </select>
-                        <small class="text-danger error-text driver_id_error"></small>
-                    </div> -->
+                  <div class="col-md-4">
+    <label class="form-label"><i class="fa fa-id-badge text-primary me-1"></i> Driver</label>
+    <select id="driver_id" name="driver_id" class="form-select form-select-lg">
+        <option value="">Select Driver</option>
+    </select>
+</div>
 
-                    <div class="col-md-6">
+
+                    <div class="col-md-4">
                         <label class="form-label">
                             <i class="fa fa-calendar text-primary me-1"></i> Requisition Date
                         </label>
@@ -277,85 +274,169 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
 <script>
-    
 $(function () {
-// Flatpickr (Date + Time)
-$('.datetimepicker').flatpickr({
-    enableTime: true,
-    dateFormat: "Y-m-d H:i",
-    time_24hr: true,
-    minuteIncrement: 5
-});
-    // ================= AUTO-FILL MAIN EMPLOYEE =================
-    $('#employee_id').on('change', function() {
-        let empId = $(this).val();
-        if (!empId) {
-            $('#department_name, #unit_name').val('');
-            return;
-        }
-        // $.get('/get-employee-details/' + empId, function(data) {
-        //     $('#department_name').val(data.department);
-        //     $('#unit_name').val(data.unit);
-        // });
 
-        $.get("{{ route('employee.details', ':id') }}".replace(':id', empId), function(data) {
-            $('#department_name').val(data.department);
-            $('#unit_name').val(data.unit);
-            $('#unit_id').val(data.unit_id);
-            $('#department_id').val(data.department_id);
+    /* ================= AJAX FORM SUBMIT ================= */
+    $('#requisitionForm').on('submit', function(e) {
+        e.preventDefault();
+
+        let form = $(this);
+        let btn  = form.find('button[type="submit"]');
+
+        $('.error-text').text('');
+        btn.prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i> Submitting...');
+
+        $.ajax({
+            url: form.attr('action'),
+            type: "POST",
+            data: form.serialize(),
+            success: function(response) {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Success',
+                    text: response.message
+                }).then(() => {
+                    window.location.href = "{{ route('requisitions.index') }}";
+                });
+            },
+            error: function(xhr) {
+                btn.prop('disabled', false).html('<i class="fa fa-paper-plane me-2"></i> Submit Requisition');
+
+                if (xhr.status === 422) {
+                    let errors = xhr.responseJSON.errors;
+
+                    $.each(errors, function(field, messages) {
+                        let errorClass = field.replace(/\./g, '_') + '_error';
+                        $('.' + errorClass).text(messages[0]);
+                    });
+                } else {
+                    Swal.fire('Error', 'Something went wrong', 'error');
+                }
+            }
         });
-
     });
 
-    
+    /* ================= VEHICLE AUTO SUGGEST ================= */
+    $('input[name="number_of_passenger"]').on('keyup change', function () {
+        let count = $(this).val();
 
-    // ================= AUTO-FILL PASSENGERS =================
+        if (!count || count < 1) return;
+
+        $.get("{{ route('vehicles.by.capacity') }}", { passenger_count: count }, function (res) {
+            let vehicleSelect = $('#vehicle_type');
+            vehicleSelect.empty().append('<option value="">Select vehicle</option>');
+
+            res.vehicles.forEach(v => {
+                vehicleSelect.append(`<option value="${v.id}">${v.name} (Capacity: ${v.capacity})</option>`);
+            });
+
+            Swal.fire('Suggested', 'Vehicles updated based on passenger count', 'info');
+        });
+    });
+
+    /* ================= DRIVER BY VEHICLE ================= */
+    $('#vehicle_type').on('change', function () {
+        let vehicleId = $(this).val();
+        let driverSelect = $('#driver_id');
+
+        driverSelect.html('<option value="">Loading...</option>');
+
+        if (!vehicleId) {
+            driverSelect.html('<option value="">Select Driver</option>');
+            return;
+        }
+$.get("{{ route('drivers.by.vehicle', ':id') }}".replace(':id', vehicleId), function (res) {
+            driverSelect.empty().append('<option value="">Select Driver</option>');
+
+            if (res.drivers.length === 0) {
+                driverSelect.append('<option value="">No driver assigned</option>');
+                return;
+            }
+
+            res.drivers.forEach(d => {
+                driverSelect.append(`<option value="${d.id}">${d.driver_name}</option>`);
+            });
+        });
+    });
+
+    /* ================= EMPLOYEE DETAILS (Department & Unit) ================= */
+    $('#employee_id').on('change', function () {
+        let employeeId = $(this).val();
+
+        // Clear fields if no employee selected
+        if (!employeeId) {
+            $('#department_name').val('');
+            $('#unit_name').val('');
+            $('#department_id').val('');
+            $('#unit_id').val('');
+            return;
+        }
+
+        $.get("{{ url('/get-employee-details') }}/" + employeeId, function (res) {
+            $('#department_name').val(res.department || '');
+            $('#unit_name').val(res.unit || '');
+            $('#department_id').val(res.department_id || '');
+            $('#unit_id').val(res.unit_id || '');
+        }).fail(function () {
+            $('#department_name').val('');
+            $('#unit_name').val('');
+            $('#department_id').val('');
+            $('#unit_id').val('');
+        });
+    });
+
+    /* ================= PASSENGER EMPLOYEE DETAILS ================= */
     $(document).on('change', '.passenger-employee', function () {
-        let id = $(this).val();
         let row = $(this).closest('tr');
+        let employeeId = $(this).val();
 
-        if (!id) {
+        if (!employeeId) {
             row.find('.passenger-department').val('');
             row.find('.passenger-unit').val('');
             return;
         }
-         $.get("{{ route('employee.details', ':id') }}".replace(':id', id), function (res) {
-            row.find('.passenger-department').val(res.department);
-            row.find('.passenger-unit').val(res.unit);
+
+        $.get("{{ url('/get-employee-details') }}/" + employeeId, function (res) {
+            row.find('.passenger-department').val(res.department || '');
+            row.find('.passenger-unit').val(res.unit || '');
+        }).fail(function () {
+            row.find('.passenger-department').val('');
+            row.find('.passenger-unit').val('');
         });
     });
 
-    // ================= ADD PASSENGER ROW =================
+    /* ================= ADD/REMOVE PASSENGER ROWS ================= */
     let rowIndex = 1;
-    $('.addRow').click(function () {
 
-        let row = `
-        <tr>
-            <td>
-                <select name="passengers[${rowIndex}][employee_id]" 
-                        class="form-select passenger-employee select2">
-                    <option value="">-- Select --</option>
-                    @foreach($employees as $employee)
-                        <option value="{{ $employee->id }}">{{ $employee->name }}</option>
-                    @endforeach
-                </select>
-                <small class="text-danger error-text passengers_${rowIndex}_employee_id_error"></small>
-            </td>
-
-            <td><input type="text" class="form-control passenger-department" readonly></td>
-
-            <td><input type="text" class="form-control passenger-unit" readonly></td>
-
-            <td class="text-center">
-                <button type="button" class="btn btn-danger btn-sm removeRow">
-                    <i class="fa fa-minus"></i>
-                </button>
-            </td>
-        </tr>`;
-
-        $('#passengerTable tbody').append(row);
+    $(document).on('click', '.addRow', function () {
+        let newRow = `
+            <tr>
+                <td>
+                    <select name="passengers[${rowIndex}][employee_id]" class="form-select passenger-employee select2">
+                        <option value="">-- Select --</option>
+                        @foreach($employees as $employee)
+                            <option value="{{ $employee->id }}">{{ $employee->name }}</option>
+                        @endforeach
+                    </select>
+                    <small class="text-danger error-text passengers_${rowIndex}_employee_id_error"></small>
+                </td>
+                <td>
+                    <input type="text" class="form-control passenger-department" readonly>
+                </td>
+                <td>
+                    <input type="text" class="form-control passenger-unit" readonly>
+                </td>
+                <td class="text-center">
+                    <button type="button" class="btn btn-danger btn-sm removeRow"><i class="fa fa-minus"></i></button>
+                </td>
+            </tr>
+        `;
+        $('#passengerTable tbody').append(newRow);
+        
+        // Reinitialize select2 for the new row if needed
+        $('#passengerTable tbody tr:last .select2').select2();
+        
         rowIndex++;
     });
 
@@ -363,169 +444,15 @@ $('.datetimepicker').flatpickr({
         $(this).closest('tr').remove();
     });
 
-    // ================= AJAX FORM SUBMIT =================
-
-$('#requisitionForm').submit(function (e) {
-    e.preventDefault();
-
-    let form = this;
-    let formData = $(form).serialize();
-    
-    console.log('Form Data:', formData); // Debug
-    
-    // Clear previous errors
-    $(".error-text").text("");
-    $('#formMessage').addClass('d-none');
-
-    $.ajax({
-        url: $(form).attr("action"),
-        method: "POST",
-        data: formData,
-        dataType: 'json', // Ensure we're expecting JSON response
-
-        beforeSend: function () {
-            $("button[type=submit]").prop("disabled", true).html("<i class='fa fa-spinner fa-spin'></i> Submitting...");
-        },
-
-        success: function (res) {
-            console.log('Success Response:', res); // Debug
-            
-            if (res.status === "validation_error") {
-                console.log('Validation Errors Found:', res.errors); // Debug
-                
-                // Clear all previous errors
-                $('.error-text').text('');
-                
-                // Display validation errors
-                $.each(res.errors, function (field, messages) {
-                    console.log('Processing error for field:', field, 'Message:', messages[0]); // Debug
-                    
-                    // Convert field name to match error class naming convention
-                    let errorField = field.replace(/\./g, '_') + '_error';
-                    console.log('Looking for error element: .' + errorField); // Debug
-                    
-                    // Find the error element and set the message
-                    let errorElement = $('.' + errorField);
-                    if (errorElement.length > 0) {
-                        errorElement.text(messages[0]);
-                        console.log('Error message set for: .' + errorField); // Debug
-                    } else {
-                        console.warn('Error element not found: .' + errorField);
-                    }
-                });
-                
-                // Show general error message
-                $('#formMessage')
-                    .removeClass('d-none alert-success')
-                    .addClass('alert-danger')
-                    .html('<i class="fa fa-exclamation-triangle me-2"></i> Please fix the validation errors below.')
-                    .show();
-                
-                return;
-            }
-
-            if (res.status === "success") {
-                 Swal.fire({
-                        icon: 'success',
-                        title: 'Success!',
-                        text: res.message,
-                        confirmButtonText: 'OK',
-                        timer: 2500,
-                        timerProgressBar: true
-                    }).then(() => {
-                        if (res.redirect_url) {
-                            window.location.href = res.redirect_url;
-                        }
-                    });
-                $('#formMessage')
-                    .removeClass('d-none alert-danger')
-                    .addClass('alert-success')
-                    .html('<i class="fa fa-check-circle me-2"></i> ' + res.message)
-                    .show();
-
-                // Reset form on success
-                setTimeout(function() {
-                    if (res.redirect_url) {
-                        window.location.href = res.redirect_url;
-                    } else {
-                        form.reset();
-                        // Reset passenger table
-                        $('#passengerTable tbody').html(`<tr>
-                            <td>
-                                <select name="passengers[0][employee_id]" class="form-select passenger-employee select2">
-                                    <option value="">-- Select --</option>
-                                    @foreach($employees as $employee)
-                                        <option value="{{ $employee->id }}">{{ $employee->name }}</option>
-                                    @endforeach
-                                </select>
-                                <small class="text-danger error-text passengers_0_employee_id_error"></small>
-                            </td>
-                            <td><input type="text" class="form-control passenger-department" readonly></td>
-                            <td><input type="text" class="form-control passenger-unit" readonly></td>
-                            <td class="text-center">
-                                <button type="button" class="btn btn-success btn-sm addRow"><i class="fa fa-plus"></i></button>
-                            </td>
-                        </tr>`);
-                        rowIndex = 1;
-                    }
-                }, 2000);
-            }
-        },
-
-        error: function (xhr, status, error) {
-            console.log('AJAX Error Status:', status);
-            console.log('AJAX Error:', error);
-            console.log('Full XHR response:', xhr);
-            console.log('Response Text:', xhr.responseText);
-            
-            // Handle different types of errors
-            if (xhr.status === 422) {
-                // Laravel validation error
-                let errors = xhr.responseJSON.errors;
-                console.log('422 Validation Errors:', errors);
-                
-                if (errors) {
-                    // Clear previous errors
-                    $('.error-text').text('');
-                    
-                    // Display validation errors
-                    $.each(errors, function (field, messages) {
-                        let errorField = field.replace(/\./g, '_') + '_error';
-                        let errorElement = $('.' + errorField);
-                        if (errorElement.length > 0) {
-                            errorElement.text(messages[0]);
-                        }
-                    });
-                    
-                    $('#formMessage')
-                        .removeClass('d-none alert-success')
-                        .addClass('alert-danger')
-                        .html('<i class="fa fa-exclamation-triangle me-2"></i> Please fix the validation errors below.')
-                        .show();
-                }
-            } else {
-                // Other server errors
-                let message = "Something went wrong. Please try again.";
-                
-                if (xhr.responseJSON && xhr.responseJSON.message) {
-                    message = xhr.responseJSON.message;
-                }
-                
-                $('#formMessage')
-                    .removeClass('d-none alert-success')
-                    .addClass('alert-danger')
-                    .html('<i class="fa fa-exclamation-circle me-2"></i> ' + message)
-                    .show();
-            }
-        },
-
-        complete: function () {
-            $("button[type=submit]").prop("disabled", false)
-                .html('<i class="fa fa-paper-plane me-2"></i> Submit Requisition');
-        }
+    /* ================= FLATPICKR DATETIME PICKER ================= */
+    flatpickr('.datetimepicker', {
+        enableTime: true,
+        dateFormat: "Y-m-d H:i",
+        time_24hr: true
     });
-});
 
 });
 </script>
+
+
 @endpush

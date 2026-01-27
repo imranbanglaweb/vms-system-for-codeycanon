@@ -92,53 +92,6 @@ class RequisitionController extends Controller
     
     return view('admin.dashboard.requisition.index', compact('requisitions', 'departments', 'stats'));
 }
-//  public function index(Request $request)
-//     {
-//         $query = Requisition::with(['requestedBy', 'vehicle', 'driver']);
-
-//         // ==============================
-//         // Search Filters
-//         // ==============================
-//         if ($request->employee) {
-//             $query->whereHas('requestedBy', function ($q) use ($request) {
-//                 $q->where('name', 'like', "%{$request->employee}%");
-//             });
-//         }
-
-//         if ($request->department) {
-//             $query->whereHas('requestedBy', function ($q) use ($request) {
-//                 $q->where('department_name', 'like', "%{$request->department}%");
-//             });
-//         }
-
-//         if ($request->vehicle) {
-//             $query->whereHas('vehicle', function ($q) use ($request) {
-//                 $q->where('name', 'like', "%{$request->vehicle}%");
-//             });
-//         }
-
-//         if ($request->date_from) {
-//             $query->whereDate('travel_date', '>=', $request->date_from);
-//         }
-
-//         if ($request->date_to) {
-//             $query->whereDate('travel_date', '<=', $request->date_to);
-//         }
-
-//         $requisitions = $query->orderBy('id', 'DESC')->paginate(10);
-
-//         // If AJAX request → return table + pagination only
-//         if ($request->ajax()) {
-//             return response()->json([
-//                 'table'      => View::make('admin.dashboard.requisition.table', compact('requisitions'))->render(),
-//                 'pagination' => $requisitions->links()->render(),
-//             ]);
-//         }
-
-//         return view('admin.dashboard.requisition.index', compact('requisitions'));
-//     }
-
-
 
 
 // EXPORT EXCEL
@@ -161,7 +114,7 @@ class RequisitionController extends Controller
    public function create()
 {
 
-        $vehicles = VehicleType::where('status', 1)->get();
+        $vehicles = Vehicle::where('status', 1)->get();
         $drivers  = Driver::where('status', 1)->get();
         $employees = Employee::all();
         $vehicleTypes = VehicleType::all();
@@ -297,7 +250,6 @@ public function validateAjax(Request $request)
 
 
 
-    Notification::send($users, new RequisitionCreated($requisition));
 
         DB::commit();
         
@@ -384,12 +336,17 @@ if ($user) {
     {
         $requisition = Requisition::with(['employee', 'department', 'vehicle', 'driver', 'passengers.employee'])->findOrFail($id);
         
+
+        // return dd($requisition);
         $employees = Employee::all();
-        $vehicles = Vehicle::all();
+        $vehicleTypes = VehicleType::where('status', 1)->get();
         $drivers = Driver::all();
+        $units = Unit::all();
+        $departments = Department::all();
+        $vehicles = Vehicle::where('status', 1)->get();
         
         return view('admin.dashboard.requisition.edit', compact(
-            'requisition', 'employees', 'vehicles', 'drivers'
+            'requisition', 'employees', 'vehicleTypes', 'drivers', 'units', 'departments', 'vehicles'
         ));
 
 
@@ -407,7 +364,7 @@ if ($user) {
         // Validation
         $validator = Validator::make($request->all(), [
             'employee_id'           => 'required|exists:employees,id',
-            // 'vehicle_type'            => 'required|exists:vehicles,id',
+            'vehicle_id'            => 'nullable|exists:vehicles,id',
             // 'driver_id'             => 'required|exists:drivers,id',
             'requisition_date'      => 'required|date',
             'from_location'         => 'required|string',
@@ -428,31 +385,13 @@ if ($user) {
             ], 422);
         }
 
-         // --------------------------------------
-        // 🔵 Auto-generate requisition number if blank
-        // --------------------------------------
-        if (empty($request->requisition_number)) {
-
-            $last = Requisition::orderBy('id', 'DESC')->first();
-
-            if ($last && $last->requisition_number) {
-                $number = ((int) filter_var($last->requisition_number, FILTER_SANITIZE_NUMBER_INT)) + 1;
-            } else {
-                $number = 1;
-            }
-
-            $generatedReqNo = 'REQ-' . str_pad($number, 5, '0', STR_PAD_LEFT);
-        } else {
-            $generatedReqNo = $request->requisition_number;
-        }
-
         // -------------------------------
         // 🔵 Update each field manually
         // -------------------------------
         $requisition->requested_by        = $request->employee_id;
         $requisition->department_id       = $request->department_id;
         $requisition->unit_id             = $request->unit_id;
-        $requisition->vehicle_type        = $request->vehicle_type;
+        $requisition->vehicle_id          = $request->vehicle_id ?? null;
         $requisition->driver_id           = $request->driver_id;
         $requisition->requisition_date    = $request->requisition_date;
         $requisition->from_location       = $request->from_location;
@@ -462,8 +401,7 @@ if ($user) {
         $requisition->purpose             = $request->purpose;
         $requisition->status              = 'Pending';
         $requisition->created_by          = auth()->id() ?? 1;
-         // Final requisition number
-        $requisition->requisition_number  = $generatedReqNo;
+        // Do not update the requisition number
         $requisition->save();
 
         // -------------------------------
@@ -771,4 +709,69 @@ public function downloadPDF($id)
    
 
 
-}
+
+    public function getVehiclesByCapacity(Request $request)
+    {
+         Validator::make($request->all(), [
+            'passenger_count' => 'required|integer|min:1',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'A valid passenger count is required.',
+                'errors' => $validator->errors()
+            ], 400);
+        }
+
+        try {
+            $passengerCount = $request->input('passenger_count');   
+            
+            // Assuming the 'vehicles' table has a 'capacity' column
+             $vehicles = Vehicle::where('capacity', '>=', $passengerCount)
+                                 ->where('status', 1)
+                                 ->orderBy('capacity', 'asc')
+                                 ->get();
+
+            if ($vehicles->isEmpty()) {
+                return response()->json([
+                    'status' => 'not_found',
+                    'message' => 'No vehicles found for the specified passenger count.'
+                ], 404);
+            }
+
+            return response()->json([
+                'status' => 'success',
+                'vehicles' => $vehicles
+            ]);
+
+        } catch (\Exception $e) {
+            \Log::error('Vehicle suggestion error: ' . $e->getMessage());   
+            return response()->json([
+                'status' => 'error',
+                'message' => 'An unexpected error occurred while fetching vehicle suggestions.'
+            ], 500);
+        }
+    }
+
+    public function getDriversByVehicle($vehicleId)
+    {
+        // Get the vehicle and find its associated driver via driver_id
+        $vehicle = Vehicle::find($vehicleId);
+        
+        if ($vehicle && $vehicle->driver_id) {
+            $drivers = Driver::where('id', $vehicle->driver_id)
+                ->where('status', 1)
+                ->get();
+        } else {
+            $drivers = collect();
+        }
+
+        return response()->json([
+            'status' => 'success',
+            'drivers' => $drivers
+        ]);
+    }
+
+    
+    }
