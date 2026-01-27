@@ -174,7 +174,7 @@ public function validateAjax(Request $request)
         'to_location' => 'required|string|max:255',
         'travel_date' => 'required|date',
         // 'return_date' => 'required|date|after_or_equal:travel_date',
-        'number_of_passenger' => 'required|integer|min:1', // Add this if it's in your form
+        'number_of_passenger' => 'nullable|integer|min:1',
         'purpose' => 'required|string|max:500', // Changed from nullable to required
         'passengers.*.employee_id' => 'required|exists:employees,id',
     ], [

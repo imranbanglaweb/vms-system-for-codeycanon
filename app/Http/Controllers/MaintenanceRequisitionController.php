@@ -146,6 +146,8 @@ class MaintenanceRequisitionController extends Controller
     {
         $vehicles = Vehicle::all();
         // dd($vehicles);
+
+        
         $types = MaintenanceType::all();
         $employees = Employee::all();
         $categories  = MaintenanceCategory::all();

@@ -199,6 +199,8 @@ Route::get('/employee/details/{id}', [EmployeeController::class, 'details'])->na
 
 Route::get('/vehicles/by-capacity', [VehicleController::class, 'byCapacity'])->name('vehicles.by.capacity');
 
+Route::get('/vehicles/{id}/details', [VehicleController::class, 'getVehicleDetails'])->name('vehicles.details');
+
 Route::get('/drivers/by-vehicle/{vehicle}', [DriverController::class, 'getByVehicle'])
     ->name('drivers.by.vehicle');
    

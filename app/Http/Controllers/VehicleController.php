@@ -228,4 +228,27 @@ class VehicleController extends Controller
     ]);
 }
 
+    /**
+     * Get vehicle details including driver name and seat capacity
+     * Used for auto-populating fields in requisition form
+     */
+    public function getVehicleDetails($id)
+    {
+        $vehicle = Vehicle::with('driver')->find($id);
+
+        if (!$vehicle) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Vehicle not found'
+            ], 404);
+        }
+
+        return response()->json([
+            'success' => true,
+            'driver_name' => $vehicle->driver ? $vehicle->driver->driver_name : 'No driver assigned',
+            'driver_id' => $vehicle->driver_id,
+            'seat_capacity' => $vehicle->seat_capacity ?? 0
+        ]);
+    }
+
 }

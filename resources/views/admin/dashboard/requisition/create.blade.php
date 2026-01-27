@@ -113,7 +113,7 @@
                 <!-- ============================ -->
                 <div class="row mb-4">
 
-                    <div class="col-md-4">
+                    <div class="col-md-3">
                         <label class="form-label"><i class="fa fa-car text-primary me-1"></i> Vehicle</label>
                         <select id="vehicle_type" name="vehicle_type" class="form-select form-select-lg select2">
                             <option value="">Select vehicle</option>
@@ -124,15 +124,20 @@
                         <small class="text-danger error-text vehicle_id_error"></small>
                     </div>
 
-                  <div class="col-md-4">
-    <label class="form-label"><i class="fa fa-id-badge text-primary me-1"></i> Driver</label>
-    <select id="driver_id" name="driver_id" class="form-select form-select-lg">
-        <option value="">Select Driver</option>
-    </select>
-</div>
+                    <div class="col-md-3">
+                        <label class="form-label"><i class="fa fa-id-badge text-primary me-1"></i> Driver</label>
+                        <input type="text" id="driver_name_display" class="form-control form-control-lg" readonly placeholder="Auto-populated from vehicle">
+                        <input type="hidden" id="driver_id" name="driver_id" value="">
+                    </div>
 
+                    <div class="col-md-3">
+                        <label class="form-label"><i class="fa fa-chair text-primary me-1"></i> Seat Capacity</label>
+                        <input type="number" id="seat_capacity_display" class="form-control form-control-lg" readonly placeholder="Auto-populated from vehicle">
+                        <input type="hidden" id="seat_capacity" name="seat_capacity" value="">
+                        <input type="hidden" id="number_of_passenger" name="number_of_passenger" value="">
+                    </div>
 
-                    <div class="col-md-4">
+                    <div class="col-md-3">
                         <label class="form-label">
                             <i class="fa fa-calendar text-primary me-1"></i> Requisition Date
                         </label>
@@ -183,17 +188,11 @@
 
 
                 <!-- ============================ -->
-                <!-- PURPOSE & PASSENGERS COUNT -->
+                <!-- PURPOSE -->
                 <!-- ============================ -->
                 <div class="row mb-4">
 
-                    <div class="col-md-6">
-                        <label class="form-label"><i class="fa fa-users text-primary me-1"></i> Number of Passengers</label>
-                        <input type="number" name="number_of_passenger" class="form-control form-control-lg">
-                        <small class="text-danger error-text number_of_passenger_error"></small>
-                    </div>
-
-                    <div class="col-md-6">
+                    <div class="col-md-12">
                         <label class="form-label"><i class="fa fa-list text-primary me-1"></i> Purpose</label>
                         <textarea name="purpose" class="form-control form-control-lg" rows="3"></textarea>
                         <small class="text-danger error-text purpose_error"></small>
@@ -209,7 +208,9 @@
                 <!-- ============================ -->
                 <h5 class="fw-bold mb-3">
                     <i class="fa fa-users text-primary me-1"></i> Add Passengers
+                    <small class="text-muted ms-2" id="passengerCountInfo"></small>
                 </h5>
+                <small class="text-danger error-text passenger_count_error d-block mb-2"></small>
 
                 <table class="table table-bordered" id="passengerTable">
                     <thead class="table-light">
@@ -285,6 +286,21 @@ $(function () {
         let btn  = form.find('button[type="submit"]');
 
         $('.error-text').text('');
+
+        // Count passengers from the table (only count rows with selected employees)
+        let passengerCount = countPassengers();
+        let seatCapacity = parseInt($('#seat_capacity').val()) || 0;
+        
+        // Validate passenger count against vehicle capacity
+        if (passengerCount > 0 && seatCapacity > 0 && passengerCount > seatCapacity) {
+            $('.passenger_count_error').text('Number of passengers (' + passengerCount + ') exceeds vehicle seat capacity (' + seatCapacity + '). Please remove some passengers or select a different vehicle.');
+            // Scroll to the error field
+            $('html, body').animate({
+                scrollTop: $('#passengerTable').offset().top - 100
+            }, 500);
+            return false;
+        }
+
         btn.prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i> Submitting...');
 
         $.ajax({
@@ -317,48 +333,98 @@ $(function () {
         });
     });
 
-    /* ================= VEHICLE AUTO SUGGEST ================= */
-    $('input[name="number_of_passenger"]').on('keyup change', function () {
-        let count = $(this).val();
-
-        if (!count || count < 1) return;
-
-        $.get("{{ route('vehicles.by.capacity') }}", { passenger_count: count }, function (res) {
-            let vehicleSelect = $('#vehicle_type');
-            vehicleSelect.empty().append('<option value="">Select vehicle</option>');
-
-            res.vehicles.forEach(v => {
-                vehicleSelect.append(`<option value="${v.id}">${v.name} (Capacity: ${v.capacity})</option>`);
-            });
-
-            Swal.fire('Suggested', 'Vehicles updated based on passenger count', 'info');
-        });
-    });
-
-    /* ================= DRIVER BY VEHICLE ================= */
+    /* ================= VEHICLE DETAILS (Driver & Seat Capacity) ================= */
     $('#vehicle_type').on('change', function () {
         let vehicleId = $(this).val();
-        let driverSelect = $('#driver_id');
 
-        driverSelect.html('<option value="">Loading...</option>');
-
+        // Clear fields if no vehicle selected
         if (!vehicleId) {
-            driverSelect.html('<option value="">Select Driver</option>');
+            $('#driver_name_display').val('');
+            $('#driver_id').val('');
+            $('#seat_capacity_display').val('');
+            $('#seat_capacity').val('');
+            $('#number_of_passenger').val('');
+            updatePassengerCountInfo();
             return;
         }
-$.get("{{ route('drivers.by.vehicle', ':id') }}".replace(':id', vehicleId), function (res) {
-            driverSelect.empty().append('<option value="">Select Driver</option>');
 
-            if (res.drivers.length === 0) {
-                driverSelect.append('<option value="">No driver assigned</option>');
-                return;
+        // Fetch vehicle details (driver name and seat capacity)
+        $.get("{{ url('/vehicles') }}/" + vehicleId + "/details", function (res) {
+            if (res.success) {
+                $('#driver_name_display').val(res.driver_name || 'No driver assigned');
+                $('#driver_id').val(res.driver_id || '');
+                $('#seat_capacity_display').val(res.seat_capacity || 0);
+                $('#seat_capacity').val(res.seat_capacity || 0);
+                // Set number_of_passenger to seat_capacity
+                $('#number_of_passenger').val(res.seat_capacity || 0);
+                
+                // Update passenger count info and validate
+                updatePassengerCountInfo();
+                validatePassengerCount();
             }
-
-            res.drivers.forEach(d => {
-                driverSelect.append(`<option value="${d.id}">${d.driver_name}</option>`);
-            });
+        }).fail(function () {
+            $('#driver_name_display').val('Error loading driver');
+            $('#driver_id').val('');
+            $('#seat_capacity_display').val('');
+            $('#seat_capacity').val('');
+            $('#number_of_passenger').val('');
         });
     });
+
+    /* ================= COUNT PASSENGERS FROM TABLE ================= */
+    function countPassengers() {
+        let count = 0;
+        $('#passengerTable tbody tr').each(function() {
+            let employeeId = $(this).find('.passenger-employee').val();
+            if (employeeId && employeeId !== '') {
+                count++;
+            }
+        });
+        return count;
+    }
+
+    /* ================= UPDATE PASSENGER COUNT INFO ================= */
+    function updatePassengerCountInfo() {
+        let passengerCount = countPassengers();
+        let seatCapacity = parseInt($('#seat_capacity').val()) || 0;
+        
+        if (seatCapacity > 0) {
+            $('#passengerCountInfo').text('(' + passengerCount + ' / ' + seatCapacity + ' seats)');
+            if (passengerCount > seatCapacity) {
+                $('#passengerCountInfo').removeClass('text-muted').addClass('text-danger');
+            } else {
+                $('#passengerCountInfo').removeClass('text-danger').addClass('text-muted');
+            }
+        } else {
+            $('#passengerCountInfo').text('(' + passengerCount + ' passengers)');
+            $('#passengerCountInfo').removeClass('text-danger').addClass('text-muted');
+        }
+    }
+
+    /* ================= PASSENGER COUNT VALIDATION ================= */
+    function validatePassengerCount(showPopup = false) {
+        let passengerCount = countPassengers();
+        let seatCapacity = parseInt($('#seat_capacity').val()) || 0;
+        
+        // Only validate if there are passengers and seat capacity is set
+        if (passengerCount > 0 && seatCapacity > 0 && passengerCount > seatCapacity) {
+            let errorMsg = 'Number of passengers (' + passengerCount + ') exceeds vehicle seat capacity (' + seatCapacity + ')';
+            $('.passenger_count_error').text(errorMsg);
+            
+            if (showPopup) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Passenger Limit Exceeded',
+                    text: errorMsg + '. Please remove some passengers or select a different vehicle.',
+                    confirmButtonColor: '#d33'
+                });
+            }
+            return false;
+        } else {
+            $('.passenger_count_error').text('');
+            return true;
+        }
+    }
 
     /* ================= EMPLOYEE DETAILS (Department & Unit) ================= */
     $('#employee_id').on('change', function () {
@@ -394,12 +460,18 @@ $.get("{{ route('drivers.by.vehicle', ':id') }}".replace(':id', vehicleId), func
         if (!employeeId) {
             row.find('.passenger-department').val('');
             row.find('.passenger-unit').val('');
+            // Update count and validate when employee is deselected
+            updatePassengerCountInfo();
+            validatePassengerCount();
             return;
         }
 
         $.get("{{ url('/get-employee-details') }}/" + employeeId, function (res) {
             row.find('.passenger-department').val(res.department || '');
             row.find('.passenger-unit').val(res.unit || '');
+            // Update count and validate when employee is selected - show popup if exceeds
+            updatePassengerCountInfo();
+            validatePassengerCount(true);
         }).fail(function () {
             row.find('.passenger-department').val('');
             row.find('.passenger-unit').val('');
@@ -410,6 +482,20 @@ $.get("{{ route('drivers.by.vehicle', ':id') }}".replace(':id', vehicleId), func
     let rowIndex = 1;
 
     $(document).on('click', '.addRow', function () {
+        // Check if adding would exceed capacity
+        let seatCapacity = parseInt($('#seat_capacity').val()) || 0;
+        let currentCount = countPassengers();
+        
+        if (seatCapacity > 0 && currentCount >= seatCapacity) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Passenger Limit Reached',
+                text: 'Cannot add more passengers. Vehicle seat capacity (' + seatCapacity + ') has been reached. Please select a different vehicle with more capacity.',
+                confirmButtonColor: '#d33'
+            });
+            return false;
+        }
+        
         let newRow = `
             <tr>
                 <td>
@@ -438,10 +524,16 @@ $.get("{{ route('drivers.by.vehicle', ':id') }}".replace(':id', vehicleId), func
         $('#passengerTable tbody tr:last .select2').select2();
         
         rowIndex++;
+        
+        // Update count info
+        updatePassengerCountInfo();
     });
 
     $(document).on('click', '.removeRow', function () {
         $(this).closest('tr').remove();
+        // Update count and clear error after removing
+        updatePassengerCountInfo();
+        validatePassengerCount();
     });
 
     /* ================= FLATPICKR DATETIME PICKER ================= */

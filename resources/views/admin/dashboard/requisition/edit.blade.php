@@ -93,12 +93,15 @@
 
                 <!-- VEHICLE & DRIVER -->
                 <div class="row mb-4">
-                    <div class="col-md-4">
+                    <div class="col-md-3">
                         <label class="form-label"><i class="fa fa-car text-primary me-1"></i> Vehicle</label>
                         <select id="vehicle_id" name="vehicle_id" class="form-select form-select-lg select2">
                             <option value="">Select vehicle</option>
                             @foreach($vehicles as $v)
                                 <option value="{{ $v->id }}" 
+                                    data-driver-name="{{ $v->driver ? $v->driver->driver_name : 'No driver assigned' }}"
+                                    data-driver-id="{{ $v->driver_id }}"
+                                    data-seat-capacity="{{ $v->seat_capacity }}"
                                     {{ optional($requisition->vehicle)->id == $v->id || $requisition->vehicle_id == $v->id ? 'selected' : '' }}>
                                     {{ $v->vehicle_name }}
                                 </option>
@@ -107,21 +110,24 @@
                         <small class="text-danger error-text vehicle_id_error"></small>
                     </div>
 
-                    <div class="col-md-4">
-                        <label class="form-label"><i class="fa fa-user text-primary me-1"></i> Driver</label>
-                        <select name="driver_id" class="form-select form-select-lg select2">
-                            <option value="">Select driver</option>
-                            @foreach($drivers as $driver)
-                                <option value="{{ $driver->id }}" 
-                                    {{ optional($requisition->driver)->id == $driver->id || $requisition->driver_id == $driver->id ? 'selected' : '' }}>
-                                    {{ $driver->driver_name }}
-                                </option>
-                            @endforeach
-                        </select>
-                        <small class="text-danger error-text driver_id_error"></small>
+                    <div class="col-md-3">
+                        <label class="form-label"><i class="fa fa-id-badge text-primary me-1"></i> Driver</label>
+                        <input type="text" id="driver_name_display" class="form-control form-control-lg" readonly 
+                               value="{{ optional($requisition->vehicle)->driver ? $requisition->vehicle->driver->driver_name : (optional($requisition->driver)->driver_name ?? 'No driver assigned') }}"
+                               placeholder="Auto-populated from vehicle">
+                        <input type="hidden" id="driver_id" name="driver_id" value="{{ $requisition->driver_id }}">
                     </div>
 
-                    <div class="col-md-4">
+                    <div class="col-md-3">
+                        <label class="form-label"><i class="fa fa-chair text-primary me-1"></i> Seat Capacity</label>
+                        <input type="number" id="seat_capacity_display" class="form-control form-control-lg" readonly 
+                               value="{{ optional($requisition->vehicle)->seat_capacity ?? $requisition->number_of_passenger ?? 0 }}"
+                               placeholder="Auto-populated from vehicle">
+                        <input type="hidden" id="seat_capacity" name="seat_capacity" value="{{ optional($requisition->vehicle)->seat_capacity ?? $requisition->number_of_passenger ?? 0 }}">
+                        <input type="hidden" id="number_of_passenger" name="number_of_passenger" value="{{ optional($requisition->vehicle)->seat_capacity ?? $requisition->number_of_passenger ?? 0 }}">
+                    </div>
+
+                    <div class="col-md-3">
                         <label class="form-label"><i class="fa fa-calendar text-primary me-1"></i> Requisition Date</label>
                         <input type="date" name="requisition_date" class="form-control form-control-lg"
                                value="{{ $requisition->requisition_date ? \Carbon\Carbon::parse($requisition->requisition_date)->format('Y-m-d') : '' }}">
