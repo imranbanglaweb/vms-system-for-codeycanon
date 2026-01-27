@@ -73,14 +73,14 @@
 
                     <div class="col-md-4">
                         <label class="form-label"><i class="fa fa-building text-primary me-1"></i> Department</label>
-                        <input type="text" id="department_name" class="form-control form-control-lg" 
-                               value="{{ $requisition->department->name ?? '' }}" readonly>
+                        <input type="text" id="department_name" class="form-control form-control-lg"
+                               value="{{ $requisition->department->department_name ?? '' }}" readonly>
                     </div>
 
                     <div class="col-md-4">
                         <label class="form-label"><i class="fa fa-sitemap text-primary me-1"></i> Unit</label>
-                        <input type="text" id="unit_name" class="form-control form-control-lg" 
-                               value="{{ $requisition->unit->name ?? '' }}" readonly>
+                        <input type="text" id="unit_name" class="form-control form-control-lg"
+                               value="{{ $requisition->unit->unit_name ?? '' }}" readonly>
 
                         <input type="hidden" id="department_id" name="department_id" 
                                value="{{ $requisition->department->id ?? '' }}">
@@ -280,14 +280,22 @@ $(function () {
     $('#employee_id').on('change', function() {
         let empId = $(this).val();
         if (!empId) {
-            $('#department_name, #unit_name').val('');
+            $('#department_name').val('');
+            $('#unit_name').val('');
+            $('#department_id').val('');
+            $('#unit_id').val('');
             return;
         }
-        $.get("{{ route('employee.details', ':id') }}".replace(':id', empId), function(data) {
-            $('#department_name').val(data.department);
-            $('#department_id').val(data.department_id);
-            $('#unit_name').val(data.unit);
-            $('#unit_id').val(data.unit_id);
+        $.get("{{ url('/get-employee-details') }}/" + empId, function(data) {
+            $('#department_name').val(data.department || '');
+            $('#department_id').val(data.department_id || '');
+            $('#unit_name').val(data.unit || '');
+            $('#unit_id').val(data.unit_id || '');
+        }).fail(function() {
+            $('#department_name').val('');
+            $('#unit_name').val('');
+            $('#department_id').val('');
+            $('#unit_id').val('');
         });
     });
 
@@ -300,9 +308,12 @@ $(function () {
             row.find('.passenger-unit').val('');
             return;
         }
-        $.get("{{ route('employee.details', ':id') }}".replace(':id', id), function (res) {
-            row.find('.passenger-department').val(res.department);
-            row.find('.passenger-unit').val(res.unit);
+        $.get("{{ url('/get-employee-details') }}/" + id, function (res) {
+            row.find('.passenger-department').val(res.department || '');
+            row.find('.passenger-unit').val(res.unit || '');
+        }).fail(function() {
+            row.find('.passenger-department').val('');
+            row.find('.passenger-unit').val('');
         });
     });
 
@@ -393,20 +404,20 @@ $(function () {
 
     // AUTO-FILL ON PAGE LOAD
     @if($requisition->requested_by ?? $requisition->employee_id)
-        $.get("{{ route('employee.details', $requisition->requested_by ?? $requisition->employee_id) }}", function(data) {
-            $('#department_name').val(data.department);
-            $('#unit_name').val(data.unit);
-            $('#department_id').val(data.department_id);
-            $('#unit_id').val(data.unit_id);
+        $.get("{{ url('/get-employee-details') }}/{{ $requisition->requested_by ?? $requisition->employee_id }}", function(data) {
+            $('#department_name').val(data.department || '');
+            $('#unit_name').val(data.unit || '');
+            $('#department_id').val(data.department_id || '');
+            $('#unit_id').val(data.unit_id || '');
         });
     @endif
 
     @if(isset($requisition->passengers))
         @foreach($requisition->passengers as $index => $passenger)
             @if($passenger->employee_id)
-                $.get("{{ route('employee.details', $passenger->employee_id) }}", function(data) {
-                    $('#passengerTable tbody tr:eq({{ $index }}) .passenger-department').val(data.department);
-                    $('#passengerTable tbody tr:eq({{ $index }}) .passenger-unit').val(data.unit);
+                $.get("{{ url('/get-employee-details') }}/{{ $passenger->employee_id }}", function(data) {
+                    $('#passengerTable tbody tr:eq({{ $index }}) .passenger-department').val(data.department || '');
+                    $('#passengerTable tbody tr:eq({{ $index }}) .passenger-unit').val(data.unit || '');
                 });
             @endif
         @endforeach
