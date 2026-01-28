@@ -20,32 +20,42 @@ class RolePermissionSeeder extends Seeder
         $employee   = Role::where('name', 'Employee')->first();
 
         // ================= SUPER ADMIN =================
-        // Super Admin gets EVERYTHING
-        $superAdmin->syncPermissions(Permission::all());
+        $superAdmin?->syncPermissions(Permission::all());
 
         // ================= ADMIN =================
         $adminPermissions = [
+
             'dashboard',
 
             // Requisitions
             'requisition-create',
             'requisition-view',
-            'requisition-approve',
+            'requisition-edit',
+            'requisition-delete',
             'requisition-export',
+            'requisition-download',
 
-            // Vehicle
+            // Department Approval
+            'department-approval-view',
+            'department-approval-approve',
+            'department-approval-reject',
+
+            // Transport Approval View
+            'transport-approval-view',
+
+            // Vehicles
             'vehicle-manage',
             'vehicle-create',
             'vehicle-edit',
             'vehicle-delete',
 
-            // Driver
+            // Drivers
             'driver-manage',
             'driver-create',
             'driver-edit',
             'driver-delete',
 
-            // Employee
+            // Employees
             'employee-manage',
             'employee-create',
             'employee-edit',
@@ -79,22 +89,30 @@ class RolePermissionSeeder extends Seeder
             'translation-manage',
         ];
 
-        $admin->syncPermissions($adminPermissions);
+        $admin?->syncPermissions($adminPermissions);
 
         // ================= TRANSPORT =================
         $transportPermissions = [
+
             'dashboard',
 
-            // Requisitions
+            // Requisition View Only
             'requisition-view',
-            'requisition-assign',
 
-            // Trips / Transport
+            // Transport Approval Stage
+            'transport-approval-view',
+            'transport-approval-assign',
+            'transport-approval-approve',
+            'transport-approval-reject',
+
+            // Trips / Trip Sheets
             'trip-manage',
+            'trip-sheet-view',
             'trip-start',
             'trip-finish',
+            'trip-end',
 
-            // Vehicle & Driver
+            // Vehicle & Driver View/Manage
             'vehicle-manage',
             'driver-manage',
 
@@ -107,10 +125,11 @@ class RolePermissionSeeder extends Seeder
             'report-vehicle-utilization',
         ];
 
-        $transport->syncPermissions($transportPermissions);
+        $transport?->syncPermissions($transportPermissions);
 
         // ================= EMPLOYEE =================
         $employeePermissions = [
+
             'dashboard',
 
             // Requisitions
@@ -124,6 +143,6 @@ class RolePermissionSeeder extends Seeder
             'notification-view',
         ];
 
-        $employee->syncPermissions($employeePermissions);
+        $employee?->syncPermissions($employeePermissions);
     }
 }

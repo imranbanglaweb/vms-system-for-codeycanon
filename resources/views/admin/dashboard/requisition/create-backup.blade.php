@@ -54,8 +54,8 @@
     <div class="card shadow-sm border-0">
         <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center py-3">
             <h3 class="m-0">
-                <i class="fa fa-car-side me-2 text-warning"></i>
-                Edit Requisition
+                <i class="fa fa-car-side me-2 text-primary"></i>
+                Create Requisition
             </h3>
             <a href="{{ route('requisitions.index') }}" class="btn btn-secondary btn-sm">
                 <i class="fa fa-arrow-left"></i> Back
@@ -67,9 +67,8 @@
             <!-- AJAX Message -->
             <div id="formMessage" class="alert d-none"></div>
 
-            <form id="requisitionForm" action="{{ route('requisitions.update', $requisition->id) }}" method="POST">
+            <form id="requisitionForm" action="{{ route('requisitions.store') }}" method="POST">
                 @csrf
-                @method('PUT')
 
                 <!-- ============================ -->
                 <!-- REQUESTED EMPLOYEE SECTION -->
@@ -80,29 +79,24 @@
                         <label class="form-label">
                             <i class="fa fa-user-tie text-primary me-1"></i> Requested Employee
                         </label>
-                        <select id="employee_id" name="employee_id" class="form-select form-select-lg select2" disabled>
+                        <select id="employee_id" name="employee_id" class="form-select form-select-lg select2">
                             <option value="">-- Select Employee --</option>
                             @foreach($employees as $employee)
-                                <option value="{{ $employee->id }}" {{ ($requisition->requested_by == $employee->id) ? 'selected' : '' }}>
-                                    {{ $employee->name }}
-                                </option>
+                                <option value="{{ $employee->id }}">{{ $employee->name }}</option>
                             @endforeach
                         </select>
-                        <input type="hidden" name="employee_id" value="{{ $requisition->requested_by }}" />
                         <br>
                         <small class="text-danger error-text employee_id_error"></small>
                     </div>
 
                     <div class="col-md-4">
                         <label class="form-label"><i class="fa fa-building text-primary me-1"></i> Department</label>
-                        <input type="text" id="department_name" class="form-control form-control-lg" readonly 
-                               value="{{ $requisition->department->department_name ?? '' }}">
+                        <input type="text" id="department_name" class="form-control form-control-lg" readonly>
                     </div>
 
                     <div class="col-md-4">
                         <label class="form-label"><i class="fa fa-sitemap text-primary me-1"></i> Unit</label>
-                        <input type="text" id="unit_name" class="form-control form-control-lg" readonly 
-                               value="{{ $requisition->unit->unit_name ?? '' }}">
+                        <input type="text" id="unit_name" class="form-control form-control-lg" readonly>
                     </div>
                        <input type="hidden" id="department_id" class="form-control form-control-lg" 
                                value="{{ $requisition->department->id ?? '' }}" name="department_id">
@@ -121,12 +115,10 @@
 
                     <div class="col-md-4">
                         <label class="form-label"><i class="fa fa-car text-primary me-1"></i> Vehicle</label><br>
-                        <select id="vehicle_id" name="vehicle_id" class="form-select form-select-lg select2">
+                        <select id="vehicle_type" name="vehicle_type" class="form-select form-select-lg select2">
                             <option value="">Select vehicle</option>
                             @foreach($vehicles as $id => $name)
-                                <option value="{{ $name->id }}" {{ ($requisition->vehicle_id == $name->id) ? 'selected' : '' }}>
-                                    {{ $name->vehicle_name }}
-                                </option>
+                                <option value="{{ $name->id }}">{{ $name->vehicle_name }}</option>
                             @endforeach
                         </select>
                         <small class="text-danger error-text vehicle_id_error"></small>
@@ -134,24 +126,22 @@
 
                     <div class="col-md-3">
                         <label class="form-label"><i class="fa fa-id-badge text-primary me-1"></i> Driver</label>
-                        <input type="text" id="driver_name_display" class="form-control form-control-lg" readonly 
-                               placeholder="Auto-populated from vehicle" value="{{ $requisition->driver->driver_name ?? '' }}">
-                        <input type="hidden" id="driver_id" name="driver_id" value="{{ $requisition->driver_id }}">
+                        <input type="text" id="driver_name_display" class="form-control form-control-lg" readonly placeholder="Auto-populated from vehicle">
+                        <input type="hidden" id="driver_id" name="driver_id" value="">
                     </div>
 
                     <div class="col-md-2">
                         <label class="form-label"><i class="fa fa-chair text-primary me-1"></i> Seat Capacity</label>
-                        <input type="number" id="seat_capacity_display" class="form-control form-control-lg" readonly 
-                               placeholder="Auto-populated from vehicle" value="{{ $requisition->vehicle->seat_capacity ?? '' }}">
-                        <input type="hidden" id="seat_capacity" name="seat_capacity" value="{{ $requisition->vehicle->seat_capacity ?? '' }}">
-                        <input type="hidden" id="number_of_passenger" name="number_of_passenger" value="{{ $requisition->number_of_passenger }}">
+                        <input type="number" id="seat_capacity_display" class="form-control form-control-lg" readonly placeholder="Auto-populated from vehicle">
+                        <input type="hidden" id="seat_capacity" name="seat_capacity" value="">
+                        <input type="hidden" id="number_of_passenger" name="number_of_passenger" value="">
                     </div>
 
                     <div class="col-md-3">
                         <label class="form-label">
                             <i class="fa fa-calendar text-primary me-1"></i> Requisition Date
                         </label>
-                        <input type="date" name="requisition_date" class="form-control form-control-lg" value="{{ $requisition->requisition_date ? \Carbon\Carbon::parse($requisition->requisition_date)->format('Y-m-d') : '' }}">
+                        <input type="date" name="requisition_date" class="form-control form-control-lg">
                         <small class="text-danger error-text requisition_date_error"></small>
                     </div>
 
@@ -166,44 +156,52 @@
 
                     <div class="col-md-3">
                         <label class="form-label"><i class="fa fa-location-dot text-primary me-1"></i> From</label>
-                        <input type="text" name="from_location" class="form-control form-control-lg" value="{{ $requisition->from_location }}">
+                        <input type="text" name="from_location" class="form-control form-control-lg">
                         <small class="text-danger error-text from_location_error"></small>
                     </div>
 
                     <div class="col-md-3">
                         <label class="form-label"><i class="fa fa-map-marker-alt text-primary me-1"></i> To</label>
-                        <input type="text" name="to_location" class="form-control form-control-lg" value="{{ $requisition->to_location }}">
+                        <input type="text" name="to_location" class="form-control form-control-lg">
                         <small class="text-danger error-text to_location_error"></small>
                     </div>
 
                     <div class="col-md-3">
                         <label class="form-label"><i class="fa fa-clock text-primary me-1"></i> Pickup Time</label>
                         <input type="text" name="travel_date" class="form-control datetimepicker"
-                               placeholder="Select pickup date & time" value="{{ $requisition->travel_date }}">
+       placeholder="Select pickup date & time">
+
                         <small class="text-danger error-text travel_date_error"></small>
                     </div>
 
                     <div class="col-md-3">
                         <label class="form-label"><i class="fa fa-calendar-check text-primary me-1"></i> Return Time</label>
+                   
                         <input type="text" name="return_date" class="form-control datetimepicker"
-                               placeholder="Select return date & time" value="{{ $requisition->return_date }}">
+       placeholder="Select return date & time">
+
                     </div>
+
                 </div>
 
               <div class="my-4 border-top"></div>
+
 
                 <!-- ============================ -->
                 <!-- PURPOSE -->
                 <!-- ============================ -->
                 <div class="row mb-4">
+
                     <div class="col-md-12">
                         <label class="form-label"><i class="fa fa-list text-primary me-1"></i> Purpose</label>
-                        <textarea name="purpose" class="form-control form-control-lg" rows="3">{{ $requisition->purpose }}</textarea>
+                        <textarea name="purpose" class="form-control form-control-lg" rows="3"></textarea>
                         <small class="text-danger error-text purpose_error"></small>
                     </div>
+
                 </div>
                 
-                <div class="my-4 border-top"></div>
+<div class="my-4 border-top"></div>
+
 
                 <!-- ============================ -->
                 <!-- PASSENGERS -->
@@ -225,37 +223,6 @@
                     </thead>
 
                     <tbody>
-                        @forelse($requisition->passengers as $index => $passenger)
-                        <tr>
-                            <td>
-                                <select name="passengers[{{$index}}][employee_id]" class="form-select passenger-employee select2">
-                                    <option value="">-- Select --</option>
-                                    @foreach($employees as $employee)
-                                        <option value="{{ $employee->id }}" {{ ($passenger->employee_id == $employee->id) ? 'selected' : '' }}>
-                                            {{ $employee->name }}
-                                        </option>
-                                    @endforeach
-                                </select>
-                                <small class="text-danger error-text passengers_{{$index}}_employee_id_error"></small>
-                            </td>
-
-                            <td>
-                                <input type="text" class="form-control passenger-department" readonly value="{{ $passenger->employee->department->department_name ?? '' }}">
-                            </td>
-
-                            <td>
-                                <input type="text" class="form-control passenger-unit" readonly value="{{ $passenger->employee->unit->unit_name ?? '' }}">
-                            </td>
-
-                            <td class="text-center">
-                                @if($loop->first)
-                                <button type="button" class="btn btn-success btn-sm addRow"><i class="fa fa-plus"></i></button>
-                                @else
-                                <button type="button" class="btn btn-danger btn-sm removeRow"><i class="fa fa-minus"></i></button>
-                                @endif
-                            </td>
-                        </tr>
-                        @empty
                         <tr>
                             <td>
                                 <select name="passengers[0][employee_id]" class="form-select passenger-employee select2">
@@ -279,7 +246,6 @@
                                 <button type="button" class="btn btn-success btn-sm addRow"><i class="fa fa-plus"></i></button>
                             </td>
                         </tr>
-                        @endforelse
                     </tbody>
                 </table>
 
@@ -287,16 +253,22 @@
                 <!-- SUBMIT -->
                 <!-- ============================ -->
                 <div class="text-end mt-4">
-                    <button type="submit" class="btn btn-warning btn-lg px-4">
-                        <i class="fa fa-save me-2"></i> Update Requisition
+                    <button type="submit" class="btn btn-primary btn-lg px-4">
+                        <i class="fa fa-paper-plane me-2"></i> Submit Requisition
                     </button>
                 </div>
+
             </form>
+
         </div>
     </div>
 </div>
+
 </section>
 @endsection
+
+
+
 
 @push('scripts')
 {{-- Flatpickr --}}
@@ -305,9 +277,6 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
 $(function () {
-    
-    /* ================= INITIALIZE ================= */
-    updatePassengerCountInfo();
 
     /* ================= BLOCK PAST DATES ================= */
     let today = new Date().toISOString().split('T')[0];
@@ -345,7 +314,7 @@ $(function () {
             return false;
         }
 
-        btn.prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i> Updating...');
+        btn.prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i> Submitting...');
 
         $.post(form.attr('action'), form.serialize())
             .done(res => {
@@ -353,7 +322,7 @@ $(function () {
                     .then(()=> window.location.href="{{ route('requisitions.index') }}");
             })
             .fail(xhr => {
-                btn.prop('disabled', false).html('<i class="fa fa-save me-2"></i> Update Requisition');
+                btn.prop('disabled', false).html('<i class="fa fa-paper-plane me-2"></i> Submit Requisition');
                 if(xhr.status===422){
                     $.each(xhr.responseJSON.errors,(f,m)=>{
                         $('.'+f.replace(/\./g,'_')+'_error').text(m[0]);
@@ -363,7 +332,7 @@ $(function () {
     });
 
     /* ================= VEHICLE DETAILS ================= */
-    $('#vehicle_id').on('change', function () {
+    $('#vehicle_type').on('change', function () {
         let vehicleId = $(this).val();
         if (!vehicleId) return resetVehicleFields();
 
@@ -387,9 +356,8 @@ $(function () {
     }
 
     function autoTrimPassengers(capacity){
-        if (capacity <= 0) return;
         while(countPassengers()>capacity){
-            $('#passengerTable tbody tr:not(:has(.addRow))').last().remove();
+            $('#passengerTable tbody tr:last').remove();
         }
     }
 
@@ -415,14 +383,14 @@ $(function () {
         let empId=$(this).val();
         let requester=$('#employee_id').val();
 
-        if(empId && empId===requester){
-            Swal.fire('Not Allowed','Requester cannot be a passenger','warning');
+        if(empId===requester){
+            Swal.fire('Not Allowed','Requester cannot be passenger','warning');
             return resetPassengerRow(row,this);
         }
 
         let duplicate=false;
         $('.passenger-employee').not(this).each(function(){
-            if($(this).val() && $(this).val()===empId) duplicate=true;
+            if($(this).val()===empId && empId!=='') duplicate=true;
         });
 
         if(duplicate){
@@ -441,13 +409,13 @@ $(function () {
     });
 
     function resetPassengerRow(row,el,clearSelect=true){
-        if(clearSelect) $(el).val('').trigger('change.select2');
+        if(clearSelect) $(el).val('').trigger('change');
         row.find('.passenger-department,.passenger-unit').val('');
         updatePassengerCountInfo();
     }
 
     /* ================= ADD/REMOVE ROWS ================= */
-    let rowIndex = {{ $requisition->passengers->count() }};
+    let rowIndex=1;
 
     $(document).on('click','.addRow',function(e){
         e.preventDefault();
@@ -498,7 +466,7 @@ $(function () {
         let count=countPassengers();
         let cap=parseInt($('#seat_capacity').val())||0;
         let info=$('#passengerCountInfo');
-        $('#number_of_passenger').val(count);
+        $('#number_of_passenger').val(countPassengers());
 
         if(cap>0){
             info.text(`(${count} / ${cap} seats)`);
@@ -532,4 +500,7 @@ $(function () {
 
 });
 </script>
+
+
+
 @endpush

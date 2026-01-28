@@ -650,7 +650,7 @@ Notification.requestPermission().then(function(permission) {
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.3/additional-methods.min.js"></script>
 
 	<!-- NiceScroll -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.nicescroll/3.7.6/jquery.nicescroll.min.js"></script>
+<!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.nicescroll/3.7.6/jquery.nicescroll.min.js"></script>
 <script>
 $(document).ready(function () {
     $("body").niceScroll({
@@ -665,7 +665,7 @@ $(document).ready(function () {
         mousescrollstep: 40
     });
 });
-</script>
+</script> -->
 
 @yield('scripts')
 

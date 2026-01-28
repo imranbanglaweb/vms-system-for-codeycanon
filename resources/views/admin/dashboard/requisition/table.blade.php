@@ -11,7 +11,7 @@
         <div class="d-flex align-items-center">
             <div>
                 <h6 class="mb-0">{{ $requisition->requestedBy->name ?? 'Unknown Employee' }}</h6>
-                <small class="text-strong">{{ $requisition->employee->employee_code ?? 'N/A' }}</small>
+                <small class="text-strong">{{ $requisition->requestedBy->employee_code}}</small>
             </div>
         </div>
     </td>
@@ -32,9 +32,7 @@
     <td>
         {{ $requisition->return_date ? $requisition->return_date->format('M d, Y') : 'N/A' }}
     </td>
-    <td>
-        {!! $requisition->priority_badge !!}
-    </td>
+
     <td>
         @if($requisition->status == 'Pending')
             <span class="badge bg-warning">Pending</span>
@@ -52,7 +50,7 @@
            class="btn btn-info btn-sm" title="View Details">
             <i class="fa fa-eye"></i>
         </a>
-            @if($requisition->status == 'Pending')
+            <!-- @if($requisition->status == 'Pending')
                 <button class="btn btn-sm btn-success approveRequest" 
                         data-id="{{ $requisition->id }}"
                         data-req-number="{{ $requisition->requisition_number }}">
@@ -83,7 +81,7 @@
                 </button>
             @else
                 <span class="text-muted small">Action taken</span>
-            @endif
+            @endif -->
             
             <a href="{{ route('requisitions.edit', $requisition->id) }}" 
                class="btn btn-sm btn-primary" title="Edit">

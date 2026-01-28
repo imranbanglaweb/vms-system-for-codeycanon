@@ -189,7 +189,7 @@
                     @foreach($timeline as $item)
                         <div class="mb-3 p-2 rounded-3 hover-bg-light" title="{{ $item->remarks ?? '' }}">
                             <div class="small text-muted">{{ \Carbon\Carbon::parse($item->created_at)->format('d M Y - h:i A') }} by {{ $item->user_name }}</div>
-                            <div class="fw-semibold text-dark">{{ $item->action }}</div>
+                            <div class="fw-semibold text-dark">{{ $item->action_type }}</div>
                             @if($item->remarks)<div class="small text-secondary">{{ $item->remarks }}</div>@endif
                         </div>
                     @endforeach

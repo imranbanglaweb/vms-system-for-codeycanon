@@ -26,7 +26,7 @@
         <div class="card mb-4">
             <div class="card-header bg-dark text-white">
                 <h5 class="card-title" style="padding: 10px;">
-                    <i class="fa fa-search"></i>Advanced Search & Filters
+                    <i class="fa fa-search"></i>&nbsp;Advanced Search & Filters
                 </h5>
             </div>
             <div class="card-body">
@@ -53,7 +53,7 @@
                             <select name="department_id" id="department_id" class="form-control select2">
                                 <option value="">All Departments</option>
                                 @foreach($departments as $department)
-                                    <option value="{{ $department->id }}">{{ $department->name }}</option>
+                                    <option value="{{ $department->id }}">{{ $department->department_name }}</option>
                                 @endforeach
                             </select>
                         </div>
@@ -63,10 +63,10 @@
                             <label for="status" class="form-label fw-semibold">Status</label>
                             <select name="status" id="status" class="form-control select2">
                                 <option value="">All Status</option>
-                                <option value="0">Pending</option>
-                                <option value="1">Approved</option>
-                                <option value="2">Rejected</option>
-                                <option value="3">Cancelled</option>
+                                <option value="Pending">Pending</option>
+                                <option value="Approved">Approved</option>
+                                <option value="Rejected">Rejected</option>
+                                <option value="Cancelled">Cancelled</option>
                             </select>
                         </div>
 
@@ -81,17 +81,7 @@
                             <input type="date" name="end_date" id="end_date" class="form-control">
                         </div>
 
-                        {{-- Priority --}}
-                        <div class="col-md-3">
-                            <label for="priority" class="form-label fw-semibold">Priority</label>
-                            <select name="priority" id="priority" class="form-control select2">
-                                <option value="">All Priorities</option>
-                                <option value="low">Low</option>
-                                <option value="medium">Medium</option>
-                                <option value="high">High</option>
-                                <option value="urgent">Urgent</option>
-                            </select>
-                        </div>
+                   
 
                         {{-- Action Buttons --}}
                         <div class="col-md-12">
@@ -145,12 +135,11 @@
                         <tr>
                             <th width="50">#</th>
                             <th width="120">Req. Number</th>
-                            <th>Employee</th>
+                            <th>Requiesd By</th>
                             <th>Department</th>
                             <th>Vehicle</th>
                             <th width="100">Travel Date</th>
                             <th width="100">Return Date</th>
-                            <th width="100">Priority</th>
                             <th width="100">Status</th>
                             <th width="150">Actions</th>
                         </tr>

@@ -634,44 +634,58 @@ class MenuSeeder extends Seeder
 
                     ],
 
-                     /* ================= DEPARTMENT APPROVAL ================= */
                     [
-                        'menu_name' => 'Department Approval',
-                        'menu_slug' => 'department-approval',
-                        'menu_icon' => 'fa-building',
+
+                        'menu_name' => 'Approval',
+
+                        'menu_slug' => 'approval',
+
+                        'menu_icon' => 'fa-gavel',
+
                         'menu_url' => null,
-                        'menu_permission' => 'department-approve',
+
+                        'menu_permission' => 'requisition-approve',
+
                         'menu_order' => 33,
+
                         'menu_parent' => 0,
-                    ],
-                    [
-                        'menu_name' => 'Pending Department Approvals',
-                        'menu_slug' => 'department-approvals',
-                        'menu_icon' => 'fa-clock-o',
-                        'menu_url' => 'department.approvals.index',
-                        'menu_permission' => 'department-approve',
-                        'menu_order' => 34,
-                        'menu_parent' => 33,
+
                     ],
 
-                    /* ================= TRANSPORT APPROVAL ================= */
                     [
-                        'menu_name' => 'Transport Approval',
-                        'menu_slug' => 'transport-approval',
-                        'menu_icon' => 'fa-truck',
-                        'menu_url' => null,
-                        'menu_permission' => 'transport-approve',
-                        'menu_order' => 35,
-                        'menu_parent' => 0,
-                    ],
-                    [
-                        'menu_name' => 'Pending Transport Approvals',
-                        'menu_slug' => 'transport-approvals',
+
+                        'menu_name' => 'Pending Approval',
+
+                        'menu_slug' => 'requisition-pending',
+
                         'menu_icon' => 'fa-clock-o',
-                        'menu_url' => 'transport.approvals.index',
-                        'menu_permission' => 'transport-approve',
-                        'menu_order' => 36,
-                        'menu_parent' => 35,
+
+                        'menu_url' => 'requisitions.pending',
+
+                        'menu_permission' => 'requisition-approve',
+
+                        'menu_order' => 34,
+
+                        'menu_parent' => 33,
+
+                    ],
+
+                    [
+
+                        'menu_name' => 'Approved Requisitions',
+
+                        'menu_slug' => 'requisition.approved',
+
+                        'menu_icon' => 'fa-check-square-o',
+
+                        'menu_url'  => 'requisitions.approved',
+
+                        'menu_permission' => 'requisition-approved-view',
+
+                        'menu_order' => 35,
+
+                        'menu_parent' => 33,
+
                     ],
 
         
@@ -690,7 +704,7 @@ class MenuSeeder extends Seeder
 
                         'menu_permission' => 'trip-manage',
 
-                        'menu_order' => 37,
+                        'menu_order' => 36,
 
                         'menu_parent' => 0,
 
@@ -714,7 +728,7 @@ class MenuSeeder extends Seeder
 
                             'menu_permission' => 'subscription-plan-manage',
 
-                            'menu_order' => 38,
+                            'menu_order' => 37,
 
                             'menu_parent' => 0,
 
@@ -736,7 +750,7 @@ class MenuSeeder extends Seeder
 
                             'menu_permission' => 'subscription-approve',
 
-                            'menu_order' => 39,
+                            'menu_order' => 38,
 
                             'menu_parent' => 0,
 
@@ -754,7 +768,7 @@ class MenuSeeder extends Seeder
 
                             'menu_permission' => 'subscription-approve',
 
-                            'menu_order' => 40,
+                            'menu_order' => 39,
 
                             'menu_parent' => 38,
 
@@ -776,7 +790,7 @@ class MenuSeeder extends Seeder
 
                             'menu_permission' => 'payment-approve',
 
-                            'menu_order' => 41,
+                            'menu_order' => 40,
 
                             'menu_parent' => 38,
 
@@ -796,7 +810,7 @@ class MenuSeeder extends Seeder
 
                             'menu_permission' => 'payment-view',
 
-                            'menu_order' => 42,
+                            'menu_order' => 41,
 
                             'menu_parent' => 38,
 
@@ -816,7 +830,7 @@ class MenuSeeder extends Seeder
 
                             'menu_permission' => 'payment-view',
 
-                            'menu_order' => 43,
+                            'menu_order' => 42,
 
                             'menu_parent' => 38,
 
@@ -835,7 +849,7 @@ class MenuSeeder extends Seeder
                         'menu_icon' => 'fa-bar-chart',
                         'menu_url' => null,
                         'menu_permission' => 'report-requisition',
-                        'menu_order' => 44,
+                        'menu_order' => 43,
                         'menu_parent' => 0,
 
                     ],
@@ -846,8 +860,8 @@ class MenuSeeder extends Seeder
                         'menu_icon' => 'fa-file-text-o',
                         'menu_url' => 'reports.requisitions',
                         'menu_permission' => 'report-requisition',
-                        'menu_order' => 45,
-                        'menu_parent' => 44,
+                        'menu_order' => 44,
+                        'menu_parent' => 43,
 
                     ],
 
@@ -857,8 +871,8 @@ class MenuSeeder extends Seeder
                         'menu_icon' => 'fa-line-chart',
                         'menu_url' => 'trips_fuel.index',
                         'menu_permission' => 'report-trip-fuel',
-                        'menu_order' => 46,
-                        'menu_parent' => 44,
+                        'menu_order' => 36,
+                        'menu_parent' => 43,
                     ],
 
                     [
@@ -867,8 +881,8 @@ class MenuSeeder extends Seeder
                         'menu_icon' => 'fa-pie-chart',
                         'menu_url' => 'vehicle_utilization.index',
                         'menu_permission' => 'report-vehicle-utilization',
-                        'menu_order' => 47,
-                        'menu_parent' => 44,
+                        'menu_order' => 46,
+                        'menu_parent' => 43,
                     ],
                     
                     [
@@ -877,8 +891,8 @@ class MenuSeeder extends Seeder
                         'menu_icon' => 'fa-tachometer',
                         'menu_url' => 'driver_performance.index',
                         'menu_permission' => 'report-driver-performance',
-                        'menu_order' => 48,
-                        'menu_parent' => 44,
+                        'menu_order' => 47,
+                        'menu_parent' => 43,
                     ],
                     
                     [
@@ -887,8 +901,8 @@ class MenuSeeder extends Seeder
                         'menu_icon' => 'fa-wrench',
                         'menu_url' => 'maintenance-reports',
                         'menu_permission' => 'report-maintenance',
-                        'menu_order' => 49,
-                        'menu_parent' => 44,
+                        'menu_order' => 48,
+                        'menu_parent' => 43,
                     ],
                 
 
@@ -903,7 +917,7 @@ class MenuSeeder extends Seeder
                         'menu_icon' => 'fa-bell',
                         'menu_url' => null,
                         'menu_permission' => 'settings-notification',
-                        'menu_order' => 50,
+                        'menu_order' => 49,
                         'menu_parent' => 0,
 
                     ],
@@ -919,8 +933,8 @@ class MenuSeeder extends Seeder
                         'menu_url' => 'settings.notifications',
 
                         'menu_permission' => 'settings-notification',
-                        'menu_order' => 51,
-                        'menu_parent' => 50,
+                        'menu_order' => 50,
+                        'menu_parent' => 49,
 
                     ],
 
@@ -935,8 +949,8 @@ class MenuSeeder extends Seeder
                         'menu_url' => 'admin.push.subscribers',
 
                         'menu_permission' => 'notification-manage',
-                        'menu_order' => 52,
-                        'menu_parent' => 50,
+                        'menu_order' => 51,
+                        'menu_parent' => 49,
 
                     ],
 

@@ -1,171 +1,112 @@
-@foreach($requisitions as $key => $req)
+@forelse($requisitions as $requisition)
 <tr>
-    <td>{{ $requisitions->firstItem() + $key }}</td>
-
-    <td>{{ $req->requestedBy->name ?? 'N/A' }}</td>
-
-    <!-- <td>{{ $req->requestedBy->department_name ?? 'N/A' }}</td> -->
-    <td>{{ $req->requestedBy->department->department_name ?? 'N/A' }}</td>
-
-    <td>{{ $req->vehicle->vehicle_name ?? 'Not Assigned' }}</td>
-
-    <td>{{ $req->driver->driver_name ?? 'Not Assigned' }}</td>
-
-    <td>{{ $req->travel_date ? $req->travel_date->format('d M, Y h:i A') : 'N/A' }}</td>
-
-    <td>{{ Str::limit($req->purpose, 25) }}</td>
-
-    <!-- <td>
-        <span class="badge 
-            @if($req->status == 'Pending') bg-warning 
-            @elseif($req->status == 'Approved') bg-success 
-            @elseif($req->status == 'Rejected') bg-danger
-            @else bg-secondary @endif
-        ">
-            {{ $req->status }}
-        </span>
-    </td> -->
-
+    <td>{{ $loop->iteration + ($requisitions->currentPage() - 1) * $requisitions->perPage() }}</td>
     <td>
-        @if($req->status == 2)
-<div class="d-flex gap-2">
-    <button class="btn btn-success btn-sm transportApproveBtn" 
-            data-id="{{$req->id}}">
-        Transport Approve
-    </button>
-
-    <button class="btn btn-danger btn-sm transportRejectBtn"  
-            data-id="{{$req->id}}">
-        Transport Reject
-    </button>
-</div>
-@endif
-
-@if($req->status == 4)
-<div class="d-flex gap-2">
-    <button class="btn btn-primary btn-sm adminApproveBtn" 
-            data-id="{{$req->id}}">
-        Final Approve
-    </button>
-
-    <button class="btn btn-warning btn-sm adminRejectBtn"  
-            data-id="{{$req->id}}">
-        Final Reject
-    </button>
-</div>
-@endif
-
+        <a href="{{ route('requisitions.show', $requisition->id) }}" 
+         title="View Details">
+           <strong>{{ $requisition->requisition_number ?? 'N/A' }}</strong>
+            </a>
     </td>
-
-    <td width="">
-        <a href="{{ route('requisitions.show', $req->id) }}" 
-           class="btn btn-sm btn-info">
+    <td>
+        <div class="d-flex align-items-center">
+            <div>
+                <h6 class="mb-0">{{ $requisition->requestedBy->name ?? 'Unknown Employee' }}</h6>
+                <small class="text-strong">{{ $requisition->requestedBy->employee_code}}</small>
+            </div>
+        </div>
+    </td>
+    <td>
+        <span class="badge bg-info">{{ $requisition->department->department_name ?? 'No Department' }}</span>
+    </td>
+    <td>
+        <div>
+            <strong>{{ $requisition->vehicle->vehicle_name ?? 'No Vehicle' }}</strong>
+            @if($requisition->vehicle)
+                <br><small class="text-muted">{{ $requisition->vehicle->license_plate }}</small>
+            @endif
+        </div>
+    </td>
+    <td>
+        {{ $requisition->travel_date ? $requisition->travel_date->format('M d, Y') : 'N/A' }}
+    </td>
+    <td>
+        {{ $requisition->return_date ? $requisition->return_date->format('M d, Y') : 'N/A' }}
+    </td>
+    <td>
+        {!! $requisition->priority_badge !!}
+    </td>
+    <td>
+        @if($requisition->status == 'Pending')
+            <span class="badge bg-warning">Pending</span>
+        @elseif($requisition->status == 'Approved')
+            <span class="badge bg-success">Approved</span>
+        @elseif($requisition->status == 'Rejected')
+            <span class="badge bg-danger">Rejected</span>
+        @else
+            <span class="badge bg-secondary">Unknown</span>
+        @endif
+    </td>
+    <td>
+        <div class="btn-group" role="group">
+            <a href="{{ route('requisitions.show', $requisition->id) }}" 
+           class="btn btn-info btn-sm" title="View Details">
             <i class="fa fa-eye"></i>
         </a>
-
-        <a href="{{ route('requisitions.edit', $req->id) }}" 
-           class="btn btn-sm btn-primary">
-            <i class="fa fa-edit"></i>
-        </a>
-
-        <!-- <form action="{{ route('requisitions.destroy', $req->id) }}" 
-              method="POST" 
-              class="d-inline"
-              onsubmit="return confirm('Are you sure?');">
-            @csrf
-            @method('DELETE')
-            <button class="btn btn-sm btn-danger">
+            @if($requisition->status == 'Pending')
+                <button class="btn btn-sm btn-success approveRequest" 
+                        data-id="{{ $requisition->id }}"
+                        data-req-number="{{ $requisition->requisition_number }}">
+                    <i class="fa fa-check"></i>
+                </button>
+                <button class="btn btn-sm btn-danger rejectRequest" 
+                        data-id="{{ $requisition->id }}"
+                        data-req-number="{{ $requisition->requisition_number }}">
+                    <i class="fa fa-times"></i>
+                </button>
+                
+            @elseif($requisition->status == 'Rejected')
+                <button class="btn btn-sm btn-success approveRequest" 
+                        data-id="{{ $requisition->id }}"
+                        data-req-number="{{ $requisition->requisition_number }}">
+                    <i class="fa fa-check"></i>
+                </button>
+                <button class="btn btn-sm btn-danger rejectRequest" 
+                        data-id="{{ $requisition->id }}"
+                        data-req-number="{{ $requisition->requisition_number }}">
+                    <i class="fa fa-times"></i>
+                </button>
+            
+                
+            @elseif($requisition->status == 'Approved')
+                <button class="btn btn-sm btn-success" disabled>
+                    <i class="fa fa-check"></i>
+                </button>
+            @else
+                <span class="text-muted small">Action taken</span>
+            @endif
+            
+            <a href="{{ route('requisitions.edit', $requisition->id) }}" 
+               class="btn btn-sm btn-primary" title="Edit">
+                <i class="fa fa-edit"></i>
+            </a>
+            
+            <button class="btn btn-sm btn-danger deleteItem" 
+                    data-id="{{ $requisition->id }}"
+                    data-req-number="{{ $requisition->requisition_number }}"
+                    title="Delete">
                 <i class="fa fa-minus"></i>
             </button>
-        </form> -->
+        </div>
     </td>
 </tr>
-@endforeach
-
-@if($requisitions->count() == 0)
+@empty
 <tr>
-    <td colspan="9" class="text-center text-muted py-3">
-        No requisitions found.
+    <td colspan="10" class="text-center py-4">
+        <div class="text-muted">
+            <i class="fa fa-inbox fa-3x mb-3"></i>
+            <h5>No requisitions found</h5>
+            <p>No requisitions match your search criteria.</p>
+        </div>
     </td>
 </tr>
-@endif
-
-<script>
-    // Transport Office Approve
-$(document).on('click', '.transportApproveBtn', function () {
-    let id = $(this).data('id');
-
-    $.ajax({
-        url: "/requisitions/transport-approve/" + id,
-        type: "POST",
-        data: {
-            _token: "{{ csrf_token() }}"
-        },
-        success: function (res) {
-            if (res.status === "success") {
-                toastr.success("Transport Office Approved!");
-                setTimeout(() => location.reload(), 1000);
-            }
-        }
-    });
-});
-
-// Transport Office Reject
-$(document).on('click', '.transportRejectBtn', function () {
-    let id = $(this).data('id');
-
-    $.ajax({
-        url: "/requisitions/transport-reject/" + id,
-        type: "POST",
-        data: {
-            _token: "{{ csrf_token() }}"
-        },
-        success: function (res) {
-            if (res.status === "success") {
-                toastr.error("Transport Office Rejected!");
-                setTimeout(() => location.reload(), 1000);
-            }
-        }
-    });
-});
-
-
-// Admin Final Approve
-$(document).on('click', '.adminApproveBtn', function () {
-    let id = $(this).data('id');
-
-    $.ajax({
-        url: "/requisitions/admin-approve/" + id,
-        type: "POST",
-        data: {
-            _token: "{{ csrf_token() }}"
-        },
-        success: function (res) {
-            if (res.status === "success") {
-                toastr.success("Requisition Fully Approved (Admin Final)");
-                setTimeout(() => location.reload(), 1000);
-            }
-        }
-    });
-});
-
-// Admin Final Reject
-$(document).on('click', '.adminRejectBtn', function () {
-    let id = $(this).data('id');
-
-    $.ajax({
-        url: "/requisitions/admin-reject/" + id,
-        type: "POST",
-        data: {
-            _token: "{{ csrf_token() }}"
-        },
-        success: function (res) {
-            if (res.status === "success") {
-                toastr.error("Requisition Rejected by Admin");
-                setTimeout(() => location.reload(), 1000);
-            }
-        }
-    });
-});
-
-</script>
+@endforelse

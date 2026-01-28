@@ -17,24 +17,36 @@ class PermissionSeeder extends Seeder
             // ================= DASHBOARD =================
             'dashboard',
 
-             // ================= MENU =================
+            // ================= MENU =================
+            'menu-manage',
             'menu-create',
             'menu-edit',
             'menu-delete',
             'menu-reorder',
-            'menu-manage',
             'menu-list',
 
             // ================= REQUISITIONS =================
             'requisition-create',
             'requisition-view',
-            'requisition-approve',
-            'requisition-assign',
-            'requisition-workflow-update',
+            'requisition-edit',
+            'requisition-delete',
             'requisition-export',
             'requisition-download',
-            'requisition-approved-view',
             'requisition-pending-view',
+            'requisition-approved-view',
+
+            // ================= DEPARTMENT APPROVAL WORKFLOW =================
+            'department-approve',
+            'department-approval-view',
+            'department-approval-approve',
+            'department-approval-reject',
+
+            // ================= TRANSPORT APPROVAL WORKFLOW =================
+            'transport-approve',
+            'transport-approval-view',
+            'transport-approval-assign',
+            'transport-approval-approve',
+            'transport-approval-reject',
 
             // ================= VEHICLE MANAGEMENT =================
             'vehicle-manage',
@@ -63,7 +75,6 @@ class PermissionSeeder extends Seeder
             'department-create',
             'department-edit',
             'department-delete',
-            'department-approve',
 
             // ================= UNIT / LOCATION =================
             'unit-manage',
@@ -90,16 +101,12 @@ class PermissionSeeder extends Seeder
             'maintenance-schedule-manage',
             'maintenance-category-manage',
 
-            // ================= TRIP & TRANSPORT =================
+            // ================= TRIP SHEETS =================
             'trip-manage',
+            'trip-sheet-view',
             'trip-start',
             'trip-finish',
-            'trip-sheet-view',
-
-            'transport-approval-view',
-            'transport-approval-assign',
-            'transport-approval-approve',
-            'transport-approval-reject',
+            'trip-end',
 
             // ================= REPORTS =================
             'report-requisition',
@@ -129,7 +136,7 @@ class PermissionSeeder extends Seeder
             'payment-reject',
             'payment-invoice',
 
-            // ================= SUPPORT / TASK =================
+            // ================= SUPPORT =================
             'support-manage',
             'support-create',
             'support-edit',
@@ -153,13 +160,7 @@ class PermissionSeeder extends Seeder
             'permission-edit',
             'permission-delete',
 
-            // ================= MENU & SETTINGS =================
-            // 'menu-manage', // Added above
-            // 'menu-create',
-            // 'menu-edit',
-            // 'menu-delete',
-            // 'menu-reorder',
-
+            // ================= SETTINGS =================
             'settings-manage',
             'settings-language',
             'settings-notification',
@@ -182,19 +183,44 @@ class PermissionSeeder extends Seeder
             ]);
         }
 
-        // ================= OPTIONAL DEFAULT ROLES =================
-        $roles = [
-            'Super Admin',
-            'Admin',
-            'Transport',
-            'Employee',
-        ];
+        /*
+        |----------------------------------------------------------
+        | Default Roles
+        |----------------------------------------------------------
+        */
+        $superAdmin = Role::firstOrCreate(['name' => 'Super Admin', 'guard_name' => 'web']);
+        $admin      = Role::firstOrCreate(['name' => 'Admin', 'guard_name' => 'web']);
+        $transport  = Role::firstOrCreate(['name' => 'Transport', 'guard_name' => 'web']);
+        $employee   = Role::firstOrCreate(['name' => 'Employee', 'guard_name' => 'web']);
 
-        foreach ($roles as $roleName) {
-            Role::firstOrCreate([
-                'name' => $roleName,
-                'guard_name' => 'web',
-            ]);
-        }
+        // Super Admin gets everything
+        $superAdmin->syncPermissions(Permission::all());
+
+        // Admin permissions
+        $admin->syncPermissions([
+            'dashboard',
+            'requisition-view',
+            'department-approval-view',
+            'transport-approval-view',
+            'trip-sheet-view',
+        ]);
+
+        // Transport role permissions
+        $transport->syncPermissions([
+            'transport-approval-view',
+            'transport-approval-assign',
+            'transport-approval-approve',
+            'trip-manage',
+            'trip-start',
+            'trip-finish',
+            'trip-end',
+        ]);
+
+        // Employee permissions
+        $employee->syncPermissions([
+            'dashboard',
+            'requisition-create',
+            'requisition-view',
+        ]);
     }
 }

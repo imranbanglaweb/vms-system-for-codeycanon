@@ -22,6 +22,7 @@ use App\Notifications\TestPushNotification;
 use App\Events\RequisitionStatusUpdated;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Log;
+use App\Models\RequisitionLogHistory;
 class RequisitionController extends Controller
 {
    
@@ -53,9 +54,9 @@ class RequisitionController extends Controller
         $query->where('status', $request->status);
     }
     
-    if ($request->filled('priority')) {
-        $query->where('priority', $request->priority);
-    }
+    // if ($request->filled('priority')) {
+    //     $query->where('priority', $request->priority);
+    // }
     
     if ($request->filled('start_date')) {
         $query->whereDate('travel_date', '>=', $request->start_date);
@@ -167,7 +168,7 @@ public function validateAjax(Request $request)
     // Complete validation for ALL form fields
     $validator = Validator::make($request->all(), [
         'employee_id' => 'required|exists:employees,id',
-        'vehicle_type' => 'required|exists:vehicle_types,id',
+        'vehicle_id' => 'required|exists:vehicles,id',
         // 'driver_id' => 'required|exists:drivers,id',    
         'requisition_date' => 'required|date', // Add this if it's in your form
         'from_location' => 'required|string|max:255',
@@ -363,7 +364,7 @@ if ($user) {
 
         // Validation
         $validator = Validator::make($request->all(), [
-            'employee_id'           => 'required|exists:employees,id',
+            // 'employee_id'           => 'required|exists:employees,id',
             'vehicle_id'            => 'nullable|exists:vehicles,id',
             // 'driver_id'             => 'required|exists:drivers,id',
             'requisition_date'      => 'required|date',
@@ -508,12 +509,11 @@ public function updateWorkflow(Request $request, $id)
     ]);
 
     // Log
-    WorkflowLog::create([
+    RequisitionLoghistory::create([
         'requisition_id' => $requisition->id,
-        'changed_by' => $user->id,
-        'old_status' => $oldStatus,
-        'new_status' => $newStatus,
-        'remarks' => $request->remarks,
+        'user_id' => $user->id,
+        'action' => "Status changed from {$oldStatus} to {$newStatus}",
+        'note' => $request->remarks,
     ]);
 
     // Dispatch event for email
@@ -543,23 +543,23 @@ public function updateStatus(Request $request, $id)
     ]);
 
     // Insert log
-    WorkflowLog::create([
+    RequisitionLoghistory::create([
         'requisition_id' => $req->id,
-        'changed_by' => auth()->id(),
-        'action' => $new == 'Approved' ? 'APPROVED' : 'REJECTED',
-        'old_status' => $old,
-        'new_status' => $new,
-        'remarks' => $request->comment ?? null
+        'user_id' => auth()->id(),
+        'action_by' => $new,
+        'action_type'=> $new == 'Approved' ? 'APPROVED' : 'REJECTED',
+        'created_by'=>auth()->id(),
+        'note' => "Status changed from {$old} to {$new}. Remarks: " . ($request->comment ?? 'N/A')
     ]);
 
 
     // SEND EMAIL TO EMPLOYEE
 Mail::to($req->requestedBy->email)
-    ->send(new RequisitionStatusChangedMail($req, $newStatus, $request->comment ?? null));
+    ->send(new RequisitionStatusChangedMail($req, $new, $request->comment ?? null));
 
 // OPTIONAL: SEND EMAIL TO ADMIN  
 Mail::to('admin@company.com')
-    ->send(new RequisitionStatusChangedMail($req, $newStatus));
+    ->send(new RequisitionStatusChangedMail($req, $new));
 
     return response()->json(['success' => true]);
 }
