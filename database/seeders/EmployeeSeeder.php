@@ -4,11 +4,14 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use App\Models\Employee;
+use Faker\Factory as Faker;
 
 class EmployeeSeeder extends Seeder
 {
     public function run()
     {
+        $faker = Faker::create();
+
         $employees = [
             [
                 'name' => 'Demo Employee',
@@ -63,6 +66,18 @@ class EmployeeSeeder extends Seeder
                     'phone' => $employee['phone'] ?? null,
                 ]
             );
+        }
+
+        // Generate 100 dummy employees
+        for ($i = 0; $i < 100; $i++) {
+            Employee::create([
+                'name' => $faker->name,
+                'email' => $faker->unique()->safeEmail,
+                'department_id' => $faker->numberBetween(1, 10),
+                'unit_id' => $faker->numberBetween(1, 6),
+                'designation' => $faker->jobTitle,
+                'phone' => $faker->phoneNumber,
+            ]);
         }
     }
 }

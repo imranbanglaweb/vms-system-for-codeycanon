@@ -4,11 +4,14 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use App\Models\Vehicle;
+use Faker\Factory as Faker;
 
 class VehicleSeeder extends Seeder
 {
     public function run()
     {
+        $faker = Faker::create();
+
         $vehicles = [
             [
                 'vehicle_number' => 'DHA-1234',
@@ -58,6 +61,18 @@ class VehicleSeeder extends Seeder
                     'status' => 1,
                 ]
             );
+        }
+
+        // Generate 100 dummy vehicles
+        for ($i = 0; $i < 100; $i++) {
+            Vehicle::create([
+                'vehicle_number' => $faker->unique()->bothify('DHA-####'),
+                'vehicle_name' => $faker->randomElement(['Toyota', 'Honda', 'Nissan', 'Mitsubishi', 'Ford']) . ' ' . $faker->word,
+                'vehicle_type_id' => $faker->numberBetween(1, 8),
+                'seat_capacity' => $faker->numberBetween(4, 40),
+                'ownership' => $faker->randomElement(['Owned', 'Rented', 'Leased']),
+                'status' => 1,
+            ]);
         }
     }
 }

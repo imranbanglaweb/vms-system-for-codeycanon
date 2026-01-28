@@ -18,6 +18,7 @@ class RolePermissionSeeder extends Seeder
         $admin      = Role::where('name', 'Admin')->first();
         $transport  = Role::where('name', 'Transport')->first();
         $employee   = Role::where('name', 'Employee')->first();
+        $deptHead   = Role::where('name', 'Department Head')->first();
 
         // ================= SUPER ADMIN =================
         $superAdmin?->syncPermissions(Permission::all());
@@ -144,5 +145,17 @@ class RolePermissionSeeder extends Seeder
         ];
 
         $employee?->syncPermissions($employeePermissions);
+
+        // ================= DEPARTMENT HEAD =================
+        $deptHeadPermissions = [
+            'dashboard',
+            'requisition-view',
+            'requisition-create',
+            'department-approval-view',
+            'department-approval-approve',
+            'department-approval-reject',
+        ];
+
+        $deptHead?->syncPermissions($deptHeadPermissions);
     }
 }

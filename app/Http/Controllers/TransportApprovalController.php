@@ -17,9 +17,8 @@ class TransportApprovalController extends Controller
     public function index()
     {
         $requisitions = Requisition::with(['requestedBy', 'department'])
-            ->where('department_status', 'Approved')
-            // ->where('transport_status', 'Pending','Assigned')
-            ->whereIn('transport_status',['Assigned','Pending'])
+            ->where('status', 'Pending Transport Approval')
+            ->orWhereIn('transport_status', ['Assigned', 'Pending'])
             ->orderBy('department_approved_at', 'desc')
             ->get();
 
@@ -232,8 +231,8 @@ class TransportApprovalController extends Controller
     public function ajax(Request $request)
     {
         $query = Requisition::with(['requestedBy', 'department'])
-            ->where('department_status', 'Approved')
-            ->whereIn('transport_status', ['Assigned', 'Pending']);
+            ->where('status', 'Pending Transport Approval')
+            ->orWhereIn('transport_status', ['Assigned', 'Pending']);
 
         if ($request->filled('department_id')) {
             $query->where('department_id', $request->department_id);

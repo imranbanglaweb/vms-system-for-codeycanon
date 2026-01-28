@@ -4,11 +4,14 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use App\Models\Driver;
+use Faker\Factory as Faker;
 
 class DriverSeeder extends Seeder
 {
     public function run()
     {
+        $faker = Faker::create();
+
         $drivers = [
             [
                 'driver_name' => 'Demo Driver',
@@ -53,6 +56,18 @@ class DriverSeeder extends Seeder
                     'created_by' => 1,
                 ]
             );
+        }
+
+        // Generate 100 dummy drivers
+        for ($i = 0; $i < 100; $i++) {
+            Driver::create([
+                'driver_name' => $faker->name,
+                'mobile' => $faker->phoneNumber,
+                'license_number' => $faker->unique()->bothify('DL-###-####'),
+                'nid' => $faker->numerify('#############'),
+                'status' => 1,
+                'created_by' => 1,
+            ]);
         }
     }
 }

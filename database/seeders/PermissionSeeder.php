@@ -192,6 +192,7 @@ class PermissionSeeder extends Seeder
         $admin      = Role::firstOrCreate(['name' => 'Admin', 'guard_name' => 'web']);
         $transport  = Role::firstOrCreate(['name' => 'Transport', 'guard_name' => 'web']);
         $employee   = Role::firstOrCreate(['name' => 'Employee', 'guard_name' => 'web']);
+        $deptHead   = Role::firstOrCreate(['name' => 'Department Head', 'guard_name' => 'web']);
 
         // Super Admin gets everything
         $superAdmin->syncPermissions(Permission::all());
@@ -221,6 +222,16 @@ class PermissionSeeder extends Seeder
             'dashboard',
             'requisition-create',
             'requisition-view',
+        ]);
+
+        // Department Head permissions
+        $deptHead->syncPermissions([
+            'dashboard',
+            'requisition-view',
+            'requisition-create',
+            'department-approval-view',
+            'department-approval-approve',
+            'department-approval-reject',
         ]);
     }
 }

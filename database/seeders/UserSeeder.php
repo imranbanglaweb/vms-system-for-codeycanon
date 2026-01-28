@@ -13,7 +13,7 @@ class UserSeeder extends Seeder
     {
         // ================= ROLES =================
         $superAdminRole = Role::where('name', 'Super Admin')->first();
-        $adminRole      = Role::where('name', 'Admin')->first();
+        $deptHeadRole   = Role::where('name', 'Department Head')->first();
         $transportRole  = Role::where('name', 'Transport')->first();
         $employeeRole   = Role::where('name', 'Employee')->first();
 
@@ -28,16 +28,18 @@ class UserSeeder extends Seeder
         );
         $superAdmin->assignRole($superAdminRole);
 
-        // ================= ADMIN =================
+        // ================= DEPARTMENT HEAD =================
         $admin = User::firstOrCreate(
             ['email' => 'admin@demo.com'],
             [
-                'name' => 'Admin User',
+                'name' => 'Department Head',
                 'password' => Hash::make('password'),
                 'status' => 1,
+                'department_id' => 1, // Assuming HR department from DepartmentSeeder
+                'user_type' => 'department_head',
             ]
         );
-        $admin->assignRole($adminRole);
+        $admin->syncRoles([$deptHeadRole]);
 
         // ================= TRANSPORT =================
         $transport = User::firstOrCreate(
