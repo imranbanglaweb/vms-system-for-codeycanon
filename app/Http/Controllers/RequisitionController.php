@@ -232,6 +232,7 @@ public function validateAjax(Request $request)
             'travel_date' => $request->travel_date,
             'return_date' => $request->return_date,
             'purpose' => $request->purpose,
+            'status' => 'Pending Department Approval', // Initial status for workflow
             'created_by' => auth()->id() ?? 1,
         ]);
 

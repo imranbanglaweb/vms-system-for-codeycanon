@@ -3,172 +3,147 @@
 namespace App\Http\Controllers;
 
 use App\Models\Requisition;
-use App\Models\Department;
-use App\Models\Unit;
 use App\Models\User;
-use Yajra\DataTables\Facades\DataTables;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Notification;
 
 class DepartmentApprovalController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('auth');
+        // This permission is defined in your PermissionSeeder
+        $this->middleware('permission:department-approval-view');
+    }
+
     /**
-     * List all pending requisitions for this department.
+     * Display a listing of the requisitions pending department approval.
+     * The view will be populated by an AJAX call to the 'ajax' method.
      */
     public function index()
     {
-        // $requisitions = Requisition::with(['requestedBy', 'department', 'unit'])
-        //     ->where('status', 'Pending')
-        //     ->orderBy('created_at', 'desc')
-        //     ->get();
-
-            $departments = Department::select('id','department_name')->get();
-            $units = Unit::select('id','unit_name')->get();
-            $users = User::select('id','name')->get();
-
-        // return view('department.approvals.index', compact('departments','units','users'));
-
-        return view('admin.dashboard.approvals.department.index', compact('departments','units','users'));
+        // Assuming the view exists at this path
+        return view('admin.dashboard.approvals.department.index');
     }
-
-    public function ajax(Request $request)
-    {
-        $query = Requisition::with(['requestedBy','department','unit'])
-            ->select('requisitions.*');
-
-        // Filters
-        if ($request->filled('department_id')) {
-            $query->where('department_id', $request->department_id);
-        }
-        if ($request->filled('unit_id')) {
-            $query->where('unit_id', $request->unit_id);
-        }
-        if ($request->filled('requested_by')) {
-            $query->where('requested_by', $request->requested_by);
-        }
-        if ($request->filled('status')) {
-            $query->where(function($q) use($request){
-                $q->where('department_status', $request->status)
-                  ->orWhere('transport_status', $request->status);
-            });
-        }
-        if ($request->filled('date_from') && $request->filled('date_to')) {
-            $query->whereBetween('created_at', [
-                $request->date_from . ' 00:00:00',
-                $request->date_to . ' 23:59:59'
-            ]);
-        }
-
-        // Search customization: highlight requisition_number on server-side? we will send the string and allow client highlight
-        return Datatables::eloquent($query)
-            ->editColumn('requisition_number', function($r){
-                return $r->requisition_number;
-            })
-            ->addColumn('requested_by', function($r){
-                return $r->requestedBy->name ?? 'N/A';
-            })
-            ->addColumn('department', function($r){
-                return $r->department->department_name ?? '-';
-            })
-            ->addColumn('unit', function($r){
-                return $r->unit->unit_name ?? '-';
-            })
-            ->addColumn('department_status_badge', function($r){
-                return $r->department_status;
-            })
-            ->addColumn('transport_status_badge', function($r){
-                return $r->transport_status;
-            })
-            ->addColumn('action', function($r){
-                return view('admin.dashboard.approvals.department.partials.action_btn', compact('r'))->render();
-            })
-            ->editColumn('created_at', function($r){
-                return $r->created_at->format('d M Y');
-            })
-            ->rawColumns(['action'])
-            ->make(true);
-    }
-
 
     /**
-     * Show a single requisition for review.
+     * Display the specified requisition for approval.
      */
+    public function show($id)
+    {
+        $requisition = Requisition::with(['requestedBy', 'department', 'unit', 'passengers.employee'])->findOrFail($id);
 
-    public function show($id) {
-    $requisition = Requisition::with(['requestedBy','department','unit'])->findOrFail($id);
-    return view('admin.dashboard.approvals.department.show', compact('requisition'));
-}
+        // Security check: Dept Head can only see their department's requisitions
+        $user = Auth::user();
+        if ($user->hasRole('Department Head') && $requisition->department_id != $user->department_id) {
+            abort(403, 'You are not authorized to view this requisition.');
+        }
 
-public function approve(Request $request, $id) {
-    $req = Requisition::findOrFail($id);
-    $req->department_status = 'approved';
-    // $req->remarks = $request->remarks;
-    $req->save();
-    return response()->json(['message'=>'Requisition approved successfully!']);
-}
+        // Assuming the view exists at this path
+        return view('admin.dashboard.approvals.department.show', compact('requisition'));
+    }
 
-public function reject(Request $request, $id) {
-    $req = Requisition::findOrFail($id);
-    $req->status = 'rejected';
-    $req->remarks = $request->remarks;
-    $req->save();
-    return response()->json(['message'=>'Requisition rejected successfully!']);
-}
+    /**
+     * Approve the specified requisition and move it to the next stage.
+     */
+    public function approve(Request $request, $id)
+    {
+        $requisition = Requisition::findOrFail($id);
+        $user = Auth::user();
 
-    // public function show($id)
-    // {
-    //     $requisition = Requisition::with([
-    //         'requestedBy',
-    //         'department',
-    //         'unit',
-    //     ])->findOrFail($id);
+        // Security check
+        if ($user->hasRole('Department Head') && $requisition->department_id != $user->department_id) {
+            return response()->json(['status' => 'error', 'message' => 'Unauthorized'], 403);
+        }
 
+        if ($requisition->status !== 'Pending Department Approval') {
+            return response()->json(['status' => 'error', 'message' => 'Requisition is not in a state to be approved by the department.'], 422);
+        }
 
-    //     return view('admin.dashboard.approvals.department.modal', compact('requisition'));
+        $requisition->update([
+            'status' => 'Pending Transport Approval',
+            'department_approved_at' => now(),
+            'department_approved_by' => $user->id,
+            'department_remarks' => $request->remarks,
+        ]);
 
-    // }
+        // TODO: Optionally, notify Transport Managers
+        // $transportManagers = User::role('Transport')->get();
+        // if ($transportManagers->isNotEmpty()) {
+        //     Notification::send($transportManagers, new YourNotificationForTransport($requisition));
+        // }
 
-    // /**
-    //  * Approve the requisition.
-    //  */
-    // public function approve(Request $request, $id)
-    // {
-    //     $requisition = Requisition::findOrFail($id);
+        return response()->json(['status' => 'success', 'message' => 'Requisition approved and forwarded to the Transport department.']);
+    }
 
-    //     $requisition->department_status = 'Approved';
-    //     $requisition->department_remarks = $request->remarks;
-    //     $requisition->department_approved_at = now();
-    //     $requisition->save();
+    /**
+     * Reject the specified requisition.
+     */
+    public function reject(Request $request, $id)
+    {
+        $request->validate(['remarks' => 'required|string|max:500']);
+        $requisition = Requisition::findOrFail($id);
+        $user = Auth::user();
 
-    //     // TODO: Add notification (Email/SMS)
-    //     // event(new RequisitionDepartmentApproved($requisition));
+        // Security check
+        if ($user->hasRole('Department Head') && $requisition->department_id != $user->department_id) {
+            return response()->json(['status' => 'error', 'message' => 'Unauthorized'], 403);
+        }
 
-    //     return response()->json([
-    //         'status' => 'success',
-    //         'message' => 'Requisition approved successfully.'
-    //     ]);
-    // }
+        if ($requisition->status !== 'Pending Department Approval') {
+            return response()->json(['status' => 'error', 'message' => 'Requisition is not in a state to be rejected by the department.'], 422);
+        }
 
-    // /**
-    //  * Reject the requisition.
-    //  */
-    // public function reject(Request $request, $id)
-    // {
-    //     $requisition = Requisition::findOrFail($id);
+        $requisition->update([
+            'status' => 'Rejected by Department',
+            'department_approved_at' => now(), // This is more like 'processed_at'
+            'department_approved_by' => $user->id,
+            'department_remarks' => $request->remarks,
+        ]);
 
-    //     $request->validate([
-    //         'remarks' => 'required'
-    //     ]);
+        // TODO: Optionally, notify the original requester
+        // if ($requisition->requestedBy->user) {
+        //    Notification::send($requisition->requestedBy->user, new YourRejectionNotification($requisition));
+        // }
 
-    //     $requisition->department_status = 'Rejected';
-    //     $requisition->department_remarks = $request->remarks;
-    //     $requisition->save();
+        return response()->json(['status' => 'success', 'message' => 'Requisition has been rejected.']);
+    }
 
-    //     // TODO: Add notification
-    //     // event(new RequisitionDepartmentRejected($requisition));
+    /**
+     * Provide data for the department approval DataTable.
+     */
+    public function ajax(Request $request)
+    {
+        $user = Auth::user();
+        $query = Requisition::with(['requestedBy', 'department'])
+            ->where('status', 'Pending Department Approval');
 
-    //     return response()->json([
-    //         'status' => 'success',
-    //         'message' => 'Requisition rejected successfully.'
-    //     ]);
-    // }
+        // Department head should only see requisitions from their own department.
+        // Super Admin/Admin can see all.
+        if ($user->hasRole('Department Head')) {
+            // Assuming the User model has a 'department_id'
+            $query->where('department_id', $user->department_id);
+        }
+
+        return \DataTables::eloquent($query)
+            ->addColumn('requested_by', function ($r) {
+                return $r->requestedBy->name ?? '-';
+            })
+            ->addColumn('department', function ($r) {
+                return $r->department->department_name ?? '-';
+            })
+            ->addColumn('travel_date', function ($r) {
+                return $r->travel_date ? date('d M, Y', strtotime($r->travel_date)) : '-';
+            })
+            ->addColumn('status_badge', function ($r) {
+                return '<span class="badge bg-warning">' . $r->status . '</span>';
+            })
+            ->addColumn('action', function ($r) {
+                $viewUrl = route('department.approvals.show', $r->id);
+                return '<a href="' . $viewUrl . '" class="btn btn-sm btn-primary"><i class="fa fa-eye"></i> View</a>';
+            })
+            ->rawColumns(['status_badge', 'action'])
+            ->make(true);
+    }
 }
