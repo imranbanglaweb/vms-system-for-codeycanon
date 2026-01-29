@@ -19,6 +19,7 @@
 		<link rel="stylesheet" href="{{ asset('public/admin_resource/')}}/assets/vendor/bootstrap/css/bootstrap.css" />
 		
 		<link rel="stylesheet" href="{{ asset('public/admin_resource/')}}/assets/vendor/font-awesome/css/font-awesome.css" />
+		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
 		<link rel="stylesheet" href="{{ asset('public/admin_resource/')}}/assets/vendor/magnific-popup/magnific-popup.css" />
 		<!-- <link rel="stylesheet" href="{{ asset('public/admin_resource/')}}/assets/vendor/bootstrap-datepicker/css/datepicker3.css" /> -->
 

@@ -51,26 +51,51 @@
 
     {{-- SINGLE MENU --}}
     @if($children->isEmpty())
+        @php
+            // For FA 6, icons need 'fa-' prefix but NOT 'fa fa-' (double prefix)
+            $iconValue = $menu->menu_icon;
+            if (str_starts_with($iconValue, 'fa-')) {
+                $iconClass = 'fas ' . $iconValue;
+            } else {
+                $iconClass = 'fas fa-' . $iconValue;
+            }
+        @endphp
         <li class="{{ $menu->menu_url === $currentRoute ? 'nav-active' : '' }}">
             <a href="{{ $menu->menu_url && Route::has($menu->menu_url) ? route($menu->menu_url) : '#' }}">
-                <i class="fa {{ $menu->menu_icon }}"></i>
+                <i class="{{ $iconClass }}"></i>
                 <span>{{ trans(ensure_menu_translation($menu->menu_name)) }}</span>
             </a>
         </li>
 
     {{-- PARENT MENU --}}
     @else
+        @php
+            $parentIconValue = $menu->menu_icon;
+            if (str_starts_with($parentIconValue, 'fa-')) {
+                $parentIconClass = 'fas ' . $parentIconValue;
+            } else {
+                $parentIconClass = 'fas fa-' . $parentIconValue;
+            }
+        @endphp
         <li class="nav-parent {{ $isActiveParent ? 'nav-expanded nav-active' : '' }}">
             <a href="#">
-                <i class="fa {{ $menu->menu_icon }}"></i>
+                <i class="{{ $parentIconClass }}"></i>
                 <span>{{ trans(ensure_menu_translation($menu->menu_name)) }}</span>
             </a>
 
             <ul class="nav nav-children">
                 @foreach($children as $child)
+                    @php
+                        $childIconValue = $child->menu_icon;
+                        if (str_starts_with($childIconValue, 'fa-')) {
+                            $childIconClass = 'fas ' . $childIconValue;
+                        } else {
+                            $childIconClass = 'fas fa-' . $childIconValue;
+                        }
+                    @endphp
                     <li class="{{ $child->menu_url === $currentRoute ? 'nav-active' : '' }}">
                         <a href="{{ $child->menu_url && Route::has($child->menu_url) ? route($child->menu_url) : '#' }}">
-                            <i class="fa {{ $child->menu_icon }}"></i>
+                            <i class="{{ $childIconClass }}"></i>
                             {{ trans(ensure_menu_translation($child->menu_name)) }}
                         </a>
                     </li>

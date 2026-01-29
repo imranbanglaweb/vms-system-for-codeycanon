@@ -10,7 +10,7 @@
         <div class="row">
             <div class="col-md-5">
                 <label class="form-label fw-semibold">Select Vehicle</label>
-                <select name="assigned_vehicle_id" class="form-select form-select-lg" style="width:100%">
+                <select name="assigned_vehicle_id" id="vehicleSelect" class="form-select form-select-lg select2" style="width:100%">
                     <option value="">-- Select Vehicle --</option>
                     @foreach($vehicles as $vehicle)
                         <option value="{{ $vehicle->id }}"  data-status="{{ $vehicle->availability_status }}" @if(strtolower($vehicle->availability_status) === 'assigned') disabled @endif {{ (isset($requisition->assignedVehicle) && $requisition->assignedVehicle->id == $vehicle->id) ? 'selected' : '' }}>
@@ -22,7 +22,7 @@
             </div>
             <div class="col-md-5">
                 <label class="form-label fw-semibold">Select Driver</label>
-                <select name="assigned_driver_id" class="form-select form-select-lg" style="width:100%">
+                <select name="assigned_driver_id" id="driverSelect" class="form-select form-select-lg select2" style="width:100%">
                     <option value="">-- Select Driver --</option>
                     @foreach($drivers as $driver)
                         <option 

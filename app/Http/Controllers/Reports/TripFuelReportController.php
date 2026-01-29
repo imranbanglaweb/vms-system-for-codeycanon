@@ -20,7 +20,7 @@ class TripFuelReportController extends Controller
         }
 
         // Fetch records to pass to the view to resolve "Undefined variable $records"
-        $records = $query->latest()->get();
+        $records = $query->latest()->paginate(10);
 
         $vehicles = Vehicle::all();
         $drivers = Driver::all();

@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Requisition;
 use App\Models\User;
+use App\Models\Department;
+use App\Models\Unit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Notification;
@@ -23,8 +25,12 @@ class DepartmentApprovalController extends Controller
      */
     public function index()
     {
+        $departments = Department::all();
+        $units = Unit::all();
+        $users = User::all();
+
         // Assuming the view exists at this path
-        return view('admin.dashboard.approvals.department.index');
+        return view('admin.dashboard.approvals.department.index', compact('departments', 'units', 'users'));
     }
 
     /**
@@ -57,12 +63,13 @@ class DepartmentApprovalController extends Controller
             return response()->json(['status' => 'error', 'message' => 'Unauthorized'], 403);
         }
 
-        if ($requisition->status !== 'Pending Department Approval') {
+        if ($requisition->department_status !== 'Pending') {
             return response()->json(['status' => 'error', 'message' => 'Requisition is not in a state to be approved by the department.'], 422);
         }
 
         $requisition->update([
-            'status' => 'Pending Transport Approval',
+            'department_status' => 'Approved',
+            'transport_status' => 'Pending',
             'department_approved_at' => now(),
             'department_approved_by' => $user->id,
             'department_remarks' => $request->remarks,
@@ -115,35 +122,68 @@ class DepartmentApprovalController extends Controller
      */
     public function ajax(Request $request)
     {
-        $user = Auth::user();
-        $query = Requisition::with(['requestedBy', 'department'])
-            ->where('status', 'Pending Department Approval');
+    $user = Auth::user();
 
-        // Department head should only see requisitions from their own department.
-        // Super Admin/Admin can see all.
-        if ($user->hasRole('Department Head')) {
-            // Assuming the User model has a 'department_id'
-            $query->where('department_id', $user->department_id);
-        }
+    $query = Requisition::with(['requestedBy', 'department', 'unit'])
+        ->whereIn('department_status', ['Pending', 'Approved']);
 
-        return \DataTables::eloquent($query)
-            ->addColumn('requested_by', function ($r) {
-                return $r->requestedBy->name ?? '-';
-            })
-            ->addColumn('department', function ($r) {
-                return $r->department->department_name ?? '-';
-            })
-            ->addColumn('travel_date', function ($r) {
-                return $r->travel_date ? date('d M, Y', strtotime($r->travel_date)) : '-';
-            })
-            ->addColumn('status_badge', function ($r) {
-                return '<span class="badge bg-warning">' . $r->status . '</span>';
-            })
-            ->addColumn('action', function ($r) {
-                $viewUrl = route('department.approvals.show', $r->id);
-                return '<a href="' . $viewUrl . '" class="btn btn-sm btn-primary"><i class="fa fa-eye"></i> View</a>';
-            })
-            ->rawColumns(['status_badge', 'action'])
-            ->make(true);
+    if ($user->hasRole('Department Head')) {
+        $query->where('department_id', $user->department_id);
     }
+
+    // Filters
+    if ($request->department_id) {
+        $query->where('department_id', $request->department_id);
+    }
+    if ($request->unit_id) {
+        $query->where('unit_id', $request->unit_id);
+    }
+    if ($request->requested_by) {
+        $query->where('requested_by', $request->requested_by);
+    }
+    if ($request->status) {
+        $query->where('status', $request->status);
+    }
+    if ($request->date_from) {
+        $query->whereDate('created_at', '>=', $request->date_from);
+    }
+    if ($request->date_to) {
+        $query->whereDate('created_at', '<=', $request->date_to);
+    }
+    if ($request->search_text) {
+        $search = $request->search_text;
+        $query->where(function($q) use ($search) {
+            $q->where('requisition_number', 'like', "%$search%");
+        });
+    }
+
+    return \DataTables::eloquent($query)
+
+        ->addColumn('requested_by', fn($r) => $r->requestedBy->name ?? '-')
+        ->addColumn('department', fn($r) => $r->department->department_name ?? '-')
+        ->addColumn('unit', fn($r) => $r->unit->unit_name ?? '-')
+
+        ->addColumn('department_status_badge', function ($r) {
+            return $r->department_status;
+        })
+
+        ->addColumn('transport_status_badge', function ($r) {
+            return $r->transport_status ?? 'Pending';
+        })
+         ->addColumn('action', function($r){
+            // Only show Review button if department_status is Pending
+            if ($r->department_status === 'Pending') {
+                $url = route('department.approvals.show', $r->id);
+                return '<a href="'.$url.'" class="btn btn-sm btn-primary">
+                            <i class="fa fa-eye me-1"></i> Review
+                        </a>';
+            }
+            return '<span class="text-muted">Approved</span>';
+        })
+
+        ->rawColumns(['action'])
+        ->make(true);
+    }
+
+
 }

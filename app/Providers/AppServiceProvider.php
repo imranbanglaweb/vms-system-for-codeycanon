@@ -6,11 +6,14 @@ use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Blade;
 use App\Models\Menu;
+use App\Models\Requisition;
+use App\Observers\RequisitionObserver;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Translation\FileLoader;
 use App\Services\CustomTranslationLoader;
 use App\Services\MenuService;
 use Illuminate\Support\Facades\View;
+
 class AppServiceProvider extends ServiceProvider
 {
     public function register()
@@ -31,6 +34,11 @@ class AppServiceProvider extends ServiceProvider
         $this->app->extend('translation.loader', function ($loader, $app) {
             return new CustomTranslationLoader($app['files'], $app['path.lang']);
         });
+
+        /**
+         * Register Requisition Observer
+         */
+        Requisition::observe(RequisitionObserver::class);
 
         /**
          * Sidebar menus
@@ -84,7 +92,7 @@ class AppServiceProvider extends ServiceProvider
         });
 
         Blade::if('ltr', function () {
-            return session('direction', 'ltr') === 'ltr';
+            return session('direction', 'ltr') === 'rtl';
         });
     }
 }

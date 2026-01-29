@@ -6,23 +6,39 @@ use App\Models\Requisition;
 use App\Models\Vehicle;
 use App\Models\Driver;
 use App\Models\TripSheet;
+use App\Models\Department;
+use App\Models\User;
+use App\Services\EmailService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Auth;
+
 class TransportApprovalController extends Controller
 {
+    /**
+     * @var EmailService
+     */
+    protected $emailService;
+
+    /**
+     * Create a new controller instance.
+     *
+     * @param EmailService $emailService
+     * @return void
+     */
+    public function __construct(EmailService $emailService)
+    {
+        $this->emailService = $emailService;
+    }
+
     /**
      * List all department-approved requisitions.
      */
     public function index()
     {
-        $requisitions = Requisition::with(['requestedBy', 'department'])
-            ->where('status', 'Pending Transport Approval')
-            ->orWhereIn('transport_status', ['Assigned', 'Pending'])
-            ->orderBy('department_approved_at', 'desc')
-            ->get();
-
-        return view('admin.dashboard.approvals.transport.index', compact('requisitions'));
+        $departments = Department::all();
+        $users = User::all();
+        return view('admin.dashboard.approvals.transport.index', compact('departments', 'users'));
     }
 
     /**
@@ -88,7 +104,7 @@ class TransportApprovalController extends Controller
         $vehicleConflict = Requisition::where('assigned_vehicle_id', $vehicle->id)
             ->whereIn('transport_status',['Assigned','Approved'])
             ->whereDate('travel_date', $travelDate)
-            ->where('id','=',$requisition->id)
+            ->where('id','!=', $requisition->id)
             ->exists();
 
         if ($vehicleConflict) {
@@ -100,7 +116,7 @@ class TransportApprovalController extends Controller
         $driverConflict = Requisition::where('assigned_driver_id', $driver->id)
             ->whereIn('transport_status',['Assigned','Approved'])
             ->whereDate('travel_date', $travelDate)
-            ->where('id','=',$requisition->id)
+            ->where('id','!=', $requisition->id)
             ->exists();
 
         if ($driverConflict) {
@@ -135,13 +151,19 @@ class TransportApprovalController extends Controller
             return response()->json(['status'=>'error','message'=>'Assign vehicle and driver before final approval.'], 422);
         }
 
+        $oldStatus = $requisition->transport_status;
+        
         $requisition->transport_status = 'Approved';
         $requisition->transport_approved_at = now();
         $requisition->transport_admin_id = Auth::id();
         $requisition->transport_remarks = $request->remarks ?? $requisition->transport_remarks;
+        $requisition->status = 'Transport_Approved';
         $requisition->save();
 
-        // // Optionally send notifications to requester, driver, vehicle owner, etc.
+        // Send email notification to requester, driver, and transport head
+        $this->emailService->sendTransportApproved($requisition);
+
+        // Optionally send notifications to requester, driver, vehicle owner, etc.
 
         //  // Update vehicle status
         $vehicle = Vehicle::find($requisition->assigned_vehicle_id);
@@ -181,6 +203,7 @@ class TransportApprovalController extends Controller
         $requisition->transport_remarks = $request->remarks;
         $requisition->transport_approved_at = now();
         $requisition->transport_approved_by = Auth::id();
+        $requisition->status = 'Rejected by Transport';
         $requisition->save();
 
         // Optionally free vehicle/driver if previously assigned
@@ -230,9 +253,13 @@ class TransportApprovalController extends Controller
      */
     public function ajax(Request $request)
     {
+        // Only show requisitions that have been approved by department
         $query = Requisition::with(['requestedBy', 'department'])
-            ->where('status', 'Pending Transport Approval')
-            ->orWhereIn('transport_status', ['Assigned', 'Pending']);
+            ->where('department_status', 'Approved')
+            ->where(function($q) {
+                $q->where('status', 'Pending Transport Approval')
+                  ->orWhereIn('transport_status', ['Assigned', 'Pending', 'Approved']);
+            });
 
         if ($request->filled('department_id')) {
             $query->where('department_id', $request->department_id);
@@ -268,7 +295,11 @@ class TransportApprovalController extends Controller
                 return '<span class="badge bg-' . $class . '">' . $status . '</span>';
             })
             ->addColumn('action', function($r){
-                return view('admin.dashboard.approvals.transport.partials.action_btn', compact('r'))->render();
+                // Only show Process button if transport_status is Pending or Assigned
+                if (in_array($r->transport_status, ['Pending', 'Assigned'])) {
+                    return view('admin.dashboard.approvals.transport.partials.action_btn', compact('r'))->render();
+                }
+                return '<span class="text-muted">Completed</span>';
             })
             ->rawColumns(['status_badge','action'])
             ->make(true);

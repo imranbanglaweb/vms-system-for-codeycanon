@@ -27,6 +27,7 @@ class DatabaseSeeder extends Seeder
             RequisitionPassengerSeeder::class,
             LanguageSeeder::class,
             SubscriptionPlanSeeder::class,
+            EmailTemplateSeeder::class,
         ]);
     }
 }

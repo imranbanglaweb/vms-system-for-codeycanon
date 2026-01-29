@@ -1,0 +1,105 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
+
+class EmailTemplate extends Model
+{
+    use SoftDeletes;
+
+    protected $fillable = [
+        'name',
+        'slug',
+        'subject',
+        'body',
+        'type',
+        'variables',
+        'is_active',
+        'created_by',
+        'updated_by'
+    ];
+
+    protected $casts = [
+        'variables' => 'array',
+        'is_active' => 'boolean'
+    ];
+
+    // Template type constants for requisition workflow
+    public const TYPE_CREATED = 'requisition_created';
+    public const TYPE_DEPT_APPROVED = 'dept_approved';
+    public const TYPE_TRANSPORT_APPROVED = 'transport_approved';
+
+    /**
+     * Get all available template types
+     */
+    public static function getTemplateTypes(): array
+    {
+        return [
+            self::TYPE_CREATED => 'Requisition Created',
+            self::TYPE_DEPT_APPROVED => 'Department Approved',
+            self::TYPE_TRANSPORT_APPROVED => 'Transport Approved',
+        ];
+    }
+
+    /**
+     * Scope active templates only
+     */
+    public function scopeActive($query)
+    {
+        return $query->where('is_active', true);
+    }
+
+    /**
+     * Scope by template type
+     */
+    public function scopeOfType($query, string $type)
+    {
+        return $query->where('type', $type);
+    }
+
+    /**
+     * Find template by slug
+     */
+    public static function findBySlug(string $slug): ?self
+    {
+        return static::where('slug', $slug)->active()->first();
+    }
+
+    /**
+     * Find template by type
+     */
+    public static function findByType(string $type): ?self
+    {
+        return static::ofType($type)->active()->first();
+    }
+
+    /**
+     * Get available variables for this template
+     */
+    public function getAvailableVariables(): array
+    {
+        return $this->variables ?? [];
+    }
+
+    /**
+     * Replace variables in template body and subject
+     */
+    public function render(array $data): array
+    {
+        $subject = $this->subject;
+        $body = $this->body;
+
+        foreach ($data as $key => $value) {
+            $placeholder = '{{' . $key . '}}';
+            $subject = str_replace($placeholder, $value, $subject);
+            $body = str_replace($placeholder, $value, $body);
+        }
+
+        return [
+            'subject' => $subject,
+            'body' => $body
+        ];
+    }
+}

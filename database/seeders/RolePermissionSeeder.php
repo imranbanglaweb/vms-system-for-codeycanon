@@ -41,8 +41,18 @@ class RolePermissionSeeder extends Seeder
             'department-approval-approve',
             'department-approval-reject',
 
-            // Transport Approval View
+            // Transport Approval
             'transport-approval-view',
+            'transport-approval-assign',
+            'transport-approval-approve',
+            'transport-approval-reject',
+
+            // Trip Sheets
+            'trip-manage',
+            'trip-sheet-view',
+            'trip-start',
+            'trip-finish',
+            'trip-end',
 
             // Vehicles
             'vehicle-manage',
@@ -77,7 +87,14 @@ class RolePermissionSeeder extends Seeder
             // Reports
             'report-requisition',
             'report-maintenance',
+            'report-trip-fuel',
+            'report-vehicle-utilization',
+            'report-driver-performance',
             'report-export',
+
+            // Settings & Notifications
+            'settings-notification',
+            'notification-manage',
 
             // Users / Roles
             'user-manage',

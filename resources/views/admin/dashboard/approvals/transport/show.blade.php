@@ -159,6 +159,7 @@
 </section>
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" />
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
 
@@ -215,7 +216,7 @@ $(document).ready(function(){
         vText = vText ? vText.replace(/\s+—\s+(Available|Unavailable|Unavailable)/, '') : '';
         dText = dText ? dText.replace(/\s+—\s+(Available|Unavailable|Unavailable)/, '') : '';
 
-        if ((vText && vText.trim() !== '-- Choose Vehicle --') || (dText && dText.trim() !== '-- Choose Driver --')) {
+        if ((vText && vText.trim() !== '-- Select Vehicle --') || (dText && dText.trim() !== '-- Select Driver --')) {
             $('#assignmentSummary').show();
             $('#summaryVehicle').text(vText.trim() || '—');
             $('#summaryDriver').text(dText.trim() || '—');
@@ -231,6 +232,7 @@ $(document).ready(function(){
             // show popup and reset selection
             Swal.fire({
                 icon: 'warning',
+                title: 'Vehicle Unavailable',
                 text: 'Selected vehicle is currently assigned. Please choose another vehicle.',
                 confirmButtonText: 'OK'
             });
@@ -246,6 +248,7 @@ $(document).ready(function(){
             // show popup and reset selection
             Swal.fire({
                 icon: 'warning',
+                title: 'Driver Unavailable',
                 text: 'Selected driver is currently assigned. Please choose another driver.',
                 confirmButtonText: 'OK'
             });
@@ -260,11 +263,9 @@ $(document).ready(function(){
     updateSummary();
 
     // Live refresh: poll availability endpoint every 10 seconds and update options
-    // Requires backend route: transport.approvals.availability
     function refreshAvailability() {
         $.get("{{ route('transport.approvals.availability', $requisition->id) }}")
             .done(function(res){
-                // res expected: { vehicles: [{id, availability_status}], drivers: [{id, availability_status}], assigned_info: { vehicle_id, driver_id, vehicle_name, driver_name } }
                 if (!res) return;
 
                 // update options for vehicles
@@ -301,20 +302,11 @@ $(document).ready(function(){
                 // refresh select2 so disabled changes take effect visually
                 $('#vehicleSelect, #driverSelect').trigger('change.select2');
 
-                // optional: if server sends currently assigned info, show small popup (non-intrusive)
-                if (res.assigned_info) {
-                    // only show if there is a conflict with the current requisition
-                    // e.g. assigned_info = { vehicle_id, vehicle_name, driver_id, driver_name } OR message
-                    $('#vehicleStatus').append('');
-                    // you can implement a subtle badge update or toast here if you want
-                }
-
                 // update status displays/summary after refresh
                 updateStatusDisplays();
                 updateSummary();
             })
             .fail(function(){
-                // silent fail (do nothing) — avoid annoying the user
                 console.warn('Failed to refresh availability');
             });
     }
@@ -330,77 +322,47 @@ $(document).ready(function(){
 });
 </script>
 <script>
-$(document).ready(function(){
-    $('.select2').select2({ width: "100%" });
-
-
-    
-});
-
 // SweetAlert Popup
-function alertBox(type, message){
+function alertBox(type, message, title = ''){
     Swal.fire({
         icon: type,
+        title: title,
         text: message,
         confirmButtonColor: type === 'success' ? '#28a745' : '#dc3545',
-        confirmButtonText: "OK",
-        background: "#f4f6f9",
-        color: "#333",
-        customClass: { popup: "rounded-4 shadow" }
+        confirmButtonText: 'OK',
+        background: '#f4f6f9',
+        color: '#333',
+        customClass: { popup: 'rounded-4 shadow' }
     });
 }
 
 // Assign Vehicle & Driver
-// function submitAssign() {
-//     if(!$('select[name="assigned_vehicle_id"]').val() || !$('select[name="assigned_driver_id"]').val()){
-//         alertBox('error', 'Please select both vehicle and driver.');
-//         return;
-//     }
-
-//     $.post("{{ route('transport.approvals.assign', $requisition->id) }}",
-//         $("#assignForm").serialize(),
-//         function(res){
-//             alertBox('success', res.message);
-//             setTimeout(()=>location.reload(), 1500);
-//         }
-//     ).fail(function(xhr){
-//         let msg = xhr.responseJSON?.message || "Assignment failed.";
-//         alertBox('error', msg);
-//     });
-// }
-
-
 function submitAssign() {
-
-    if (!$('select[name="assigned_vehicle_id"]').val() || !$('select[name="assigned_driver_id"]').val()) {
+    if (!$('#vehicleSelect').val() || !$('#driverSelect').val()) {
         alertBox('error', 'Please select both vehicle and driver.');
         return;
     }
 
     $.ajax({
         url: "{{ route('transport.approvals.assign', $requisition->id) }}",
-        type: "POST",
-        data: $("#assignForm").serialize(),
+        type: 'POST',
+        data: $('#assignForm').serialize(),
         success: function(res) {
-            alertBox('success', res.message);
+            alertBox('success', res.message, 'Success!');
             setTimeout(() => location.reload(), 1500);
         },
         error: function(xhr) {
-
             if (xhr.status === 422) {
-
                 // CASE 1: Laravel validation errors
                 if (xhr.responseJSON.errors) {
                     let errors = xhr.responseJSON.errors;
                     let firstError = Object.values(errors)[0][0];
                     alertBox('error', firstError);
                 }
-
-                // CASE 2: Custom backend conflict messages (vehicle/driver already assigned)
+                // CASE 2: Custom backend conflict messages
                 else if (xhr.responseJSON.message) {
                     alertBox('error', xhr.responseJSON.message);
                 }
-                
             } else {
                 alertBox('error', 'Assignment failed. Please try again.');
             }
@@ -408,25 +370,25 @@ function submitAssign() {
     });
 }
 
-
-// Approve or Reject
+// Approve or Reject - remarks required only for reject
 function submitAction(type){
     let remarks = $('textarea[name="remarks"]').val().trim();
-
-    if(!remarks){
-        alertBox('error', 'Remarks are required.');
+    
+    // For reject, remarks are required
+    if(type === 'reject' && !remarks){
+        alertBox('error', 'Remarks are required for rejection.');
         return;
     }
 
-    let url = type === "approve"
+    let url = type === 'approve'
         ? "{{ route('transport.approvals.approve', $requisition->id) }}"
         : "{{ route('transport.approvals.reject', $requisition->id) }}";
 
-    $.post(url, $("#actionForm").serialize(), function(res){
-        alertBox('success', res.message);
+    $.post(url, $('#actionForm').serialize(), function(res){
+        alertBox('success', res.message, 'Success!');
         setTimeout(()=>window.location.href="{{ route('transport.approvals.index') }}", 1500);
     }).fail(function(xhr){
-        let msg = xhr.responseJSON?.message || "Action failed.";
+        let msg = xhr.responseJSON?.message || 'Action failed.';
         alertBox('error', msg);
     });
 }

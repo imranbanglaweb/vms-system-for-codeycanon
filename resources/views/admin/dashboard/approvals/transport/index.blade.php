@@ -1,86 +1,151 @@
 @extends('admin.dashboard.master')
 
-@section('main_content')
 <style>
-    table{
-        color:#000;
-        font-size:15px;
-    }
-</style>
-<section role="main" class="content-body" style="background-color:#f1f4f8;">
-<div class="container-fluid px-4 mt-4">
+body { background:#ffffff !important; }
 
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h3 class="fw-bold text-primary">
-            <i class="fa-solid fa-truck-moving me-2"></i>Transport Approval Panel
+.content-body { padding:20px 25px !important; }
+
+.card { border-radius:12px; }
+
+/* Filter alignment */
+.filter-bar .form-control,
+.filter-bar .form-select {
+    height:40px;
+    font-size:14px;
+}
+
+/* Table styling */
+.table thead th {
+    text-align:center;
+    vertical-align:middle !important;
+}
+.table tbody td {
+    vertical-align:middle !important;
+}
+
+table.dataTable tbody tr:hover {
+    filter: brightness(0.97);
+}
+
+/* 🎨 Row colors by Transport Status */
+tr.status-pending  { background-color:#fff9db !important; }
+tr.status-busy     { background-color:#e7f1ff !important; }
+tr.status-assigned { background-color:#f1f3f5 !important; }
+tr.status-approved { background-color:#e6f7ed !important; }
+tr.status-rejected { background-color:#fdecea !important; }
+</style>
+
+@section('main_content')
+<section role="main" class="content-body">
+<div class="container-fluid">
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h3 class="mb-0 fw-bold">
+            <i class="fa-solid fa-truck-moving me-2"></i> Transport Approval Panel
         </h3>
     </div>
 
-    <div class="card shadow border-0">
-        <div class="card-body p-4">
+    <div class="card shadow-sm border-0 mb-3">
+        <div class="card-body">
 
-            <!-- Filter Bar -->
-            <div class="row g-2 mb-3" id="filterBar">
-                <div class="col-md-3">
-                    <input type="text" id="searchBox" class="form-control" placeholder="Search requisition # or text">
-                </div>
+            <!-- 🔍 FILTER BAR -->
+            <div class="row g-2 align-items-end mb-3 filter-bar">
+
                 <div class="col-md-2">
+                    <label class="form-label">Search Requisition</label>
+                    <input type="text" id="searchBox" class="form-control" placeholder="Enter requisition number">
+                </div>
+
+                <div class="col-md-2">
+                    <label class="form-label">Department</label>
                     <select id="filterDepartment" class="form-select">
-                        <option value="">All Departments</option>
-                        <!-- Option values should be loaded dynamically or via JS -->
+                        <option value="">All</option>
+                        @foreach($departments as $d)
+                            <option value="{{ $d->id }}">{{ $d->department_name }}</option>
+                        @endforeach
                     </select>
                 </div>
+
                 <div class="col-md-2">
+                    <label class="form-label">Transport Status</label>
                     <select id="filterStatus" class="form-select">
-                        <option value="">All Status</option>
+                        <option value="">All</option>
                         <option value="Pending">Pending</option>
                         <option value="Assigned">Assigned</option>
                         <option value="Approved">Approved</option>
                         <option value="Rejected">Rejected</option>
                     </select>
                 </div>
-                <div class="col-md-2 d-flex gap-2">
-                    <input type="date" id="dateFrom" class="form-control">
-                    <input type="date" id="dateTo" class="form-control">
+
+                <div class="col-md-3">
+                    <label class="form-label">Date From</label>
+                    <div class="d-flex gap-2">
+                        <input type="date" id="dateFrom" class="form-control">
+                    </div>
                 </div>
-                <div class="col-12 mt-2">
-                    <button id="btnFilter" class="btn btn-primary btn-sm">Apply</button>
-                    <button id="btnReset" class="btn btn-outline-secondary btn-sm">Reset</button>
+
+                <div class="col-md-3">
+                    <label class="form-label">Date To</label>
+                    <div class="d-flex gap-2">
+                        <input type="date" id="dateTo" class="form-control">
+                    </div>
                 </div>
+
+               
             </div>
+  <div class="col-12 mt-2">
+                    <button id="btnFilter" class="btn btn-primary btn-sm">
+                        <i class="fa fa-filter me-1"></i> Apply Filters
+                    </button>
+                    <button id="btnReset" class="btn btn-outline-secondary btn-sm">
+                        Reset
+                    </button>
+                </div>
             <hr>
-            <!-- DataTable -->
+
+            <!-- 📋 FULL WIDTH TABLE -->
             <div class="table-responsive">
-                <table id="transportTable" class="table table-striped table-hover align-middle w-100">
-                    <thead class="bg-dark text-white sticky-top">
+                <table id="transportTable" class="table table-bordered table-hover align-middle w-100">
+                    <thead class="table-dark">
                         <tr>
                             <th>Req No</th>
                             <th>Requested By</th>
                             <th>Department</th>
                             <th>Passengers</th>
-                            <th>Dept Approved</th>
-                            <th>Status</th>
-                            <th class="text-center">Action</th>
+                            <th>Dept Status</th>
+                            <th>Transport Status</th>
+                            <th>Created At</th>
+                            <th class="text-center">Actions</th>
                         </tr>
                     </thead>
                 </table>
             </div>
 
-<!-- Scripts for DataTable -->
+        </div>
+    </div>
+</div>
+</section>
+
+<!-- Scripts -->
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-<link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/dataTables.bootstrap5.min.css">
 <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
 <script src="https://cdn.datatables.net/1.13.7/js/dataTables.bootstrap5.min.js"></script>
 
 <script>
 $(function(){
-    // DataTable
+
+    $.ajaxSetup({ headers:{ 'X-CSRF-TOKEN':'{{ csrf_token() }}' } });
+
     var table = $('#transportTable').DataTable({
-        processing: true,
-        serverSide: true,
-        ajax: {
-            url: "{{ route('transport.approvals.ajax') }}",
-            data: function(d){
+        processing:true,
+        serverSide:true,
+        responsive:true,
+        autoWidth:false,
+        searching: false, 
+
+        ajax:{
+            url:"{{ route('transport.approvals.ajax') }}",
+            data:function(d){
                 d.department_id = $('#filterDepartment').val();
                 d.status = $('#filterStatus').val();
                 d.date_from = $('#dateFrom').val();
@@ -88,31 +153,49 @@ $(function(){
                 d.search_text = $('#searchBox').val();
             }
         },
-        columns: [
-            { data: 'requisition_number', name: 'requisition_number' },
-            { data: 'requested_by', name: 'requestedBy.name' },
-            { data: 'department', name: 'department.name' },
-            { data: 'number_of_passenger', name: 'number_of_passenger' },
-            { data: 'department_status', name: 'department_status' },
-            { data: 'status_badge', name: 'status' },
-            { data: 'action', name: 'action', orderable:false, searchable:false }
+
+        columns:[
+            {data:'requisition_number'},
+            {data:'requested_by'},
+            {data:'department'},
+            {data:'number_of_passenger', render:d=>`<span class="badge bg-success">${d||0}</span>`},
+            {data:'department_status', render:d=>statusBadge(d)},
+            {data:'transport_status', render:d=>statusBadge(d)},
+            {data:'created_at'},
+            { data: 'action', orderable:false, searchable:false, className:'text-center' }
         ],
-        order: [[4,'desc']]
+
+        order:[[6,'desc']],
+
+        createdRow:function(row,data){
+            let s=(data.transport_status||'').toLowerCase();
+            if(s==='pending')  $(row).addClass('status-pending');
+            if(s==='busy')     $(row).addClass('status-busy');
+            if(s==='assigned') $(row).addClass('status-assigned');
+            if(s==='approved') $(row).addClass('status-approved');
+            if(s==='rejected') $(row).addClass('status-rejected');
+        }
     });
 
-    // Filters
-    $('#btnFilter').click(function(){ table.ajax.reload(); });
-    $('#btnReset').click(function(){
-        $('#filterDepartment,#filterStatus,#dateFrom,#dateTo,#searchBox').val('');
+    function statusBadge(val){
+        if(!val) return '';
+        let v=val.toLowerCase(), cls='bg-secondary';
+        if(v==='pending') cls='bg-warning text-dark';
+        if(v==='busy') cls='bg-info text-dark';
+        if(v==='assigned') cls='bg-secondary';
+        if(v==='approved') cls='bg-success';
+        if(v==='rejected') cls='bg-danger';
+        return `<span class="badge ${cls}">${val}</span>`;
+    }
+
+    $('#btnFilter').click(()=>table.ajax.reload());
+    $('#btnReset').click(()=>{
+        $('.filter-bar select, .filter-bar input').val('');
         table.ajax.reload();
     });
-    $('#searchBox').on('keypress', function(e){ if(e.which==13) table.ajax.reload(); });
+
+   
+
 });
 </script>
-
-        </div>
-    </div>
-
-</div>
-</section>
 @endsection

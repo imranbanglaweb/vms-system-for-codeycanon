@@ -19,6 +19,8 @@ class Requisition extends Model
       'return_date',
       'vehicle_id',
       'vehicle_type',
+      'department_status',
+      'transport_status',
       'requisition_number',
       'number_of_passenger',
       'driver_id',

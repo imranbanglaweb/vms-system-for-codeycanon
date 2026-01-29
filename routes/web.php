@@ -114,9 +114,19 @@ use App\Http\Controllers\SupportController;
 use App\Http\Controllers\TranslationController;
 use App\Http\Controllers\LanguageController;
 use App\Http\Controllers\EmailLogController;
+use App\Http\Controllers\EmailTemplateController;
 
 use App\Notifications\TestPushNotification;
 Route::resource('emaillogs', EmailLogController::class);
+
+// ============================================================================
+// EMAIL TEMPLATES ROUTES
+// ============================================================================
+Route::middleware(['auth'])->group(function () {
+    Route::resource('email-templates', EmailTemplateController::class);
+    Route::post('email-templates/toggle-status', [EmailTemplateController::class, 'toggleStatus'])->name('email-templates.toggle-status');
+    Route::post('email-templates/{id}/restore', [EmailTemplateController::class, 'restore'])->name('email-templates.restore');
+});
 
 // ============================================================================
 // 1. AUTHENTICATION ROUTES
@@ -330,7 +340,7 @@ Route::prefix('maintenance-categories')->group(function () {
 // 12. REPORTS
 // ============================================================================
 
-Route::middleware(['auth'])->prefix('admin/reports')->group(function () {
+Route::middleware(['auth'])->prefix('admin')->group(function () {
     // Requisition Reports
     Route::get('requisitions', [RequisitionReportController::class, 'index'])->name('reports.requisitions');
     Route::get('requisitions/excel', [RequisitionReportController::class, 'exportExcel'])->name('reports.requisitions.excel');
@@ -338,35 +348,35 @@ Route::middleware(['auth'])->prefix('admin/reports')->group(function () {
 });
 
 // Trip & Fuel Consumption Report
-Route::middleware(['auth'])->prefix('admin/reports')->group(function () {
-    Route::get('/reports/trips-fuel', [TripFuelReportController::class, 'index'])->name('trips_fuel.index');
-    Route::get('/reports/trips-fuel/ajax', [TripFuelReportController::class, 'ajax'])->name('reports.trips_fuel.ajax');
-    Route::get('/reports/trips-fuel/excel', [TripFuelReportController::class, 'excel'])->middleware('role:Super Admin,Admin')->name('reports.trips_fuel.excel');
-    Route::get('/reports/trips-fuel/pdf', [TripFuelReportController::class, 'pdf'])->middleware('role:Super Admin,Admin')->name('reports.trips_fuel.pdf');
+Route::middleware(['auth'])->prefix('admin')->name('reports.')->group(function () {
+    Route::get('/reports/trips-fuel', [TripFuelReportController::class, 'index'])->name('trips_fuel');
+    Route::get('/reports/trips-fuel/ajax', [TripFuelReportController::class, 'ajax'])->name('trips_fuel.ajax');
+    Route::get('/reports/trips-fuel/excel', [TripFuelReportController::class, 'excel'])->middleware('role:Super Admin,Admin')->name('trips_fuel.excel');
+    Route::get('/reports/trips-fuel/pdf', [TripFuelReportController::class, 'pdf'])->middleware('role:Super Admin,Admin')->name('trips_fuel.pdf');
 });
 
 // Vehicle Utilization Report
-Route::middleware(['auth'])->prefix('admin/reports')->group(function () {
-    Route::get('/reports/vehicle-utilization', [VehicleUtilizationReportController::class, 'index'])->name('vehicle_utilization.index');
-    Route::get('/reports/vehicle-utilization/ajax', [VehicleUtilizationReportController::class, 'ajax'])->name('reports.vehicle_utilization.ajax');
-    Route::get('/reports/vehicle-utilization/excel', [VehicleUtilizationReportController::class, 'excel'])->middleware('role:Super Admin,Admin')->name('reports.vehicle_utilization.excel');
-    Route::get('/reports/vehicle-utilization/pdf', [VehicleUtilizationReportController::class, 'pdf'])->middleware('role:Super Admin,Admin')->name('reports.vehicle_utilization.pdf');
+Route::middleware(['auth'])->prefix('admin')->name('reports.')->group(function () {
+    Route::get('/reports/vehicle-utilization', [VehicleUtilizationReportController::class, 'index'])->name('vehicle_utilization');
+    Route::get('/reports/vehicle-utilization/ajax', [VehicleUtilizationReportController::class, 'ajax'])->name('vehicle_utilization.ajax');
+    Route::get('/reports/vehicle-utilization/excel', [VehicleUtilizationReportController::class, 'excel'])->middleware('role:Super Admin,Admin')->name('vehicle_utilization.excel');
+    Route::get('/reports/vehicle-utilization/pdf', [VehicleUtilizationReportController::class, 'pdf'])->middleware('role:Super Admin,Admin')->name('vehicle_utilization.pdf');
 });
 
 // Driver Performance Report
-Route::middleware(['auth'])->prefix('admin/reports')->group(function () {
-    Route::get('/reports/driver-performance', [DriverPerformanceReportController::class, 'index'])->name('driver_performance.index');
-    Route::get('/reports/driver-performance/ajax', [DriverPerformanceReportController::class, 'ajax'])->name('reports.driver_performance.ajax');
-    Route::get('/reports/driver-performance/excel', [DriverPerformanceReportController::class, 'excel'])->middleware('role:Super Admin,Admin')->name('reports.driver_performance.excel');
-    Route::get('/reports/driver-performance/pdf', [DriverPerformanceReportController::class, 'pdf'])->middleware('role:Super Admin,Admin')->name('reports.driver_performance.pdf');
+Route::middleware(['auth'])->prefix('admin')->name('reports.')->group(function () {
+    Route::get('/reports/driver-performance', [DriverPerformanceReportController::class, 'index'])->name('driver_performance');
+    Route::get('/reports/driver-performance/ajax', [DriverPerformanceReportController::class, 'ajax'])->name('driver_performance.ajax');
+    Route::get('/reports/driver-performance/excel', [DriverPerformanceReportController::class, 'excel'])->middleware('role:Super Admin,Admin')->name('driver_performance.excel');
+    Route::get('/reports/driver-performance/pdf', [DriverPerformanceReportController::class, 'pdf'])->middleware('role:Super Admin,Admin')->name('driver_performance.pdf');
 });
 
 // Maintenance Reports
-Route::middleware(['auth'])->prefix('admin/reports')->group(function () {
-Route::get('/reports/maintenance', [MaintenanceReportController::class, 'index'])->name('maintenance-reports');
-Route::get('/reports/maintenance/ajax', [MaintenanceReportController::class, 'ajax'])->name('reports.maintenance.ajax');
-Route::get('/reports/maintenance/excel', [MaintenanceReportController::class, 'excel'])->middleware('role:Super Admin,Admin')->name('reports.maintenance.excel');
-Route::get('/reports/maintenance/pdf', [MaintenanceReportController::class, 'pdf'])->middleware('role:Super Admin,Admin')->name('reports.maintenance.pdf');
+Route::middleware(['auth'])->prefix('admin')->name('reports.')->group(function () {
+    Route::get('/reports/maintenance', [MaintenanceReportController::class, 'index'])->name('maintenance');
+    Route::get('/reports/maintenance/ajax', [MaintenanceReportController::class, 'ajax'])->name('maintenance.ajax');
+    Route::get('/reports/maintenance/excel', [MaintenanceReportController::class, 'excel'])->middleware('role:Super Admin,Admin')->name('maintenance.excel');
+    Route::get('/reports/maintenance/pdf', [MaintenanceReportController::class, 'pdf'])->middleware('role:Super Admin,Admin')->name('maintenance.pdf');
 });
 // ============================================================================
 // 13. SUBSCRIPTIONS & PLANS
