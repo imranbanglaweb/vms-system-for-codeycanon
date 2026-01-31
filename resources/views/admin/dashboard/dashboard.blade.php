@@ -109,7 +109,8 @@
                     @php
                         $statuses = [
                             ['label'=>trans('backend.pending'),'value'=>$pending ?? 0,'color'=>'#ffc107'],
-                            ['label'=>trans('backend.approved'),'value'=>$approved ?? 0,'color'=>'#20c997'],
+                            ['label'=>'Dept Approved','value'=>$deptApproved ?? 0,'color'=>'#17a2b8'],
+                            ['label'=>'Transport Approved','value'=>$transportApproved ?? 0,'color'=>'#20c997'],
                             ['label'=>trans('backend.completed'),'value'=>$completed ?? 0,'color'=>'#0d6efd'],
                         ];
                     @endphp
@@ -215,7 +216,7 @@
                             @foreach($latest as $r)
                                 <tr class="align-middle">
                                     <td>{{ $r->id }}</td>
-                                    <td>{{ $r->requestedBy->name ?? 'N/A' }}</td>
+                                    <td>{{ $r->employee->name ?? 'N/A' }}</td>
                                     <td>{{ \Carbon\Carbon::parse($r->travel_date)->format('d M Y') }}</td>
                                     <td>
                                         @php

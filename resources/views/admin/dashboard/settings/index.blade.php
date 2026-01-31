@@ -83,6 +83,9 @@
             <button class="btn btn-light tab-btn language_menu" data-target=".language_settings">
                 <i class="fa fa-language me-1"></i> Language Settings
             </button>
+            <button class="btn btn-light tab-btn email_menu" data-target=".email_settings">
+                <i class="fa fa-envelope me-1"></i> Email Settings
+            </button>
         </div>
 
         <hr>
@@ -228,6 +231,99 @@
 
             </div>
 
+            {{-- EMAIL SETTINGS CARD --}}
+            <div class="col-md-12 email_settings settings-card" style="display: none;">
+
+                <h4 class="mb-4"><i class="fa fa-envelope text-primary me-2"></i>Email Configuration</h4>
+
+                <div class="alert alert-info mb-4">
+                    <i class="fa fa-info-circle me-2"></i>
+                    Configure your SMTP settings here. These settings will override the .env mail configuration.
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group mb-3">
+                            <label>Mail Mailer:</label>
+                            <select name="mail_mailer" class="form-control">
+                                <option value="smtp" {{ ($settings->mail_mailer ?? 'smtp') == 'smtp' ? 'selected' : '' }}>SMTP</option>
+                                <option value="sendmail" {{ ($settings->mail_mailer ?? '') == 'sendmail' ? 'selected' : '' }}>Sendmail</option>
+                                <option value="log" {{ ($settings->mail_mailer ?? '') == 'log' ? 'selected' : '' }}>Log (for testing)</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group mb-3">
+                            <label>Mail Host:</label>
+                            {!! Form::text('mail_host', $settings->mail_host ?? 'smtp.gmail.com', ['class'=>'form-control', 'placeholder'=>'smtp.gmail.com']) !!}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group mb-3">
+                            <label>Mail Port:</label>
+                            {!! Form::number('mail_port', $settings->mail_port ?? 587, ['class'=>'form-control', 'placeholder'=>'587']) !!}
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group mb-3">
+                            <label>Mail Encryption:</label>
+                            <select name="mail_encryption" class="form-control">
+                                <option value="tls" {{ ($settings->mail_encryption ?? 'tls') == 'tls' ? 'selected' : '' }}>TLS</option>
+                                <option value="ssl" {{ ($settings->mail_encryption ?? '') == 'ssl' ? 'selected' : '' }}>SSL</option>
+                                <option value="" {{ ($settings->mail_encryption ?? '') == '' ? 'selected' : '' }}>None</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group mb-3">
+                            <label>Mail Username:</label>
+                            {!! Form::text('mail_username', $settings->mail_username ?? '', ['class'=>'form-control', 'placeholder'=>'your-email@gmail.com']) !!}
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group mb-3">
+                            <label>Mail Password:</label>
+                            {!! Form::password('mail_password', ['class'=>'form-control', 'placeholder'=>'App Password']) !!}
+                            <small class="text-muted">For Gmail, use an App Password, not your login password</small>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group mb-3">
+                            <label>From Address:</label>
+                            {!! Form::email('mail_from_address', $settings->mail_from_address ?? '', ['class'=>'form-control', 'placeholder'=>'noreply@example.com']) !!}
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group mb-3">
+                            <label>From Name:</label>
+                            {!! Form::text('mail_from_name', $settings->mail_from_name ?? '', ['class'=>'form-control', 'placeholder'=>'Your Application Name']) !!}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="border-top pt-3">
+                    <h5 class="mb-3">Quick Actions</h5>
+                    <div class="d-flex gap-2 flex-wrap">
+                        <a href="{{ route('admin.email.test') }}" class="btn btn-outline-primary btn-sm">
+                            <i class="fa fa-paper-plane me-1"></i>Send Test Email
+                        </a>
+                        <button type="button" class="btn btn-outline-secondary btn-sm" onclick="clearMailConfigCache()">
+                            <i class="fa fa-trash me-1"></i>Clear Config Cache
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+
             <div class="text-center mt-3">
                 <button type="submit" class="btn btn-primary saved">Save Changes</button>
             </div>
@@ -335,6 +431,44 @@
                             icon: 'error',
                             title: 'Error',
                             text: 'Failed to clear translation cache.',
+                            confirmButtonColor: '#d33'
+                        });
+                    }
+                });
+            }
+        });
+    }
+
+    function clearMailConfigCache() {
+        Swal.fire({
+            title: 'Clear Mail Config Cache?',
+            text: 'This will clear the cached mail configuration.',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Yes, Clear Cache'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    url: '{{ route("admin.mail.clear-cache") }}',
+                    type: 'POST',
+                    data: {
+                        _token: '{{ csrf_token() }}'
+                    },
+                    success: function(response) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Cache Cleared',
+                            text: 'Mail configuration cache has been cleared.',
+                            confirmButtonColor: '#4A90E2'
+                        });
+                    },
+                    error: function() {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: 'Failed to clear cache.',
                             confirmButtonColor: '#d33'
                         });
                     }

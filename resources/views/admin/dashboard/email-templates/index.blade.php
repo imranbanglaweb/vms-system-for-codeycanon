@@ -12,9 +12,14 @@ Email Templates
                 <br>
                 <i class="fa fa-envelope"></i> Email Templates
             </h4>
-            <a href="{{ route('email-templates.create') }}" class="btn btn-success btn-sm pull-right">
-                <i class="fa fa-plus-circle"></i> Add Template
-            </a>
+            <div class="btn-group pull-right">
+                <a href="{{ route('admin.email.test') }}" class="btn btn-info btn-sm">
+                    <i class="fa fa-paper-plane"></i> Test Email
+                </a>
+                <a href="{{ route('email-templates.create') }}" class="btn btn-success btn-sm">
+                    <i class="fa fa-plus-circle"></i> Add Template
+                </a>
+            </div>
         </div>
         <br>
         <br>
@@ -39,7 +44,7 @@ Email Templates
                                 <th>Type</th>
                                 <th>Subject</th>
                                 <th>Status</th>
-                                <th>Actions</th>
+                                <th width="15%">Actions</th>
                             </tr>
                         </thead>
                         <tbody></tbody>

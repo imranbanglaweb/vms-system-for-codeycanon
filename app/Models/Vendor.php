@@ -18,5 +18,7 @@ class Vendor extends Model
         'city',
         'country',
         'status',
+        'created_by',
+        'updated_by'
     ];
 }

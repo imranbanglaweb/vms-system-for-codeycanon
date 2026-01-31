@@ -6,6 +6,9 @@ use Illuminate\Http\Request;
 use App\Models\User;
 use App\Models\Employee;
 use App\Models\Company;
+use App\Models\Department;
+use App\Models\Unit;
+use App\Models\Location;
 use Spatie\Permission\Models\Role;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -39,13 +42,19 @@ class UserController extends Controller
         public function getData(Request $request)
         {
 
-            $users = User::select([
-                'id',
-                'user_name',
-                'name',
-                'email',
-                'user_image'
-            ])->orderBy('id', 'DESC');
+            $users = User::with(['employee', 'department', 'unit', 'location', 'company'])
+                ->select([
+                    'id',
+                    'user_name',
+                    'name',
+                    'email',
+                    'user_image',
+                    'employee_id',
+                    'department_id',
+                    'unit_id',
+                    'location_id',
+                    'company_id'
+                ])->orderBy('id', 'DESC');
 
             return DataTables::of($users)
                 ->addIndexColumn() // DT_RowIndex
@@ -61,6 +70,22 @@ class UserController extends Controller
                     return '<img src="'.$imageUrl.'" width="45" height="45"
                             class="rounded-circle"
                             onerror="this.onerror=null;this.src=\''.asset('public/admin_resource/assets/images/user_image/default.png').'\'">';
+                })
+
+                ->addColumn('employee', function ($row) {
+                    return $row->employee ? $row->employee->name . ' (' . $row->employee->employee_code . ')' : 'N/A';
+                })
+
+                ->addColumn('department', function ($row) {
+                    return $row->department ? $row->department->department_name : 'N/A';
+                })
+
+                ->addColumn('unit', function ($row) {
+                    return $row->unit ? $row->unit->unit_name : 'N/A';
+                })
+
+                ->addColumn('location', function ($row) {
+                    return $row->location ? $row->location->location_name : 'N/A';
                 })
 
                 ->addColumn('action', function ($row) {
@@ -87,8 +112,11 @@ class UserController extends Controller
         $roles = Role::orderBy('id', 'DESC')->get();
         $employees = Employee::orderBy('employee_order', 'ASC')->get();
         $companies = Company::orderBy('id', 'DESC')->get();
+        $departments = Department::orderBy('id', 'DESC')->get();
+        $units = Unit::orderBy('id', 'DESC')->get();
+        $locations = Location::orderBy('id', 'DESC')->get();
 
-        return view('admin.dashboard.users.create', compact('roles','employees','companies'));
+        return view('admin.dashboard.users.create', compact('roles','employees','companies','departments','units','locations'));
     }
 
     /* ------------------------------------------------------------------
@@ -123,8 +151,9 @@ class UserController extends Controller
                 'email'         => $request->email,
                 'password'      => Hash::make($request->password),
                 'user_type'     => $request->user_type,
-                'department_id' => $employee->department_id,
-                'unit_id'       => $employee->unit_id,
+                'department_id' => $request->department_id ?: $employee->department_id,
+                'unit_id'       => $request->unit_id ?: $employee->unit_id,
+                'location_id'   => $request->location_id,
                 'created_by'    => Auth::id(),
             ];
 
@@ -171,8 +200,11 @@ class UserController extends Controller
         $roles = Role::pluck('name')->all();
         $userRole = $user->roles->pluck('name','name')->all();
         $employees = Employee::orderBy('employee_order','ASC')->get();
+        $departments = Department::orderBy('id', 'DESC')->get();
+        $units = Unit::orderBy('id', 'DESC')->get();
+        $locations = Location::orderBy('id', 'DESC')->get();
 
-        return view('admin.dashboard.users.edit', compact('user','roles','userRole','employees'));
+        return view('admin.dashboard.users.edit', compact('user','roles','userRole','employees','departments','units','locations'));
     }
 
     /* ------------------------------------------------------------------
@@ -205,8 +237,9 @@ class UserController extends Controller
 
             $employee = Employee::find($request->employee_id);
                 if ($employee) {
-                    $user->department_id = $employee->department_id;
-                    $user->unit_id       = $employee->unit_id;
+                    $user->department_id = $request->department_id ?: $employee->department_id;
+                    $user->unit_id       = $request->unit_id ?: $employee->unit_id;
+                    $user->location_id   = $request->location_id;
                     $user->user_name     = $employee->employee_code;
                 }
 

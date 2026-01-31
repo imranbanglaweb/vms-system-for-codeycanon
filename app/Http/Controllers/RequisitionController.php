@@ -1,5 +1,5 @@
 <?php
-
+ 
 namespace App\Http\Controllers;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
@@ -23,103 +23,144 @@ use App\Events\RequisitionStatusUpdated;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Log;
 use App\Models\RequisitionLogHistory;
+use App\Services\EmailService;
 class RequisitionController extends Controller
 {
    
-     public function __construct()
+    protected $emailService;
+    
+    public function __construct(EmailService $emailService)
     {
         $this->middleware('auth');
+        $this->emailService = $emailService;
     }
-
+ 
     public function index(Request $request)
-{
-    $query = Requisition::with(['employee', 'department', 'vehicle']);
-    
-    // Apply filters
-    if ($request->filled('requisition_number')) {
-        $query->where('requisition_number', 'like', '%' . $request->requisition_number . '%');
+    {
+        $user = Auth::user();
+        
+        // Determine role-based query base
+        $isAdmin = $user->hasRole('Super Admin') || $user->hasRole('Admin');
+        $isManager = $user->hasRole('Department Head') || $user->hasRole('Manager');
+        $isTransport = $user->hasRole('Transport');
+        $isEmployee = $user->hasRole('Employee');
+        
+        // Fallback to role column if no Spatie role
+        if (!$isAdmin && !$isManager && !$isTransport && !$isEmployee) {
+            $userRole = $user->role ?? 'employee';
+            $isAdmin = ($userRole === 'admin');
+            $isManager = ($userRole === 'manager');
+            $isTransport = ($userRole === 'transport');
+            $isEmployee = ($userRole === 'employee');
+        }
+        
+        $query = Requisition::with(['employee', 'department', 'vehicle', 'driver']);
+        
+        // User-wise filtering
+        if ($isEmployee) {
+            // Employees see only their own requisitions
+            $query->where('created_by', $user->id);
+        } elseif ($isManager && $user->department_id) {
+            // Managers see requisitions from their department
+            $query->where('department_id', $user->department_id);
+        } elseif ($isTransport) {
+            // Transport users see requisitions that need transport approval
+            $query->where('department_status', 'Approved')
+                  ->where('transport_status', 'Pending');
+        }
+        
+        // Apply filters
+        if ($request->filled('requisition_number')) {
+            $query->where('requisition_number', 'like', '%' . $request->requisition_number . '%');
+        }
+        
+        if ($request->filled('employee_name')) {
+            $query->whereHas('employee', function($q) use ($request) {
+                $q->where('name', 'like', '%' . $request->employee_name . '%');
+            });
+        }
+        
+        if ($request->filled('department_id')) {
+            $query->where('department_id', $request->department_id);
+        }
+        
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+        
+        if ($request->filled('start_date')) {
+            $query->whereDate('travel_date', '>=', $request->start_date);
+        }
+        
+        if ($request->filled('end_date')) {
+            $query->whereDate('travel_date', '<=', $request->end_date);
+        }
+        
+        $perPage = $request->get('per_page', 10);
+        $requisitions = $query->latest()->paginate($perPage);
+        
+        // For AJAX requests
+        if ($request->ajax()) {
+            return response()->json([
+                'html' => view('admin.dashboard.requisition.table', compact('requisitions'))->render(),
+                'pagination' => view('admin.dashboard.requisition.pagination', compact('requisitions'))->render(),
+                'stats' => [
+                    'total' => $query->count(),
+                    'pending' => (clone $query)->where('status', 0)->count(),
+                    'approved' => (clone $query)->where('status', 1)->count(),
+                    'rejected' => (clone $query)->where('status', 2)->count(),
+                ]
+            ]);
+        }
+        
+        $departments = Department::all();
+        $stats = [
+            'total' => $query->count(),
+            'pending' => (clone $query)->where('status', 0)->count(),
+            'approved' => (clone $query)->where('status', 1)->count(),
+            'rejected' => (clone $query)->where('status', 2)->count(),
+        ];
+        
+        return view('admin.dashboard.requisition.index', compact('requisitions', 'departments', 'stats'));
     }
-    
-    if ($request->filled('employee_name')) {
-        $query->whereHas('employee', function($q) use ($request) {
-            $q->where('name', 'like', '%' . $request->employee_name . '%');
-        });
-    }
-    
-    if ($request->filled('department_id')) {
-        $query->where('department_id', $request->department_id);
-    }
-    
-    if ($request->filled('status')) {
-        $query->where('status', $request->status);
-    }
-    
-    // if ($request->filled('priority')) {
-    //     $query->where('priority', $request->priority);
-    // }
-    
-    if ($request->filled('start_date')) {
-        $query->whereDate('travel_date', '>=', $request->start_date);
-    }
-    
-    if ($request->filled('end_date')) {
-        $query->whereDate('travel_date', '<=', $request->end_date);
-    }
-    
-    $perPage = $request->get('per_page', 10);
-    $requisitions = $query->latest()->paginate($perPage);
-    
-    // For AJAX requests
-    if ($request->ajax()) {
-        return response()->json([
-            'html' => view('admin.dashboard.requisition.table', compact('requisitions'))->render(),
-            'pagination' => view('admin.dashboard.requisition.pagination', compact('requisitions'))->render(),
-            'stats' => [
-                'total' => Requisition::count(),
-                'pending' => Requisition::where('status', 0)->count(),
-                'approved' => Requisition::where('status', 1)->count(),
-                'rejected' => Requisition::where('status', 2)->count(),
-            ]
-        ]);
-    }
-    
-    $departments = Department::all();
-    $stats = [
-        'total' => Requisition::count(),
-        'pending' => Requisition::where('status', 0)->count(),
-        'approved' => Requisition::where('status', 1)->count(),
-        'rejected' => Requisition::where('status', 2)->count(),
-    ];
-    
-    return view('admin.dashboard.requisition.index', compact('requisitions', 'departments', 'stats'));
-}
-
-
+ 
+ 
 // EXPORT EXCEL
     public function exportExcel()
     {
         return Excel::download(new RequisitionExport, 'requisitions.xlsx');
     }
-
+ 
     // EXPORT PDF
     public function exportPDF()
     {
         $requisitions = Requisition::with(['requestedBy','vehicle','driver'])->get();
-
+ 
         $pdf = PDF::loadView('admin.dashboard.requisition.pdf', compact('requisitions'))
                   ->setPaper('a4', 'landscape');
-
+ 
         return $pdf->download('requisitions.pdf');
     }
-
+ 
    public function create()
-{
-
+    {
+        $user = Auth::user();
+        $isEmployee = $user->hasRole('Employee');
+        
         $vehicles = Vehicle::where('status', 1)->get();
         $drivers  = Driver::where('status', 1)->get();
-        $employees = Employee::all();
+        $departments = Department::all();
+        $units = Unit::all();
         $vehicleTypes = VehicleType::all();
-
+        $employees = Employee::all();
+        
+        // Try to find the employee record that matches the logged-in user by email
+        $selectedEmployeeId = null;
+        $matchingEmployee = Employee::where('email', $user->email)->first();
+        if ($matchingEmployee) {
+            $selectedEmployeeId = $matchingEmployee->id;
+        }
+ 
     return view('admin.dashboard.requisition.create', [
         'action'      => route('requisitions.store'),
         'method'      => 'POST',
@@ -127,15 +168,18 @@ class RequisitionController extends Controller
         'requisition' => new Requisition(),
         'vehicles'    => $vehicles,
         'employees'    => $employees,
-        'drivers'     => $drivers
+        'departments' => $departments,
+        'vehicleTypes' => $vehicleTypes,
+        'units'       => $units,
+        'drivers'     => $drivers,
+        'selectedEmployeeId' => $selectedEmployeeId
     ]);
-
-
  
+  
         // return view('admin.dashboard.requisition.create', compact('employees', 'vehicleTypes'));
-}
-
-
+    }
+ 
+ 
 public function validateAjax(Request $request)
 {
     $validator = Validator::make($request->all(), [
@@ -146,24 +190,24 @@ public function validateAjax(Request $request)
         'travel_date'    => 'required|date',
         'purpose'        => 'nullable|string|max:500',
     ]);
-
+ 
     if ($validator->fails()) {
         return response()->json([
             'status' => 'error',
             'errors' => $validator->errors()
         ], 422);
     }
-
+ 
     return response()->json([
         'status' => 'success',
         'message' => 'Validation passed'
     ]);
 }
-
-
+ 
+ 
   public function store(Request $request)
-{
-
+  {
+ 
     // dd($request->vehicle_id);
     // Complete validation for ALL form fields
     $validator = Validator::make($request->all(), [
@@ -190,30 +234,29 @@ public function validateAjax(Request $request)
         'number_of_passenger.required' => 'Number of passengers is required',
         'passengers.*.employee_id.exists' => 'Selected passenger is invalid',
     ]);
-
+ 
     if ($validator->fails()) {
         return response()->json([
             'status' => 'validation_error',
             'errors' => $validator->errors()
         ], 422);
     }
-
-
-
-
-     // 🔵 AUTO GENERATE UNIQUE REQUISITION NUMBER
-       $last = Requisition::orderBy('id', 'DESC')->first();
-
-            if ($last && preg_match('/(\d+)/', $last->requisition_number, $matches)) {
-                $number = (int)$matches[1] + 1;
-            } else {
-                $number = 1;
-            }
-
-            $requisition_number = 'REQ-' . str_pad($number, 5, '0', STR_PAD_LEFT);
-
-
-    
+ 
+ 
+ 
+      // 🔵 AUTO GENERATE UNIQUE REQUISITION NUMBER
+        $last = Requisition::orderBy('id', 'DESC')->first();
+ 
+             if ($last && preg_match('/(\d+)/', $last->requisition_number, $matches)) {
+                 $number = (int)$matches[1] + 1;
+             } else {
+                 $number = 1;
+             }
+ 
+             $requisition_number = 'REQ-' . str_pad($number, 5, '0', STR_PAD_LEFT);
+ 
+ 
+     
     DB::beginTransaction();
     try {
         $requisition = Requisition::create([
@@ -232,10 +275,11 @@ public function validateAjax(Request $request)
             'travel_date' => $request->travel_date,
             'return_date' => $request->return_date,
             'purpose' => $request->purpose,
-            'status' => 'Pending Department Approval', // Initial status for workflow
+            'status' => 'Pending', // Initial status for workflow
+            'transport_remarks' => 'Pending Department Approval',
             'created_by' => auth()->id() ?? 1,
         ]);
-
+ 
         // Add passengers if any
         if (!empty($request->passengers)) {
             foreach ($request->passengers as $passenger) {
@@ -248,58 +292,62 @@ public function validateAjax(Request $request)
                 }
             }
         }
-
-
-
-
-
-        DB::commit();
+ 
+ 
+ 
+    DB::commit();
+        
+        // Send email notification to department head
+        try {
+            $this->emailService->sendRequisitionCreated($requisition);
+            Log::info('Email notification sent for requisition created: ' . $requisition->requisition_number);
+        } catch (\Exception $e) {
+            Log::error('Failed to send requisition created email: ' . $e->getMessage());
+        }
         
 //   $users = User::whereHas('roles', function ($q) {
 //         $q->whereIn('name', ['Super Admin', 'Demo Role']);
 //     })
 //     ->whereHas('pushSubscriptions')
 //     ->get();
-
+ 
 // Notification::send($users, new TestPushNotification($requisition));
 // $user = User::find(1);
 // $user->notify(new TestPushNotification($requisition));
-
-
-
-
+ 
+ 
 // Get users with specific roles AND push subscriptions
-$users = User::whereHas('roles', function ($q) {
-        $q->whereIn('name', ['Super Admin', 'Demo Role']);
-    })
-    // ->whereHas('pushSubscriptions')
-    ->get();
+    $users = User::whereHas('roles', function ($q) {
+            $q->whereIn('name', ['Super Admin', 'Demo Role']);
+        })
+        // ->whereHas('pushSubscriptions')
+        ->get();
     // dd($users);
-
-// Log the users we found
-Log::info('Push notification target users count: ' . $users->count());
-foreach ($users as $user) {
-    Log::info('User ID: ' . $user->id . ', Email: ' . $user->email);
-}
-
-// Send notification to these users
-if ($users->isNotEmpty()) {
-    Notification::send($users, new RequisitionCreated($requisition));
-} else {
-    Log::warning('No users found with roles and push subscriptions.');
-}
-
-// Also try sending directly to Super Admin (ID 1)
-$user = User::find(1);
-if ($user) {
-    $user->notify(new RequisitionCreated($requisition));
-    Log::info('Direct notification sent to User ID 1.');
-} else {
-    Log::warning('User ID 1 not found.');
-}
-
-    // event(new RequisitionCreated($requisition));
-
+ 
+    // Log the users we found
+    Log::info('Push notification target users count: ' . $users->count());
+    foreach ($users as $user) {
+        Log::info('User ID: ' . $user->id . ', Email: ' . $user->email);
+    }
+ 
+    // Send notification to these users
+    if ($users->isNotEmpty()) {
+        Notification::send($users, new RequisitionCreated($requisition));
+    } else {
+        Log::warning('No users found with roles and push subscriptions.');
+    }
+ 
+    // Also try sending directly to Super Admin (ID 1)
+    $user = User::find(1);
+    if ($user) {
+        $user->notify(new RequisitionCreated($requisition));
+        Log::info('Direct notification sent to User ID 1.');
+    } else {
+        Log::warning('User ID 1 not found.');
+    }
+ 
+        // event(new RequisitionCreated($requisition));
+ 
         return response()->json([
             'status' => 'success',
             'message' => 'Requisition created successfully!',
@@ -307,8 +355,8 @@ if ($user) {
             'users_found' => $users->pluck('id'),
              'direct_user' => $user ? $user->id : null,
         ], 200);
-        
-
+         
+ 
     } catch (\Throwable $e) {
         DB::rollBack();
         \Log::error('Requisition store error: '.$e->getMessage());
@@ -317,8 +365,8 @@ if ($user) {
             'message' => 'Server error while saving requisition: ' . $e->getMessage()
         ], 500);
     }
-}
-
+ }
+ 
      /**
      * Display the specified resource.
      */
@@ -326,20 +374,26 @@ if ($user) {
     {
         $requisition = Requisition::with(['requestedBy', 'vehicle', 'driver', 'unit', 'passengers.employee'])
                                   ->findOrFail($id);
-
+ 
         return view('admin.dashboard.requisition.show', compact('requisition'));
         
     }
-
+ 
     /**
      * Edit form.
      */
    public function edit($id)
     {
+        $user = Auth::user();
+        $isEmployee = $user->hasRole('Employee');
+        
         $requisition = Requisition::with(['employee', 'department', 'vehicle', 'driver', 'passengers.employee'])->findOrFail($id);
         
-
-        // return dd($requisition);
+        // Employee can only edit their own requisitions
+        if ($isEmployee && $requisition->requested_by != $user->id) {
+            abort(403, 'You can only edit your own requisitions.');
+        }
+ 
         $employees = Employee::all();
         $vehicleTypes = VehicleType::where('status', 1)->get();
         $drivers = Driver::all();
@@ -350,19 +404,26 @@ if ($user) {
         return view('admin.dashboard.requisition.edit', compact(
             'requisition', 'employees', 'vehicleTypes', 'drivers', 'units', 'departments', 'vehicles'
         ));
-
-
+ 
+ 
     }
-
+ 
     /**
      * Update requisition.
      */
     public function update(Request $request, $id)
-{
+ {
     try {
-
+        $user = Auth::user();
+        $isEmployee = $user->hasRole('Employee');
+ 
         $requisition = Requisition::findOrFail($id);
-
+        
+        // Employee can only update their own requisitions
+        if ($isEmployee && $requisition->requested_by != $user->id) {
+            abort(403, 'You can only update your own requisitions.');
+        }
+ 
         // Validation
         $validator = Validator::make($request->all(), [
             // 'employee_id'           => 'required|exists:employees,id',
@@ -375,18 +436,18 @@ if ($user) {
             'number_of_passenger'   => 'required|integer|min:1',
             'purpose'               => 'required|string',
             // 'status'                => 'required|string',
-
+ 
             'passengers'            => 'sometimes|array',
             'passengers.*.employee_id' => 'required|exists:employees,id',
         ]);
-
+ 
         if ($validator->fails()) {
             return response()->json([
                 'status' => 'validation_error',
                 'errors' => $validator->errors()
             ], 422);
         }
-
+ 
         // -------------------------------
         // 🔵 Update each field manually
         // -------------------------------
@@ -405,15 +466,15 @@ if ($user) {
         $requisition->created_by          = auth()->id() ?? 1;
         // Do not update the requisition number
         $requisition->save();
-
+ 
         // -------------------------------
         // 🔵 Update Passengers
         // -------------------------------
         if ($request->has('passengers')) {
-
+ 
             // Remove old
             $requisition->passengers()->delete();
-
+ 
             // Insert new passengers
             foreach ($request->passengers as $passengerData) {
                 $requisition->passengers()->create([
@@ -422,42 +483,51 @@ if ($user) {
                 ]);
             }
         }
-
+ 
         return response()->json([
             'status'  => 'success',
             'message' => 'Requisition updated successfully!',
             'redirect_url' => route('requisitions.index')
         ]);
-
+ 
     } catch (\Exception $e) {
-
+ 
         return response()->json([
             'status'  => 'error',
             'message' => 'Error updating requisition: ' . $e->getMessage()
         ], 500);
     }
-}
-
-
+ }
+ 
+ 
     /**
      * Delete requisition.
      */
     public function destroy($id)
     {
+        $user = Auth::user();
+        $isEmployee = $user->hasRole('Employee');
+        
         $requisition = Requisition::findOrFail($id);
+        
+        // Employee can only delete their own requisitions
+        if ($isEmployee && $requisition->requested_by != $user->id) {
+            abort(403, 'You can only delete your own requisitions.');
+        }
+        
         $requisition->delete();
-
+ 
         return redirect()->route('requisitions.index')
                          ->with('success', 'Requisition deleted successfully!');
     }
  public function getEmployeeDetails($id)
     {
         $emp = Employee::find($id);
-
+ 
         if (!$emp) {
             return response()->json(['status' => 'error', 'message' => 'Employee not found']);
         }
-
+ 
         return response()->json([
             'status' => 'success',
             'employee' => [
@@ -467,22 +537,22 @@ if ($user) {
             ]
         ]);
     }
-
-
+ 
+ 
 public function updateWorkflow(Request $request, $id)
 {
     $request->validate([
         'status' => 'required|in:1,2,3,4,5',
         'remarks' => 'nullable|string|max:1000',
     ]);
-
+ 
     $requisition = Requisition::findOrFail($id);
-
+ 
     // Role-based allowed transitions (example)
     $user = Auth::user();
     $newStatus = (int)$request->status;
     $oldStatus = (int)$requisition->status;
-
+ 
     // Example policy:
     // - employee cannot change status (except create)
     // - transport can move Requested(1) -> TransportReview(2) OR TransportReview(2) -> Pending/Approved? customize
@@ -490,7 +560,7 @@ public function updateWorkflow(Request $request, $id)
     if ($user->role === 'employee') {
         abort(403, 'Access Denied');
     }
-
+ 
     if ($user->role === 'transport') {
         // allow only transitions to 2 (review) or to 5 (completed) depending on your rules
         $allowed = [2];
@@ -498,17 +568,17 @@ public function updateWorkflow(Request $request, $id)
             abort(403, 'Transport role not allowed to set this status.');
         }
     }
-
+ 
     if ($user->role === 'admin') {
         // admin allowed any
     }
-
+ 
     // Update
     $requisition->update([
         'status' => $newStatus,
         'updated_by' => $user->id,
     ]);
-
+ 
     // Log
     RequisitionLoghistory::create([
         'requisition_id' => $requisition->id,
@@ -516,10 +586,10 @@ public function updateWorkflow(Request $request, $id)
         'action' => "Status changed from {$oldStatus} to {$newStatus}",
         'note' => $request->remarks,
     ]);
-
+ 
     // Dispatch event for email
     event(new RequisitionStatusChanged($requisition, $oldStatus, $newStatus, $request->remarks));
-
+ 
     return back()->with('success', 'Workflow updated.');
 }
 public function updateStatus(Request $request, $id)
@@ -529,20 +599,20 @@ public function updateStatus(Request $request, $id)
     //     'status' => $request->status,
     //     'updated_by' => auth()->id()
     // ]);
-
+ 
     // return response()->json(['success' => true]);
-
-
+ 
+ 
      $req = Requisition::findOrFail($id);
-
+ 
     $old = $req->status;
     $new = $request->status;
-
+ 
     // Update status
     $req->update([
         'status' => $new
     ]);
-
+ 
     // Insert log
     RequisitionLoghistory::create([
         'requisition_id' => $req->id,
@@ -552,89 +622,87 @@ public function updateStatus(Request $request, $id)
         'created_by'=>auth()->id(),
         'note' => "Status changed from {$old} to {$new}. Remarks: " . ($request->comment ?? 'N/A')
     ]);
-
-
+ 
+ 
     // SEND EMAIL TO EMPLOYEE
 Mail::to($req->requestedBy->email)
     ->send(new RequisitionStatusChangedMail($req, $new, $request->comment ?? null));
-
+ 
 // OPTIONAL: SEND EMAIL TO ADMIN  
 Mail::to('admin@company.com')
     ->send(new RequisitionStatusChangedMail($req, $new));
-
+ 
     return response()->json(['success' => true]);
 }
-
-
-
-
-
+ 
+ 
+ 
 public function transportApprove($id)
 {
     $req = Requisition::findOrFail($id);
-
+ 
     if ($req->status != 2) {
         return response()->json(['status' => 'error', 'message' => 'Invalid workflow step']);
     }
-
+ 
     $req->status = 4; // Transport Office Approved
     $req->save();
-
+ 
     RequisitionLogHistory::create([
     'requisition_id' => $req->id,
     'user_id' => auth()->id(),
     'action' => 'Transport Approved'
 ]);
-
-
+ 
+ 
     return response()->json(['status' => 'success']);
 }
-
+ 
 public function transportReject($id)
 {
     $req = Requisition::findOrFail($id);
-
+ 
     if ($req->status != 2) {
         return response()->json(['status' => 'error', 'message' => 'Invalid workflow step']);
     }
-
+ 
     $req->status = 5; // Transport Office Rejected
     $req->save();
-
+ 
     RequisitionLogHistory::create([
     'requisition_id' => $req->id,
     'user_id' => auth()->id(),
     'action' => 'Transport Rejected',
     'note' => $request->note ?? null
 ]);
-
+ 
     return response()->json(['status' => 'success']);
 }
-
-
+ 
+ 
 public function adminApprove($id)
 {
     $req = Requisition::findOrFail($id);
-
+ 
     if ($req->status != 4) {
         return response()->json(['status' => 'error', 'message' => 'Invalid workflow step']);
     }
-
+ 
     $req->status = 6; // Final Approval
     $req->save();
-
+ 
     RequisitionLogHistory::create([
     'requisition_id' => $req->id,
     'user_id' => auth()->id(),
     'action' => 'Admin Final Approved'
 ]);
-
+ 
 $requisition->update([
         'approved_by_department' => auth()->id(),
         'department_approved_at' => now(),
         'status' => 'Pending Transport Approval'
     ]);
-
+ 
 sendNotification(
     $requisition->created_by,
     "Requisition Approved",
@@ -642,36 +710,36 @@ sendNotification(
     "success",
     route('admin.requisition.show', $requisition->id)
 );
-
-
-
+ 
+ 
+ 
     return response()->json(['status' => 'success']);
 }
-
+ 
 public function adminReject($id)
 {
     $req = Requisition::findOrFail($id);
-
+ 
     if ($req->status != 4) {
         return response()->json(['status' => 'error', 'message' => 'Invalid workflow step']);
     }
-
+ 
     $req->status = 7; // Final Rejection
     $req->save();
-
+ 
     RequisitionLogHistory::create([
         'requisition_id' => $req->id,
         'user_id' => auth()->id(),
         'action' => 'Admin Final Rejected',
         'note' => $request->note ?? null
     ]);
-
+ 
      $requisition->update([
         'approved_by_department' => auth()->id(),
         'department_approved_at' => now(),
         'status' => 'Rejected'
     ]);
-
+ 
 sendNotification(
     $requisition->created_by,
     "Requisition Rejected",
@@ -679,13 +747,12 @@ sendNotification(
     "danger",
     route('admin.requisition.show', $requisition->id)
 );
-
+ 
     return response()->json(['status' => 'success']);
 }
-
-
-
-
+ 
+ 
+ 
 public function downloadPDF($id)
 {
     $requisition = Requisition::with([
@@ -699,24 +766,19 @@ public function downloadPDF($id)
         'approvedBy',
         'rejectedBy'
     ])->findOrFail($id);
-
+ 
     $pdf = PDF::loadView('admin.dashboard.requisition.pdf', compact('requisition'));
     
     return $pdf->download("requisition-{$requisition->requisition_number}.pdf");
 }
-
+ 
   
-
-   
-
-
-
     public function getVehiclesByCapacity(Request $request)
     {
          Validator::make($request->all(), [
             'passenger_count' => 'required|integer|min:1',
         ]);
-
+ 
         if ($validator->fails()) {
             return response()->json([
                 'status' => 'error',
@@ -724,7 +786,7 @@ public function downloadPDF($id)
                 'errors' => $validator->errors()
             ], 400);
         }
-
+ 
         try {
             $passengerCount = $request->input('passenger_count');   
             
@@ -733,19 +795,19 @@ public function downloadPDF($id)
                                  ->where('status', 1)
                                  ->orderBy('capacity', 'asc')
                                  ->get();
-
+ 
             if ($vehicles->isEmpty()) {
                 return response()->json([
                     'status' => 'not_found',
                     'message' => 'No vehicles found for the specified passenger count.'
                 ], 404);
             }
-
+ 
             return response()->json([
                 'status' => 'success',
                 'vehicles' => $vehicles
             ]);
-
+ 
         } catch (\Exception $e) {
             \Log::error('Vehicle suggestion error: ' . $e->getMessage());   
             return response()->json([
@@ -754,7 +816,7 @@ public function downloadPDF($id)
             ], 500);
         }
     }
-
+ 
     public function getDriversByVehicle($vehicleId)
     {
         // Get the vehicle and find its associated driver via driver_id
@@ -767,12 +829,12 @@ public function downloadPDF($id)
         } else {
             $drivers = collect();
         }
-
+ 
         return response()->json([
             'status' => 'success',
             'drivers' => $drivers
         ]);
     }
-
+ 
     
     }

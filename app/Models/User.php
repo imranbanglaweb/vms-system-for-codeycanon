@@ -8,7 +8,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Spatie\Permission\Traits\HasRoles;
 use NotificationChannels\WebPush\HasPushSubscriptions;
-
+  
 class User extends Authenticatable
 {
     use HasFactory, Notifiable, HasRoles, HasPushSubscriptions;
@@ -53,7 +53,7 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
-
+  
     /**
      * Route notifications for the mail channel.
      *
@@ -76,16 +76,36 @@ class User extends Authenticatable
         
         return [$this->email => $this->name];
     }
-
-    // App\Models\User.php
+  
+    // App\Models/User.php
     public function pushSubscriptions()
     {
         return $this->hasMany(\NotificationChannels\WebPush\PushSubscription::class);
     }
-
-     public function company()
+  
+    public function company()
     {
         return $this->belongsTo(Company::class);
     }
-
+  
+    public function employee()
+    {
+        return $this->belongsTo(Employee::class, 'employee_id');
+    }
+  
+    public function department()
+    {
+        return $this->belongsTo(Department::class, 'department_id');
+    }
+  
+    public function unit()
+    {
+        return $this->belongsTo(Unit::class, 'unit_id');
+    }
+  
+    public function location()
+    {
+        return $this->belongsTo(Location::class, 'location_id');
+    }
+  
 }

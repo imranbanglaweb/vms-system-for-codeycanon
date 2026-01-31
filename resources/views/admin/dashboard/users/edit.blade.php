@@ -48,6 +48,48 @@
                         <div class="invalid-feedback"></div>
                     </div>
 
+                    {{-- Department --}}
+                    <div class="col-md-6">
+                        <label for="department_id" class="form-label"><strong>Select Department</strong></label>
+                        <select name="department_id" id="department_id" class="form-control select2">
+                            <option value="">Please Select</option>
+                            @foreach($departments as $department)
+                                <option value="{{ $department->id }}" {{ $user->department_id == $department->id ? 'selected' : '' }}>
+                                    {{ $department->department_name }}
+                                </option>
+                            @endforeach
+                        </select>
+                        <div class="invalid-feedback"></div>
+                    </div>
+
+                    {{-- Unit --}}
+                    <div class="col-md-6">
+                        <label for="unit_id" class="form-label"><strong>Select Unit</strong></label>
+                        <select name="unit_id" id="unit_id" class="form-control select2">
+                            <option value="">Please Select</option>
+                            @foreach($units as $unit)
+                                <option value="{{ $unit->id }}" {{ $user->unit_id == $unit->id ? 'selected' : '' }}>
+                                    {{ $unit->unit_name }}
+                                </option>
+                            @endforeach
+                        </select>
+                        <div class="invalid-feedback"></div>
+                    </div>
+
+                    {{-- Location --}}
+                    <div class="col-md-6">
+                        <label for="location_id" class="form-label"><strong>Select Location</strong></label>
+                        <select name="location_id" id="location_id" class="form-control select2">
+                            <option value="">Please Select</option>
+                            @foreach($locations as $location)
+                                <option value="{{ $location->id }}" {{ $user->location_id == $location->id ? 'selected' : '' }}>
+                                    {{ $location->location_name }}
+                                </option>
+                            @endforeach
+                        </select>
+                        <div class="invalid-feedback"></div>
+                    </div>
+
                     {{-- User Type --}}
                     <div class="col-md-6">
                         <label for="user_type" class="form-label"><strong>Select User Type <span class="text-danger">*</span></strong></label>

@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Config;
 class SettingController extends Controller
 {
     public function index()
@@ -98,6 +99,16 @@ class SettingController extends Controller
         $setting->auto_translate = $request->auto_translate ? 1 : 0;
         $setting->translation_cache_duration = $request->translation_cache_duration ?? 60;
 
+        // Email Settings
+        $setting->mail_mailer = $request->mail_mailer ?? 'smtp';
+        $setting->mail_host = $request->mail_host ?? 'smtp.gmail.com';
+        $setting->mail_port = $request->mail_port ?? 587;
+        $setting->mail_username = $request->mail_username ?? '';
+        $setting->mail_password = $request->mail_password ?? '';
+        $setting->mail_encryption = $request->mail_encryption ?? 'tls';
+        $setting->mail_from_address = $request->mail_from_address ?? '';
+        $setting->mail_from_name = $request->mail_from_name ?? '';
+
         if (!empty($admin_logo)) {
             
              $setting->admin_logo = $admin_logo;
@@ -187,5 +198,38 @@ class SettingController extends Controller
         ];
         
         return $languages[$code] ?? ucfirst($code);
+    }
+
+    /**
+     * Clear mail configuration cache
+     */
+    public function clearMailConfigCache()
+    {
+        try {
+            Cache::forget('mail_config');
+            
+            return response()->json(['success' => true, 'message' => 'Mail configuration cache cleared successfully']);
+        } catch (\Exception $e) {
+            Log::error('Failed to clear mail config cache: ' . $e->getMessage());
+            return response()->json(['success' => false, 'message' => 'Failed to clear cache'], 500);
+        }
+    }
+
+    /**
+     * Get current mail configuration
+     */
+    public function getMailConfig()
+    {
+        $settings = DB::table('settings')->where('id', 1)->first();
+        
+        return [
+            'mailer' => $settings->mail_mailer ?? config('mail.default'),
+            'host' => $settings->mail_host ?? config('mail.mailers.smtp.host'),
+            'port' => $settings->mail_port ?? config('mail.mailers.smtp.port'),
+            'username' => $settings->mail_username ?? config('mail.mailers.smtp.username'),
+            'encryption' => $settings->mail_encryption ?? config('mail.mailers.smtp.encryption'),
+            'from_address' => $settings->mail_from_address ?? config('mail.from.address'),
+            'from_name' => $settings->mail_from_name ?? config('mail.from.name'),
+        ];
     }
 }

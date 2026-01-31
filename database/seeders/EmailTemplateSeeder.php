@@ -15,146 +15,274 @@ class EmailTemplateSeeder extends Seeder
     public function run(): void
     {
         $now = Carbon::now();
-        $adminId = 1;
 
         $templates = [
-            // Requisition Created Template
+            // Requisition Created - sends to Department Head
             [
-                'name' => 'Requisition Created',
+                'name' => 'Requisition Created Notification',
                 'slug' => 'requisition-created',
-                'subject' => 'New Transport Requisition: {{requisition_number}}',
+                'subject' => 'New Vehicle Requisition: {{requisition_number}}',
                 'body' => <<<'HTML'
-<h3>New Transport Requisition Created</h3>
-<p>Dear {{recipient_name}},</p>
-<p>A new transport requisition has been created and is awaiting your approval.</p>
-<h4>Requisition Details:</h4>
-<ul>
-    <li><strong>Requisition Number:</strong> {{requisition_number}}</li>
-    <li><strong>Requested By:</strong> {{requested_by}}</li>
-    <li><strong>Department:</strong> {{department}}</li>
-    <li><strong>Date:</strong> {{requisition_date}}</li>
-    <li><strong>Purpose:</strong> {{purpose}}</li>
-    <li><strong>Pickup Location:</strong> {{pickup_location}}</li>
-    <li><strong>Destination:</strong> {{destination}}</li>
-    <li><strong>Start Time:</strong> {{start_time}}</li>
-    <li><strong>End Time:</strong> {{end_time}}</li>
-</ul>
-<p>Please login to the system to review and approve this requisition.</p>
-<p>Best regards,<br>Vehicle Management System</p>
+<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+    <div style="background-color: #3b82f6; color: white; padding: 20px; text-align: center;">
+        <h1 style="margin: 0;">New Vehicle Requisition</h1>
+    </div>
+    
+    <div style="padding: 20px; background-color: #f9fafb; border: 1px solid #e5e7eb;">
+        <p>A new vehicle requisition has been submitted and requires your approval.</p>
+        
+        <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
+            <tr>
+                <td style="padding: 8px; border-bottom: 1px solid #e5e7eb; font-weight: bold;">Requisition Number:</td>
+                <td style="padding: 8px; border-bottom: 1px solid #e5e7eb;">{{requisition_number}}</td>
+            </tr>
+            <tr>
+                <td style="padding: 8px; border-bottom: 1px solid #e5e7eb; font-weight: bold;">Requested By:</td>
+                <td style="padding: 8px; border-bottom: 1px solid #e5e7eb;">{{requester_name}}</td>
+            </tr>
+            <tr>
+                <td style="padding: 8px; border-bottom: 1px solid #e5e7eb; font-weight: bold;">Department:</td>
+                <td style="padding: 8px; border-bottom: 1px solid #e5e7eb;">{{department_name}}</td>
+            </tr>
+            <tr>
+                <td style="padding: 8px; border-bottom: 1px solid #e5e7eb; font-weight: bold;">Pickup Location:</td>
+                <td style="padding: 8px; border-bottom: 1px solid #e5e7eb;">{{pickup_location}}</td>
+            </tr>
+            <tr>
+                <td style="padding: 8px; border-bottom: 1px solid #e5e7eb; font-weight: bold;">Drop-off Location:</td>
+                <td style="padding: 8px; border-bottom: 1px solid #e5e7eb;">{{dropoff_location}}</td>
+            </tr>
+            <tr>
+                <td style="padding: 8px; border-bottom: 1px solid #e5e7eb; font-weight: bold;">Date & Time:</td>
+                <td style="padding: 8px; border-bottom: 1px solid #e5e7eb;">{{pickup_date}} at {{pickup_time}}</td>
+            </tr>
+            <tr>
+                <td style="padding: 8px; border-bottom: 1px solid #e5e7eb; font-weight: bold;">Purpose:</td>
+                <td style="padding: 8px; border-bottom: 1px solid #e5e7eb;">{{purpose}}</td>
+            </tr>
+            <tr>
+                <td style="padding: 8px; border-bottom: 1px solid #e5e7eb; font-weight: bold;">Passengers:</td>
+                <td style="padding: 8px; border-bottom: 1px solid #e5e7eb;">{{passengers}}</td>
+            </tr>
+            <tr>
+                <td style="padding: 8px; border-bottom: 1px solid #e5e7eb; font-weight: bold;">Vehicle Type:</td>
+                <td style="padding: 8px; border-bottom: 1px solid #e5e7eb;">{{vehicle_type}}</td>
+            </tr>
+        </table>
+        
+        <p>Please review and take appropriate action.</p>
+        
+        <div style="text-align: center; margin-top: 20px;">
+            <a href="{{approval_url}}" style="background-color: #3b82f6; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block;">
+                Review Requisition
+            </a>
+        </div>
+    </div>
+    
+    <div style="padding: 20px; text-align: center; color: #6b7280; font-size: 12px;">
+        <p>{{company_name}}</p>
+    </div>
+</div>
 HTML,
                 'type' => EmailTemplate::TYPE_CREATED,
                 'variables' => json_encode([
                     'requisition_number',
-                    'recipient_name',
-                    'requested_by',
-                    'department',
-                    'requisition_date',
-                    'purpose',
+                    'requester_name',
+                    'requester_email',
+                    'department_name',
                     'pickup_location',
-                    'destination',
-                    'start_time',
-                    'end_time'
+                    'dropoff_location',
+                    'pickup_date',
+                    'pickup_time',
+                    'purpose',
+                    'vehicle_type',
+                    'passengers',
+                    'status',
+                    'approval_url',
+                    'company_name'
                 ]),
                 'is_active' => true,
-                'created_by' => $adminId,
-                'updated_by' => $adminId,
+                'created_by' => 1,
+                'updated_by' => 1,
                 'created_at' => $now,
                 'updated_at' => $now,
             ],
-
-            // Department Approved Template
+            
+            // Department Approved - sends to Transport Head
             [
-                'name' => 'Department Approved',
+                'name' => 'Department Approval Notification',
                 'slug' => 'department-approved',
-                'subject' => 'Requisition {{requisition_number}} - Department Approved',
+                'subject' => 'Requisition Approved by Department: {{requisition_number}}',
                 'body' => <<<'HTML'
-<h3>Requisition Department Approval</h3>
-<p>Dear {{recipient_name}},</p>
-<p>Good news! Your transport requisition has been approved by the department.</p>
-<h4>Requisition Details:</h4>
-<ul>
-    <li><strong>Requisition Number:</strong> {{requisition_number}}</li>
-    <li><strong>Requested By:</strong> {{requested_by}}</li>
-    <li><strong>Department:</strong> {{department}}</li>
-    <li><strong>Approval Date:</strong> {{approval_date}}</li>
-    <li><strong>Approved By:</strong> {{approved_by}}</li>
-    <li><strong>Purpose:</strong> {{purpose}}</li>
-    <li><strong>Pickup Location:</strong> {{pickup_location}}</li>
-    <li><strong>Destination:</strong> {{destination}}</li>
-</ul>
-<p>Your requisition is now pending transport approval. You will be notified once the final approval is complete.</p>
-<p>Best regards,<br>Vehicle Management System</p>
+<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+    <div style="background-color: #10b981; color: white; padding: 20px; text-align: center;">
+        <h1 style="margin: 0;">Department Approved</h1>
+    </div>
+    
+    <div style="padding: 20px; background-color: #f9fafb; border: 1px solid #e5e7eb;">
+        <p>A requisition has been approved by the department and is now ready for transport assignment.</p>
+        
+        <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
+            <tr>
+                <td style="padding: 8px; border-bottom: 1px solid #e5e7eb; font-weight: bold;">Requisition Number:</td>
+                <td style="padding: 8px; border-bottom: 1px solid #e5e7eb;">{{requisition_number}}</td>
+            </tr>
+            <tr>
+                <td style="padding: 8px; border-bottom: 1px solid #e5e7eb; font-weight: bold;">Requested By:</td>
+                <td style="padding: 8px; border-bottom: 1px solid #e5e7eb;">{{requester_name}}</td>
+            </tr>
+            <tr>
+                <td style="padding: 8px; border-bottom: 1px solid #e5e7eb; font-weight: bold;">Department:</td>
+                <td style="padding: 8px; border-bottom: 1px solid #e5e7eb;">{{department_name}}</td>
+            </tr>
+            <tr>
+                <td style="padding: 8px; border-bottom: 1px solid #e5e7eb; font-weight: bold;">Pickup Location:</td>
+                <td style="padding: 8px; border-bottom: 1px solid #e5e7eb;">{{pickup_location}}</td>
+            </tr>
+            <tr>
+                <td style="padding: 8px; border-bottom: 1px solid #e5e7eb; font-weight: bold;">Drop-off Location:</td>
+                <td style="padding: 8px; border-bottom: 1px solid #e5e7eb;">{{dropoff_location}}</td>
+            </tr>
+            <tr>
+                <td style="padding: 8px; border-bottom: 1px solid #e5e7eb; font-weight: bold;">Date & Time:</td>
+                <td style="padding: 8px; border-bottom: 1px solid #e5e7eb;">{{pickup_date}} at {{pickup_time}}</td>
+            </tr>
+            <tr>
+                <td style="padding: 8px; border-bottom: 1px solid #e5e7eb; font-weight: bold;">Purpose:</td>
+                <td style="padding: 8px; border-bottom: 1px solid #e5e7eb;">{{purpose}}</td>
+            </tr>
+            <tr>
+                <td style="padding: 8px; border-bottom: 1px solid #e5e7eb; font-weight: bold;">Passengers:</td>
+                <td style="padding: 8px; border-bottom: 1px solid #e5e7eb;">{{passengers}}</td>
+            </tr>
+        </table>
+        
+        <p>Please assign a vehicle and driver to this requisition.</p>
+        
+        <div style="text-align: center; margin-top: 20px;">
+            <a href="{{approval_url}}" style="background-color: #10b981; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block;">
+                Assign Vehicle & Driver
+            </a>
+        </div>
+    </div>
+    
+    <div style="padding: 20px; text-align: center; color: #6b7280; font-size: 12px;">
+        <p>{{company_name}}</p>
+    </div>
+</div>
 HTML,
                 'type' => EmailTemplate::TYPE_DEPT_APPROVED,
                 'variables' => json_encode([
                     'requisition_number',
-                    'recipient_name',
-                    'requested_by',
-                    'department',
-                    'approval_date',
-                    'approved_by',
-                    'purpose',
+                    'requester_name',
+                    'requester_email',
+                    'department_name',
                     'pickup_location',
-                    'destination'
+                    'dropoff_location',
+                    'pickup_date',
+                    'pickup_time',
+                    'purpose',
+                    'vehicle_type',
+                    'passengers',
+                    'status',
+                    'approval_url',
+                    'company_name'
                 ]),
                 'is_active' => true,
-                'created_by' => $adminId,
-                'updated_by' => $adminId,
+                'created_by' => 1,
+                'updated_by' => 1,
                 'created_at' => $now,
                 'updated_at' => $now,
             ],
-
-            // Transport Approved Template
+            
+            // Transport Approved - sends to Employee, Driver, and Transport Head
             [
-                'name' => 'Transport Approved',
+                'name' => 'Transport Approval Notification',
                 'slug' => 'transport-approved',
-                'subject' => 'Requisition {{requisition_number}} - Fully Approved',
+                'subject' => 'Requisition Approved - Vehicle Assigned: {{requisition_number}}',
                 'body' => <<<'HTML'
-<h3>Requisition Fully Approved</h3>
-<p>Dear {{recipient_name}},</p>
-<p>Excellent! Your transport requisition has been fully approved and is ready for scheduling.</p>
-<h4>Requisition Details:</h4>
-<ul>
-    <li><strong>Requisition Number:</strong> {{requisition_number}}</li>
-    <li><strong>Requested By:</strong> {{requested_by}}</li>
-    <li><strong>Department:</strong> {{department}}</li>
-    <li><strong>Final Approval Date:</strong> {{approval_date}}</li>
-    <li><strong>Approved By:</strong> {{approved_by}}</li>
-    <li><strong>Purpose:</strong> {{purpose}}</li>
-    <li><strong>Pickup Location:</strong> {{pickup_location}}</li>
-    <li><strong>Destination:</strong> {{destination}}</li>
-    <li><strong>Start Time:</strong> {{start_time}}</li>
-    <li><strong>End Time:</strong> {{end_time}}</li>
-</ul>
-<p>Vehicle and driver details will be assigned shortly. Please be ready at the scheduled pickup time.</p>
-<p>Best regards,<br>Vehicle Management System</p>
+<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+    <div style="background-color: #059669; color: white; padding: 20px; text-align: center;">
+        <h1 style="margin: 0;">Requisition Approved</h1>
+    </div>
+    
+    <div style="padding: 20px; background-color: #f9fafb; border: 1px solid #e5e7eb;">
+        <p>Your vehicle requisition has been approved and a vehicle has been assigned.</p>
+        
+        <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
+            <tr>
+                <td style="padding: 8px; border-bottom: 1px solid #e5e7eb; font-weight: bold;">Requisition Number:</td>
+                <td style="padding: 8px; border-bottom: 1px solid #e5e7eb;">{{requisition_number}}</td>
+            </tr>
+            <tr>
+                <td style="padding: 8px; border-bottom: 1px solid #e5e7eb; font-weight: bold;">Pickup Location:</td>
+                <td style="padding: 8px; border-bottom: 1px solid #e5e7eb;">{{pickup_location}}</td>
+            </tr>
+            <tr>
+                <td style="padding: 8px; border-bottom: 1px solid #e5e7eb; font-weight: bold;">Drop-off Location:</td>
+                <td style="padding: 8px; border-bottom: 1px solid #e5e7eb;">{{dropoff_location}}</td>
+            </tr>
+            <tr>
+                <td style="padding: 8px; border-bottom: 1px solid #e5e7eb; font-weight: bold;">Date & Time:</td>
+                <td style="padding: 8px; border-bottom: 1px solid #e5e7eb;">{{pickup_date}} at {{pickup_time}}</td>
+            </tr>
+            <tr>
+                <td style="padding: 8px; border-bottom: 1px solid #e5e7eb; font-weight: bold;">Purpose:</td>
+                <td style="padding: 8px; border-bottom: 1px solid #e5e7eb;">{{purpose}}</td>
+            </tr>
+            <tr>
+                <td style="padding: 8px; border-bottom: 1px solid #e5e7eb; font-weight: bold;">Passengers:</td>
+                <td style="padding: 8px; border-bottom: 1px solid #e5e7eb;">{{passengers}}</td>
+            </tr>
+            <tr>
+                <td style="padding: 8px; border-bottom: 1px solid #e5e7eb; font-weight: bold;">Vehicle Type:</td>
+                <td style="padding: 8px; border-bottom: 1px solid #e5e7eb;">{{vehicle_type}}</td>
+            </tr>
+        </table>
+        
+        <p>Your requisition is now confirmed. Please be ready at the pickup location at the scheduled time.</p>
+        
+        <div style="text-align: center; margin-top: 20px;">
+            <a href="{{approval_url}}" style="background-color: #059669; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block;">
+                View Details
+            </a>
+        </div>
+    </div>
+    
+    <div style="padding: 20px; text-align: center; color: #6b7280; font-size: 12px;">
+        <p>{{company_name}}</p>
+    </div>
+</div>
 HTML,
                 'type' => EmailTemplate::TYPE_TRANSPORT_APPROVED,
                 'variables' => json_encode([
                     'requisition_number',
-                    'recipient_name',
-                    'requested_by',
-                    'department',
-                    'approval_date',
-                    'approved_by',
-                    'purpose',
+                    'requester_name',
+                    'requester_email',
+                    'department_name',
                     'pickup_location',
-                    'destination',
-                    'start_time',
-                    'end_time'
+                    'dropoff_location',
+                    'pickup_date',
+                    'pickup_time',
+                    'purpose',
+                    'vehicle_type',
+                    'passengers',
+                    'status',
+                    'approval_url',
+                    'company_name'
                 ]),
                 'is_active' => true,
-                'created_by' => $adminId,
-                'updated_by' => $adminId,
+                'created_by' => 1,
+                'updated_by' => 1,
                 'created_at' => $now,
                 'updated_at' => $now,
             ],
         ];
 
-        // Insert templates (check if they already exist to avoid duplicates)
         foreach ($templates as $template) {
-            $exists = EmailTemplate::where('slug', $template['slug'])->exists();
-            if (!$exists) {
+            // Check if template already exists
+            $existing = EmailTemplate::where('slug', $template['slug'])->first();
+            if (!$existing) {
                 EmailTemplate::create($template);
             }
         }

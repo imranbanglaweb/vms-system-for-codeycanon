@@ -46,7 +46,7 @@ class TransportApprovalController extends Controller
      */
     public function show($id)
     {
-        $requisition = Requisition::with(['requestedBy', 'department', 'unit','passengers'])
+        $requisition = Requisition::with(['requestedBy', 'department', 'unit', 'passengers', 'assignedVehicle', 'assignedDriver'])
             ->findOrFail($id);
 
         $vehicles = Vehicle::where('status', '1')->get();
@@ -157,7 +157,7 @@ class TransportApprovalController extends Controller
         $requisition->transport_approved_at = now();
         $requisition->transport_admin_id = Auth::id();
         $requisition->transport_remarks = $request->remarks ?? $requisition->transport_remarks;
-        $requisition->status = 'Transport_Approved';
+        $requisition->status = 'Approved';
         $requisition->save();
 
         // Send email notification to requester, driver, and transport head
@@ -185,8 +185,8 @@ class TransportApprovalController extends Controller
         'vehicle_id' => $requisition->assigned_vehicle_id,
         'driver_id' => $requisition->assigned_driver_id,
         'start_date' => $requisition->travel_date,
-        // 'trip_start_time' => $request->start_time,
-        // 'start_meter' => $request->start_meter,
+        'trip_start_time' => $request->start_time,
+        'start_meter' => $request->start_meter,
         'start_location' => $requisition->from_location,
         'status' => 'in_progress'
     ]);
@@ -246,6 +246,51 @@ class TransportApprovalController extends Controller
         'drivers'  => $drivers,
         'assigned_info' => $assignedInfo
     ]);
+    }
+
+    /**
+     * Get available drivers for a specific vehicle
+     * Used for auto-loading drivers when vehicle is selected
+     */
+    public function getDriversForVehicle($requisitionId, $vehicleId)
+    {
+        $travelDate = null;
+        
+        if ($requisitionId) {
+            $requisition = Requisition::find($requisitionId);
+            $travelDate = $requisition->travel_date ? date('Y-m-d', strtotime($requisition->travel_date)) : null;
+        }
+        
+        // Get drivers available for this vehicle on the travel date
+        // First get all active drivers
+        $drivers = Driver::where('status', '1')->get();
+        
+        $availableDrivers = $drivers->filter(function($driver) use ($travelDate, $requisitionId) {
+            // Check if driver is assigned to another requisition on the same date
+            $conflict = Requisition::where('assigned_driver_id', $driver->id)
+                ->whereIn('transport_status', ['Assigned', 'Approved'])
+                ->whereDate('travel_date', $travelDate)
+                ->where('id', '!=', $requisitionId)
+                ->exists();
+            
+            return !$conflict;
+        })->map(function($driver) {
+            $isAvailable = strtolower($driver->availability_status) !== 'assigned';
+            return [
+                'id' => $driver->id,
+                'driver_name' => $driver->driver_name,
+                'phone' => $driver->phone,
+                'availability_status' => $driver->availability_status,
+                'is_available' => $isAvailable,
+                'status_label' => $isAvailable ? 'Available' : 'Busy',
+                'status_class' => $isAvailable ? 'success' : 'danger'
+            ];
+        });
+        
+        return response()->json([
+            'drivers' => $availableDrivers,
+            'travel_date' => $travelDate
+        ]);
     }
 
     /**

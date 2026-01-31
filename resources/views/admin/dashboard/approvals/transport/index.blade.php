@@ -128,6 +128,7 @@ tr.status-rejected { background-color:#fdecea !important; }
 
 <!-- Scripts -->
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js"></script>
 <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
 <script src="https://cdn.datatables.net/1.13.7/js/dataTables.bootstrap5.min.js"></script>
 
@@ -161,7 +162,7 @@ $(function(){
             {data:'number_of_passenger', render:d=>`<span class="badge bg-success">${d||0}</span>`},
             {data:'department_status', render:d=>statusBadge(d)},
             {data:'transport_status', render:d=>statusBadge(d)},
-            {data:'created_at'},
+            {data:'created_at', render:function(d){ return d ? moment(d).format('DD MMM Y, hh:mm A') : ''; }},
             { data: 'action', orderable:false, searchable:false, className:'text-center' }
         ],
 

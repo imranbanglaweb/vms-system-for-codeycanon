@@ -11,7 +11,7 @@
         font-size: 1.7rem;
         font-weight: 600;
     }
-.card {
+    .card {
         border-radius: 16px;
         overflow: hidden;
     }
@@ -27,7 +27,6 @@
 
     table td, table th {
         font-size: 1.65rem;
-        
     }
 
     .error-text {
@@ -37,14 +36,68 @@
         animation: fadeIn 0.5s;
     }
      @keyframes fadeIn {
-        from {opacity: 0; transform: translateY(-4px);}
-        to {opacity: 1; transform: translateY(0);}
-    }
+         from {opacity: 0; transform: translateY(-4px);}
+         to {opacity: 1; transform: translateY(0);}
+     }
 
     .btn-lg {
         border-radius: 30px;
         padding: 10px 28px;
         font-size: 1.45rem;
+    }
+    
+    .form-control[readonly] {
+        background-color: #f8f9fa;
+        cursor: not-allowed;
+    }
+    
+    .passenger-row {
+        animation: slideIn 0.3s ease-out;
+    }
+    
+    @keyframes slideIn {
+        from {
+            opacity: 0;
+            transform: translateX(-20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+    
+    .table {
+        border-radius: 8px;
+        overflow: hidden;
+    }
+    
+    .table thead th {
+        background: linear-gradient(135deg, #1e1e2f, #2a2a40);
+        color: #fff;
+        border: none;
+        padding: 15px;
+        font-weight: 600;
+    }
+    
+    .table tbody td {
+        padding: 12px 15px;
+        vertical-align: middle;
+        border-color: #e0e0e0;
+    }
+    
+    .table tbody tr:hover {
+        background-color: #f8f9fa;
+    }
+    
+    .table .form-control, 
+    .table .form-select {
+        border-radius: 6px;
+    }
+    
+    .passenger-count-badge {
+        font-size: 0.9rem;
+        padding: 4px 12px;
+        border-radius: 20px;
     }
 </style>
 
@@ -54,7 +107,7 @@
     <div class="card shadow-sm border-0">
         <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center py-3">
             <h3 class="m-0">
-                <i class="fa fa-car-side me-2 text-primary"></i>
+                <i class="fa fa-car-side me-2 text-warning"></i>
                 Create Requisition
             </h3>
             <a href="{{ route('requisitions.index') }}" class="btn btn-secondary btn-sm">
@@ -71,38 +124,56 @@
                 @csrf
 
                 <!-- ============================ -->
+                @php
+                    $isReadonly = isset($selectedEmployeeId) && $selectedEmployeeId;
+                @endphp
                 <!-- REQUESTED EMPLOYEE SECTION -->
                 <!-- ============================ -->
                 <div class="row mb-4">
 
                     <div class="col-md-4">
                         <label class="form-label">
-                            <i class="fa fa-user-tie text-primary me-1"></i> Requested Employee
+                            <i class="fa fa-user-tie text-primary me-1"></i> Requested Employee <span class="text-danger">*</span>
                         </label>
-                        <select id="employee_id" name="employee_id" class="form-select form-select-lg select2">
+                        <select id="employee_id" name="employee_id" class="form-select form-select-lg select2 {{ $isReadonly ? '' : '' }}" {{ $isReadonly ? 'disabled' : '' }}>
                             <option value="">-- Select Employee --</option>
                             @foreach($employees as $employee)
-                                <option value="{{ $employee->id }}">{{ $employee->name }}</option>
+                                <option value="{{ $employee->id }}" {{ isset($selectedEmployeeId) && $selectedEmployeeId == $employee->id ? 'selected' : '' }}>{{ $employee->name }}</option>
                             @endforeach
                         </select>
-                        <br>
+                        @if($isReadonly)
+                            <input type="hidden" name="employee_id" value="{{ $selectedEmployeeId }}">
+                        @endif
                         <small class="text-danger error-text employee_id_error"></small>
                     </div>
 
                     <div class="col-md-4">
-                        <label class="form-label"><i class="fa fa-building text-primary me-1"></i> Department</label>
-                        <input type="text" id="department_name" class="form-control form-control-lg" readonly>
+                        <label class="form-label"><i class="fa fa-building text-primary me-1"></i> Department <span class="text-danger">*</span></label>
+                        <div class="input-group input-group-lg">
+                            <span class="input-group-text bg-light"><i class="fa fa-sitemap text-muted"></i></span>
+                            <select id="department_id" name="department_id" class="form-select form-select-lg">
+                                <option value="">-- Select Department --</option>
+                                @foreach($departments as $dept)
+                                    <option value="{{ $dept->id }}">{{ $dept->department_name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <small class="text-danger error-text department_id_error"></small>
                     </div>
 
                     <div class="col-md-4">
-                        <label class="form-label"><i class="fa fa-sitemap text-primary me-1"></i> Unit</label>
-                        <input type="text" id="unit_name" class="form-control form-control-lg" readonly>
+                        <label class="form-label"><i class="fa fa-layer-group text-primary me-1"></i> Unit <span class="text-danger">*</span></label>
+                        <div class="input-group input-group-lg">
+                            <span class="input-group-text bg-light"><i class="fa fa-cubes text-muted"></i></span>
+                            <select id="unit_id" name="unit_id" class="form-select form-select-lg">
+                                <option value="">-- Select Unit --</option>
+                                @foreach($units as $unit)
+                                    <option value="{{ $unit->id }}">{{ $unit->unit_name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <small class="text-danger error-text unit_id_error"></small>
                     </div>
-                       <input type="hidden" id="department_id" class="form-control form-control-lg" 
-                               value="{{ $requisition->department->id ?? '' }}" name="department_id">
-                               
-                         <input type="hidden" id="unit_id" class="form-control form-control-lg" 
-                               value="{{ $requisition->unit->id ?? '' }}" name="unit_id">
 
                 </div>
 
@@ -115,7 +186,7 @@
 
                     <div class="col-md-4">
                         <label class="form-label"><i class="fa fa-car text-primary me-1"></i> Vehicle</label><br>
-                        <select id="vehicle_type" name="vehicle_id" class="form-select form-select-lg select2">
+                        <select id="vehicle_id" name="vehicle_id" class="form-select form-select-lg select2">
                             <option value="">Select vehicle</option>
                             @foreach($vehicles as $id => $name)
                                 <option value="{{ $name->id }}">{{ $name->vehicle_name }}</option>
@@ -132,16 +203,16 @@
 
                     <div class="col-md-2">
                         <label class="form-label"><i class="fa fa-chair text-primary me-1"></i> Seat Capacity</label>
-                        <input type="number" id="seat_capacity_display" class="form-control form-control-lg" readonly placeholder="Auto-populated from vehicle">
+                        <input type="number" id="seat_capacity_display" class="form-control form-control-lg" readonly placeholder="Auto-populated" value="">
                         <input type="hidden" id="seat_capacity" name="seat_capacity" value="">
-                        <input type="hidden" id="number_of_passenger" name="number_of_passenger" value="">
+                        <input type="hidden" id="number_of_passenger" name="number_of_passenger" value="1">
                     </div>
 
                     <div class="col-md-3">
                         <label class="form-label">
                             <i class="fa fa-calendar text-primary me-1"></i> Requisition Date
                         </label>
-                        <input type="date" name="requisition_date" class="form-control form-control-lg">
+                        <input type="date" name="requisition_date" class="form-control form-control-lg" value="{{ date('Y-m-d') }}">
                         <small class="text-danger error-text requisition_date_error"></small>
                     </div>
 
@@ -156,59 +227,51 @@
 
                     <div class="col-md-3">
                         <label class="form-label"><i class="fa fa-location-dot text-primary me-1"></i> From</label>
-                        <input type="text" name="from_location" class="form-control form-control-lg">
+                        <input type="text" name="from_location" class="form-control form-control-lg" placeholder="Starting location">
                         <small class="text-danger error-text from_location_error"></small>
                     </div>
 
                     <div class="col-md-3">
                         <label class="form-label"><i class="fa fa-map-marker-alt text-primary me-1"></i> To</label>
-                        <input type="text" name="to_location" class="form-control form-control-lg">
+                        <input type="text" name="to_location" class="form-control form-control-lg" placeholder="Destination">
                         <small class="text-danger error-text to_location_error"></small>
                     </div>
 
                     <div class="col-md-3">
                         <label class="form-label"><i class="fa fa-clock text-primary me-1"></i> Pickup Time</label>
-                        <input type="text" name="travel_date" class="form-control datetimepicker"
-       placeholder="Select pickup date & time">
-
+                        <input type="text" name="travel_date" class="form-control form-control-lg datetimepicker"
+                               placeholder="Select pickup date & time">
                         <small class="text-danger error-text travel_date_error"></small>
                     </div>
 
                     <div class="col-md-3">
                         <label class="form-label"><i class="fa fa-calendar-check text-primary me-1"></i> Return Time</label>
-                   
-                        <input type="text" name="return_date" class="form-control datetimepicker"
-       placeholder="Select return date & time">
-
+                        <input type="text" name="return_date" class="form-control form-control-lg datetimepicker"
+                               placeholder="Select return date & time">
                     </div>
-
                 </div>
 
-              <div class="my-4 border-top"></div>
-
+                <div class="my-4 border-top"></div>
 
                 <!-- ============================ -->
                 <!-- PURPOSE -->
                 <!-- ============================ -->
                 <div class="row mb-4">
-
                     <div class="col-md-12">
                         <label class="form-label"><i class="fa fa-list text-primary me-1"></i> Purpose</label>
-                        <textarea name="purpose" class="form-control form-control-lg" rows="3"></textarea>
+                        <textarea name="purpose" class="form-control form-control-lg" rows="3" placeholder="Reason for requisition"></textarea>
                         <small class="text-danger error-text purpose_error"></small>
                     </div>
-
                 </div>
-                
-<div class="my-4 border-top"></div>
 
+                <div class="my-4 border-top"></div>
 
                 <!-- ============================ -->
                 <!-- PASSENGERS -->
                 <!-- ============================ -->
                 <h5 class="fw-bold mb-3">
                     <i class="fa fa-users text-primary me-1"></i> Add Passengers
-                    <small class="text-muted ms-2" id="passengerCountInfo"></small>
+                    <small class="text-muted ms-2 passenger-count-badge" id="passengerCountInfo"></small>
                 </h5>
                 <small class="text-danger error-text passenger_count_error d-block mb-2"></small>
 
@@ -249,34 +312,46 @@
                     </tbody>
                 </table>
 
-                <!-- ============================ -->
-                <!-- SUBMIT -->
-                <!-- ============================ -->
+                <!-- Submit Button -->
                 <div class="text-end mt-4">
-                    <button type="submit" class="btn btn-primary btn-lg px-4">
+                    <button type="submit" class="btn btn-primary btn-lg px-5" id="submitBtn">
                         <i class="fa fa-paper-plane me-2"></i> Submit Requisition
                     </button>
                 </div>
-
             </form>
-
         </div>
     </div>
 </div>
 
 </section>
-@endsection
 
-
-
-
-@push('scripts')
 {{-- Flatpickr --}}
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 <script>
 $(function () {
+
+    /* ================= INITIALIZE ================= */
+    updatePassengerCountInfo();
+    
+    // Select2 is already initialized in master layout, reinitialize dynamic elements only
+
+    /* ================= AUTO-LOAD EMPLOYEE DETAILS FOR LOGGED IN USER ================= */
+    @if(isset($selectedEmployeeId) && $selectedEmployeeId)
+        var selectedEmployeeId = {{ $selectedEmployeeId }};
+        // Set the employee dropdown value
+        $('#employee_id').val(selectedEmployeeId).trigger('change');
+        
+        // Fetch employee details using named route
+        $.get("{{ route('employee.details', ['id' => $selectedEmployeeId]) }}", function (res) {
+            // Set department dropdown
+            $('#department_id').val(res.department_id || '').trigger('change');
+            // Set unit dropdown
+            $('#unit_id').val(res.unit_id || '').trigger('change');
+        });
+    @endif
 
     /* ================= BLOCK PAST DATES ================= */
     let today = new Date().toISOString().split('T')[0];
@@ -299,11 +374,11 @@ $(function () {
         e.preventDefault();
 
         let form = $(this);
-        let btn  = form.find('button[type="submit"]');
+        let btn = $('#submitBtn');
         $('.error-text').text('');
 
         let passengerCount = countPassengers();
-        updateHiddenPassengerField(); 
+        updateHiddenPassengerField();
         let seatCapacity = parseInt($('#seat_capacity').val()) || 0;
 
         if (seatCapacity > 0 && passengerCount > seatCapacity) {
@@ -332,7 +407,7 @@ $(function () {
     });
 
     /* ================= VEHICLE DETAILS ================= */
-    $('#vehicle_type').on('change', function () {
+    $('#vehicle_id').on('change', function () {
         let vehicleId = $(this).val();
         if (!vehicleId) return resetVehicleFields();
 
@@ -356,8 +431,9 @@ $(function () {
     }
 
     function autoTrimPassengers(capacity){
+        if (capacity <= 0) return;
         while(countPassengers()>capacity){
-            $('#passengerTable tbody tr:last').remove();
+            $('#passengerTable tbody tr:not(:has(.addRow))').last().remove();
         }
     }
 
@@ -365,16 +441,16 @@ $(function () {
     $('#employee_id').on('change', function () {
         let id = $(this).val();
         if(!id) return clearEmployeeInfo();
-            $.get("{{ url('/get-employee-details') }}/" + id, function (res) {
-            $('#department_name').val(res.department);
-            $('#unit_name').val(res.unit);
-            $('#department_id').val(res.department_id);
-            $('#unit_id').val(res.unit_id);
+        $.get("{{ route('employee.details', ['id' => '__ID__']) }}".replace('__ID__', id), function (res) {
+            // Set department dropdown
+            $('#department_id').val(res.department_id || '').trigger('change');
+            // Set unit dropdown
+            $('#unit_id').val(res.unit_id || '').trigger('change');
         });
     });
 
     function clearEmployeeInfo(){
-        $('#department_name,#unit_name,#department_id,#unit_id').val('');
+        $('#department_id, #unit_id').val('').trigger('change');
     }
 
     /* ================= PASSENGER SELECTION ================= */
@@ -383,14 +459,14 @@ $(function () {
         let empId=$(this).val();
         let requester=$('#employee_id').val();
 
-        if(empId===requester){
-            Swal.fire('Not Allowed','Requester cannot be passenger','warning');
+        if(empId && empId===requester){
+            Swal.fire('Not Allowed','Requester cannot be a passenger','warning');
             return resetPassengerRow(row,this);
         }
 
         let duplicate=false;
         $('.passenger-employee').not(this).each(function(){
-            if($(this).val()===empId && empId!=='') duplicate=true;
+            if($(this).val() && $(this).val()===empId) duplicate=true;
         });
 
         if(duplicate){
@@ -400,7 +476,7 @@ $(function () {
 
         if(!empId) return resetPassengerRow(row,this,false);
 
-            $.get("{{ url('/get-employee-details') }}/" + empId, function (res) {
+        $.get("{{ url('/get-employee-details') }}/" + empId, function (res) {
             row.find('.passenger-department').val(res.department);
             row.find('.passenger-unit').val(res.unit);
             updatePassengerCountInfo();
@@ -409,13 +485,13 @@ $(function () {
     });
 
     function resetPassengerRow(row,el,clearSelect=true){
-        if(clearSelect) $(el).val('').trigger('change');
-        row.find('.passenger-department,.passenger-unit').val('');
+        if(clearSelect) $(el).val('').trigger('change.select2');
+        row.find('.passenger-department, .passenger-unit').val('');
         updatePassengerCountInfo();
     }
 
     /* ================= ADD/REMOVE ROWS ================= */
-    let rowIndex=1;
+    let rowIndex = 1;
 
     $(document).on('click','.addRow',function(e){
         e.preventDefault();
@@ -444,7 +520,7 @@ $(function () {
             </tr>
         `);
 
-        $('#passengerTable tbody tr:last .select2').select2();
+        $('#passengerTable tbody tr:last').find('select').select2();
         rowIndex++;
         updatePassengerCountInfo();
     });
@@ -466,7 +542,7 @@ $(function () {
         let count=countPassengers();
         let cap=parseInt($('#seat_capacity').val())||0;
         let info=$('#passengerCountInfo');
-        $('#number_of_passenger').val(countPassengers());
+        $('#number_of_passenger').val(count);
 
         if(cap>0){
             info.text(`(${count} / ${cap} seats)`);
@@ -501,6 +577,4 @@ $(function () {
 });
 </script>
 
-
-
-@endpush
+@endsection

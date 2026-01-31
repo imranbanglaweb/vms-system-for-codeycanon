@@ -293,8 +293,8 @@ class EmployeeController extends Controller
                 $emp = Employee::with(['department','unit'])->findOrFail($id);
 
                 return response()->json([
-                    'department' => $emp->department->name ?? '',
-                    'unit' => $emp->unit->name ?? '',
+                    'department' => $emp->department->department_name ?? '',
+                    'unit' => $emp->unit->unit_name ?? '',
                     'department_id' => $emp->department_id,
                     'unit_id' => $emp->unit_id,
                 ]);

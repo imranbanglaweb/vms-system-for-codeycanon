@@ -1002,9 +1002,9 @@ class MenuSeeder extends Seeder
 
                         'menu_slug' => 'email-templates',
                         'menu_icon' => 'fa-envelope',
-                        'menu_url' => 'admin.email-templates',
+                        'menu_url' => 'email-templates.index',
 
-                        'menu_permission' => 'email-templates.index',
+                        'menu_permission' => 'email-template-manage',
                         'menu_order' => 56,
                         'menu_parent' => 53,
 

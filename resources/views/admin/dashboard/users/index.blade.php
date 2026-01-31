@@ -39,6 +39,10 @@
                 <th>User Name</th>
                 <th>Name</th>
                 <th>Email</th>
+                <th>Employee</th>
+                <th>Department</th>
+                <th>Unit</th>
+                <th>Location</th>
                 <th>Image</th>
                 <th width="150px">Action</th>
             </tr>
@@ -87,6 +91,10 @@ $(document).ready(function() {
             { data: 'user_name' },
             { data: 'name' },
             { data: 'email' },
+            { data: 'employee' },
+            { data: 'department' },
+            { data: 'unit' },
+            { data: 'location' },
             { data: 'user_image', orderable: false, searchable: false },
             { data: 'action', orderable: false, searchable: false }
         ]

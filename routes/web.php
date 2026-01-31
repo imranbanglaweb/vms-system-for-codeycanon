@@ -115,6 +115,7 @@ use App\Http\Controllers\TranslationController;
 use App\Http\Controllers\LanguageController;
 use App\Http\Controllers\EmailLogController;
 use App\Http\Controllers\EmailTemplateController;
+use App\Http\Controllers\TestEmailController;
 
 use App\Notifications\TestPushNotification;
 Route::resource('emaillogs', EmailLogController::class);
@@ -126,6 +127,10 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('email-templates', EmailTemplateController::class);
     Route::post('email-templates/toggle-status', [EmailTemplateController::class, 'toggleStatus'])->name('email-templates.toggle-status');
     Route::post('email-templates/{id}/restore', [EmailTemplateController::class, 'restore'])->name('email-templates.restore');
+    
+    // Test Email Routes
+    Route::get('email/test', [TestEmailController::class, 'index'])->name('admin.email.test');
+    Route::post('email/test/send', [TestEmailController::class, 'send'])->name('admin.email.test.send');
 });
 
 // ============================================================================
@@ -264,6 +269,7 @@ Route::prefix('transport')->group(function () {
     Route::post('/approvals/{id}/approve', [TransportApprovalController::class, 'approve'])->name('transport.approvals.approve');
     Route::post('/approvals/{id}/reject', [TransportApprovalController::class, 'reject'])->name('transport.approvals.reject');
     Route::get('/approvals/{id}/availability', [TransportApprovalController::class, 'availability'])->name('transport.approvals.availability');
+    Route::get('/approvals/{id}/vehicle/{vehicleId}/drivers', [TransportApprovalController::class, 'getDriversForVehicle'])->name('transport.approvals.drivers-for-vehicle');
     
     // Trip Sheets
     Route::get('/trip-sheets', [TripSheetController::class, 'index'])->name('trip-sheets.index');
@@ -605,6 +611,7 @@ Route::middleware(['auth'])->group(function () {
     Route::post('settings/store', [SettingController::class, 'store'])->name('settings.store');
     Route::get('settings/languages', [SettingController::class, 'loadLanguages'])->name('settings.languages');
     Route::post('admin/language/clear-cache', [SettingController::class, 'clearTranslationCache'])->name('admin.language.clear-cache');
+    Route::post('admin/mail/clear-cache', [SettingController::class, 'clearMailConfigCache'])->name('admin.mail.clear-cache');
     Route::post('admin/language/sync', [SettingController::class, 'syncLanguages'])->name('admin.language.sync');
     
     // Menus

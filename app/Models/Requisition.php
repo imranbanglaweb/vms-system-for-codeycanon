@@ -50,6 +50,12 @@ public const STATUS_COMPLETED = 'Completed';
     ];
 
     public function creator(){ return $this->belongsTo(Employee::class,'requested_by'); }
+    
+    // Relationship for the user who created this requisition
+    public function createdByUser()
+    {
+        return $this->belongsTo(User::class, 'created_by');
+    }
     public function passengers(){ return $this->hasMany(RequisitionPassenger::class); }
     public function approvals(){ return $this->hasMany(RequisitionApproval::class); }
  

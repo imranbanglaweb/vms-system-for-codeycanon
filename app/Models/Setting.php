@@ -27,5 +27,14 @@ class Setting extends Model
         'available_languages',
         'auto_translate',
         'translation_cache_duration',
+        // Email Settings
+        'mail_mailer',
+        'mail_host',
+        'mail_port',
+        'mail_username',
+        'mail_password',
+        'mail_encryption',
+        'mail_from_address',
+        'mail_from_name',
     ];
 }

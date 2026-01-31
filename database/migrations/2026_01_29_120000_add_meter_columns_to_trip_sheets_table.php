@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class AddAvailabilityStatusToVehiclesTable extends Migration
+class AddMeterColumnsToTripSheetsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,8 +13,8 @@ class AddAvailabilityStatusToVehiclesTable extends Migration
      */
     public function up()
     {
-        Schema::table('vehicles', function (Blueprint $table) {
-            $table->enum('availability_status', ['available', 'busy', 'maintenance', 'on_leave'])->default('available');
+        Schema::table('trip_sheets', function (Blueprint $table) {
+            $table->decimal('start_meter', 10, 2)->nullable()->after('trip_start_time');
         });
     }
 
@@ -25,8 +25,8 @@ class AddAvailabilityStatusToVehiclesTable extends Migration
      */
     public function down()
     {
-        Schema::table('vehicles', function (Blueprint $table) {
-            //
+        Schema::table('trip_sheets', function (Blueprint $table) {
+            $table->dropColumn(['start_meter']);
         });
     }
 }
