@@ -103,6 +103,25 @@
                         <div class="invalid-feedback"></div>
                     </div>
 
+                    {{-- Department Head Assignment (show only when Department Head is selected) --}}
+                    @php
+                        // Get departments where this user is assigned as head
+                        $headDepartments = \App\Models\Department::where('head_employee_id', $user->employee_id)->get();
+                    @endphp
+                    <div class="col-md-6 department-head-section" style="display: {{ $user->user_type == 'department_head' ? 'block' : 'none' }};">
+                        <label for="head_department_id" class="form-label"><strong>Select Department to Head <span class="text-danger">*</span></strong></label>
+                        <select name="head_department_id" id="head_department_id" class="form-control select2">
+                            <option value="">Please Select Department</option>
+                            @foreach($departments as $department)
+                                <option value="{{ $department->id }}" {{ $headDepartments->contains('id', $department->id) ? 'selected' : '' }}>
+                                    {{ $department->department_name }}
+                                </option>
+                            @endforeach
+                        </select>
+                        <small class="form-text text-muted">Select the department this user will manage as Department Head</small>
+                        <div class="invalid-feedback"></div>
+                    </div>
+
                     {{-- Name --}}
                     <div class="col-md-6">
                         <label for="user_name" class="form-label"><strong>Name <span class="text-danger">*</span></strong></label>
@@ -212,6 +231,25 @@ window.addEventListener('load', function() {
         $(this).valid();
     });
 
+    // Show/hide department head assignment section based on user type
+    $('.user_type').on('change', function() {
+        if ($(this).val() === 'department_head') {
+            $('.department-head-section').show();
+            $('#head_department_id').attr('required', true);
+        } else {
+            $('.department-head-section').hide();
+            $('#head_department_id').removeAttr('required');
+        }
+    });
+
+    // Initialize on page load if user_type is department_head
+    $(document).ready(function() {
+        if ($('.user_type').val() === 'department_head') {
+            $('.department-head-section').show();
+            $('#head_department_id').attr('required', true);
+        }
+    });
+
     // Toggle password visibility
     $(document).on('click', '.toggle-password', function () {
         const input = $($(this).data('target'));
@@ -236,6 +274,7 @@ window.addEventListener('load', function() {
         rules: {
             // employee_id: { required: true }, // Disabled field
             user_type: { required: true },
+            head_department_id: { required: function() { return $('.user_type').val() === 'department_head'; } },
             user_name: { required: true },
             email: { required: true, email: true },
             phone: { required: true, digits: true, minlength: 10, maxlength: 15 },

@@ -208,17 +208,16 @@ public function validateAjax(Request $request)
   public function store(Request $request)
   {
  
-    // dd($request->vehicle_id);
+   
     // Complete validation for ALL form fields
     $validator = Validator::make($request->all(), [
         'employee_id' => 'required|exists:employees,id',
-        'vehicle_id' => 'required|exists:vehicles,id',
-        // 'driver_id' => 'required|exists:drivers,id',    
+        'vehicle_id' => 'required|exists:vehicles,id',  
         'requisition_date' => 'required|date', // Add this if it's in your form
         'from_location' => 'required|string|max:255',
         'to_location' => 'required|string|max:255',
         'travel_date' => 'required|date',
-        // 'return_date' => 'required|date|after_or_equal:travel_date',
+        'return_date' => 'required|date|after_or_equal:travel_date',
         'number_of_passenger' => 'nullable|integer|min:1',
         'purpose' => 'required|string|max:500', // Changed from nullable to required
         'passengers.*.employee_id' => 'required|exists:employees,id',
@@ -294,27 +293,20 @@ public function validateAjax(Request $request)
         }
  
  
- 
     DB::commit();
         
-        // Send email notification to department head
-        try {
-            $this->emailService->sendRequisitionCreated($requisition);
-            Log::info('Email notification sent for requisition created: ' . $requisition->requisition_number);
-        } catch (\Exception $e) {
-            Log::error('Failed to send requisition created email: ' . $e->getMessage());
+        // Send email notification to department head (only if toggle is checked)
+        if ($request->send_email_to_head == 1 && !empty($request->department_head_email)) {
+            try {
+                $this->emailService->sendRequisitionCreated($requisition, $request->department_head_email);
+                Log::info('Email notification sent for requisition created: ' . $requisition->requisition_number . ' to: ' . $request->department_head_email);
+            } catch (\Exception $e) {
+                Log::error('Failed to send requisition created email: ' . $e->getMessage());
+            }
+        } else {
+            Log::info('Email notification skipped for requisition: ' . $requisition->requisition_number . ' (toggle not checked or no email provided)');
         }
         
-//   $users = User::whereHas('roles', function ($q) {
-//         $q->whereIn('name', ['Super Admin', 'Demo Role']);
-//     })
-//     ->whereHas('pushSubscriptions')
-//     ->get();
- 
-// Notification::send($users, new TestPushNotification($requisition));
-// $user = User::find(1);
-// $user->notify(new TestPushNotification($requisition));
- 
  
 // Get users with specific roles AND push subscriptions
     $users = User::whereHas('roles', function ($q) {
@@ -483,7 +475,19 @@ public function validateAjax(Request $request)
                 ]);
             }
         }
- 
+        
+        // Send email notification to department head (only if toggle is checked)
+        if ($request->send_email_to_head == 1 && !empty($request->department_head_email)) {
+            try {
+                $this->emailService->sendRequisitionCreated($requisition, $request->department_head_email);
+                Log::info('Email notification sent for requisition updated: ' . $requisition->requisition_number . ' to: ' . $request->department_head_email);
+            } catch (\Exception $e) {
+                Log::error('Failed to send requisition updated email: ' . $e->getMessage());
+            }
+        } else {
+            Log::info('Email notification skipped for requisition update: ' . $requisition->requisition_number . ' (toggle not checked or no email provided)');
+        }
+        
         return response()->json([
             'status'  => 'success',
             'message' => 'Requisition updated successfully!',

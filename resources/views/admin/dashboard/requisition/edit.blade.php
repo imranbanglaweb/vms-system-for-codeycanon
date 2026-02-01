@@ -112,6 +112,33 @@
 
                 </div>
 
+                <!-- ============================ -->
+                <!-- EMAIL TO DEPARTMENT HEAD TOGGLE -->
+                <!-- ============================ -->
+                <div class="row mb-4">
+                    <div class="col-md-12">
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="send_email_to_head" name="send_email_to_head" value="1">
+                            <label class="form-check-label fw-bold" for="send_email_to_head">
+                                <i class="fa fa-envelope text-primary me-1"></i> Send Email to Department Head
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Hidden Email Details Section (shown when toggle is checked) -->
+                <div id="emailDetailsSection" class="row mb-4" style="display: none;">
+                    <div class="col-md-6">
+                        <label class="form-label"><i class="fa fa-building text-primary me-1"></i> Department Head Name</label>
+                        <input type="text" id="department_head_name" class="form-control form-control-lg" readonly placeholder="Auto-populated from department">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label"><i class="fa fa-envelope text-primary me-1"></i> Department Head Email</label>
+                        <input type="email" id="department_head_email" name="department_head_email" class="form-control form-control-lg" placeholder="Enter email address">
+                        <small class="text-muted">Email will be sent to this address</small>
+                    </div>
+                </div>
+
                 <hr>
 
                 <!-- ============================ -->
@@ -528,6 +555,50 @@ $(function () {
         if(cap>0 && count>cap && popup){
             Swal.fire('Exceeded','Passenger count exceeds seat capacity','error');
         }
+    }
+
+    /* ================= EMAIL TO DEPARTMENT HEAD TOGGLE ================= */
+    $('#send_email_to_head').on('change', function() {
+        if ($(this).is(':checked')) {
+            $('#emailDetailsSection').slideDown();
+            // Auto-populate department head info if department is selected
+            let departmentId = $('#department_id').val();
+            if (departmentId) {
+                fetchDepartmentHeadInfo(departmentId);
+            }
+        } else {
+            $('#emailDetailsSection').slideUp();
+            $('#department_head_name').val('');
+            $('#department_head_email').val('');
+        }
+    });
+
+    // Fetch department head info when department changes
+    $('#department_id').on('change', function() {
+        if ($('#send_email_to_head').is(':checked')) {
+            let departmentId = $(this).val();
+            if (departmentId) {
+                fetchDepartmentHeadInfo(departmentId);
+            } else {
+                $('#department_head_name').val('');
+                $('#department_head_email').val('');
+            }
+        }
+    });
+
+    function fetchDepartmentHeadInfo(departmentId) {
+        $.get("{{ url('/departments') }}/" + departmentId + "/head-info", function(res) {
+            if (res.success) {
+                $('#department_head_name').val(res.head_name || '');
+                $('#department_head_email').val(res.head_email || '');
+            } else {
+                $('#department_head_name').val('');
+                $('#department_head_email').val('');
+            }
+        }).fail(function() {
+            $('#department_head_name').val('');
+            $('#department_head_email').val('');
+        });
     }
 
 });

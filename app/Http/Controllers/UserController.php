@@ -182,6 +182,13 @@ class UserController extends Controller
             $user = User::create($userData);
             $user->assignRole($request->roles);
 
+            // If user is department_head, update the department with this employee as head
+            if ($request->user_type === 'department_head' && $request->head_department_id) {
+                Department::where('id', $request->head_department_id)->update([
+                    'head_employee_id' => $request->employee_id,
+                ]);
+            }
+
             DB::commit();
             return response()->json(['success'=>true,'message'=>'User created successfully!']);
 
@@ -278,6 +285,13 @@ class UserController extends Controller
 
             // UPDATE ROLE
             $user->syncRoles([$request->roles]);
+
+            // If user is department_head, update the department with this employee as head
+            if ($request->user_type === 'department_head' && $request->head_department_id) {
+                Department::where('id', $request->head_department_id)->update([
+                    'head_employee_id' => $request->employee_id,
+                ]);
+            }
 
             return response()->json([
                 'status' => 'success',

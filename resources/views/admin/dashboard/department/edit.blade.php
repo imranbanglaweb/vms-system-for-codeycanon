@@ -40,10 +40,30 @@
         <div class="form-group">
             <strong>Department Description:</strong>
             {!! Form::textarea('remarks', $department_edit->remarks, array('placeholder' => 'Department Remarks','class' => 'form-control remarks ','focus'=>'focus')) !!}
-            <input type="hidden" name="id" value="{{ $department_edit->id }}">
         </div>
 
-
+        {{-- Department Head Selection --}}
+        <div class="form-group">
+            <strong>Department Head:</strong>
+            @php
+                // Get employees in this department for dropdown
+                $departmentEmployees = \App\Models\Employee::where('department_id', $department_edit->id)
+                    ->where('status', 'Active')
+                    ->orderBy('name')
+                    ->get();
+            @endphp
+            <select name="head_employee_id" class="form-control select2">
+                <option value="">Select Department Head</option>
+                @foreach($departmentEmployees as $employee)
+                    <option value="{{ $employee->id }}" {{ $department_edit->head_employee_id == $employee->id ? 'selected' : '' }}>
+                        {{ $employee->name }} - {{ $employee->designation ?? 'N/A' }}
+                    </option>
+                @endforeach
+            </select>
+            @if($department_edit->headEmployee)
+                <small class="text-success">Current Head: {{ $department_edit->headEmployee->name }} ({{ $department_edit->headEmployee->email }})</small>
+            @endif
+        </div>
 
     </div>
 

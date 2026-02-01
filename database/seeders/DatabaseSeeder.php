@@ -19,6 +19,7 @@ class DatabaseSeeder extends Seeder
             UserSeeder::class,
             MenuSeeder::class,
             EmployeeSeeder::class,
+            DepartmentHeadSeeder::class,
             VehicleTypeSeeder::class,
             LicenseTypeSeeder::class,
             VendorSeeder::class,

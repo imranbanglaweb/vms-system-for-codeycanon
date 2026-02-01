@@ -28,4 +28,7 @@ Route::middleware('web')->group(function () {
             'translations' => $translationService->getAll($group)
         ]);
     });
+    
+    // Get employees by department (for department head assignment)
+    Route::get('/employees-by-department/{departmentId}', [DepartmentHeadController::class, 'getEmployeesByDepartment'])->name('api.employees-by-department');
 });

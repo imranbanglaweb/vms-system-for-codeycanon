@@ -95,6 +95,7 @@ use App\Http\Controllers\Admin\PushTestController;
 // Organization Structure
 use App\Http\Controllers\CompanyController;
 use App\Http\Controllers\DepartmentController;
+use App\Http\Controllers\DepartmentHeadController;
 use App\Http\Controllers\UnitController;
 use App\Http\Controllers\LocationController;
 use App\Http\Controllers\EmployeeController;
@@ -467,7 +468,15 @@ Route::middleware(['auth'])->group(function () {
     // Departments
     Route::get('departments/data', [DepartmentController::class, 'data'])->name('departments.data');
     Route::resource('departments', DepartmentController::class);
+    Route::get('departments/{id}/head-info', [DepartmentController::class, 'getHeadInfo'])->name('departments.head-info');
     Route::get('unit-wise-department', [DepartmentController::class, 'unitWiseDepartment'])->name('unit-wise-department');
+    
+    // Department Heads Management
+    Route::get('department-heads', [DepartmentHeadController::class, 'index'])->name('department-heads.index');
+    Route::post('department-heads', [DepartmentHeadController::class, 'store'])->name('department-heads.store');
+    Route::post('department-heads/send-notification', [DepartmentHeadController::class, 'sendNotification'])->name('department-heads.send-notification');
+    Route::delete('department-heads/remove', [DepartmentHeadController::class, 'remove'])->name('department-heads.remove');
+    Route::get('department-heads/employees/{departmentId}', [DepartmentHeadController::class, 'getEmployeesByDepartment'])->name('department-heads.employees');
     
     // Locations
     Route::get('locations/data', [LocationController::class, 'data'])->name('locations.data');

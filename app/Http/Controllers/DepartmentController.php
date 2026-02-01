@@ -50,6 +50,7 @@ class DepartmentController extends Controller
             'location' => 'nullable|string|max:255',
             'description' => 'nullable|string',
             'status' => 'required|in:0,1',
+            'head_employee_id' => 'nullable|exists:employees,id',
         ];
 
         $validator = Validator::make($request->all(), $rules);
@@ -66,6 +67,7 @@ class DepartmentController extends Controller
             'location' => $request->location,
             'description' => $request->description,
             'status' => $request->status,
+            'head_employee_id' => $request->head_employee_id,
             'updated_by' => Auth::id() ?? 1,
         ];
 
@@ -86,6 +88,7 @@ class DepartmentController extends Controller
             'location' => 'nullable|string|max:255',
             'description' => 'nullable|string',
             'status' => 'required|in:0,1',
+            'head_employee_id' => 'nullable|exists:employees,id',
         ];
 
         $validator = Validator::make($request->all(), $rules);
@@ -107,6 +110,7 @@ class DepartmentController extends Controller
             'location' => $request->location,
             'description' => $request->description,
             'status' => $request->status,
+            'head_employee_id' => $request->head_employee_id,
             'updated_by' => Auth::id() ?? 1,
         ];
 
@@ -157,7 +161,24 @@ class DepartmentController extends Controller
         return response()->json(['department_list' => $department_list]);
     }
 
-    
+    /**
+     * Get department head info (name and email)
+     */
+    public function getHeadInfo($id)
+    {
+        $department = Department::with('headEmployee')->find($id);
+        
+        if (!$department) {
+            return response()->json(['success' => false, 'message' => 'Department not found'], 404);
+        }
+        
+        return response()->json([
+            'success' => true,
+            'head_name' => $department->head_name,
+            'head_email' => $department->head_email
+        ]);
+    }
+
 
 
 }

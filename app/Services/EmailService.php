@@ -56,15 +56,22 @@ class EmailService
      * Send email when requisition is created (to Department Head)
      *
      * @param Requisition $requisition
+     * @param string|null $customEmail Optional custom email recipient
      * @return bool
      */
-    public function sendRequisitionCreated(Requisition $requisition): bool
+    public function sendRequisitionCreated(Requisition $requisition, ?string $customEmail = null): bool
     {
-        $recipients = $this->getRecipients('created', $requisition);
+        // If custom email is provided, use it instead of default recipients
+        if (!empty($customEmail)) {
+            $recipients = [$customEmail];
+        } else {
+            $recipients = $this->getRecipients('created', $requisition);
+        }
         
         if (empty($recipients)) {
             Log::warning('EmailService: No recipients found for requisition created notification', [
-                'requisition_id' => $requisition->id
+                'requisition_id' => $requisition->id,
+                'custom_email' => $customEmail
             ]);
             return false;
         }
@@ -323,20 +330,29 @@ class EmailService
 
         // Get department head from department relationship
         $department = $requisition->department;
-        if ($department && !empty($department->head_email)) {
-            $emails[] = $department->head_email;
-        }
-
-        // Also check if there's a designated department head employee
-        // This depends on your application's structure
-        if (method_exists($department, 'head') && $department->head) {
-            $head = $department->head;
-            if (!empty($head->email)) {
-                $emails[] = $head->email;
+        if ($department) {
+            // Use the model's accessor which has fallback logic
+            $headEmail = $department->head_email;
+            if (!empty($headEmail)) {
+                $emails[] = $headEmail;
             }
         }
 
-        return $emails;
+        // Fallback: Also check for users with department_head user_type in the same department
+        if (empty($emails)) {
+            $departmentId = $requisition->department_id;
+            if ($departmentId) {
+                $headUsers = \App\Models\User::where('department_id', $departmentId)
+                    ->where('user_type', 'department_head')
+                    ->where('email', '!=', '')
+                    ->pluck('email')
+                    ->toArray();
+                
+                $emails = array_merge($emails, $headUsers);
+            }
+        }
+
+        return array_filter(array_unique($emails));
     }
 
     /**

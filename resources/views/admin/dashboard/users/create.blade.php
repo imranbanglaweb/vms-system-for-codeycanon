@@ -104,6 +104,19 @@
                         <div class="invalid-feedback"></div>
                     </div>
 
+                    {{-- Department Head Assignment (show only when Department Head is selected) --}}
+                    <div class="col-md-6 department-head-section" style="display: none;">
+                        <label for="head_department_id" class="form-label"><strong>Select Department to Head <span class="text-danger">*</span></strong></label>
+                        <select name="head_department_id" id="head_department_id" class="form-control select2">
+                            <option value="">Please Select Department</option>
+                            @foreach($departments as $department)
+                                <option value="{{ $department->id }}">{{ $department->department_name }}</option>
+                            @endforeach
+                        </select>
+                        <small class="form-text text-muted">Select the department this user will manage as Department Head</small>
+                        <div class="invalid-feedback"></div>
+                    </div>
+
                     {{-- Name --}}
                     <div class="col-md-6">
                         <label for="user_name" class="form-label"><strong>Name <span class="text-danger">*</span></strong></label>
@@ -207,6 +220,17 @@ window.addEventListener('load', function() {
         $(this).valid();
     });
 
+    // Show/hide department head assignment section based on user type
+    $('.user_type').on('change', function() {
+        if ($(this).val() === 'department_head') {
+            $('.department-head-section').show();
+            $('#head_department_id').attr('required', true);
+        } else {
+            $('.department-head-section').hide();
+            $('#head_department_id').removeAttr('required');
+        }
+    });
+
     // Toggle password visibility
     $(document).on('click', '.toggle-password', function () {
         const input = $($(this).data('target'));
@@ -232,6 +256,7 @@ window.addEventListener('load', function() {
             company_id: { required: true },
             employee_id: { required: true },
             user_type: { required: true },
+            head_department_id: { required: function() { return $('.user_type').val() === 'department_head'; } },
             user_name: { required: true },
             email: { required: true, email: true },
             phone: { required: true, digits: true, minlength: 10, maxlength: 15 },

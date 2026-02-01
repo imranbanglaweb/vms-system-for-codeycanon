@@ -22,7 +22,7 @@ class UserSeeder extends Seeder
         $transportRole  = Role::where('name', 'Transport')->first();
         $employeeRole   = Role::where('name', 'Employee')->first();
 
-        // Get first employee for linking
+        // Get first records for linking
         $firstEmployee = Employee::first();
         $firstDepartment = Department::first();
         $firstUnit = Unit::first();
@@ -70,26 +70,6 @@ class UserSeeder extends Seeder
         );
         $admin->assignRole($adminRole);
 
-        // ================= DEPARTMENT HEAD =================
-        $deptHead = User::firstOrCreate(
-            ['email' => 'depthead@demo.com'],
-            [
-                'name' => 'Department Head',
-                'user_name' => 'DH001',
-                'password' => Hash::make('password'),
-                'status' => 1,
-                'user_type' => 'department_head',
-                'employee_id' => $firstEmployee ? $firstEmployee->id : null,
-                'company_id' => 1,
-                'department_id' => $firstDepartment ? $firstDepartment->id : null,
-                'unit_id' => $firstUnit ? $firstUnit->id : null,
-                'location_id' => $firstLocation ? $firstLocation->id : null,
-                'user_image' => $dummyImage,
-                'cell_phone' => '01700000003',
-            ]
-        );
-        $deptHead->syncRoles([$deptHeadRole]);
-
         // ================= TRANSPORT MANAGER =================
         $transport = User::firstOrCreate(
             ['email' => 'transport@demo.com'],
@@ -110,66 +90,87 @@ class UserSeeder extends Seeder
         );
         $transport->assignRole($transportRole);
 
-        // ================= EMPLOYEE =================
-        $employee = User::firstOrCreate(
-            ['email' => 'employee@demo.com'],
-            [
-                'name' => 'Employee User',
-                'user_name' => 'EMP001',
-                'password' => Hash::make('password'),
-                'status' => 1,
-                'user_type' => 'normal_user',
-                'employee_id' => $firstEmployee ? $firstEmployee->id : null,
-                'company_id' => 1,
-                'department_id' => $firstDepartment ? $firstDepartment->id : null,
-                'unit_id' => $firstUnit ? $firstUnit->id : null,
-                'location_id' => $firstLocation ? $firstLocation->id : null,
-                'user_image' => $dummyImage,
-                'cell_phone' => '01700000005',
-            ]
-        );
-        $employee->assignRole($employeeRole);
-
-        // ================= ADDITIONAL USERS =================
+        // ================= EMPLOYEE USERS (Linked to Employees) =================
         
-        // HR Manager
-        $hrManager = User::firstOrCreate(
-            ['email' => 'hrmanager@demo.com'],
-            [
-                'name' => 'HR Manager',
-                'user_name' => 'HR001',
-                'password' => Hash::make('password'),
-                'status' => 1,
-                'user_type' => 'admin',
-                'employee_id' => $firstEmployee ? $firstEmployee->id : null,
-                'company_id' => 1,
-                'department_id' => $firstDepartment ? $firstDepartment->id : null,
-                'unit_id' => $firstUnit ? $firstUnit->id : null,
-                'location_id' => $firstLocation ? $firstLocation->id : null,
-                'user_image' => $dummyImage,
-                'cell_phone' => '01700000006',
-            ]
-        );
-        $hrManager->assignRole($adminRole);
+        // Get all employees with their emails
+        $employees = Employee::whereIn('email', [
+            'employee@demo.com',
+            'john.doe@demo.com',
+            'jane.smith@demo.com',
+            'mike.johnson@demo.com',
+            'sarah.williams@demo.com',
+        ])->get();
 
-        // Finance Manager
-        $financeManager = User::firstOrCreate(
-            ['email' => 'financemanager@demo.com'],
-            [
-                'name' => 'Finance Manager',
-                'user_name' => 'FM001',
-                'password' => Hash::make('password'),
-                'status' => 1,
-                'user_type' => 'admin',
-                'employee_id' => $firstEmployee ? $firstEmployee->id : null,
-                'company_id' => 1,
-                'department_id' => $firstDepartment ? $firstDepartment->id : null,
-                'unit_id' => $firstUnit ? $firstUnit->id : null,
-                'location_id' => $firstLocation ? $firstLocation->id : null,
-                'user_image' => $dummyImage,
-                'cell_phone' => '01700000007',
-            ]
-        );
-        $financeManager->assignRole($adminRole);
+        foreach ($employees as $emp) {
+            // Create or update user for each employee
+            $user = User::firstOrCreate(
+                ['email' => $emp->email],
+                [
+                    'name' => $emp->name,
+                    'user_name' => $emp->employee_code,
+                    'password' => Hash::make('password'),
+                    'status' => 1,
+                    'user_type' => 'normal_user',
+                    'employee_id' => $emp->id,
+                    'company_id' => 1,
+                    'department_id' => $emp->department_id,
+                    'unit_id' => $emp->unit_id,
+                    'location_id' => $emp->location_id,
+                    'user_image' => $dummyImage,
+                    'cell_phone' => $emp->phone ?? '01700000000',
+                ]
+            );
+            
+            // Assign employee role
+            $user->syncRoles([$employeeRole]);
+            
+            $this->command->info("Created user for employee: {$emp->name} ({$emp->email})");
+        }
+
+        // ================= DEPARTMENT HEAD USERS =================
+        
+        // Create department head users based on assigned heads
+        $departmentHeads = [
+            'HR' => 'Demo Employee',
+            'IT' => 'John Doe',
+            'Accounts' => 'Jane Smith',
+            'Operations' => 'Mike Johnson',
+            'Finance' => 'Sarah Williams',
+        ];
+
+        foreach ($departmentHeads as $deptName => $empName) {
+            $department = Department::where('department_name', $deptName)->first();
+            if ($department && $department->headEmployee) {
+                $headEmployee = $department->headEmployee;
+                
+                // Create or update user as department head
+                $headUser = User::firstOrCreate(
+                    ['email' => $headEmployee->email],
+                    [
+                        'name' => $headEmployee->name,
+                        'user_name' => $headEmployee->employee_code,
+                        'password' => Hash::make('password'),
+                        'status' => 1,
+                        'user_type' => 'department_head',
+                        'employee_id' => $headEmployee->id,
+                        'company_id' => 1,
+                        'department_id' => $department->id,
+                        'unit_id' => $headEmployee->unit_id,
+                        'location_id' => $headEmployee->location_id,
+                        'user_image' => $dummyImage,
+                        'cell_phone' => $headEmployee->phone ?? '01700000000',
+                    ]
+                );
+                
+                // Assign department head role
+                $headUser->syncRoles([$deptHeadRole, $employeeRole]);
+                
+                $this->command->info("Created department head user: {$headEmployee->name} for {$deptName}");
+            }
+        }
+
+        // ================= SUMMARY =================
+        $this->command->info('User seeding completed!');
+        $this->command->info('Users created: Super Admin, Admin, Transport Manager, and all department head employees');
     }
 }
