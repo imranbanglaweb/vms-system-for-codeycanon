@@ -38,13 +38,27 @@ class CompanyController extends Controller
      */
     public function index()
     {
-                        $companies = DB::table('companies')
-                        ->select('companies.id as c_id','companies.company_name','companies.company_code','units.*')
-                        ->leftJoin('units','companies.unit_id','=','units.id')
-                        ->get();
-        return view('admin.dashboard.company.index',compact('companies'));
+        return view('admin.dashboard.company.index');
+    }
 
-
+    /**
+     * Get data for DataTables
+     */
+    public function data()
+    {
+        $companies = Company::select(['id', 'company_name', 'company_code']);
+        
+        return DataTables::of($companies)
+            ->addIndexColumn()
+            ->addColumn('action', function($row) {
+                $btn = '<div class="action-btns">';
+                $btn .= '<button class="btn btn-primary btn-sm editCompany" data-id="'.$row->id.'" data-name="'.$row->company_name.'" data-code="'.$row->company_code.'"><i class="fa fa-edit"></i> Edit</button>';
+                $btn .= '<button class="btn btn-danger btn-sm deleteCompany" data-id="'.$row->id.'"><i class="fa fa-trash"></i> Delete</button>';
+                $btn .= '</div>';
+                return $btn;
+            })
+            ->rawColumns(['action'])
+            ->make(true);
     }
 
     /**
@@ -54,8 +68,7 @@ class CompanyController extends Controller
      */
     public function create()
     {
-         $units = Unit::get();
-        return view('admin.dashboard.company.create',compact('units'));
+         return view('admin.dashboard.company.create');
     }
 
     /**
@@ -66,64 +79,28 @@ class CompanyController extends Controller
      */
     public function store(Request $request)
     {
-
           $validator = Validator::make($request->all(), [
-                    "company_name" => "required",
-        ]);
+              'company_name' => 'required|string|max:255',
+              'company_code' => 'required|string|max:50|unique:companies,company_code',
+          ]);
 
+          if ($validator->fails()) {
+              return response()->json(['errors' => $validator->errors()->all()], 400);
+          }
 
-// return dd($request);
+          $company = Company::updateOrCreate(
+              ['id' => $request->id],
+              [
+                  'company_name' => $request->company_name,
+                  'company_code' => $request->company_code,
+                  'unit_id' => $request->unit_id,
+                  'remarks' => $request->remarks,
+                  'status' => $request->status ?? 'active',
+                  'created_by' => Auth::id(),
+              ]
+          );
 
-        // if ($validator->fails()) {
-        //       return redirect()->back()->withErrors($validator->errors());
-        //     // return response()->json(['errors' => $validator->errors()->all()], 400);
-        // }
-
-           if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()->all()], 400);
-        }
-
-// return dd($request);
-
-
-           if (!empty($request->company_name)) {
-                $company = Company::updateOrCreate(
-
-        ['id'   => $request->id],
-        [
-        'company_name'      => $request->company_name,
-        'company_code'   => $request->company_code,
-        'unit_id'   => $request->unit_id,
-        'remarks'     => $request->remarks,
-        'created_by' => Auth::id(),
-        ],
-     
-        );
-        
-        }
-        else{
-               $event = Company::updateOrCreate(
-
-        ['id'   => $request->id],
-        [
-        'company_name'      => $request->company_name,
-        'company_code'   => $request->company_code,
-        'unit_id'   => $request->unit_id,
-        'remarks'     => $request->remarks,
-        'created_by' => Auth::id(),
-        ],
-     
-        );
-        }
-
-
-        // $setting->path = '/storage/'.$path;
-
-
-        return response()->json('Company Added Successfully');
-
-        
-
+          return response()->json(['message' => 'Company saved successfully']);
     }
 
     /**
@@ -145,8 +122,9 @@ class CompanyController extends Controller
      */
     public function edit($id)
     {
-                 $unit_edit = Unit::find($id);
-        return view('admin.dashboard.unit.edit',compact('unit_edit'));
+        $company = Company::findOrFail($id);
+        $units = Unit::all();
+        return view('admin.dashboard.company.edit', compact('company', 'units'));
     }
 
     /**
@@ -169,9 +147,8 @@ class CompanyController extends Controller
      */
     public function destroy($id)
     {
-                       Company::find($id)->delete();
-        return redirect()->route('units.index')
-                        ->with('danger','Unit Deleted successfully');
+        Company::find($id)->delete();
+        return response()->json(['message' => 'Company deleted successfully']);
     }
 
 

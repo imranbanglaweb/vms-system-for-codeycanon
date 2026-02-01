@@ -13,13 +13,22 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
 class DepartmentController extends Controller
 {
-    
+
 
   // Show view
     public function index()
     {
         $units = Unit::all();
         return view('admin.dashboard.department.index', compact('units'));
+    }
+
+    /**
+     * List all departments for dropdowns
+     */
+    public function list()
+    {
+        $departments = Department::orderBy('department_name')->get(['id', 'department_name']);
+        return response()->json($departments);
     }
 
     // Data for DataTables

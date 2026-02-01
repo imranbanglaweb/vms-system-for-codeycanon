@@ -57,7 +57,7 @@ class LocationController extends Controller
      * Server-side data endpoint for locations
      */
     public function data()
-{
+    {
     $query = \DB::table('locations')
         ->leftJoin('units', 'locations.unit_id', '=', 'units.id')
         ->select(
@@ -87,7 +87,16 @@ class LocationController extends Controller
         })
         ->rawColumns(['action'])
         ->make(true);
-}
+    }
+
+    /**
+     * List all locations for dropdowns
+     */
+    public function list()
+    {
+        $locations = Location::orderBy('location_name')->get(['id', 'location_name']);
+        return response()->json($locations);
+    }
 
     /**
      * Show the form for creating a new resource.
@@ -121,7 +130,7 @@ class LocationController extends Controller
         ]);
 
 
-// return dd($request);
+ // return dd($request);
 
         // if ($validator->fails()) {
         //       return redirect()->back()->withErrors($validator->errors());
@@ -135,7 +144,7 @@ class LocationController extends Controller
 
         Log::info('LocationController@store called', ['payload' => $request->all()]);
 
-// return dd($request);
+ // return dd($request);
 
 
         // derive location_code from the selected unit's name (if available)

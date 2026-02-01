@@ -78,6 +78,9 @@ class RolePermissionSeeder extends Seeder
             'department-edit',
             'unit-manage',
 
+            // Company
+            'company-manage',
+
             // Maintenance
             'maintenance-manage',
             'maintenance-create',

@@ -73,7 +73,15 @@ class UserController extends Controller
                 })
 
                 ->addColumn('employee', function ($row) {
-                    return $row->employee ? $row->employee->name . ' (' . $row->employee->employee_code . ')' : 'N/A';
+                    $isDeptHead = $row->employee && $row->employee->department && $row->employee->department->head_employee_id == $row->employee_id;
+                    $deptHeadBadge = $isDeptHead ? '<span class="badge bg-primary ms-1" style="font-size: 9px;"><i class="fa fa-user-tie"></i> HOD</span>' : '';
+                    return $row->employee ? $row->employee->name . ' (' . $row->employee->employee_code . ')' . $deptHeadBadge : 'N/A';
+                })
+
+                ->addColumn('email', function ($row) {
+                    $emailMatch = $row->employee && $row->employee->email && $row->email == $row->employee->email;
+                    $emailBadge = $emailMatch ? '<span class="badge bg-success ms-1" style="font-size: 9px;" title="Email matches employee email"><i class="fa fa-check"></i></span>' : '<span class="badge bg-warning ms-1" style="font-size: 9px;" title="Email does not match employee email"><i class="fa fa-exclamation"></i></span>';
+                    return $row->email . $emailBadge;
                 })
 
                 ->addColumn('department', function ($row) {
@@ -88,6 +96,13 @@ class UserController extends Controller
                     return $row->location ? $row->location->location_name : 'N/A';
                 })
 
+                ->addColumn('status', function ($row) {
+                    if ($row->status == 1) {
+                        return '<span class="badge bg-success" style="font-size: 11px;"><i class="fa fa-check-circle me-1"></i>Active</span>';
+                    }
+                    return '<span class="badge bg-danger" style="font-size: 11px;"><i class="fa fa-times-circle me-1"></i>Inactive</span>';
+                })
+
                 ->addColumn('action', function ($row) {
                     return '
                         <button class="btn btn-sm btn-danger deleteUser" data-id="'.$row->id.'">
@@ -99,7 +114,7 @@ class UserController extends Controller
                     ';
                 })
 
-                ->rawColumns(['user_image','action'])
+                ->rawColumns(['user_image','action','status','employee','email'])
                 ->make(true);
         }
 
@@ -224,7 +239,7 @@ class UserController extends Controller
             // Validate
             $request->validate([
                 // 'name' => 'required|string|max:255',
-                'employee_id' => 'required',
+                'employee_id' => 'nullable',
                 'user_type'   => 'required',
                 'user_name'   => 'required|string|max:255',
                 'email'       => "required|email|unique:users,email,$id",
@@ -425,7 +440,30 @@ class UserController extends Controller
 
 
 
-        
-        
-
+        /* ------------------------------------------------------------------
+            GET EMPLOYEE DETAILS (for auto-populate)
+        ------------------------------------------------------------------ */
+        public function getEmployeeDetails($employeeId)
+        {
+            $employee = Employee::with(['company', 'department', 'unit', 'location'])
+                ->find($employeeId);
+            
+            if ($employee) {
+                return response()->json([
+                    'success' => true,
+                    'employee' => [
+                        'id' => $employee->id,
+                        'name' => $employee->name,
+                        'email' => $employee->email ?? '',
+                        'phone' => $employee->phone ?? '',
+                        'company_id' => $employee->company_id,
+                        'department_id' => $employee->department_id,
+                        'unit_id' => $employee->unit_id,
+                        'location_id' => $employee->location_id,
+                    ]
+                ]);
+            }
+            
+            return response()->json(['success' => false, 'message' => 'Employee not found'], 404);
+        }
 }

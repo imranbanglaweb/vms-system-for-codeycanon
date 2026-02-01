@@ -76,6 +76,18 @@ class EmployeeSeeder extends Seeder
                 'employee_type' => 'Permanent',
                 'status' => 'Active',
             ],
+            [
+                'name' => 'Alex Brown',
+                'employee_code' => 'EMP200',
+                'email' => 'alex.brown@demo.com',
+                'department_id' => 2,
+                'unit_id' => 1,
+                'location_id' => $firstLocation ? $firstLocation->id : 1,
+                'designation' => 'Senior Developer',
+                'phone' => '01800000006',
+                'employee_type' => 'Permanent',
+                'status' => 'Active',
+            ],
         ];
 
         foreach ($employees as $employee) {

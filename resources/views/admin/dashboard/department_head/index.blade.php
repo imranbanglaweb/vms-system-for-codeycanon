@@ -65,6 +65,11 @@
         background: linear-gradient(to right, #f8fafc, #f1f5f9);
         padding: 20px 30px;
         border-bottom: 1px solid #e2e8f0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 15px;
     }
     
     .card-header-premium h4 {
@@ -319,8 +324,60 @@
     
     .toast-notification.success .toast-icon { background: #d1fae5; color: #10b981; }
     .toast-notification.error .toast-icon { background: #fee2e2; color: #ef4444; }
+    
+    /* Search Box Styles */
+    .search-box {
+        position: relative;
+    }
+    
+    .search-box input {
+        padding-left: 40px;
+        width: 280px;
+    }
+    
+    .search-box .fa-search {
+        position: absolute;
+        left: 14px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #94a3b8;
+    }
+    
+    .search-box .clear-search {
+        position: absolute;
+        right: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        cursor: pointer;
+        color: #94a3b8;
+        display: none;
+    }
+    
+    .search-box .clear-search:hover {
+        color: #64748b;
+    }
+    
+    .filtered-row { display: none !important; }
+    
+    .search-highlight {
+        background-color: #fef08a;
+        padding: 0 2px;
+        border-radius: 2px;
+    }
+    
+    .no-results-row { display: table-row !important; }
+    
+    /* Highlighted row for assigned departments */
+    .table-success-row {
+        background-color: rgba(16, 185, 129, 0.08) !important;
+    }
+    
+    .table-success-row:hover {
+        background-color: rgba(16, 185, 129, 0.15) !important;
+    }
 </style>
-
+<br>
+<br>
 <section role="main" class="content-body">
     <div class="row">
         <div class="col-12">
@@ -348,6 +405,11 @@
     <div class="card card-premium">
         <div class="card-header card-header-premium">
             <h4><i class="fa fa-list"></i> Department Heads List</h4>
+            <div class="search-box">
+                <i class="fa fa-search"></i>
+                <input type="text" id="searchDepartmentHeads" class="form-control-premium" placeholder="Search department, head, email...">
+                <span class="clear-search" id="clearSearch"><i class="fa fa-times-circle"></i></span>
+            </div>
         </div>
         <div class="card-body p-0">
             <div class="table-responsive">
@@ -365,11 +427,20 @@
                     </thead>
                     <tbody>
                         @forelse($departments as $index => $department)
-                        <tr>
+                        <tr class="@if($department->headEmployee || $department->head_email) table-success-row @endif">
                             <td class="text-center text-muted-premium fw-bold">{{ $index + 1 }}</td>
                             <td>
-                                <div class="fw-bold">{{ $department->department_name }}</div>
-                                <small class="text-muted-premium">{{ $department->department_code }}</small>
+                                <div class="d-flex align-items-center gap-2">
+                                    @if($department->headEmployee || $department->head_email)
+                                        <span class="badge bg-success" style="font-size: 10px;"><i class="fa fa-check me-1"></i>Assigned</span>
+                                    @else
+                                        <span class="badge bg-warning" style="font-size: 10px;"><i class="fa fa-clock me-1"></i>Pending</span>
+                                    @endif
+                                    <div>
+                                        <div class="fw-bold">{{ $department->department_name }}</div>
+                                        <small class="text-muted-premium">{{ $department->department_code }}</small>
+                                    </div>
+                                </div>
                             </td>
                             <td>
                                 @if($department->headEmployee)
@@ -418,9 +489,9 @@
                             </td>
                             <td class="text-center">
                                 @if($department->headEmployee || $department->head_email)
-                                    <span class="badge badge-premium badge-success"><i class="fa fa-check me-1"></i>Assigned</span>
+                                    <span class="badge badge-premium badge-success"><i class="fa fa-check-circle me-1"></i>Active</span>
                                 @else
-                                    <span class="badge badge-premium badge-warning"><i class="fa fa-clock me-1"></i>Pending</span>
+                                    <span class="badge badge-premium badge-warning"><i class="fa fa-exclamation-circle me-1"></i>Pending</span>
                                 @endif
                             </td>
                             <td class="text-center">
@@ -454,7 +525,7 @@
                         @empty
                         <tr>
                             <td colspan="7" class="empty-state">
-                                <div class="empty-state-icon">📋</div>
+                                <div class="empty-state-icon">&#128203;</div>
                                 <h5 class="text-muted-premium">No departments found</h5>
                             </td>
                         </tr>
@@ -620,6 +691,42 @@ function showToast(type, title, message) {
     }, 5000);
 }
 
+// Escape regex special characters
+function escapeRegExp(string) {
+    return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+// Highlight matching text function
+function highlightText(element, searchTerm) {
+    const existingHighlights = element.querySelectorAll('.search-highlight');
+    existingHighlights.forEach(el => {
+        el.outerHTML = el.innerHTML;
+    });
+    
+    if (!searchTerm) return;
+    
+    const textNodes = [];
+    const walker = document.createTreeWalker(element, NodeFilter.SHOW_TEXT, null, false);
+    let node;
+    while (node = walker.nextNode()) {
+        if (node.textContent.toLowerCase().includes(searchTerm) && node.parentElement.tagName !== 'SCRIPT' && node.parentElement.tagName !== 'STYLE') {
+            textNodes.push(node);
+        }
+    }
+    
+    textNodes.forEach(textNode => {
+        const span = document.createElement('span');
+        span.className = 'search-highlight';
+        span.style.backgroundColor = '#fef08a';
+        span.style.padding = '0 2px';
+        span.style.borderRadius = '2px';
+        
+        const regex = new RegExp('(' + escapeRegExp(searchTerm) + ')', 'gi');
+        span.textContent = textNode.textContent;
+        textNode.parentNode.replaceChild(span, textNode);
+    });
+}
+
 // Event listeners
 document.addEventListener('DOMContentLoaded', function() {
     // Open modal
@@ -697,14 +804,11 @@ document.addEventListener('DOMContentLoaded', function() {
     document.addEventListener('click', function(e) {
         const btn = e.target.closest('.btn-edit');
         if (btn) {
-            console.log('Edit button clicked', btn.dataset);
             const deptId = btn.dataset.departmentId;
             const deptName = btn.dataset.departmentName;
             const headEmpId = btn.dataset.headEmployeeId;
             const headEmail = btn.dataset.headEmail;
             const headName = btn.dataset.headName;
-            
-            console.log(' deptId:', deptId, 'headEmpId:', headEmpId, 'headEmail:', headEmail);
             
             document.getElementById('modal_department_id').value = deptId || '';
             document.getElementById('department_select').value = deptId || '';
@@ -724,8 +828,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     .then(employees => {
                         const empSelect = document.getElementById('head_employee_id');
                         const loadingSpan = document.getElementById('employee_loading');
-                        
-                        console.log('Employees fetched:', employees);
                         
                         // Destroy existing Select2 to reinitialize with new data
                         if ($(empSelect).hasClass('select2-hidden-accessible')) {
@@ -757,7 +859,6 @@ document.addEventListener('DOMContentLoaded', function() {
                         $(empSelect).trigger('change');
                         
                         loadingSpan.style.display = 'none';
-                        console.log('Selected value after set:', empSelect.value);
                     });
             } else if (headEmail) {
                 document.querySelector('input[value="manual"]').checked = true;
@@ -860,6 +961,82 @@ document.addEventListener('DOMContentLoaded', function() {
                 showToast('error', 'Error!', 'Something went wrong.');
             }
         });
+    });
+    
+    // Search functionality
+    document.getElementById('searchDepartmentHeads').addEventListener('input', function(e) {
+        const searchTerm = e.target.value.toLowerCase().trim();
+        const clearBtn = document.getElementById('clearSearch');
+        const table = document.getElementById('departmentHeadsTable');
+        const tbody = table.querySelector('tbody');
+        const rows = tbody.querySelectorAll('tr:not(.empty-state-row)');
+        
+        // Show/hide clear button
+        clearBtn.style.display = searchTerm ? 'block' : 'none';
+        
+        // Filter rows
+        let visibleCount = 0;
+        rows.forEach(row => {
+            const departmentName = row.querySelector('td:nth-child(2)')?.textContent.toLowerCase() || '';
+            const departmentCode = row.querySelector('td:nth-child(2) small')?.textContent.toLowerCase() || '';
+            const headName = row.querySelector('td:nth-child(3)')?.textContent.toLowerCase() || '';
+            const email = row.querySelector('td:nth-child(4)')?.textContent.toLowerCase() || '';
+            const phone = row.querySelector('td:nth-child(5)')?.textContent.toLowerCase() || '';
+            const status = row.querySelector('td:nth-child(6)')?.textContent.toLowerCase() || '';
+            
+            const rowText = departmentName + ' ' + departmentCode + ' ' + headName + ' ' + email + ' ' + phone + ' ' + status;
+            
+            if (rowText.includes(searchTerm)) {
+                row.style.display = '';
+                row.classList.remove('filtered-row');
+                visibleCount++;
+            } else {
+                row.style.display = 'none';
+                row.classList.add('filtered-row');
+            }
+        });
+        
+        // Show/hide empty state based on results
+        if (searchTerm && visibleCount === 0) {
+            // Show no results found
+            if (!tbody.querySelector('.no-results-row')) {
+                const noResultsRow = document.createElement('tr');
+                noResultsRow.className = 'no-results-row';
+                noResultsRow.innerHTML = '<td colspan="7" class="empty-state">' +
+                    '<div class="empty-state-icon">&#128270;</div>' +
+                    '<h5 class="text-muted-premium">No department heads found</h5>' +
+                    '<p class="text-muted-premium">Try different search terms</p>' +
+                    '</td>';
+                tbody.insertBefore(noResultsRow, tbody.firstChild);
+            }
+        } else {
+            const noResultsRow = tbody.querySelector('.no-results-row');
+            if (noResultsRow) noResultsRow.remove();
+        }
+        
+        // Highlight matching text
+        if (searchTerm) {
+            rows.forEach(row => {
+                if (row.style.display !== 'none') {
+                    highlightText(row, searchTerm);
+                }
+            });
+        } else {
+            rows.forEach(row => {
+                const highlighted = row.querySelectorAll('.search-highlight');
+                highlighted.forEach(el => {
+                    el.outerHTML = el.innerHTML;
+                });
+            });
+        }
+    });
+    
+    // Clear search button
+    document.getElementById('clearSearch').addEventListener('click', function() {
+        const searchInput = document.getElementById('searchDepartmentHeads');
+        searchInput.value = '';
+        searchInput.dispatchEvent(new Event('input'));
+        searchInput.focus();
     });
 });
 </script>

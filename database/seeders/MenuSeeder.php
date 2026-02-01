@@ -250,12 +250,21 @@ class MenuSeeder extends Seeder
                 'parent_name' => 'Employee Manage',
             ],
             [
+                'menu_name' => 'Company List',
+                'menu_slug' => 'company-list',
+                'menu_icon' => 'fa-building',
+                'menu_url' => 'company.index',
+                'menu_permission' => 'company-manage',
+                'menu_order' => 3,
+                'parent_name' => 'Employee Manage',
+            ],
+            [
                 'menu_name' => 'Location Manage',
                 'menu_slug' => 'location-manage',
                 'menu_icon' => 'fa-map-marker',
                 'menu_url' => 'locations.index',
                 'menu_permission' => 'location-manage',
-                'menu_order' => 3,
+                'menu_order' => 4,
                 'parent_name' => 'Employee Manage',
             ],
             [
@@ -264,7 +273,7 @@ class MenuSeeder extends Seeder
                 'menu_icon' => 'fa-briefcase',
                 'menu_url' => 'departments.index',
                 'menu_permission' => 'department-manage',
-                'menu_order' => 4,
+                'menu_order' => 5,
                 'parent_name' => 'Employee Manage',
             ],
             [
@@ -273,7 +282,7 @@ class MenuSeeder extends Seeder
                 'menu_icon' => 'fa-user-tie',
                 'menu_url' => 'department-heads.index',
                 'menu_permission' => 'department-head-manage',
-                'menu_order' => 5,
+                'menu_order' => 6,
                 'parent_name' => 'Employee Manage',
             ],
             [
@@ -282,7 +291,7 @@ class MenuSeeder extends Seeder
                 'menu_icon' => 'fa-certificate',
                 'menu_url' => 'license-types.index',
                 'menu_permission' => 'license-type-manage',
-                'menu_order' => 6,
+                'menu_order' => 7,
                 'parent_name' => 'Employee Manage',
             ],
             // Vehicle Management children (parent ID: Vehicle Management)

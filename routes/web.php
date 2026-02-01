@@ -460,13 +460,16 @@ Route::middleware(['auth', 'role:Admin'])->prefix('admin')->group(function () {
 Route::middleware(['auth'])->group(function () {
     // Units
     Route::get('units/data', [UnitController::class, 'data'])->name('units.data');
+    Route::get('units/list', [UnitController::class, 'list'])->name('units.list');
     Route::resource('units', UnitController::class);
     
     // Companies
+    Route::get('company/data', [CompanyController::class, 'data'])->name('company.data');
     Route::resource('company', CompanyController::class);
     
     // Departments
     Route::get('departments/data', [DepartmentController::class, 'data'])->name('departments.data');
+    Route::get('departments/list', [DepartmentController::class, 'list'])->name('departments.list');
     Route::resource('departments', DepartmentController::class);
     Route::get('departments/{id}/head-info', [DepartmentController::class, 'getHeadInfo'])->name('departments.head-info');
     Route::get('unit-wise-department', [DepartmentController::class, 'unitWiseDepartment'])->name('unit-wise-department');
@@ -480,6 +483,7 @@ Route::middleware(['auth'])->group(function () {
     
     // Locations
     Route::get('locations/data', [LocationController::class, 'data'])->name('locations.data');
+    Route::get('locations/list', [LocationController::class, 'list'])->name('locations.list');
     Route::resource('locations', LocationController::class);
 });
 
@@ -503,6 +507,9 @@ Route::middleware(['auth'])->group(function () {
 
     Route::post('users/validate', [UserController::class, 'validateUser'])->name('users.validate');
     Route::post('users/ajaxSubmit', [UserController::class, 'ajaxSubmit'])->name('users.ajaxSubmit');
+    
+    // Get employee details for auto-populate
+    Route::get('users/employee-details/{employeeId}', [UserController::class, 'getEmployeeDetails'])->name('users.get-employee-details');
     
     // User Profile
     Route::get('user-profile', [UserController::class, 'userprofile'])->name('user-profile');

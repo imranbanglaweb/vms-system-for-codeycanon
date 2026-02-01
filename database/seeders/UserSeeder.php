@@ -99,6 +99,7 @@ class UserSeeder extends Seeder
             'jane.smith@demo.com',
             'mike.johnson@demo.com',
             'sarah.williams@demo.com',
+            'alex.brown@demo.com',
         ])->get();
 
         foreach ($employees as $emp) {

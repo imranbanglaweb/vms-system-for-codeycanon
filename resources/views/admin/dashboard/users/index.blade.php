@@ -43,6 +43,7 @@
                 <th>Department</th>
                 <th>Unit</th>
                 <th>Location</th>
+                <th>Status</th>
                 <th>Image</th>
                 <th width="150px">Action</th>
             </tr>
@@ -95,6 +96,7 @@ $(document).ready(function() {
             { data: 'department' },
             { data: 'unit' },
             { data: 'location' },
+            { data: 'status' },
             { data: 'user_image', orderable: false, searchable: false },
             { data: 'action', orderable: false, searchable: false }
         ]

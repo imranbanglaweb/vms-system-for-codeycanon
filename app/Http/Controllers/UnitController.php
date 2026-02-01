@@ -44,6 +44,15 @@ class UnitController extends Controller
     }
 
     /**
+     * List all units for dropdowns
+     */
+    public function list()
+    {
+        $units = Unit::orderBy('unit_name')->get(['id', 'unit_name']);
+        return response()->json($units);
+    }
+
+    /**
      * Server-side data for DataTables
      */
     public function data(Request $request)

@@ -7,7 +7,7 @@
 <div class="row">
     <div class="col-12 mb-3 d-flex justify-content-between align-items-center">
             <h2>Edit User</h2>
-            <a class="btn btn-primary" href="{{ route('users.index') }}"> Back</a>
+            <a class="btn btn-primary" href="{{ route('users.index') }}"> <i class="fa fa-arrow-left"></i> Back</a>
     </div>
 </div>
 
@@ -36,7 +36,7 @@
                     {{-- Employee --}}
                     <div class="col-md-6">
                         <label for="employee_id" class="form-label"><strong>Select Employee</strong></label>
-                        <select name="employee_id" class="form-control select2 employee_id" disabled>
+                        <select name="employee_id" id="employee_id" class="form-control select2 employee_id">
                             <option value="">Please Select</option>
                             @foreach($employees as $list)
                                 <option value="{{ $list->id }}" {{ $user->employee_id == $list->id ? 'selected' : '' }}>
@@ -44,7 +44,23 @@
                                 </option>
                             @endforeach
                         </select>
-                        <input type="hidden" name="employee_id" value="{{ $user->employee_id }}">
+                        <div class="invalid-feedback"></div>
+                    </div>
+
+                    {{-- Company --}}
+                    <div class="col-md-6">
+                        <label for="company_id" class="form-label"><strong>Select Company</strong></label>
+                        <select name="company_id" id="company_id" class="form-control select2">
+                            <option value="">Please Select</option>
+                            @php
+                                $companies = \App\Models\Company::orderBy('id', 'DESC')->get();
+                            @endphp
+                            @foreach($companies as $company)
+                                <option value="{{ $company->id }}" {{ $user->company_id == $company->id ? 'selected' : '' }}>
+                                    {{ $company->company_name }}
+                                </option>
+                            @endforeach
+                        </select>
                         <div class="invalid-feedback"></div>
                     </div>
 
@@ -263,6 +279,72 @@ window.addEventListener('load', function() {
         }
     });
 
+    // Auto-populate fields when employee is selected
+    $('#employee_id').on('change', function() {
+        const employeeId = $(this).val();
+        
+        if (employeeId) {
+            // Show loading indicator
+            $('#company_id, #department_id, #unit_id, #location_id').next('.select2-container').find('.select2-selection').css('opacity', '0.6');
+            
+            // Make fields readonly while loading
+            $('#company_id, #department_id, #unit_id, #location_id').prop('disabled', true);
+            
+            // Fetch employee details via AJAX
+            fetch('{{ route('users.get-employee-details', ':employeeId') }}'.replace(':employeeId', employeeId))
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        const employee = data.employee;
+                        
+                        // Auto-populate name, email, phone
+                        $('#user_name').val(employee.name || '');
+                        $('#user_email').val(employee.email || '');
+                        $('#user_phone').val(employee.phone || '');
+                        
+                        // Auto-populate company (readonly)
+                        if (employee.company_id) {
+                            $('#company_id').val(employee.company_id).trigger('change');
+                        }
+                        $('#company_id').prop('disabled', true).addClass('bg-light');
+                        
+                        // Auto-populate department
+                        if (employee.department_id) {
+                            $('#department_id').val(employee.department_id).trigger('change');
+                        }
+                        $('#department_id').prop('disabled', true).addClass('bg-light');
+                        
+                        // Auto-populate unit
+                        if (employee.unit_id) {
+                            $('#unit_id').val(employee.unit_id).trigger('change');
+                        }
+                        $('#unit_id').prop('disabled', true).addClass('bg-light');
+                        
+                        // Auto-populate location
+                        if (employee.location_id) {
+                            $('#location_id').val(employee.location_id).trigger('change');
+                        }
+                        $('#location_id').prop('disabled', true).addClass('bg-light');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching employee details:', error);
+                })
+                .finally(() => {
+                    $('#company_id, #department_id, #unit_id, #location_id').next('.select2-container').find('.select2-selection').css('opacity', '1');
+                });
+        } else {
+            // Clear fields when no employee selected
+            $('#user_name').val('');
+            $('#user_email').val('');
+            $('#user_phone').val('');
+            $('#company_id').val('').trigger('change').prop('disabled', false).removeClass('bg-light');
+            $('#department_id').val('').trigger('change').prop('disabled', false).removeClass('bg-light');
+            $('#unit_id').val('').trigger('change').prop('disabled', false).removeClass('bg-light');
+            $('#location_id').val('').trigger('change').prop('disabled', false).removeClass('bg-light');
+        }
+    });
+    
     // Custom file size validation
     $.validator.addMethod("filesize", function(value, element, param) {
         return this.optional(element) || (element.files[0].size <= param);

@@ -26,7 +26,7 @@ class CompanySeeder extends Seeder
             'phone'         => '+8801000000000',
             'address'       => 'Dhaka, Bangladesh',
             'logo'          => 'company/logo.png',
-            'status'        => 1,
+            'status'        => 'active',
             'created_by'    => $adminId,
             'updated_by'    => $adminId,
             'created_at'    => $now,

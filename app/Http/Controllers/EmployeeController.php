@@ -26,6 +26,56 @@ class EmployeeController extends Controller
                 ->leftJoin('locations', 'employees.location_id', '=', 'locations.id')
                 ->select('employees.*', 'locations.location_name as joined_location_name');
 
+            // Apply filters
+            $searchName = request()->get('search_name');
+            $unitId = request()->get('unit_id');
+            $departmentId = request()->get('department_id');
+            $locationId = request()->get('location_id');
+            $employeeType = request()->get('employee_type');
+            $status = request()->get('status');
+            $isHead = request()->get('is_head');
+
+            if ($searchName) {
+                $query->where(function($q) use ($searchName) {
+                    $q->where('employees.name', 'like', '%' . $searchName . '%')
+                      ->orWhere('employees.employee_code', 'like', '%' . $searchName . '%');
+                });
+            }
+
+            if ($unitId) {
+                $query->where('employees.unit_id', $unitId);
+            }
+
+            if ($departmentId) {
+                $query->where('employees.department_id', $departmentId);
+            }
+
+            if ($locationId) {
+                $query->where('employees.location_id', $locationId);
+            }
+
+            if ($employeeType) {
+                $query->where('employees.employee_type', $employeeType);
+            }
+
+            if ($status) {
+                $query->where('employees.status', $status);
+            }
+
+            if ($isHead === 'yes') {
+                $query->whereExists(function($q) {
+                    $q->select(DB::raw(1))
+                      ->from('departments')
+                      ->whereColumn('departments.head_employee_id', 'employees.id');
+                });
+            } elseif ($isHead === 'no') {
+                $query->whereNotExists(function($q) {
+                    $q->select(DB::raw(1))
+                      ->from('departments')
+                      ->whereColumn('departments.head_employee_id', 'employees.id');
+                });
+            }
+
             return DataTables::of($query)
                 ->addIndexColumn()
                 ->addColumn('photo', function($row){
@@ -34,8 +84,10 @@ class EmployeeController extends Controller
                     }
                     return '<i class="fa fa-user-circle text-muted" style="font-size:40px;"></i>';
                 })
-                ->editColumn('employee_code', function($row){
-                    return $row->employee_code ?? $row->id;
+                ->addColumn('name', function($row){
+                    $isDeptHead = $row->department && $row->department->head_employee_id == $row->id;
+                    $deptHeadBadge = $isDeptHead ? '<span class="badge bg-primary ms-1" style="font-size: 9px;"><i class="fa fa-user-tie"></i> HOD</span>' : '';
+                    return $row->name . $deptHeadBadge;
                 })
                 ->addColumn('unit_name', function($row){
                     return optional($row->unit)->unit_name;
@@ -46,12 +98,18 @@ class EmployeeController extends Controller
                 ->addColumn('location_name', function($row){
                     return $row->joined_location_name ?? '';
                 })
+                ->addColumn('status', function($row){
+                    if ($row->status == 'Active') {
+                        return '<span class="badge bg-success" style="font-size: 11px;"><i class="fa fa-check-circle me-1"></i>Active</span>';
+                    }
+                    return '<span class="badge bg-danger" style="font-size: 11px;"><i class="fa fa-times-circle me-1"></i>Inactive</span>';
+                })
                 ->addColumn('action', function($row){
                     $edit = auth()->user() && auth()->user()->can('employee-edit') ? '<a class="btn btn-primary" href="'.route('employees.edit', $row->id).'"> <i class="fa fa-edit"></i></a>' : '';
                     $delete = auth()->user() && auth()->user()->can('employee-delete') ? '<button class="btn btn-danger deleteUser" data-eid="'.$row->id.'"><i class="fa fa-minus-circle"></i></button>' : '';
                     return $edit.' '.$delete;
                 })
-                ->rawColumns(['photo', 'action'])
+                ->rawColumns(['photo', 'action', 'status', 'name'])
                 ->make(true);
         }
 

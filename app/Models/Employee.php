@@ -30,5 +30,9 @@ class Employee extends Model
         return $this->belongsTo(Unit::class, 'unit_id', 'id');
     }
     public function officeLocation() { return $this->belongsTo(Location::class, 'office_location_id'); }
+    
+    public function location() { return $this->belongsTo(Location::class, 'location_id'); }
+    
+    public function company() { return $this->belongsTo(Company::class, 'company_id'); }
 
 }

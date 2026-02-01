@@ -20,6 +20,29 @@
     padding:10px;
     margin-top:20px;
   }
+  .filter-section {
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 15px;
+    border: 1px solid #e9ecef;
+  }
+  .filter-section label {
+    font-weight: 600;
+    color: #495057;
+    margin-bottom: 5px;
+  }
+  .filter-section select, .filter-section input {
+    border-radius: 5px;
+  }
+  .badge-hod {
+    background: linear-gradient(135deg, #4f46e5, #4338ca);
+    color: white;
+    padding: 3px 8px;
+    border-radius: 12px;
+    font-size: 10px;
+    font-weight: 600;
+  }
 </style>
 
 <section role="main" class="content-body" style="background-color: #ffffff;">
@@ -47,7 +70,7 @@
   <div class="pull-right">
     <br>
     <br>
- 
+
     @can('employee-create')
     <a class="btn btn-success" href="{{ route('employees.create') }}">
       <i class="fa fa-plus"></i> Add Employee
@@ -58,6 +81,69 @@
   </div>
 
   <div class="panel-body">
+    <!-- Advanced Filter Section -->
+    <div class="filter-section">
+      <div class="row">
+        <div class="col-md-3">
+          <label><i class="fa fa-search"></i> Search Employee</label>
+          <input type="text" id="searchName" class="form-control" placeholder="Name or Employee Code">
+        </div>
+        <div class="col-md-3">
+          <label><i class="fa fa-building"></i> Unit</label>
+          <select id="filterUnit" class="form-control">
+            <option value="">All Units</option>
+          </select>
+        </div>
+        <div class="col-md-3">
+          <label><i class="fa fa-briefcase"></i> Department</label>
+          <select id="filterDepartment" class="form-control">
+            <option value="">All Departments</option>
+          </select>
+        </div>
+        <div class="col-md-3">
+          <label><i class="fa fa-map-marker"></i> Location</label>
+          <select id="filterLocation" class="form-control">
+            <option value="">All Locations</option>
+          </select>
+        </div>
+      </div>
+      <div class="row mt-3">
+        <div class="col-md-3">
+          <label><i class="fa fa-user"></i> Employee Type</label>
+          <select id="filterType" class="form-control">
+            <option value="">All Types</option>
+            <option value="Permanent">Permanent</option>
+            <option value="Contract">Contract</option>
+            <option value="Intern">Intern</option>
+          </select>
+        </div>
+        <div class="col-md-3">
+          <label><i class="fa fa-toggle-on"></i> Status</label>
+          <select id="filterStatus" class="form-control">
+            <option value="">All Status</option>
+            <option value="Active">Active</option>
+            <option value="Inactive">Inactive</option>
+          </select>
+        </div>
+        <div class="col-md-3">
+          <label><i class="fa fa-filter"></i> Department Head</label>
+          <select id="filterHead" class="form-control">
+            <option value="">All</option>
+            <option value="yes">Head Only</option>
+            <option value="no">Non-Head Only</option>
+          </select>
+        </div>
+        <div class="col-md-3 d-flex align-items-end">
+          <button type="button" id="btnFilter" class="btn btn-primary me-2">
+            <i class="fa fa-filter"></i> Apply Filter
+          </button>
+          <button type="button" id="btnReset" class="btn btn-secondary">
+            <i class="fa fa-refresh"></i> Reset
+          </button>
+        </div>
+      </div>
+    </div>
+
     <table class="table table-bordered table-striped" id="myTable" style="width:100%">
       <thead>
         <tr>
@@ -68,6 +154,7 @@
           <th>Unit</th>
           <th>Department</th>
           <th>Location</th>
+          <th>Status</th>
           <th width="15%">Action</th>
         </tr>
       </thead>
@@ -107,6 +194,107 @@
 <script>
 
 $(".myElem").show().delay(5000).fadeOut();
+
+/* ========== LOAD FILTER DROPDOWNS ========== */
+function loadFilterOptions() {
+    // Load Units
+    $.ajax({
+        url: '{{ route("units.list") }}',
+        type: 'GET',
+        success: function(units) {
+            $('#filterUnit').append('<option value="">All Units</option>');
+            units.forEach(function(unit) {
+                $('#filterUnit').append('<option value="'+unit.id+'">'+unit.unit_name+'</option>');
+            });
+        }
+    });
+
+    // Load Departments
+    $.ajax({
+        url: '{{ route("departments.list") }}',
+        type: 'GET',
+        success: function(departments) {
+            $('#filterDepartment').append('<option value="">All Departments</option>');
+            departments.forEach(function(dept) {
+                $('#filterDepartment').append('<option value="'+dept.id+'">'+dept.department_name+'</option>');
+            });
+        }
+    });
+
+    // Load Locations
+    $.ajax({
+        url: '{{ route("locations.list") }}',
+        type: 'GET',
+        success: function(locations) {
+            $('#filterLocation').append('<option value="">All Locations</option>');
+            locations.forEach(function(loc) {
+                $('#filterLocation').append('<option value="'+loc.id+'">'+loc.location_name+'</option>');
+            });
+        }
+    });
+}
+
+loadFilterOptions();
+
+/* ========== DATATABLES SERVER-SIDE ========== */
+var table = $('#myTable').DataTable({
+    processing: true,
+    serverSide: true,
+    ajax: {
+        url: '{{ route("employees.index") }}',
+        type: 'GET',
+        data: function(d) {
+            d.search_name = $('#searchName').val();
+            d.unit_id = $('#filterUnit').val();
+            d.department_id = $('#filterDepartment').val();
+            d.location_id = $('#filterLocation').val();
+            d.employee_type = $('#filterType').val();
+            d.status = $('#filterStatus').val();
+            d.is_head = $('#filterHead').val();
+        }
+    },
+    columns: [
+      { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false },
+      { data: 'photo', name: 'photo', orderable: false, searchable: false },
+      { data: 'employee_code', name: 'employee_code' },
+      { data: 'name', name: 'name' },
+      { data: 'unit_name', name: 'unit.unit_name' },
+      { data: 'department_name', name: 'department.department_name' },
+      { data: 'location_name', name: 'location_name' },
+      { data: 'status', name: 'status', orderable: false, searchable: false },
+      { data: 'action', name: 'action', orderable: false, searchable: false }
+    ],
+    dom: 'Bfrtip',
+    buttons: ['copy', 'csv', 'excel', 'pdf', 'print']
+});
+
+/* ========== FILTER EVENTS ========== */
+$('#btnFilter').on('click', function() {
+    table.ajax.reload();
+});
+
+$('#btnReset').on('click', function() {
+    $('#searchName').val('');
+    $('#filterUnit').val('');
+    $('#filterDepartment').val('');
+    $('#filterLocation').val('');
+    $('#filterType').val('');
+    $('#filterStatus').val('');
+    $('#filterHead').val('');
+    table.ajax.reload();
+});
+
+// Enter key on search
+$('#searchName').on('keypress', function(e) {
+    if (e.which === 13) {
+        table.ajax.reload();
+    }
+});
+
+// Change events reload table
+$('#filterUnit, #filterDepartment, #filterLocation, #filterType, #filterStatus, #filterHead').on('change', function() {
+    table.ajax.reload();
+});
 
 /* ========== SORTABLE ========== */
 $(function(){
@@ -159,7 +347,7 @@ $(document).on('click', '.deleteUser', function(e){
                     );
 
                     // Refresh DataTable
-                    $('#myTable').DataTable().ajax.reload();
+                    table.ajax.reload();
                 },
                 error: function (xhr) {
                     Swal.fire(
@@ -179,26 +367,6 @@ $('.select_employee_file').on('change', function(){
   $("#show" + $(this).val()).show();
 });
 
-/* ========== DATATABLES SERVER-SIDE ========== */
-$(document).ready(function(){
-  $('#myTable').DataTable({
-    processing: true,
-    serverSide: true,
-    ajax: '{{ route("employees.index") }}',
-    columns: [
-      { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false },
-      { data: 'photo', name: 'photo', orderable: false, searchable: false },
-      { data: 'employee_code', name: 'employee_code' },
-      { data: 'name', name: 'name' },
-      { data: 'unit_name', name: 'unit.unit_name' },
-      { data: 'department_name', name: 'department.department_name' },
-      { data: 'location_name', name: 'location_name' },
-      { data: 'action', name: 'action', orderable: false, searchable: false }
-    ],
-    dom: 'Bfrtip',
-    buttons: ['copy', 'csv', 'excel', 'pdf', 'print']
-  });
-});
 </script>
 
 @endsection

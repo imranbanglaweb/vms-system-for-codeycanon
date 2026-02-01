@@ -87,6 +87,12 @@ class PermissionSeeder extends Seeder
             'location-edit',
             'location-delete',
 
+            // ================= COMPANY =================
+            'company-manage',
+            'company-create',
+            'company-edit',
+            'company-delete',
+
             // ================= MAINTENANCE =================
             'maintenance-manage',
             'maintenance-view',
@@ -204,6 +210,11 @@ class PermissionSeeder extends Seeder
             'department-approval-view',
             'transport-approval-view',
             'trip-sheet-view',
+            'company-manage',
+            'employee-manage',
+            'department-manage',
+            'unit-manage',
+            'location-manage',
         ]);
 
         // Transport role permissions

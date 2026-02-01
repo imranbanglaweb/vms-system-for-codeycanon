@@ -244,6 +244,72 @@ window.addEventListener('load', function() {
         }
     });
 
+    // Auto-populate fields when employee is selected
+    $('.employee_id').on('change', function() {
+        const employeeId = $(this).val();
+        
+        if (employeeId) {
+            // Show loading indicator
+            $('#company_id, #department_id, #unit_id, #location_id').next('.select2-container').find('.select2-selection').css('opacity', '0.6');
+            
+            // Make fields readonly while loading
+            $('#company_id, #department_id, #unit_id, #location_id').prop('disabled', true);
+            
+            // Fetch employee details via AJAX
+            fetch('{{ route('users.get-employee-details', ':employeeId') }}'.replace(':employeeId', employeeId))
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        const employee = data.employee;
+                        
+                        // Auto-populate name, email, phone
+                        $('#user_name').val(employee.name || '');
+                        $('#user_email').val(employee.email || '');
+                        $('#user_phone').val(employee.phone || '');
+                        
+                        // Auto-populate company (readonly)
+                        if (employee.company_id) {
+                            $('#company_id').val(employee.company_id).trigger('change');
+                        }
+                        $('#company_id').prop('disabled', true).addClass('bg-light');
+                        
+                        // Auto-populate department
+                        if (employee.department_id) {
+                            $('#department_id').val(employee.department_id).trigger('change');
+                        }
+                        $('#department_id').prop('disabled', true).addClass('bg-light');
+                        
+                        // Auto-populate unit
+                        if (employee.unit_id) {
+                            $('#unit_id').val(employee.unit_id).trigger('change');
+                        }
+                        $('#unit_id').prop('disabled', true).addClass('bg-light');
+                        
+                        // Auto-populate location
+                        if (employee.location_id) {
+                            $('#location_id').val(employee.location_id).trigger('change');
+                        }
+                        $('#location_id').prop('disabled', true).addClass('bg-light');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching employee details:', error);
+                })
+                .finally(() => {
+                    $('#company_id, #department_id, #unit_id, #location_id').next('.select2-container').find('.select2-selection').css('opacity', '1');
+                });
+        } else {
+            // Clear fields when no employee selected
+            $('#user_name').val('');
+            $('#user_email').val('');
+            $('#user_phone').val('');
+            $('#company_id').val('').trigger('change').prop('disabled', false).removeClass('bg-light');
+            $('#department_id').val('').trigger('change').prop('disabled', false).removeClass('bg-light');
+            $('#unit_id').val('').trigger('change').prop('disabled', false).removeClass('bg-light');
+            $('#location_id').val('').trigger('change').prop('disabled', false).removeClass('bg-light');
+        }
+    });
+
     // Custom file size validation
     $.validator.addMethod("filesize", function(value, element, param) {
         return this.optional(element) || (element.files[0].size <= param);
