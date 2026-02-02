@@ -154,11 +154,31 @@ class RequisitionController extends Controller
         $vehicleTypes = VehicleType::all();
         $employees = Employee::all();
         
-        // Try to find the employee record that matches the logged-in user by email
+        // Try to find the employee record that matches the logged-in user
         $selectedEmployeeId = null;
-        $matchingEmployee = Employee::where('email', $user->email)->first();
-        if ($matchingEmployee) {
-            $selectedEmployeeId = $matchingEmployee->id;
+        
+        // Method 1: Match by employee_id stored in users table (most reliable - direct link)
+        if ($user->employee_id) {
+            $matchingEmployee = Employee::find($user->employee_id);
+            if ($matchingEmployee) {
+                $selectedEmployeeId = $matchingEmployee->id;
+            }
+        }
+        
+        // Method 2: Match by phone if available
+        if (!$selectedEmployeeId && $user->cell_phone) {
+            $matchingEmployee = Employee::where('phone', $user->cell_phone)->first();
+            if ($matchingEmployee) {
+                $selectedEmployeeId = $matchingEmployee->id;
+            }
+        }
+        
+        // Method 3: Match by name as last resort
+        if (!$selectedEmployeeId) {
+            $matchingEmployee = Employee::where('name', 'like', '%' . $user->name . '%')->first();
+            if ($matchingEmployee) {
+                $selectedEmployeeId = $matchingEmployee->id;
+            }
         }
  
     return view('admin.dashboard.requisition.create', [

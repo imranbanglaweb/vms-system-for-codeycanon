@@ -929,7 +929,10 @@ document.addEventListener('DOMContentLoaded', function() {
         fetch(this.action, {
             method: 'POST',
             body: new FormData(this),
-            headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content }
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                'Accept': 'application/json'
+            }
         })
         .then(res => res.json())
         .then(data => {

@@ -573,6 +573,15 @@ class MenuSeeder extends Seeder
                 'menu_order' => 3,
                 'parent_name' => 'Email & Notification Settings',
             ],
+            [
+                'menu_name' => 'Email Log History',
+                'menu_slug' => 'email-log-history',
+                'menu_icon' => 'fa-history',
+                'menu_url' => 'emaillogs.index',
+                'menu_permission' => 'emaillog-manage',
+                'menu_order' => 4,
+                'parent_name' => 'Email & Notification Settings',
+            ],
         ];
 
         // Insert child menus with correct parent_id

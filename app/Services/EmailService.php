@@ -158,7 +158,8 @@ class EmailService
                 implode(', ', $recipients),
                 'Template Not Found',
                 'Template type: ' . $templateType,
-                EmailLog::STATUS_FAILED
+                EmailLog::STATUS_FAILED,
+                'Email template not found for type: ' . $templateType
             );
             Log::error('EmailService: Email template not found', ['type' => $templateType]);
             return false;
@@ -183,19 +184,21 @@ class EmailService
                 );
             } catch (\Exception $e) {
                 $success = false;
+                $errorMessage = $e->getMessage();
                 
                 $this->logEmail(
                     $template->id,
                     $recipient,
                     $subject,
                     $body,
-                    EmailLog::STATUS_FAILED
+                    EmailLog::STATUS_FAILED,
+                    $errorMessage
                 );
 
                 Log::error('EmailService: Failed to send email', [
                     'recipient' => $recipient,
                     'template_type' => $templateType,
-                    'error' => $e->getMessage()
+                    'error' => $errorMessage
                 ]);
             }
         }
@@ -241,6 +244,7 @@ class EmailService
      * @param string $subject
      * @param string $body
      * @param string $status
+     * @param string|null $errorMessage
      * @return EmailLog
      */
     public function logEmail(
@@ -248,7 +252,8 @@ class EmailService
         string $recipient,
         string $subject,
         string $body,
-        string $status
+        string $status,
+        ?string $errorMessage = null
     ): EmailLog {
         return EmailLog::create([
             'requisition_id' => null, // Will be set if available in context
@@ -256,6 +261,7 @@ class EmailService
             'subject' => $subject,
             'body' => $body,
             'status' => $status,
+            'error_message' => $errorMessage,
             'sent_at' => $status === EmailLog::STATUS_SENT ? now() : null,
             'created_by' => auth()->id() ?? 1,
             'updated_by' => auth()->id() ?? 1

@@ -119,7 +119,14 @@ use App\Http\Controllers\EmailTemplateController;
 use App\Http\Controllers\TestEmailController;
 
 use App\Notifications\TestPushNotification;
-Route::resource('emaillogs', EmailLogController::class);
+
+// ============================================================================
+// EMAIL LOGS ROUTES
+// ============================================================================
+Route::middleware(['auth'])->group(function () {
+    Route::resource('emaillogs', EmailLogController::class);
+    Route::post('emaillogs/{id}/resend', [EmailLogController::class, 'resend'])->name('emaillogs.resend');
+});
 
 // ============================================================================
 // EMAIL TEMPLATES ROUTES
@@ -629,6 +636,7 @@ Route::middleware(['auth'])->group(function () {
     Route::post('admin/language/clear-cache', [SettingController::class, 'clearTranslationCache'])->name('admin.language.clear-cache');
     Route::post('admin/mail/clear-cache', [SettingController::class, 'clearMailConfigCache'])->name('admin.mail.clear-cache');
     Route::post('admin/language/sync', [SettingController::class, 'syncLanguages'])->name('admin.language.sync');
+    Route::get('admin/settings/get-logo', [SettingController::class, 'getLogo'])->name('admin.settings.get-logo');
     
     // Menus
     Route::resource('menus', MenuController::class);

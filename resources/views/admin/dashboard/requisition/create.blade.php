@@ -124,9 +124,6 @@
                 @csrf
 
                 <!-- ============================ -->
-                @php
-                    $isReadonly = isset($selectedEmployeeId) && $selectedEmployeeId;
-                @endphp
                 <!-- REQUESTED EMPLOYEE SECTION -->
                 <!-- ============================ -->
                 <div class="row mb-4">
@@ -135,14 +132,21 @@
                         <label class="form-label">
                             <i class="fa fa-user-tie text-primary me-1"></i> Requested Employee <span class="text-danger">*</span>
                         </label>
-                        <select id="employee_id" name="employee_id" class="form-select form-select-lg select2 {{ $isReadonly ? '' : '' }}" {{ $isReadonly ? 'disabled' : '' }}>
-                            <option value="">-- Select Employee --</option>
-                            @foreach($employees as $employee)
-                                <option value="{{ $employee->id }}" {{ isset($selectedEmployeeId) && $selectedEmployeeId == $employee->id ? 'selected' : '' }}>{{ $employee->name }}</option>
-                            @endforeach
-                        </select>
-                        @if($isReadonly)
+                        @if(isset($selectedEmployeeId) && $selectedEmployeeId)
+                            <select id="employee_id" name="employee_id" class="form-select form-select-lg select2" disabled>
+                                <option value="">-- Select Employee --</option>
+                                @foreach($employees as $employee)
+                                    <option value="{{ $employee->id }}" {{ $selectedEmployeeId == $employee->id ? 'selected' : '' }}>{{ $employee->name }}</option>
+                                @endforeach
+                            </select>
                             <input type="hidden" name="employee_id" value="{{ $selectedEmployeeId }}">
+                        @else
+                            <select id="employee_id" name="employee_id" class="form-select form-select-lg select2">
+                                <option value="">-- Select Employee --</option>
+                                @foreach($employees as $employee)
+                                    <option value="{{ $employee->id }}">{{ $employee->name }}</option>
+                                @endforeach
+                            </select>
                         @endif
                         <small class="text-danger error-text employee_id_error"></small>
                     </div>
@@ -367,16 +371,26 @@ $(function () {
 
     /* ================= AUTO-LOAD EMPLOYEE DETAILS FOR LOGGED IN USER ================= */
     @if(isset($selectedEmployeeId) && $selectedEmployeeId)
-        var selectedEmployeeId = {{ $selectedEmployeeId }};
-        // Set the employee dropdown value
-        $('#employee_id').val(selectedEmployeeId).trigger('change');
-        
-        // Fetch employee details using named route
-        $.get("{{ route('employee.details', ['id' => $selectedEmployeeId]) }}", function (res) {
-            // Set department dropdown
-            $('#department_id').val(res.department_id || '').trigger('change');
-            // Set unit dropdown
-            $('#unit_id').val(res.unit_id || '').trigger('change');
+        $(document).ready(function() {
+            var selectedEmployeeId = {{ $selectedEmployeeId }};
+            
+            // Initialize Select2 for disabled element
+            $('#employee_id').select2({
+                placeholder: '-- Select Employee --',
+                allowClear: false,
+                disabled: true // Make Select2 readonly
+            });
+            
+            // Set the employee dropdown value
+            $('#employee_id').val(selectedEmployeeId).trigger('change');
+            
+            // Fetch employee details using named route
+            $.get("{{ route('employee.details', ['id' => $selectedEmployeeId]) }}", function (res) {
+                // Set department dropdown
+                $('#department_id').val(res.department_id || '').trigger('change');
+                // Set unit dropdown
+                $('#unit_id').val(res.unit_id || '').trigger('change');
+            });
         });
     @endif
 

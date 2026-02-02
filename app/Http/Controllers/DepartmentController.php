@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Department;
 use Illuminate\Http\Request;
+use App\Models\Employee;
 use App\Models\Company;
 use App\Models\Unit;
 use Illuminate\Support\Facades\Validator;
@@ -19,7 +20,8 @@ class DepartmentController extends Controller
     public function index()
     {
         $units = Unit::all();
-        return view('admin.dashboard.department.index', compact('units'));
+        $employees = Employee::select('id', 'name', 'email')->orderBy('name')->get();
+        return view('admin.dashboard.department.index', compact('units', 'employees'));
     }
 
     /**
@@ -51,6 +53,9 @@ class DepartmentController extends Controller
     // Store / Update
     public function store(Request $request)
     {
+        // DEBUG: Log incoming request data
+        Log::info('DepartmentStore Request:', $request->all());
+        
         $rules = [
             'unit_id' => 'required|exists:units,id',
             'department_name' => 'required|string|max:255',
@@ -76,10 +81,24 @@ class DepartmentController extends Controller
             'location' => $request->location,
             'description' => $request->description,
             'status' => $request->status,
-            'head_employee_id' => $request->head_employee_id,
             'updated_by' => Auth::id() ?? 1,
         ];
 
+        // Auto-populate head_email and head_name from selected employee
+        if ($request->head_employee_id) {
+            $employee = Employee::find($request->head_employee_id);
+            $data['head_employee_id'] = $request->head_employee_id;
+            $data['head_email'] = $employee->email ?? null;
+            $data['head_name'] = $employee->name ?? null;
+        } else {
+            $data['head_employee_id'] = null;
+            $data['head_email'] = null;
+            $data['head_name'] = null;
+        }
+
+        // DEBUG: Log validated data before save
+        Log::info('DepartmentStore Validated Data:', $data);
+        
         $data['created_by'] = Auth::id() ?? 1;
         Department::create($data);
 
@@ -106,6 +125,9 @@ class DepartmentController extends Controller
             return response()->json(['errors' => $validator->errors()], 422);
         }
 
+        // DEBUG: Log incoming request data
+        Log::info('DepartmentUpdate Request:', $request->all());
+        
         $department = Department::find($id);
         if (!$department) {
             return response()->json(['message' => 'Department not found'], 404);
@@ -119,10 +141,24 @@ class DepartmentController extends Controller
             'location' => $request->location,
             'description' => $request->description,
             'status' => $request->status,
-            'head_employee_id' => $request->head_employee_id,
             'updated_by' => Auth::id() ?? 1,
         ];
 
+        // Auto-populate head_email and head_name from selected employee
+        if ($request->head_employee_id) {
+            $employee = Employee::find($request->head_employee_id);
+            $data['head_employee_id'] = $request->head_employee_id;
+            $data['head_email'] = $employee->email ?? null;
+            $data['head_name'] = $employee->name ?? null;
+        } else {
+            $data['head_employee_id'] = null;
+            $data['head_email'] = null;
+            $data['head_name'] = null;
+        }
+
+        // DEBUG: Log data before update
+        Log::info('DepartmentUpdate Data:', $data);
+        
         $department->update($data);
 
         return response()->json(['message' => 'Department updated successfully']);

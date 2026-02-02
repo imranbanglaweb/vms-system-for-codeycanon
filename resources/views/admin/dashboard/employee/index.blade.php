@@ -22,18 +22,110 @@
   }
   .filter-section {
     background: #f8f9fa;
-    padding: 15px;
+    padding: 15px 20px;
     border-radius: 8px;
     margin-bottom: 15px;
     border: 1px solid #e9ecef;
+    width: 100%;
   }
   .filter-section label {
     font-weight: 600;
     color: #495057;
     margin-bottom: 5px;
+    font-size: 13px;
   }
   .filter-section select, .filter-section input {
     border-radius: 5px;
+  }
+  .filter-section .form-control {
+    font-size: 14px;
+    padding: 8px 12px;
+    border: 1px solid #dee2e6;
+  }
+  .filter-section .form-control:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.15);
+  }
+  .filter-row {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+  }
+  .filter-row .form-row {
+    display: flex;
+    flex-wrap: wrap;
+    margin: 0;
+    padding: 0;
+    width: 100%;
+  }
+  .filter-row .form-row > div {
+    padding: 0 10px;
+    flex: 0 0 25%;
+    max-width: 25%;
+  }
+  .filter-row .form-row > div:first-child {
+    padding-left: 0;
+  }
+  .filter-row .form-row > div:last-child {
+    padding-right: 0;
+  }
+  .filter-row .btn-group {
+    display: flex;
+    gap: 8px;
+  }
+  .filter-row .btn {
+    padding: 8px 16px;
+    font-size: 14px;
+    border-radius: 5px;
+  }
+  @media (max-width: 1199px) {
+    .filter-row .form-row > div {
+      flex: 0 0 33.333%;
+      max-width: 33.333%;
+    }
+    .filter-row .form-row > div:last-child {
+      flex: 0 0 100%;
+      max-width: 100%;
+      padding: 0;
+      margin-top: 10px;
+    }
+  }
+  @media (max-width: 991px) {
+    .filter-row .form-row > div {
+      flex: 0 0 50%;
+      max-width: 50%;
+      padding: 0 5px;
+    }
+    .filter-row .form-row > div:nth-child(2) {
+      padding-right: 0;
+    }
+    .filter-row .form-row > div:last-child {
+      flex: 0 0 100%;
+      max-width: 100%;
+      margin-top: 10px;
+      padding: 0;
+    }
+  }
+  @media (max-width: 576px) {
+    .filter-row .form-row > div {
+      flex: 0 0 100%;
+      max-width: 100%;
+      padding: 0 0 10px 0 !important;
+      margin-top: 0;
+    }
+    .filter-row .form-row > div:last-child {
+      margin-top: 5px;
+    }
+    .filter-row .btn-group {
+      flex-direction: column;
+      width: 100%;
+    }
+    .filter-row .btn {
+      width: 100%;
+    }
   }
   .badge-hod {
     background: linear-gradient(135deg, #4f46e5, #4338ca);
@@ -83,63 +175,68 @@
   <div class="panel-body">
     <!-- Advanced Filter Section -->
     <div class="filter-section">
-      <div class="row">
-        <div class="col-md-3">
-          <label><i class="fa fa-search"></i> Search Employee</label>
-          <input type="text" id="searchName" class="form-control" placeholder="Name or Employee Code">
+      <div class="filter-row">
+        <div class="form-row">
+          <div>
+            <label><i class="fa fa-search"></i> Search Employee</label>
+            <input type="text" id="searchName" class="form-control" placeholder="Name or Employee Code">
+          </div>
+          <div>
+            <label><i class="fa fa-building"></i> Unit</label>
+            <select id="filterUnit" class="form-control">
+              <option value="">All Units</option>
+            </select>
+          </div>
+          <div>
+            <label><i class="fa fa-briefcase"></i> Department</label>
+            <select id="filterDepartment" class="form-control">
+              <option value="">All Departments</option>
+            </select>
+          </div>
+          <div>
+            <label><i class="fa fa-map-marker"></i> Location</label>
+            <select id="filterLocation" class="form-control">
+              <option value="">All Locations</option>
+            </select>
+          </div>
         </div>
-        <div class="col-md-3">
-          <label><i class="fa fa-building"></i> Unit</label>
-          <select id="filterUnit" class="form-control">
-            <option value="">All Units</option>
-          </select>
-        </div>
-        <div class="col-md-3">
-          <label><i class="fa fa-briefcase"></i> Department</label>
-          <select id="filterDepartment" class="form-control">
-            <option value="">All Departments</option>
-          </select>
-        </div>
-        <div class="col-md-3">
-          <label><i class="fa fa-map-marker"></i> Location</label>
-          <select id="filterLocation" class="form-control">
-            <option value="">All Locations</option>
-          </select>
-        </div>
-      </div>
-      <div class="row mt-3">
-        <div class="col-md-3">
-          <label><i class="fa fa-user"></i> Employee Type</label>
-          <select id="filterType" class="form-control">
-            <option value="">All Types</option>
-            <option value="Permanent">Permanent</option>
-            <option value="Contract">Contract</option>
-            <option value="Intern">Intern</option>
-          </select>
-        </div>
-        <div class="col-md-3">
-          <label><i class="fa fa-toggle-on"></i> Status</label>
-          <select id="filterStatus" class="form-control">
-            <option value="">All Status</option>
-            <option value="Active">Active</option>
-            <option value="Inactive">Inactive</option>
-          </select>
-        </div>
-        <div class="col-md-3">
-          <label><i class="fa fa-filter"></i> Department Head</label>
-          <select id="filterHead" class="form-control">
-            <option value="">All</option>
-            <option value="yes">Head Only</option>
-            <option value="no">Non-Head Only</option>
-          </select>
-        </div>
-        <div class="col-md-3 d-flex align-items-end">
-          <button type="button" id="btnFilter" class="btn btn-primary me-2">
-            <i class="fa fa-filter"></i> Apply Filter
-          </button>
-          <button type="button" id="btnReset" class="btn btn-secondary">
-            <i class="fa fa-refresh"></i> Reset
-          </button>
+        <div class="form-row">
+          <div>
+            <label><i class="fa fa-user"></i> Employee Type</label>
+            <select id="filterType" class="form-control">
+              <option value="">All Types</option>
+              <option value="Permanent">Permanent</option>
+              <option value="Contract">Contract</option>
+              <option value="Intern">Intern</option>
+            </select>
+          </div>
+          <div>
+            <label><i class="fa fa-toggle-on"></i> Status</label>
+            <select id="filterStatus" class="form-control">
+              <option value="">All Status</option>
+              <option value="Active">Active</option>
+              <option value="Inactive">Inactive</option>
+            </select>
+          </div>
+          <div>
+            <label><i class="fa fa-filter"></i> Department Head</label>
+            <select id="filterHead" class="form-control">
+              <option value="">All</option>
+              <option value="yes">Head Only</option>
+              <option value="no">Non-Head Only</option>
+            </select>
+          </div>
+          <div>
+            <label>&nbsp;</label>
+            <div class="btn-group">
+              <button type="button" id="btnFilter" class="btn btn-primary">
+                <i class="fa fa-filter"></i> Apply Filter
+              </button>
+              <button type="button" id="btnReset" class="btn btn-secondary">
+                <i class="fa fa-refresh"></i> Reset
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </div>

@@ -9,7 +9,7 @@ class EmailLog extends Model
 {
     use SoftDeletes;
 
-    protected $fillable = ['requisition_id','recipient_email','subject','body','status','sent_at','created_by','updated_by'];
+    protected $fillable = ['requisition_id','recipient_email','subject','body','status','error_message','sent_at','created_by','updated_by'];
 
     // Email status constants
     public const STATUS_SENT = 'sent';

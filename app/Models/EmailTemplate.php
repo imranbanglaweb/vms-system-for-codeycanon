@@ -90,11 +90,25 @@ class EmailTemplate extends Model
     {
         $subject = $this->subject;
         $body = $this->body;
-
+        
+        // Decode HTML entities that CKEditor might have added
+        $subject = html_entity_decode($subject, ENT_QUOTES, 'UTF-8');
+        $body = html_entity_decode($body, ENT_QUOTES, 'UTF-8');
+        
+        // Also handle common HTML entity conversions for curly braces
+        $subject = str_replace(['&lbrace;', '&rbrace;', '&#123;', '&#125;'], ['{', '}', '{', '}'], $subject);
+        $body = str_replace(['&lbrace;', '&rbrace;', '&#123;', '&#125;'], ['{', '}', '{', '}'], $body);
+        
         foreach ($data as $key => $value) {
-            $placeholder = '{{' . $key . '}}';
-            $subject = str_replace($placeholder, $value, $subject);
-            $body = str_replace($placeholder, $value, $body);
+            // Support both {{variable}} and @{{variable}} formats
+            $placeholders = [
+                '{{' . $key . '}}',
+                '@{{' . $key . '}}',
+                '{{ ' . $key . ' }}',
+                '@{{ ' . $key . ' }}'
+            ];
+            $subject = str_replace($placeholders, $value, $subject);
+            $body = str_replace($placeholders, $value, $body);
         }
 
         return [

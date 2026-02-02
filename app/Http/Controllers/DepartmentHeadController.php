@@ -35,6 +35,13 @@ class DepartmentHeadController extends Controller
      */
     public function store(Request $request)
     {
+        Log::info('DepartmentHeadController.store: Request received', [
+            'department_id' => $request->department_id,
+            'head_type' => $request->head_type,
+            'head_employee_id' => $request->head_employee_id,
+            'has_notification' => $request->has('send_notification'),
+        ]);
+        
         $request->validate([
             'department_id' => 'required|exists:departments,id',
             'head_type' => 'required|in:employee,manual',
@@ -53,7 +60,6 @@ class DepartmentHeadController extends Controller
 
         if ($request->head_type === 'employee') {
             $employee = Employee::findOrFail($request->head_employee_id);
-            dd($employee);
             
             $updateData['head_employee_id'] = $employee->id;
             $updateData['head_email'] = $employee->email;
@@ -66,6 +72,11 @@ class DepartmentHeadController extends Controller
 
         // Update department
         $department->update($updateData);
+
+        Log::info('DepartmentHeadController.store: Success', [
+            'department_id' => $department->id,
+            'head_employee_id' => $updateData['head_employee_id'] ?? null,
+        ]);
 
         // Send notification email if requested
         if ($request->send_notification == '1') {
@@ -172,14 +183,23 @@ class DepartmentHeadController extends Controller
      */
     public function getEmployeesByDepartment(Request $request, $departmentId)
     {
+        Log::info('DepartmentHeadController.getEmployeesByDepartment called', [
+            'departmentId' => $departmentId,
+            'selected_employee_id' => $request->query('selected_employee_id'),
+        ]);
+        
         $selectedEmployeeId = $request->query('selected_employee_id');
         
-        $employees = Employee::where('department_id', $departmentId)
-            ->where('status', 'Active')
+        // Fetch ALL active employees - department head can be from any department
+        $employees = Employee::where('status', 'Active')
             ->orderBy('name')
             ->get(['id', 'name', 'designation', 'email']);
         
-        // If there's a selected employee not in the department, add them
+        Log::info('DepartmentHeadController.getEmployeesByDepartment: Found employees', [
+            'count' => $employees->count(),
+        ]);
+        
+        // If there's a selected employee not in the list, add them
         if ($selectedEmployeeId) {
             $selectedEmployee = Employee::where('id', $selectedEmployeeId)->first();
             if ($selectedEmployee && !$employees->contains('id', $selectedEmployeeId)) {

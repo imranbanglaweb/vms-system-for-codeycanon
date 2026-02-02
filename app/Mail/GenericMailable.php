@@ -80,13 +80,29 @@ class GenericMailable extends Mailable
      */
     public function build()
     {
-        return $this->subject($this->subject)
-                    ->view('emails.generic')
-                    ->with([
-                        'body' => $this->body,
-                        'email' => $this->email,
-                        'action_url' => $this->action_url,
-                        'action_text' => $this->action_text,
-                    ]);
+        // Check if body is already a complete email template (starts with table tag)
+        $isCompleteTemplate = (
+            stripos(trim($this->body), '<table') === 0 ||
+            stripos($this->body, '<!DOCTYPE') !== false || 
+            stripos($this->body, '<html') !== false ||
+            stripos($this->body, '<head') !== false ||
+            stripos($this->body, '<body') !== false
+        );
+
+        if ($isCompleteTemplate) {
+            // Send the body directly as complete HTML email
+            return $this->subject($this->subject)
+                        ->html($this->body);
+        } else {
+            // Wrap in the premium email template
+            return $this->subject($this->subject)
+                        ->view('emails.generic')
+                        ->with([
+                            'body' => $this->body,
+                            'email' => $this->email,
+                            'action_url' => $this->action_url,
+                            'action_text' => $this->action_text,
+                        ]);
+        }
     }
 }

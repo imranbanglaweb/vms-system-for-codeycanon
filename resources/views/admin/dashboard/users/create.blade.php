@@ -365,6 +365,9 @@ window.addEventListener('load', function() {
 
         // AJAX submission on valid form
         submitHandler: function(form) {
+            // Re-enable disabled fields so they get submitted
+            $('#company_id, #department_id, #unit_id, #location_id').prop('disabled', false);
+            
             let formData = new FormData(form);
             $.ajax({
                 url: $(form).attr("action"),

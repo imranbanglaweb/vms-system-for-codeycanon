@@ -79,6 +79,16 @@
                 </select>
                 <span class="text-danger" id="status_error"></span>
             </div>
+            <div class="mb-3">
+                <label>Department Head</label>
+                <select name="head_employee_id" id="head_employee_id" class="form-select select2">
+                    <option value="">Select Department Head</option>
+                    @foreach($employees as $emp)
+                    <option value="{{ $emp->id }}">{{ $emp->name }} ({{ $emp->email }})</option>
+                    @endforeach
+                </select>
+                <span class="text-danger" id="head_employee_id_error"></span>
+            </div>
         </div>
         <div class="modal-footer">
             <button class="btn btn-primary" type="submit">Save</button>
@@ -146,6 +156,7 @@ $(function(){
             $('#location').val(data.location);
             $('#description').val(data.description);
             $('#status').val(data.status);
+            $('#head_employee_id').val(data.head_employee_id).trigger('change');
             $('#deptModal').modal('show');
         }).fail(function(){
             Swal.fire('Error','Failed to load department data.','error');

@@ -232,4 +232,21 @@ class SettingController extends Controller
             'from_name' => $settings->mail_from_name ?? config('mail.from.name'),
         ];
     }
+
+    /**
+     * Get logo URL for email templates
+     */
+    public function getLogo()
+    {
+        $settings = DB::table('settings')->where('id', 1)->first();
+        
+        $logoUrl = null;
+        if ($settings && $settings->site_logo) {
+            $logoUrl = asset('admin_resource/assets/images/' . $settings->site_logo);
+        }
+        
+        return response()->json([
+            'logo_url' => $logoUrl
+        ]);
+    }
 }
