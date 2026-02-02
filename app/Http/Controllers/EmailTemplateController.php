@@ -38,6 +38,14 @@ class EmailTemplateController extends Controller
                         ? '<span class="badge bg-success">Active</span>'
                         : '<span class="badge bg-danger">Inactive</span>';
                 })
+                ->addColumn('preview', function ($row) {
+                    return '<button class="btn btn-secondary btn-sm previewTemplateBtn" 
+                        data-id="' . $row->id . '" 
+                        data-name="' . htmlspecialchars($row->name) . '" 
+                        title="Preview">
+                        <i class="fa fa-eye"></i>
+                    </button>';
+                })
                 ->addColumn('action', function ($row) {
                     $editUrl = route('email-templates.edit', $row->id);
                     $showUrl = route('email-templates.show', $row->id);
@@ -65,7 +73,7 @@ class EmailTemplateController extends Controller
                     
                     return $editBtn . ' ' . $showBtn . ' ' . $toggleBtn . ' ' . $deleteBtn;
                 })
-                ->rawColumns(['is_active', 'action'])
+                ->rawColumns(['is_active', 'preview', 'action'])
                 ->make(true);
         }
 
@@ -309,6 +317,19 @@ class EmailTemplateController extends Controller
                 'success' => false,
                 'message' => 'An error occurred while restoring the template.'
             ], 500);
+        }
+    }
+
+    public function preview($id)
+    {
+        try {
+            $template = EmailTemplate::findOrFail($id);
+            $body = $template->renderBody(['recipient_name' => 'John Doe']);
+            $isCompleteTemplate = preg_match('/^<table/i', trim($body));
+            if ($isCompleteTemplate) return $body;
+            return view('emails.generic', ['title' => $template->subject, 'body' => $body])->render();
+        } catch (\Exception $e) {
+            return '<div class="alert alert-danger">Failed to load preview</div>';
         }
     }
 }

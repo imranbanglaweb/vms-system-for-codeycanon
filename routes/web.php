@@ -135,6 +135,7 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('email-templates', EmailTemplateController::class);
     Route::post('email-templates/toggle-status', [EmailTemplateController::class, 'toggleStatus'])->name('email-templates.toggle-status');
     Route::post('email-templates/{id}/restore', [EmailTemplateController::class, 'restore'])->name('email-templates.restore');
+    Route::get('email-templates/{id}/preview', [EmailTemplateController::class, 'preview'])->name('email-templates.preview');
     
     // Test Email Routes
     Route::get('email/test', [TestEmailController::class, 'index'])->name('admin.email.test');

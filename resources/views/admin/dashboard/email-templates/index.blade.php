@@ -29,7 +29,7 @@ Email Templates
         @endif
 
         @if(session('error'))
-            <div class="alert alert-danger">{{ session('error') }}</div>
+            <div class="alert alert-danger small">{{ session('error') }}</div>
         @endif
 
         <div class="card shadow-sm border-0 rounded-3">
@@ -44,6 +44,7 @@ Email Templates
                                 <th>Type</th>
                                 <th>Subject</th>
                                 <th>Status</th>
+                                <th>Preview</th>
                                 <th width="15%">Actions</th>
                             </tr>
                         </thead>
@@ -54,17 +55,38 @@ Email Templates
         </div>
     </div>
 </section>
+
+<!-- Preview Modal -->
+<div class="modal" id="previewModal" tabindex="-1" role="dialog" aria-labelledby="previewModalLabel">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="previewModalLabel"><i class="fa fa-eye"></i> Template Preview</h5>
+                <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div id="previewContent" class="border rounded p-3" style="min-height: 300px; background: #fff;"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal"><i class="fa fa-times"></i> Close</button>
+            </div>
+        </div>
+    </div>
+</div>
 @endsection
 
 @push('styles')
-<link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/dataTables.bootstrap5.min.css" />
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/dataTables.bootstrap4.min.css" />
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
 <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
 @endpush
 
 @push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
-<script src="https://cdn.datatables.net/1.13.7/js/dataTables.bootstrap5.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.7/js/dataTables.bootstrap4.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
@@ -81,6 +103,7 @@ $(function() {
             { data: 'type_label', name: 'type', orderable: false },
             { data: 'subject', name: 'subject' },
             { data: 'is_active', name: 'is_active', className: 'text-center', orderable: false },
+            { data: 'preview', name: 'preview', orderable: false, searchable: false, className: 'text-center' },
             { data: 'action', name: 'action', orderable: false, searchable: false, className: 'text-center' }
         ],
         language: {
@@ -192,6 +215,28 @@ $(function() {
                         });
                     }
                 });
+            }
+        });
+    });
+
+    // Preview Template
+    $(document).on('click', '.previewTemplateBtn', function() {
+        let id = $(this).data('id');
+        let name = $(this).data('name');
+        
+        $('#previewModalLabel').html('<i class="fa fa-eye"></i> Preview: ' + name);
+        $('#previewContent').html('<div class="text-center py-5"><i class="fa fa-spinner fa-spin fa-2x"></i><p class="mt-2">Loading preview...</p></div>');
+        
+        $('#previewModal').modal('show');
+        
+        $.ajax({
+            url: "{{ route('email-templates.preview', ':id') }}".replace(':id', id),
+            type: 'GET',
+            success: function(response) {
+                $('#previewContent').html(response);
+            },
+            error: function() {
+                $('#previewContent').html('<div class="alert alert-danger">Failed to load preview</div>');
             }
         });
     });

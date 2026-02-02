@@ -6,34 +6,101 @@
 	
 	<meta name="csrf-token" content="{{ csrf_token() }}">
 
+	<!-- Font Awesome for Vehicle Icons -->
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
 	<style>
-	    /* Loading Spinner */
-	    .loading-overlay {
-	        display: none;
-	        background: rgba(255, 255, 255, 0.8);
+	    /* Global Professional Preloader Styles */
+	    .preloader {
 	        position: fixed;
 	        top: 0;
 	        left: 0;
 	        width: 100%;
 	        height: 100%;
-	        z-index: 9999;
+	        background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+	        display: flex;
+	        justify-content: center;
+	        align-items: center;
+	        z-index: 99999;
+	        opacity: 1;
+	        transition: opacity 0.5s ease;
 	    }
 
-	    .loading-overlay .spinner {
-	        position: absolute;
-	        top: 50%;
-	        left: 50%;
-	        transform: translate(-50%, -50%);
+	    .preloader.fade-out {
+	        opacity: 0;
+	        pointer-events: none;
+	    }
+
+	    .preloader-content {
 	        text-align: center;
+	        color: #fff;
 	    }
 
-	    .loading-overlay .spinner i {
-	        color: #007bff;
+	    .vehicle-icon {
+	        font-size: 80px;
+	        margin-bottom: 20px;
+	        animation: bounce 1s ease-in-out infinite, drive 2s ease-in-out infinite;
 	    }
 
-	    .loading-overlay .spinner p {
-	        margin-top: 10px;
-	        color: #6c757d;
+	    @keyframes bounce {
+	        0%, 100% { transform: translateY(0); }
+	        50% { transform: translateY(-10px); }
+	    }
+
+	    @keyframes drive {
+	        0%, 100% { transform: translateX(0); }
+	        25% { transform: translateX(-10px); }
+	        75% { transform: translateX(10px); }
+	    }
+
+	    .preloader-text {
+	        font-size: 24px;
+	        font-weight: 600;
+	        margin-bottom: 30px;
+	        letter-spacing: 2px;
+	        text-transform: uppercase;
+	        animation: pulse 1.5s ease-in-out infinite;
+	    }
+
+	    @keyframes pulse {
+	        0%, 100% { opacity: 1; }
+	        50% { opacity: 0.6; }
+	    }
+
+	    .progress-bar {
+	        width: 300px;
+	        height: 6px;
+	        background: rgba(255, 255, 255, 0.2);
+	        border-radius: 10px;
+	        overflow: hidden;
+	        margin: 0 auto;
+	    }
+
+	    .progress-fill {
+	        height: 100%;
+	        width: 0%;
+	        background: linear-gradient(90deg, #00c6ff, #0072ff);
+	        border-radius: 10px;
+	        animation: progress 2s ease-in-out infinite;
+	    }
+
+	    @keyframes progress {
+	        0% { width: 0%; }
+	        50% { width: 70%; }
+	        100% { width: 100%; }
+	    }
+
+	    /* Responsive */
+	    @media (max-width: 768px) {
+	        .vehicle-icon {
+	            font-size: 60px;
+	        }
+	        .preloader-text {
+	            font-size: 18px;
+	        }
+	        .progress-bar {
+	            width: 200px;
+	        }
 	    }
 
 	    /* Form Validation Styles */
@@ -319,11 +386,16 @@
 	</style>
 </head>
 <body>
-	<!-- Loading Overlay -->
-	<div class="loading-overlay">
-		<div class="spinner">
-			<i class="fa fa-spinner fa-spin fa-3x"></i>
-			<p class="mt-2">Loading...</p>
+	<!-- Global Professional Preloader -->
+	<div id="globalPreloader" class="preloader">
+		<div class="preloader-content">
+			<div class="vehicle-icon">
+				<i class="fas fa-bus"></i>
+			</div>
+			<div class="preloader-text">Loading...</div>
+			<div class="progress-bar">
+				<div class="progress-fill"></div>
+			</div>
 		</div>
 	</div>
 
@@ -360,6 +432,44 @@
 
 	<!-- Global Script -->
 	<script>
+	// Preloader functionality
+	var preloaderShown = false;
+	
+	function showPreloader() {
+	    if (!preloaderShown) {
+	        $('#globalPreloader').removeClass('fade-out').show();
+	        preloaderShown = true;
+	    }
+	}
+	
+	function hidePreloader() {
+	    $('#globalPreloader').addClass('fade-out');
+	    setTimeout(function() {
+	        $('#globalPreloader').hide();
+	        preloaderShown = false;
+	    }, 500);
+	}
+	
+	// Auto-show on page load
+	$(window).on('load', function() {
+	    setTimeout(function() {
+	        hidePreloader();
+	    }, 500);
+	});
+	
+	// Show preloader on form submissions
+	$(document).on('submit', 'form', function() {
+	    showPreloader();
+	});
+	
+	// Show preloader on link clicks
+	$(document).on('click', 'a:not([href^="#"])', function() {
+	    var href = $(this).attr('href');
+	    if (href && !href.startsWith('javascript') && !href.startsWith('#')) {
+	        showPreloader();
+	    }
+	});
+
 	document.addEventListener('DOMContentLoaded', function() {
 		// Setup AJAX CSRF token
 		$.ajaxSetup({
@@ -385,14 +495,6 @@
 
 	<!-- Page Specific Scripts -->
 	@stack('scripts')
-
-	<!-- Add this just before </body> -->
-	<div class="loading-overlay">
-		<div class="spinner">
-			<i class="fa fa-spinner fa-spin fa-3x"></i>
-			<p class="mt-2">Loading...</p>
-		</div>
-	</div>
 
 	<!-- Add in head section -->
 	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.32/dist/sweetalert2.min.css">

@@ -126,7 +126,7 @@ Create Email Template
                                 placeholder="Email body content...">{{ old('body') }}</textarea>
                             <small class="text-danger error-text body_error"></small>
                             <div class="mt-2">
-                                <span class="badge bg-info">Use {{'{{variable_name}}'}} for dynamic content</span>
+                                <span class="badge bg-info">Use @{{variable_name}} for dynamic content</span>
                             </div>
                         </div>
 
