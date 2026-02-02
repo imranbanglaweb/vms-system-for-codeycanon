@@ -1,9 +1,9 @@
 {
-    "name": "laravel/laravel",
+    "name": "yourname/transport-vehicle-automation",
     "type": "project",
-    "description": "The Laravel Framework.",
-    "keywords": ["framework", "laravel"],
-    "license": "MIT",
+    "description": "A powerful Laravel-based fleet and transport management system with vehicle management, driver management, task assignments, and maintenance tracking.",
+    "keywords": ["laravel", "transport-management", "fleet-management", "vehicle-management", "tms", "vms", "driver-management", "logistics"],
+    "license": "proprietary",
     "require": {
         "php": "^7.3|^8.0",
         "barryvdh/laravel-dompdf": "^2.2",

@@ -101,17 +101,10 @@ use App\Http\Controllers\LocationController;
 use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\UserController;
 
-// Admin Features
-use App\Http\Controllers\Admin\ProjectController;
-use App\Http\Controllers\Admin\DocumentController;
-use App\Http\Controllers\Admin\LandController;
-use App\Http\Controllers\Admin\DocumentTypeController;
-use App\Http\Controllers\Admin\DocumentHistoryController;
 
 // Other Controllers
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\LicneseTypeController;
-use App\Http\Controllers\SupportController;
 use App\Http\Controllers\TranslationController;
 use App\Http\Controllers\LanguageController;
 use App\Http\Controllers\EmailLogController;
@@ -297,19 +290,7 @@ Route::prefix('transport')->group(function () {
 Route::get('admin/maintenance/history', [MaintenanceRequisitionController::class, 'history'])->name('admin-maintenance.history');
 Route::resource('maintenance', MaintenanceRequisitionController::class);
 
-// ============================================================================
-// 10. MAINTENANCE SCHEDULE
-// ============================================================================
 
-Route::prefix('maintenance-schedule')->middleware('auth')->group(function () {
-    Route::get('/', [MaintenanceController::class, 'index'])->name('maintenance-schedules.index');
-    Route::get('/create', [MaintenanceController::class, 'create'])->name('maintenance-schedule.create');
-    Route::post('/store', [MaintenanceController::class, 'storeSchedule'])->name('maintenance-schedule.store');
-    Route::get('/record/{id}', [MaintenanceController::class, 'recordForm'])->name('maintenance.record.form');
-    Route::post('/record/{id}', [MaintenanceController::class, 'recordMaintenance'])->name('maintenance.record');
-    Route::post('/schedule/{id}/deactivate', [MaintenanceController::class, 'markScheduleInactive'])->name('maintenance.schedule.deactivate');
-    Route::get('/due/list', [MaintenanceController::class, 'dueList'])->name('maintenance.due.list');
-});
 
 // ============================================================================
 // 11. MAINTENANCE TYPES, VENDORS & SCHEDULES
@@ -332,17 +313,6 @@ Route::prefix('maintenance-vendors')->middleware('auth')->group(function () {
     Route::delete('/delete/{vendor}', [MaintenanceVendorController::class, 'destroy'])->name('maintenance.vendors.destroy');
 });
 
-Route::prefix('maintenance-schedules')->middleware('auth')->group(function () {
-    Route::get('/', [MaintenanceScheduleController::class, 'index'])->name('maintenance.schedules.index');
-    Route::get('/create', [MaintenanceScheduleController::class, 'create'])->name('maintenance.schedules.create');
-    Route::post('/store', [MaintenanceScheduleController::class, 'store'])->name('maintenance.schedules.store');
-    Route::get('/edit/{schedule}', [MaintenanceScheduleController::class, 'edit'])->name('maintenance-schedules.edit');
-    Route::post('/update/{schedule}', [MaintenanceScheduleController::class, 'update'])->name('maintenance.schedules.update');
-    Route::delete('/delete/{schedule}', [MaintenanceScheduleController::class, 'destroy'])->name('maintenance-schedules.destroy');
-    Route::get('/{id}', [MaintenanceScheduleController::class, 'show'])->name('maintenance-schedules.show');
-    Route::post('maintenance-schedules/toggle-active/{id}', [MaintenanceScheduleController::class, 'toggleActive'])->name('maintenance-schedules.toggleActive');
-    Route::get('maintenance-schedules/server/load', [MaintenanceScheduleController::class, 'server'])->name('maintenance.schedules.server');
-});
 
 Route::prefix('maintenance-categories')->group(function () {
     Route::get('/', [MaintenanceCategoryController::class, 'index'])->name('maintenance-categories.index');
@@ -573,26 +543,6 @@ Route::middleware(['auth'])->group(function () {
     Route::get('notifications', [NotificationController::class, 'index'])->name('admin.notifications.all');
 });
 
-// ============================================================================
-// 20. DOCUMENTS MANAGEMENT
-// ============================================================================
-
-Route::middleware(['auth'])->group(function () {
-    Route::resource('documents', DocumentController::class);
-    
-    // Document Operations
-    Route::group(['prefix' => 'documents'], function () {
-        Route::get('/{document}/show', [DocumentController::class, 'show'])->name('documents.show');
-        Route::get('/{document}/edit', [DocumentController::class, 'edit'])->name('documents.edit');
-        Route::post('/{document}/approve', [DocumentController::class, 'approve'])->name('documents.approve');
-        Route::post('/{document}/reject', [DocumentController::class, 'reject'])->name('documents.reject');
-    });
-    
-    // Document Approval
-    Route::get('documents/pending-approval', [DocumentController::class, 'pendingApproval'])->name('documents.pending-approval');
-    Route::get('documents/{id}/return-modal', [DocumentController::class, 'showReturnModal'])->name('documents.return-modal');
-    Route::post('documents/{id}/return', [DocumentController::class, 'returnDocument'])->name('documents.return');
-});
 
 // ============================================================================
 // 21. LANGUAGES & LOCALIZATION
@@ -616,10 +566,7 @@ Route::middleware(['auth'])->prefix('Super Admin')->group(function () {
 // ============================================================================
 
 Route::middleware(['auth'])->group(function () {
-    // Projects & Lands
-    Route::resource('projects', ProjectController::class);
-    Route::resource('lands', LandController::class);
-    
+
     // License Types
     Route::get('license-types/data', [LicneseTypeController::class, 'data'])->name('license-types.data');
     Route::resource('license-types', LicneseTypeController::class);
@@ -643,9 +590,7 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('menus', MenuController::class);
     Route::post('menus/reorder', [MenuController::class, 'menuoder'])->name('menus.reorder');
     
-    // Import/Export
-    Route::post('import-task', [SupportController::class, 'import'])->name('import-task.import');
-    Route::post('sample_import-file', [SupportController::class, 'importexcelfile'])->name('support.sample_import-file');
+   
 });
 
 // ============================================================================

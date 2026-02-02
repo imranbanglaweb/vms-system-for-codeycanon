@@ -17,13 +17,14 @@
 	        left: 0;
 	        width: 100%;
 	        height: 100%;
-	        background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+	        background: rgba(15, 23, 42, 0.9);
+	        backdrop-filter: blur(8px);
 	        display: flex;
 	        justify-content: center;
 	        align-items: center;
 	        z-index: 99999;
 	        opacity: 1;
-	        transition: opacity 0.5s ease;
+	        transition: opacity 0.4s ease;
 	    }
 
 	    .preloader.fade-out {
@@ -36,66 +37,132 @@
 	        color: #fff;
 	    }
 
-	    .vehicle-icon {
-	        font-size: 80px;
-	        margin-bottom: 20px;
-	        animation: bounce 1s ease-in-out infinite, drive 2s ease-in-out infinite;
+	    .preloader-spinner {
+	        position: relative;
+	        width: 100px;
+	        height: 100px;
+	        margin: 0 auto 25px;
 	    }
 
-	    @keyframes bounce {
-	        0%, 100% { transform: translateY(0); }
-	        50% { transform: translateY(-10px); }
+	    .preloader-spinner::before {
+	        content: '';
+	        position: absolute;
+	        top: 0;
+	        left: 0;
+	        width: 100%;
+	        height: 100%;
+	        border-radius: 50%;
+	        border: 4px solid transparent;
+	        border-top-color: #3b82f6;
+	        border-right-color: #3b82f6;
+	        animation: spin 1s linear infinite;
 	    }
 
-	    @keyframes drive {
-	        0%, 100% { transform: translateX(0); }
-	        25% { transform: translateX(-10px); }
-	        75% { transform: translateX(10px); }
+	    .preloader-spinner::after {
+	        content: '';
+	        position: absolute;
+	        top: 12px;
+	        left: 12px;
+	        right: 12px;
+	        bottom: 12px;
+	        border-radius: 50%;
+	        border: 4px solid transparent;
+	        border-top-color: #60a5fa;
+	        border-bottom-color: #60a5fa;
+	        animation: spin 1.5s linear infinite reverse;
+	    }
+
+	    .vehicle-icon-container {
+	        position: absolute;
+	        top: 50%;
+	        left: 50%;
+	        transform: translate(-50%, -50%);
+	        font-size: 32px;
+	        color: #fff;
+	        z-index: 1;
+	    }
+
+	    @keyframes spin {
+	        0% { transform: rotate(0deg); }
+	        100% { transform: rotate(360deg); }
 	    }
 
 	    .preloader-text {
-	        font-size: 24px;
-	        font-weight: 600;
-	        margin-bottom: 30px;
-	        letter-spacing: 2px;
+	        font-size: 16px;
+	        font-weight: 500;
+	        margin-bottom: 25px;
+	        letter-spacing: 3px;
 	        text-transform: uppercase;
-	        animation: pulse 1.5s ease-in-out infinite;
+	        color: #e2e8f0;
 	    }
 
-	    @keyframes pulse {
-	        0%, 100% { opacity: 1; }
-	        50% { opacity: 0.6; }
-	    }
-
-	    .progress-bar {
-	        width: 300px;
-	        height: 6px;
-	        background: rgba(255, 255, 255, 0.2);
+	    .preloader-progress {
+	        width: 200px;
+	        height: 4px;
+	        background: rgba(255, 255, 255, 0.1);
 	        border-radius: 10px;
 	        overflow: hidden;
 	        margin: 0 auto;
 	    }
 
-	    .progress-fill {
+	    .preloader-progress-fill {
 	        height: 100%;
-	        width: 0%;
-	        background: linear-gradient(90deg, #00c6ff, #0072ff);
+	        width: 100%;
+	        background: linear-gradient(90deg, #3b82f6, #60a5fa, #3b82f6);
+	        background-size: 200% 100%;
 	        border-radius: 10px;
-	        animation: progress 2s ease-in-out infinite;
+	        animation: shimmer 1.5s ease-in-out infinite;
 	    }
 
-	    @keyframes progress {
-	        0% { width: 0%; }
-	        50% { width: 70%; }
-	        100% { width: 100%; }
+	    @keyframes shimmer {
+	        0% { background-position: 200% 0; }
+	        100% { background-position: -200% 0; }
+	    }
+
+	    /* Branding Styles */
+	    .preloader-branding {
+	        margin-bottom: 30px;
+	    }
+
+	    .preloader-brand-title {
+	        font-size: 22px;
+	        font-weight: 700;
+	        color: #fff;
+	        letter-spacing: 1px;
+	        margin-bottom: 8px;
+	        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+	    }
+
+	    .preloader-brand-tagline {
+	        font-size: 12px;
+	        font-weight: 400;
+	        color: #94a3b8;
+	        letter-spacing: 2px;
+	        text-transform: uppercase;
 	    }
 
 	    /* Responsive */
 	    @media (max-width: 768px) {
-	        .vehicle-icon {
-	            font-size: 60px;
+	        .preloader-spinner {
+	            width: 80px;
+	            height: 80px;
+	        }
+	        .vehicle-icon-container {
+	            font-size: 26px;
 	        }
 	        .preloader-text {
+	            font-size: 14px;
+	        }
+	        .preloader-progress {
+	            width: 160px;
+	        }
+	        .preloader-brand-title {
+	            font-size: 18px;
+	        }
+	        .preloader-brand-tagline {
+	            font-size: 10px;
+	        }
+	    }
 	            font-size: 18px;
 	        }
 	        .progress-bar {
@@ -389,12 +456,17 @@
 	<!-- Global Professional Preloader -->
 	<div id="globalPreloader" class="preloader">
 		<div class="preloader-content">
-			<div class="vehicle-icon">
-				<i class="fas fa-bus"></i>
+			<div class="preloader-branding">
+				<div class="preloader-brand-title">TRANSPORT & VEHICLE AUTOMATION</div>
+				<div class="preloader-brand-tagline">Smart Logistics. Better Operations.</div>
 			</div>
-			<div class="preloader-text">Loading...</div>
-			<div class="progress-bar">
-				<div class="progress-fill"></div>
+			<div class="preloader-spinner">
+				<div class="vehicle-icon-container">
+					<i class="fas fa-bus"></i>
+				</div>
+			</div>
+			<div class="preloader-progress">
+				<div class="preloader-progress-fill"></div>
 			</div>
 		</div>
 	</div>
