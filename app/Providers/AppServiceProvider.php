@@ -57,13 +57,37 @@ class AppServiceProvider extends ServiceProvider
         View::composer(
                 'admin.dashboard.common.sidebar',
                 function ($view) {
-                    $view->with('sidebar_menus', MenuService::sidebar());
+                    $user = auth()->user();
+                    $isAdmin = $user->hasRole('Super Admin') || $user->hasRole('Admin');
+                    $isManager = $user->hasRole('Department Head') || $user->hasRole('Manager');
+                    $isTransport = $user->hasRole('Transport');
+                    $isEmployee = $user->hasRole('Employee');
+                    
+                    $view->with([
+                        'sidebar_menus' => MenuService::sidebar(),
+                        'isAdmin' => $isAdmin,
+                        'isManager' => $isManager,
+                        'isTransport' => $isTransport,
+                        'isEmployee' => $isEmployee,
+                    ]);
                 }
             );
 
                 View::composer('admin.dashboard.dashboard',
                 function ($view) {
-                    $view->with('sidebar_menus', MenuService::sidebar());
+                    $user = auth()->user();
+                    $isAdmin = $user->hasRole('Super Admin') || $user->hasRole('Admin');
+                    $isManager = $user->hasRole('Department Head') || $user->hasRole('Manager');
+                    $isTransport = $user->hasRole('Transport');
+                    $isEmployee = $user->hasRole('Employee');
+                    
+                    $view->with([
+                        'sidebar_menus' => MenuService::sidebar(),
+                        'isAdmin' => $isAdmin,
+                        'isManager' => $isManager,
+                        'isTransport' => $isTransport,
+                        'isEmployee' => $isEmployee,
+                    ]);
                 }
             );
 
@@ -71,10 +95,22 @@ class AppServiceProvider extends ServiceProvider
          * Settings
          */
         view()->composer(
-            ['admin.dashboard.common.header', 'admin.dashboard.common.sidebar'],
+            ['admin.dashboard.common.header', 'admin.dashboard.common.sidebar', 'admin.dashboard.master'],
             function ($view) {
                 $settings = DB::table('settings')->where('id', 1)->first();
-                $view->with('settings', $settings);
+                $user = auth()->user();
+                $isAdmin = $user->hasRole('Super Admin') || $user->hasRole('Admin');
+                $isManager = $user->hasRole('Department Head') || $user->hasRole('Manager');
+                $isTransport = $user->hasRole('Transport');
+                $isEmployee = $user->hasRole('Employee');
+                
+                $view->with([
+                    'settings' => $settings,
+                    'isAdmin' => $isAdmin,
+                    'isManager' => $isManager,
+                    'isTransport' => $isTransport,
+                    'isEmployee' => $isEmployee,
+                ]);
             }
         );
 

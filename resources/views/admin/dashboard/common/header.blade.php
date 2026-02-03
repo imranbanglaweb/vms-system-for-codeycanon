@@ -4,7 +4,7 @@
 		<!-- Basic -->
 		<meta charset="UTF-8">
 
-		<title>Dashboard |  @if(!empty($settings->admin_title)) {{ $settings->admin_title}} @endif</title>
+		<title>Dashboard |  {{ $settings->admin_title ?? 'InayaFleet360' }}</title>
 		<meta name="keywords" content="HTML5 Admin Template" />
 		<meta name="description" content="@if(!empty($settings->admin_description)) @endif">
 		<meta name="author" content="Imran Rahman">
@@ -45,16 +45,26 @@
 		<script src="{{ asset('public/admin_resource/assets/vendor/bootstrap/js/bootstrap.js') }}"></script>
     <!-- Flag Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/flag-icons/6.6.6/css/flag-icons.min.css">
-<style>
+ <style>
 
-	.logo img {
-		width: 100px !important;
-		height: 100px !important;
-		display: block;
-		text-align: center;
-		margin-top: -14px;
-	}
-	 /* Language Switcher Styles */
+ 	.logo {
+ 		height: 100px !important;
+ 		display: flex !important;
+ 		align-items: center !important;
+ 		justify-content: center !important;
+ 		/* padding: 15px 20px !important; */
+ 		margin-top: -18px !important;
+ 	}
+ 	
+ 	.logo img {
+ 		max-height: 90px !important;
+ 		max-width: 250px !important;
+ 		width: auto !important;
+ 		height: auto !important;
+ 		object-fit: contain !important;
+ 		display: block !important;
+ 	}
+ 	 /* Language Switcher Styles */
         .language-flag {
             width: 20px;
             height: 15px;
@@ -88,9 +98,9 @@
         }
 		  .text-start { text-align: right !important; }
         .text-end { text-align: left !important; }
-</style>
-@include('admin.dashboard.includes.notification')
-<meta name="csrf-token" content="{{ csrf_token() }}">
+ </style>
+ @include('admin.dashboard.includes.notification')
+ <meta name="csrf-token" content="{{ csrf_token() }}">
 	</head>
 	<body>
 		<section class="body">
@@ -100,8 +110,12 @@
 				<div class="logo-container">
 					<a href="{{route('home')}}" class="logo">
 						@if(!empty($settings->admin_logo)) 
-
-						<img src="{{ asset('public/admin_resource/assets/images/'.$settings->admin_logo)}}" height="35" alt="Hansa Admin" />
+							<img src="{{ asset('public/admin_resource/assets/images/'.$settings->admin_logo)}}" alt="" />
+						@else
+							<div style="display: flex; align-items: center; gap: 12px;">
+								<i class="fa fa-bus" style="font-size: 48px; color: #4A90E2;"></i>
+								<span style="font-size: 28px; font-weight: bold; color: #333;">InayaFleet360</span>
+							</div>
 						@endif
 					</a>
 					<div class="visible-xs toggle-sidebar-left" data-toggle-class="sidebar-left-opened" data-target="html" data-fire-event="sidebar-left-opened">
@@ -169,7 +183,7 @@
 								<li>
 									
 
-
+									
 									    <a   role="menuitem" tabindex="-1"class="dropdown-item" href="{{ route('logout') }}"
                onclick="event.preventDefault();
                              document.getElementById('logout-form').submit();">

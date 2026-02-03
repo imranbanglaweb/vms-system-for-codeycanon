@@ -4,7 +4,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Transport & Vehicle Management System</title>
+    <title>InayaFleet360 – All-in-One Fleet & Transport Automation System</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <!-- Bootstrap + FontAwesome -->
@@ -41,12 +41,44 @@
         .login-box {
             width: 100%;
             max-width: 380px;
+            text-align: center;
         }
 
-        .login-box img {
-            width: 80px;
-            display: block;
-            margin: 0 auto 20px;
+        .login-box .logo-container {
+            margin-bottom: 25px;
+        }
+
+        .login-box .logo {
+            width: 70px;
+            height: 70px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 15px;
+            background: linear-gradient(135deg, #4f46e5 0%, #0ea5e9 100%);
+            border-radius: 16px;
+            box-shadow: 0 8px 20px rgba(79, 70, 229, 0.3);
+        }
+
+        .login-box .logo i {
+            font-size: 32px;
+            color: #fff;
+        }
+
+        .login-box .brand-title {
+            font-size: 22px;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 8px;
+            letter-spacing: -0.5px;
+            line-height: 1.3;
+        }
+
+        .login-box .brand-tagline {
+            font-size: 14px;
+            color: #64748b;
+            margin-bottom: 30px;
+            font-weight: 400;
         }
 
         .login-box h3 {
@@ -72,18 +104,21 @@
         }
 
         .btn-login {
-            background: #3498db;
+            background: linear-gradient(135deg, #4f46e5 0%, #0ea5e9 100%);
             color: #fff;
             font-weight: 600;
             width: 100%;
             padding: 12px 0;
-            border-radius: 5px;
+            border-radius: 8px;
             border: none;
             transition: .3s;
+            font-size: 1rem;
         }
 
         .btn-login:hover {
-            background: #2980b9;
+            background: linear-gradient(135deg, #4338ca 0%, #0284c7 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.4);
         }
 
         /* RIGHT PANEL - ENHANCED ROAD VIEW */
@@ -510,13 +545,33 @@
 
 <body>
 
+<?php
+$settings = DB::table('settings')->where('id', 1)->first();
+$logoUrl = null;
+if ($settings && $settings->site_logo) {
+    $logoUrl = asset('public/admin_resource/assets/images/' . $settings->site_logo);
+} elseif ($settings && $settings->admin_logo) {
+    $logoUrl = asset('public/admin_resource/assets/images/' . $settings->admin_logo);
+}
+?>
+
 <div class="login-wrapper">
     <!-- LEFT SIDE LOGIN -->
     <div class="login-left">
         <div class="login-box">
-            <img src="{{ asset('public/admin_resource/assets/images/vault-logo.webp') }}" alt="Logo">
-            <h3>Login</h3>
-
+            <div class="logo-container">
+                @if($logoUrl)
+                    <img src="{{ $logoUrl }}" alt="Logo" class="site-logo" style="width: 250px;; object-fit: contain; margin: 0 auto; border-radius: 8px;">
+                @else
+                    <div class="logo">
+                        <i class="fas fa-truck"></i>
+                    </div>
+                @endif
+                <!-- <h1 class="brand-title">InayaFleet360</h1>
+                <p class="brand-tagline">All-in-One Fleet & Transport Automation System</p> -->
+            </div>
+            <h5>Login to your account</h5>
+<hr>
             <form method="POST" action="{{ route('login') }}">
                 @csrf
                 <div class="form-group position-relative">
@@ -590,8 +645,9 @@
 
         <!-- COMPANY TEXT -->
         <div class="system-text">
-            <h1>TRANSPORT & <span style="color:#FFD700">VEHICLE</span> AUTOMATION</h1>
-            <p>Smart Logistics. Better Operations.</p>
+            <h1>InayaFleet - 360</h1>
+            <p>All-in-One Fleet & Transport Automation System</p>
+            
         </div>
     </div>
 </div>

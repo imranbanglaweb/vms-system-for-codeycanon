@@ -2,48 +2,95 @@
 
 @section('main_content')
 
+<div class="page-content" style="width: 100%; max-width: 100%; padding: 0; margin: 0;">
+
 <style>
+    /* Reset any existing styles */
     body {
         background: #fff !important;
+        margin: 0 !important;
+        padding: 0 !important;
     }
-
+    
+    .page-content {
+        width: 100% !important;
+        max-width: 100% !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        left: 0 !important;
+    }
+    
+    .page-content .container-fluid {
+        width: 100% !important;
+        max-width: 100% !important;
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+    
+    /* Remove any default Bootstrap spacing */
+    .page-content > * {
+        width: 100% !important;
+        max-width: 100% !important;
+    }
+    
     .form-label {
-        font-size: 1.7rem;
+        font-size: 1rem;
         font-weight: 600;
     }
+    
     .card {
-        border-radius: 16px;
+        border-radius: 12px;
         overflow: hidden;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
     }
 
     .card-header {
-        background: linear-gradient(135deg, #1e1e2f, #2a2a40);
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
         border-bottom: 0;
+        padding: 16px 20px;
     }
+    
+    .card-header h4 {
+        color: #fff;
+        margin: 0;
+        font-size: 18px;
+    }
+    
     .form-control-lg, .form-select-lg {
-        font-size: 1.5rem;
+        font-size: 1rem;
         padding: 10px 14px;
     }
 
     table td, table th {
-        font-size: 1.65rem;
+        font-size: 14px;
+        padding: 12px;
     }
 
     .error-text {
-        font-size: 1.55rem;
+        font-size: 0.875rem;
         font-weight: 500;
         transition: all 0.3s;
         animation: fadeIn 0.5s;
     }
-     @keyframes fadeIn {
-         from {opacity: 0; transform: translateY(-4px);}
-         to {opacity: 1; transform: translateY(0);}
-     }
+
+    @keyframes fadeIn {
+        from {opacity: 0; transform: translateY(-4px);}
+        to {opacity: 1; transform: translateY(0);}
+    }
 
     .btn-lg {
-        border-radius: 30px;
-        padding: 10px 28px;
-        font-size: 1.45rem;
+        border-radius: 10px;
+        padding: 12px 28px;
+        font-size: 1rem;
+    }
+    
+    .btn-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: none;
+    }
+    
+    .btn-primary:hover {
+        background: linear-gradient(135deg, #5a6fd6 0%, #6a4190 100%);
     }
     
     .form-control[readonly] {
@@ -661,5 +708,7 @@ $(function () {
 
 });
 </script>
+
+</div> <!-- End page-content -->
 
 @endsection

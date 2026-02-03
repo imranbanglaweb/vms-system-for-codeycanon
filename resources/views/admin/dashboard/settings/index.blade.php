@@ -74,10 +74,7 @@
 
         {{-- TAB BUTTONS --}}
         <div class="mb-4">
-            <button class="btn btn-light tab-btn site_menu active" data-target=".site_settings">
-                <i class="fa fa-globe me-1"></i> Site Settings
-            </button>
-            <button class="btn btn-light tab-btn admin_menu" data-target=".admin_settings">
+            <button class="btn btn-light tab-btn admin_menu active" data-target=".admin_settings">
                 <i class="fa fa-user"></i>  Admin Settings
             </button>
             <button class="btn btn-light tab-btn language_menu" data-target=".language_settings">
@@ -94,34 +91,6 @@
         {!! Form::open(['method'=>'POST','enctype'=>'multipart/form-data', 'id'=>'upload-image-form']) !!}
 
         <div class="row">
-
-            {{-- SITE SETTINGS CARD --}}
-            <div class="col-md-12 site_settings settings-card">
-
-                <div class="form-group mb-3">
-                    <label>Site Title:</label>
-                    {!! Form::text('site_title', $settings->site_title ?? null, ['class'=>'form-control']) !!}
-                </div>
-
-                <div class="form-group mb-3">
-                    <label>Site Description:</label>
-                    {!! Form::textarea('site_description', $settings->site_description ?? null, ['class'=>'form-control']) !!}
-                </div>
-
-                <div class="form-group mb-3">
-                    <label>Site Copyright:</label>
-                    {!! Form::text('site_copyright_text', $settings->site_copyright_text ?? null, ['class'=>'form-control']) !!}
-                </div>
-
-                <label>Site Logo:</label>
-                <div class="d-flex align-items-center gap-3 mb-3">
-                    <input type="file" name="site_logo">
-                    @if(!empty($settings->site_logo))
-                        <img src="{{ asset('admin_resource/assets/images/'.$settings->site_logo) }}" width="80">
-                    @endif
-                </div>
-
-            </div>
 
             {{-- ADMIN SETTINGS CARD --}}
             <div class="col-md-12 admin_settings settings-card">
@@ -342,9 +311,9 @@
         // Initialize: Hide all cards
         $('.settings-card').hide();
 
-        // Restore active tab from localStorage or default to Site Settings
-        let activeTab = localStorage.getItem('active_settings_tab') || '.site_settings';
-        if ($(activeTab).length === 0) activeTab = '.site_settings'; // Fallback
+        // Restore active tab from localStorage or default to Admin Settings
+        let activeTab = localStorage.getItem('active_settings_tab') || '.admin_settings';
+        if ($(activeTab).length === 0) activeTab = '.admin_settings'; // Fallback
 
         $(activeTab).show();
         $('.tab-btn').removeClass('active');
@@ -387,7 +356,11 @@
                     html: "<span style='color:green;'>Your changes have been saved successfully.</span>",
                     confirmButtonColor: "#4A90E2"
                 }).then(() => {
-                    location.reload();
+                    // Hide preloader before reload
+                    $('#globalPreloader').addClass('fade-out');
+                    setTimeout(function() {
+                        location.reload();
+                    }, 300);
                 });
             },
 

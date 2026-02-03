@@ -1,76 +1,83 @@
-# TRANSPORT & VEHICLE AUTOMATION
+# InayaFleet360 - All-in-One Fleet & Transport Automation System
 
 ## Smart Logistics. Better Operations.
 
-A powerful Laravel-based fleet and transport management system designed to streamline your organization's vehicle and transportation operations. This all-in-one solution combines fleet management, driver management, task assignments, and maintenance tracking.
+A comprehensive Laravel-based fleet and transport management system designed to streamline your organization's vehicle and transportation operations. This all-in-one solution combines fleet management, driver management, requisition workflows, maintenance tracking, and multi-language support.
 
-## Features
+![License](https://img.shields.io/badge/license-Proprietary-green)
+![Laravel](https://img.shields.io/badge/Laravel-9.x%20|%2010.x-orange)
+![PHP](https://img.shields.io/badge/PHP-8.0%2B-blue)
+
+## 🚗 About InayaFleet360
+
+InayaFleet360 is a powerful, feature-rich fleet and transport automation system built with Laravel framework. It provides complete control over your fleet operations, from vehicle tracking to driver management, requisition workflows to maintenance scheduling.
+
+## ✨ Key Features
 
 ### Fleet Management
-- Complete vehicle fleet management
-- Vehicle type categorization
-- Real-time vehicle tracking
-- Vehicle availability status
-- Document management for vehicles
+- Complete vehicle fleet management with detailed records
+- Vehicle type categorization and classification
+- Real-time vehicle availability tracking
+- Vehicle document management (insurance, registration, etc.)
+- Vehicle maintenance history and records
 
 ### Driver Management
-- Driver registration and profile management
-- License type tracking
-- Driver document management
-- Driver availability status
-- Performance tracking
+- Comprehensive driver profiles and documentation
+- License type tracking and expiry alerts
+- Driver availability status management
+- Performance tracking and evaluation
+- Driver-document management
 
-### Transport Management
-- Transport requisition system with approval workflow
+### Transport Requisition System
+- Online requisition submission with approval workflow
+- Multi-level approval process
 - Trip sheet creation and tracking
 - Vehicle and driver assignment
-- Transport notifications and alerts
 - Passenger management for transport requisitions
+- Real-time status tracking
 
-### Task & Project Management
-- Create and assign tasks to employees
-- Project-based task organization
-- Task progress tracking and status updates
-- File attachments for tasks
-- Real-time notifications
-
-### Maintenance System
-- Vehicle and equipment maintenance tracking
-- Maintenance categories and schedules
+### Maintenance Management
+- Scheduled maintenance planning
 - Maintenance requisition system
-- Vendor management for maintenance
-- Maintenance history and reporting
-
-### Requisition System
-- Multi-level approval workflow
-- Requisition status tracking
-- Requisition log history
-- Email notifications at each stage
-- Complete audit trail
+- Maintenance vendor management
+- Complete maintenance history
+- Cost tracking and reporting
 
 ### Organization Management
-- Department management
+- Department and unit management
 - Employee management
-- Role-based access control
-- Unit and company management
+- Role-based access control (RBAC)
+- Multi-company support
 - Location tracking
 
 ### Additional Features
-- Multi-language support (translation system)
-- Email templates and logging
-- PDF and Excel export functionality
-- Real-time notifications (WebSocket support)
-- Push notifications
-- Role-based access control (RBAC)
-- Activity logging and history
-- Document approval workflow
+- 📋 Multi-language support (translation system)
+- 📧 Email templates and logging
+- 📊 PDF and Excel export
+- 🔔 Real-time notifications (WebSocket support)
+- 📱 Push notifications
+- 📝 Activity logging and audit trail
+- 📄 Document approval workflow
+- 📈 Reporting and analytics
 
-## Requirements
+## 🛠️ Technology Stack
+
+- **Backend:** Laravel 9.x / 10.x
+- **Frontend:** Bootstrap 5, jQuery, DataTables
+- **Database:** MySQL 8.0+ / MariaDB 10.2+
+- **Authentication:** Laravel Sanctum, JWT
+- **Real-time:** Pusher / WebSockets
+- **PDF Generation:** DomPDF
+- **Excel Export:** Maatwebsite Excel
+- **QR Codes:** Simple QRCode
+- **Translation:** Google Translate PHP
+
+## 📋 Requirements
 
 - PHP 8.0 or higher
-- Laravel 8.x
-- MySQL 5.7+ or MariaDB 10.2+
-- Composer
+- Laravel 9.x or 10.x
+- MySQL 8.0+ or MariaDB 10.2+
+- Composer 2.0+
 - Node.js & NPM (for frontend assets)
 - OpenSSL PHP Extension
 - PDO PHP Extension
@@ -78,30 +85,30 @@ A powerful Laravel-based fleet and transport management system designed to strea
 - Tokenizer PHP Extension
 - XML PHP Extension
 - Ctype PHP Extension
-- JSON PHP Extension
-- BCMath PHP Extension
+- JSON Extension
+- BCMath Extension
 - Fileinfo Extension
 - CURL Extension
 
-## Installation
+## 🚀 Installation
 
-### Step 1: Download and Extract
-Download the package and extract it to your web server directory.
-
-### Step 2: Install Dependencies
+### Step 1: Clone and Install
 ```bash
+git clone https://github.com/inayafleet/inayafleet360.git
+cd inayafleet360
 composer install
+npm install
 ```
 
-### Step 3: Configure Environment
-Copy the example environment file and configure your settings:
+### Step 2: Environment Configuration
 ```bash
 cp .env.example .env
+php artisan key:generate
 ```
 
-Update the `.env` file with your database credentials and other settings:
+Update your `.env` file with database credentials:
 ```env
-APP_NAME="Transport & Vehicle Automation"
+APP_NAME="InayaFleet360"
 APP_URL=http://localhost
 
 DB_CONNECTION=mysql
@@ -112,103 +119,196 @@ DB_USERNAME=your_username
 DB_PASSWORD=your_password
 
 MAIL_MAILER=smtp
-MAIL_HOST=your_mail_host
+MAIL_HOST=smtp.gmail.com
 MAIL_PORT=587
-MAIL_USERNAME=your_email
-MAIL_PASSWORD=your_password
+MAIL_USERNAME=your_email@gmail.com
+MAIL_PASSWORD=your_app_password
 ```
 
-### Step 4: Generate Application Key
-```bash
-php artisan key:generate
-```
-
-### Step 5: Run Migrations
+### Step 3: Database Setup
 ```bash
 php artisan migrate --seed
 ```
 
-### Step 6: Create Storage Link
+### Step 4: Storage Link
 ```bash
 php artisan storage:link
 ```
 
-### Step 7: Configure Permissions
-Ensure the following directories have write permissions:
+### Step 5: Permissions
 ```bash
 chmod -R 775 storage/
 chmod -R 775 bootstrap/cache/
 ```
 
-### Step 8: Access the Application
-Open your browser and navigate to `http://yourdomain.com`
+### Step 6: Queue Worker (for background jobs)
+```bash
+php artisan queue:work
+```
 
-## Default Login Credentials
+### Step 7: Start Development Server
+```bash
+php artisan serve
+```
 
-After installation, you can login with:
+## 📖 Default Access
 
-- **Admin URL:** `/admin`
-- **Email:** admin@example.com
-- **Password:** password
+After installation, access the admin panel:
+- **Admin URL:** `http://localhost/admin`
+- **Email:** `admin@inayafleet360.com`
+- **Password:** `password`
 
-**Note:** Change these credentials immediately after first login.
+> ⚠️ **Security Note:** Change these credentials immediately after first login.
 
-## Configuration
+## 📁 Project Structure
+
+```
+inayafleet360/
+├── app/
+│   ├── Console/
+│   ├── Exceptions/
+│   ├── Http/
+│   ├── Models/
+│   ├── Providers/
+│   ├── Services/
+│   └── Traits/
+├── bootstrap/
+├── config/
+├── database/
+│   ├── migrations/
+│   └── seeders/
+├── public/
+│   └── admin_resource/
+├── resources/
+│   └── views/
+├── routes/
+├── storage/
+└── tests/
+```
+
+## ⚙️ Configuration
 
 ### Email Settings
-Configure your mail settings in the `.env` file or through the admin panel under Settings > Email.
+Configure via `.env` file or admin panel:
+```
+Settings > Email Configuration
+```
 
 ### Language Settings
-The application supports multiple languages. Configure languages through the admin panel under Settings > Languages.
+Multi-language support available:
+```
+Settings > Language Settings
+```
 
-### Payment Gateway
-For payment processing, configure your preferred gateway in the admin panel under Settings > Payments.
+### Notification Settings
+Configure WebSocket and push notifications:
+```
+Settings > Notifications
+```
 
-## Third-Party Packages Used
+## 📊 Database Schema
 
-This project uses the following open-source packages:
+Key tables include:
+- `users` - User authentication and profiles
+- `vehicles` - Vehicle fleet management
+- `drivers` - Driver records
+- `requisitions` - Transport requisitions
+- `trip_sheets` - Trip documentation
+- `maintenance_records` - Vehicle maintenance
+- `departments` - Organization structure
+- `settings` - System configuration
 
-- Laravel Framework 8.x
-- Laravel UI 3.x
-- Spatie Laravel Permission
-- Maatwebsite Excel
-- Barryvdh Laravel DomPDF
-- Yajra DataTables
-- Simple QRCode
-- Google Translate PHP
-- Pusher WebSockets
-- And more...
+## 🔌 API Endpoints
 
-## Support
+The system provides RESTful APIs for:
+- Vehicle management
+- Driver management
+- Requisition workflows
+- Trip sheet operations
+- Maintenance tracking
 
-For support, please contact us through the CodeCanyon support system.
+## 🎨 Customization
 
-## License
+### Theme Customization
+Edit CSS files in:
+```
+public/admin_resource/assets/stylesheets/
+```
 
-This is a commercial product. You are purchasing a license to use this product according to the terms of the CodeCanyon Regular or Extended License.
+### Menu Configuration
+Modify menus via:
+```
+Database > MenuSeeder
+```
 
-- **Regular License:** Use in a single end product (free or paid)
-- **Extended License:** Use in a single end product that you plan to sell
+### Email Templates
+Customize templates in:
+```
+resources/views/emails/
+```
 
-## Changelog
+## 📈 Performance Optimization
+
+```bash
+# Cache configuration
+php artisan config:cache
+php artisan route:cache
+php artisan view:clear
+
+# Optimize autoloader
+composer dump-autoload --optimize
+```
+
+## 🧪 Testing
+
+```bash
+# Run unit tests
+php artisan test
+
+# Run feature tests
+php artisan test --features
+```
+
+## 📝 License
+
+This is a proprietary software. You are purchasing a license according to the terms of your purchase agreement.
+
+- **Regular License:** Use in a single end product
+- **Extended License:** Use in a single end product for sale
+
+## 🤝 Support
+
+For technical support:
+- Email: support@inayafleet360.com
+- Documentation: https://docs.inayafleet360.com
+- Issues: https://github.com/inayafleet360/tms/issues
+
+## 🙏 Acknowledgments
+
+Built with:
+- [Laravel](https://laravel.com) - The PHP Framework for Web Artisans
+- [Bootstrap](https://getbootstrap.com) - Bootstrap 5
+- [FontAwesome](https://fontawesome.com) - Icons
+- [DataTables](https://datatables.net) - Interactive tables
+- And many more open-source packages...
+
+## 📄 Changelog
 
 ### Version 1.0.0
 - Initial release
-- All core features implemented
+- Core fleet management features
+- Driver management module
+- Transport requisition workflow
+- Maintenance tracking system
 - Multi-language support
-- Responsive admin panel
+- Responsive admin dashboard
 - Export functionality (PDF, Excel)
 - Real-time notifications
 
-## Upgrade Guide
-
-To upgrade from a previous version:
-1. Backup your database and files
-2. Download the latest version
-3. Replace the application files (keep your `.env` file)
-4. Run migrations: `php artisan migrate`
-5. Clear caches: `php artisan optimize:clear`
-
 ---
 
-**TRANSPORT & VEHICLE AUTOMATION** - Smart Logistics. Better Operations.
+**InayaFleet360** - All-in-One Fleet & Transport Automation System
+
+Smart Logistics. Better Operations.
+
+© 2024 InayaFleet360. All rights reserved.

@@ -38,7 +38,7 @@ class SettingController extends Controller
     {
 
           $validator = Validator::make($request->all(), [
-                    "site_title" => "required",
+                    // "site_title" => "required",
                     // "site_description" => "required",
         ]);
 
@@ -51,23 +51,6 @@ class SettingController extends Controller
         if (!$setting) {
             $setting = new Setting();
             $setting->id = 1; // Explicitly set ID for the first record
-        }
-
-        if ($request->file('site_logo')) {
-            $imagePath = $request->file('site_logo');
-       $request->validate([
-          'site_logo' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
-        ]);
-            $imageName = $imagePath->getClientOriginalName();
-
-            // $path = $request->file('site_logo')->storeAs('admin_resource\assets\images', $imageName, 'public');
-            // $path = public_path().'//images';
-            //   $imagePath->move($path, $imageName);
-
- $site_logo = time().'.'.$request->site_logo->extension();  
-     
-  $request->site_logo->move(public_path('admin_resource\assets\images'), $site_logo);
-
         }
 
         if ($request->file('admin_logo')) {
@@ -87,9 +70,6 @@ class SettingController extends Controller
   $request->admin_logo->move(public_path('admin_resource\assets\images'), $admin_logo);
         }
 
-        $setting->site_title = $request->site_title;
-        $setting->site_description = $request->site_description;
-        $setting->site_copyright_text = $request->site_copyright_text;
         $setting->admin_title = $request->admin_title;
         $setting->admin_description = $request->admin_description;
 
@@ -112,11 +92,6 @@ class SettingController extends Controller
         if (!empty($admin_logo)) {
             
              $setting->admin_logo = $admin_logo;
-        }
-
-        if (!empty($site_logo)) {
-            
-             $setting->site_logo = $site_logo;
         }
 
         $setting->created_by = Auth::id();

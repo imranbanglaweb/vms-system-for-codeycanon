@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Transport & Vehicle Automation - Documentation</title>
+    <title>InayaFleet360 - Documentation</title>
     <style>
         * {
             margin: 0;
@@ -22,7 +22,7 @@
             padding: 20px;
         }
         header {
-            background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
             color: white;
             padding: 40px 20px;
             text-align: center;
@@ -36,13 +36,14 @@
             opacity: 0.9;
         }
         .tagline {
-            background: rgba(255,255,255,0.2);
+            background: rgba(74, 144, 226, 0.3);
             padding: 10px 20px;
             border-radius: 5px;
             display: inline-block;
             margin-top: 15px;
             font-size: 1.1em;
             font-weight: bold;
+            border: 1px solid rgba(74, 144, 226, 0.5);
         }
         nav {
             background: white;
@@ -52,10 +53,10 @@
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         }
         nav h2 {
-            color: #2c3e50;
+            color: #1a1a2e;
             margin-bottom: 15px;
             padding-bottom: 10px;
-            border-bottom: 2px solid #3498db;
+            border-bottom: 2px solid #4A90E2;
         }
         nav ul {
             list-style: none;
@@ -73,7 +74,7 @@
             transition: all 0.3s ease;
         }
         nav ul li a:hover {
-            background: #3498db;
+            background: #4A90E2;
             color: white;
             transform: translateY(-2px);
         }
@@ -85,13 +86,13 @@
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         }
         section h2 {
-            color: #2c3e50;
+            color: #1a1a2e;
             margin-bottom: 20px;
             padding-bottom: 10px;
             border-bottom: 2px solid #f0f0f0;
         }
         section h3 {
-            color: #3498db;
+            color: #4A90E2;
             margin: 20px 0 10px;
         }
         section p {
@@ -112,7 +113,7 @@
             font-size: 0.9em;
         }
         pre {
-            background: #2d3748;
+            background: #1a1a2e;
             color: #e2e8f0;
             padding: 20px;
             border-radius: 8px;
@@ -134,10 +135,10 @@
             background: #f8f9fa;
             padding: 20px;
             border-radius: 8px;
-            border-left: 4px solid #3498db;
+            border-left: 4px solid #4A90E2;
         }
         .feature-card h4 {
-            color: #2c3e50;
+            color: #1a1a2e;
             margin-bottom: 10px;
         }
         .warning {
@@ -172,7 +173,7 @@
             border-bottom: 1px solid #ddd;
         }
         th {
-            background: #2c3e50;
+            background: #1a1a2e;
             color: white;
         }
         tr:hover {
@@ -185,15 +186,15 @@
             font-size: 0.9em;
         }
         footer a {
-            color: #3498db;
+            color: #4A90E2;
             text-decoration: none;
         }
     </style>
 </head>
 <body>
     <header>
-        <h1>Transport & Vehicle Automation</h1>
-        <p>Complete Fleet & Transport Management System</p>
+        <h1>InayaFleet360</h1>
+        <p>All-in-One Fleet & Transport Automation System</p>
         <div class="tagline">Smart Logistics. Better Operations.</div>
     </header>
 
@@ -216,8 +217,8 @@
 
         <section id="introduction">
             <h2>Introduction</h2>
-            <p>Welcome to <strong>Transport & Vehicle Automation</strong> documentation. This powerful Laravel-based solution is designed to streamline your organization's fleet and transport operations with an all-in-one management platform.</p>
-            <p>Whether you need to manage your vehicle fleet, track drivers, handle transport requisitions, schedule maintenance, or manage tasks and employees, this system has you covered with a modern, intuitive interface.</p>
+            <p>Welcome to <strong>InayaFleet360</strong> documentation. This powerful Laravel-based solution is designed to streamline your organization's fleet and transport operations with an all-in-one management platform.</p>
+            <p>InayaFleet360 is a comprehensive fleet and transport automation system that helps you manage vehicles, drivers, requisitions, maintenance, and more - all in one place.</p>
             <p><strong>Smart Logistics. Better Operations.</strong> - Our mission is to help you achieve operational excellence through intelligent automation.</p>
         </section>
 
@@ -273,19 +274,19 @@
                 </tr>
                 <tr>
                     <td>Laravel</td>
-                    <td>8.x</td>
+                    <td>9.x / 10.x</td>
                 </tr>
                 <tr>
                     <td>MySQL</td>
-                    <td>5.7+ or MariaDB 10.2+</td>
+                    <td>8.0+ or MariaDB 10.2+</td>
                 </tr>
                 <tr>
                     <td>Composer</td>
-                    <td>Latest stable</td>
+                    <td>2.0+</td>
                 </tr>
                 <tr>
                     <td>Node.js</td>
-                    <td>14+ (for frontend assets)</td>
+                    <td>16+ (for frontend assets)</td>
                 </tr>
             </table>
 
@@ -297,8 +298,8 @@
                 <li>Tokenizer PHP Extension</li>
                 <li>XML PHP Extension</li>
                 <li>Ctype PHP Extension</li>
-                <li>JSON PHP Extension</li>
-                <li>BCMath PHP Extension</li>
+                <li>JSON Extension</li>
+                <li>BCMath Extension</li>
                 <li>Fileinfo Extension</li>
                 <li>CURL Extension</li>
             </ul>
@@ -312,19 +313,20 @@
             <h2>Installation Guide</h2>
 
             <h3>Step 1: Download and Setup</h3>
-            <p>Download the package from CodeCanyon and extract it to your web server directory (e.g., <code>public_html</code> or <code>htdocs</code>).</p>
+            <p>Download the package and extract it to your web server directory (e.g., <code>public_html</code> or <code>htdocs</code>).</p>
 
             <h3>Step 2: Install Dependencies</h3>
             <p>Open your terminal and navigate to the project directory:</p>
             <pre><code>cd /path/to/your/project
-composer install</code></pre>
+composer install
+npm install</code></pre>
 
             <h3>Step 3: Configure Environment</h3>
             <p>Copy the example environment file:</p>
             <pre><code>cp .env.example .env</code></pre>
 
             <p>Edit the <code>.env</code> file with your database credentials:</p>
-            <pre><code>APP_NAME="Transport & Vehicle Automation"
+            <pre><code>APP_NAME="InayaFleet360"
 APP_URL=http://yourdomain.com
 
 DB_CONNECTION=mysql
@@ -404,7 +406,7 @@ MAIL_ENCRYPTION=tls</code></pre>
                 <tr>
                     <td>Admin</td>
                     <td>/admin</td>
-                    <td>admin@example.com</td>
+                    <td>admin@inayafleet360.com</td>
                     <td>password</td>
                 </tr>
             </table>
@@ -474,7 +476,7 @@ MAIL_ENCRYPTION=tls</code></pre>
             <p>We provide comprehensive support for our product:</p>
             <ul>
                 <li><strong>Documentation:</strong> This complete guide covers all aspects of the system</li>
-                <li><strong>CodeCanyon Support:</strong> Use the CodeCanyon support system for inquiries</li>
+                <li><strong>Email Support:</strong> Contact support@inayafleet360.com</li>
                 <li><strong>Updates:</strong> Regular updates to improve functionality and fix issues</li>
             </ul>
 
@@ -485,19 +487,19 @@ MAIL_ENCRYPTION=tls</code></pre>
 
         <section id="license">
             <h2>License</h2>
-            <p>This is a commercial product licensed under CodeCanyon terms:</p>
+            <p>This is a commercial product licensed under proprietary terms:</p>
             <ul>
                 <li><strong>Regular License:</strong> Use in a single end product (free or paid) where end users are not charged</li>
                 <li><strong>Extended License:</strong> Use in a single end product that you plan to sell</li>
             </ul>
-            <p>For more details, please refer to the CodeCanyon license terms.</p>
+            <p>For more details, please refer to your purchase agreement.</p>
         </section>
     </div>
 
     <footer>
-        <p><strong>Transport & Vehicle Automation</strong></p>
+        <p><strong>InayaFleet360</strong> - All-in-One Fleet & Transport Automation System</p>
         <p>Smart Logistics. Better Operations.</p>
-        <p>Version 1.0.0 | &copy; 2024 Your Company Name</p>
+        <p>Version 1.0.0 | &copy; 2024 InayaFleet360</p>
     </footer>
 </body>
 </html>

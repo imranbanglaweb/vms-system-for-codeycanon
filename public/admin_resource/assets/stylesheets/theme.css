@@ -181,7 +181,7 @@ a:active {
 
 	/* Layout Fixed - Content Body */
 	html.fixed .content-body {
-		margin-left: 300px;
+		/* margin-left: 300px; */
 	}
 
 	html.fixed .content-body.has-toolbar {
