@@ -9,7 +9,7 @@
             <h2><i class="fa fa-plus mr-2"></i> Add Employee</h2>
         </div>
         <div class="pull-right">
-            <a class="btn btn-primary" href="{{ route('employees.index') }}"><i class="fa fa-arrow-left mr-2"></i> Back</a>
+            <a class="btn btn-primary" href="{{ route('admin.employees.index') }}"><i class="fa fa-arrow-left mr-2"></i> Back</a>
         </div>
     </div>
 </div>
@@ -35,12 +35,12 @@
             <p class="text-muted">Fill in employee details. Required fields are validated via AJAX.</p>
         </div>
         <div>
-            <a href="{{ route('employees.index') }}" class="btn btn-outline-secondary"><i class="fa fa-arrow-left"></i> Back to list</a>
+            <a href="{{ route('admin.employees.index') }}" class="btn btn-outline-secondary"><i class="fa fa-arrow-left"></i> Back to list</a>
         </div>
     </header>
 
     <div class="panel-body">
-        {!! Form::open(['route' => ['employees.store'], 'method' => 'POST', 'enctype' => 'multipart/form-data', 'id' => 'employee_add']) !!}
+        {!! Form::open(['route' => ['admin.employees.store'], 'method' => 'POST', 'enctype' => 'multipart/form-data', 'id' => 'employee_add']) !!}
         @include('admin.dashboard.employee._form')
         {!! Form::close() !!}
     </div>
@@ -98,11 +98,11 @@ $(document).ready(function() {
         // populate departments
         $.ajax({
             type: 'GET',
-            url: "{{ route('unit-wise-department')}}",
+            url: "{{ route('admin.unit-wise-department')}}",
             data: { unit_id: unit_id},
             dataType: 'json',
             success: function (data) {
-                console.log('unit-wise-department response:', data);
+                console.log('admin.unit-wise-department response:', data);
                 // If department was previously initialized with Select2, destroy it to update options reliably
                 if ($('.department_name').data('select2')) {
                     try { $('.department_name').select2('destroy'); } catch(e) { console.warn('select2 destroy failed', e); }
@@ -210,7 +210,7 @@ $(document).on('change', '#photo-input', function(e){
 
         $.ajax({
             type:'POST',
-            url:"{{ route('employees.store') }}",
+            url:"{{ route('admin.employees.store') }}",
             data: formData,
             contentType: false,
             processData: false,
@@ -222,7 +222,7 @@ $(document).on('change', '#photo-input', function(e){
                     timer: 2000,
                     showConfirmButton: false,
                 }).then(() => {
-                    window.location.href = "{{ route('employees.index') }}";
+                    window.location.href = "{{ route('admin.employees.index') }}";
                 });
             },
             error: function(response){

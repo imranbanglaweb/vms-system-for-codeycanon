@@ -5,9 +5,8 @@
 
 <div class="row">
     <div class="col-md-4">
-       
 
-       
+
     </div>
     <div class="col-md-8 text-right">
     <br>
@@ -19,9 +18,10 @@
             <br>
         </div>
 
-    </div>
+        <br>
+        </div>
 
-    
+
 </div>
 
 @if ($message = Session::get('success'))
@@ -51,38 +51,30 @@
     </table>
 </div>
 
-<!-- Delete Modal -->
-<div class="modal" id="deleteModal">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Delete User</h5>
-                <button class="close" data-dismiss="modal">&times;</button>
-            </div>
-            <div class="modal-body">Are you sure you want to delete this user?</div>
-            <div class="modal-footer">
-                <button class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-                <form id="deleteForm" method="POST">
-                    @csrf
-                    @method('DELETE')
-                    <button class="btn btn-danger">Delete</button>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
-
 </section>
 
-<!-- JS -->
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
-<script src="https://cdn.datatables.net/1.10.21/js/jquery.dataTables.min.js"></script>
-<script src="https://cdn.datatables.net/1.10.21/js/dataTables.bootstrap4.min.js"></script>
-<script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+@push('styles')
+<link rel="stylesheet" href="{{ asset('public/admin_resource/plugins/datatables-bs4/css/dataTables.bootstrap4.min.css') }}">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+
+<style>
+    .table th, .table td {
+        vertical-align: middle !important;
+        font-size: 15px;
+    }
+</style>
+@endpush
+
+@push('scripts')
+<!-- Load SweetAlert2 from CDN to ensure it's available -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
 $(document).ready(function() {
+    console.log('jQuery loaded:', typeof $);
+    console.log('Swal loaded:', typeof Swal);
+    
     $('#myTable').DataTable({
         processing: true,
         serverSide: true,
@@ -102,32 +94,44 @@ $(document).ready(function() {
         ]
     });
 
-    $(document).on('click', '.deleteUser', function() {
-        var id = $(this).data('id');
-        $('#deleteForm').data('id', id);
-        $('#deleteModal').modal('show');
-    });
-
-    $('#deleteForm').submit(function(e) {
+    // Delete click handler
+    $(document).on('click', '.deleteUser', function(e) {
         e.preventDefault();
         var id = $(this).data('id');
-        var url = "{{ route('users.destroy', ':id') }}";
-        url = url.replace(':id', id);
-
-        $.ajax({
-            url: url,
-            type: 'DELETE',
-            data: $(this).serialize(),
-            success: function(response) {
-                $('#deleteModal').modal('hide');
-                $('#myTable').DataTable().ajax.reload();
-                Swal.fire('Deleted!', response.success, 'success');
+        console.log('Clicked delete, ID:', id);
+        
+        if (!id) {
+            alert('Error: No user ID found!');
+            return;
+        }
+        
+        Swal.fire({
+            title: 'Are you sure?',
+            text: 'This user will be deleted permanently!',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Yes, delete!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    url: '{{ route("users.destroy", ":id") }}'.replace(':id', id),
+                    type: 'DELETE',
+                    headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
+                    success: function(response) {
+                        $('#myTable').DataTable().ajax.reload();
+                        Swal.fire('Deleted!', 'User has been deleted.', 'success');
+                    },
+                    error: function(xhr) {
+                        Swal.fire('Error!', xhr.responseJSON?.message || 'Delete failed', 'error');
+                    }
+                });
             }
         });
     });
 });
-
 </script>
-
+@endpush
 
 @endsection

@@ -26,7 +26,7 @@
          
         </div>
     </div>
- 
+  
 </div>
 
 <div class="row mt-3">
@@ -96,19 +96,20 @@
 
 @push('styles')
 
-<link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap4.min.css">
+<link rel="stylesheet" href="{{ asset('public/admin_resource/plugins/datatables-bs4/css/dataTables.bootstrap4.min.css') }}">
+<link rel="stylesheet" href="{{ asset('public/admin_resource/plugins/sweetalert2/sweetalert2.min.css') }}">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+
 <style> 
 #locations-table thead th { font-weight:600; } 
+.table th, .table td {
+    vertical-align: middle !important;
+    font-size: 15px;
+}
 </style>
 @endpush
 
 @push('scripts')
-
-<script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
-
-<script src="https://cdn.datatables.net/1.13.4/js/dataTables.bootstrap4.min.js"></script>
-
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
 $(function(){
@@ -117,7 +118,7 @@ $(function(){
     var table = $('#locations-table').DataTable({
         processing: true,
         serverSide: true,
-        ajax: '{!! route('locations.data') !!}',
+        ajax: '{!! route('admin.locations.data') !!}',
         columns: [
             { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable:false, searchable:false },
             { data: 'location_name', name: 'location_name' },

@@ -7,7 +7,7 @@
         <div class="col-12">
             <nav aria-label="breadcrumb">
                 <ol class="breadcrumb bg-white py-3 px-4 rounded shadow-sm">
-                    <li class="breadcrumb-item"><a href="{{ route('permissions.index') }}" class="text-decoration-none"><i class="fa fa-shield-alt"></i> Permissions</a></li>
+                    <li class="breadcrumb-item"><a href="{{ route('admin.permissions.index') }}" class="text-decoration-none"><i class="fa fa-shield-alt"></i> Permissions</a></li>
                     <li class="breadcrumb-item active" aria-current="page"><i class="fa fa-edit"></i> Edit Permission</li>
                 </ol>
             </nav>
@@ -24,7 +24,7 @@
                     <p class="text-strong mb-0" style="font-size:16px;color:green">Modify permission details below</p>
                 </div>
                 <div>
-                    <a href="{{ route('permissions.index') }}" class="btn btn-light btn-lg border">
+                    <a href="{{ route('admin.permissions.index') }}" class="btn btn-light btn-lg border">
                         <i class="fa fa-arrow-left me-2"></i>Back to List
                     </a>
                 </div>
@@ -238,7 +238,7 @@ $(document).ready(function(){
     $('#name').on('blur', function(){
         const name = $(this).val().trim();
         if(name){
-            $.post("{{ route('permissions.validate') }}", {_token: "{{ csrf_token() }}", name: name, id: $('#permission_id').val()}, function(response){
+            $.post("{{ route('admin.permissions.validate') }}", {_token: "{{ csrf_token() }}", name: name, id: $('#permission_id').val()}, function(response){
                 if(!response.valid){
                     $('#name').addClass('is-invalid');
                     $('#name-error').text(response.message);
@@ -250,7 +250,7 @@ $(document).ready(function(){
         }
     });
 
-    // AJAX form submission
+    // AJAX form submission with Premium Toast
     $('#editPermissionForm').on('submit', function(e){
         e.preventDefault();
         const id = $('#permission_id').val();
@@ -261,11 +261,15 @@ $(document).ready(function(){
 
         $.ajax({
             url: `{{ url('permissions') }}/${id}`,
-            //   let url = id ? "{{ url('license-types') }}/" + id : "{{ route('license-types.store') }}";
             type: 'POST',
             data: formData,
             success: function(response){
-                Swal.fire({icon:'success', title:'Updated!', text: response.message || 'Permission updated successfully'});
+                showPremiumToast(
+                    'success',
+                    '<i class="fas fa-check-circle me-2"></i>Updated',
+                    response.message || 'Permission updated successfully',
+                    5000
+                );
             },
             error: function(xhr){
                 if(xhr.status === 422){
@@ -274,8 +278,19 @@ $(document).ready(function(){
                         $('#' + field).addClass('is-invalid');
                         $('#' + field + '-error').text(messages[0]);
                     });
+                    showPremiumToast(
+                        'error',
+                        '<i class="fas fa-times-circle me-2"></i>Validation Error',
+                        'Please check your input and try again.',
+                        5000
+                    );
                 } else {
-                    Swal.fire({icon:'error', title:'Error', text:'An error occurred. Please try again.'});
+                    showPremiumToast(
+                        'error',
+                        '<i class="fas fa-times-circle me-2"></i>Error',
+                        'An error occurred. Please try again.',
+                        5000
+                    );
                 }
             },
             complete: function(){

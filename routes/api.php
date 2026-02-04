@@ -1,6 +1,10 @@
 <?php
 
 // routes/api.php
+use App\Http\Controllers\DepartmentHeadController;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Request;
+
 Route::middleware('web')->group(function () {
     Route::post('/switch-language', function (Request $request) {
         $request->validate([

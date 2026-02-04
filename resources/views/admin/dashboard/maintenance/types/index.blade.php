@@ -1,10 +1,10 @@
 @extends('admin.dashboard.master')
 
-@section('main_content')
-
 @push('styles')
-<link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
-<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap4.min.css">
+<link rel="stylesheet" href="{{ asset('public/admin_resource/plugins/datatables-bs4/css/dataTables.bootstrap4.min.css') }}">
+<link rel="stylesheet" href="{{ asset('public/admin_resource/plugins/sweetalert2/sweetalert2.min.css') }}">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+
 <style>
   .card-premium { border: none; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.08); }
   .form-label-premium { font-weight: 600; color: #495057; }
@@ -13,8 +13,14 @@
   .btn-primary-premium, .btn-info-premium, .btn-danger-premium, .btn-secondary-premium { border-radius: 8px; padding: .45rem .9rem; }
   table.table-premium th, table.table-premium td { vertical-align: middle; }
   .dt-search { max-width: 360px; margin-left:auto; }
+  .table th, .table td {
+        vertical-align: middle !important;
+        font-size: 15px;
+    }
 </style>
 @endpush
+
+@section('main_content')
 
 <section role="main" class="content-body" style="background:#f8f9fc;">
 <div class="container mt-5">
@@ -83,10 +89,6 @@
 </section>
 
 @push('scripts')
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
-<script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap4.min.js"></script>
-
 <script>
 $(function(){
 

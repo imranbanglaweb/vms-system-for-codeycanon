@@ -14,7 +14,7 @@
                 {{ count($rolePermissions) }} Selected
             </span>
         </h3>
-        <a href="{{ route('roles.index') }}" class="btn btn-outline-primary">← Back</a>
+        <a href="{{ route('admin.roles.index') }}" class="btn btn-outline-primary">← Back</a>
     </div>
 
     {{-- Search --}}
@@ -186,27 +186,32 @@ $(function () {
         });
     });
 
-    // AJAX UPDATE
+    // AJAX UPDATE with Premium Toast
     $('#roleEditForm').submit(function (e) {
         e.preventDefault();
 
         $.ajax({
-            url: "{{ route('roles.update', $role->id) }}",
+            url: "{{ route('admin.roles.update', $role->id) }}",
             method: "POST",
             data: $(this).serialize(),
             success: function (res) {
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Updated!',
-                    text: res.message,
-                    timer: 2000,
-                    showConfirmButton: false
-                }).then(() => {
-                    window.location.href = "{{ route('roles.index') }}";
-                });
+                showPremiumToast(
+                    'success',
+                    '<i class="fas fa-check-circle me-2"></i>Updated',
+                    res.message,
+                    5000
+                );
+                setTimeout(function() {
+                    window.location.href = "{{ route('admin.roles.index') }}";
+                }, 2000);
             },
             error: function () {
-                Swal.fire('Error', 'Validation failed', 'error');
+                showPremiumToast(
+                    'error',
+                    '<i class="fas fa-times-circle me-2"></i>Error',
+                    'Validation failed. Please check your input.',
+                    5000
+                );
             }
         });
     });

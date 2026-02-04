@@ -30,7 +30,7 @@
                     </td>
                     <td>
                         <a href="{{ route('users.edit', $user->id) }}" class="edit btn btn-primary btn-sm"><i class="fa fa-edit"></i></a>
-                        <button type="button" onclick="confirmDelete({{ $user->id }})" class="deleteUser btn btn-danger btn-sm" data-qid="{{ $user->id }}"><i class="fa fa-minus"></i></button>
+                        <button type="button" onclick="confirmDelete({{ $user->id }})" class="deleteUser btn btn-danger btn-sm" data-id="{{ $user->id }}"><i class="fa fa-minus"></i></button>
                     </td>
                 </tr>
             @endforeach
@@ -42,7 +42,9 @@
     {{ $users instanceof \Illuminate\Pagination\LengthAwarePaginator ? $users->links() : '' }}
 </div>
 
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
@@ -51,7 +53,7 @@
         processing: true,
         serverSide: true,
         ajax: {
-            url: '{{ route('users.data') }}',
+            url: '{{ route('users.getData') }}',
             type: 'GET',
             error: function(xhr, error, code) {
                 console.error('DataTable AJAX Error:', error);
@@ -80,6 +82,12 @@
   });
 
 function confirmDelete(userId) {
+    console.log('confirmDelete called with ID:', userId);
+    if (typeof Swal === 'undefined') {
+        alert('SweetAlert2 not loaded! Check console.');
+        console.error('Swal is undefined');
+        return;
+    }
     Swal.fire({
         title: 'Are you sure?',
         text: "You won't be able to revert this!",
@@ -97,28 +105,42 @@ function confirmDelete(userId) {
 
 function deleteUser(userId) {
     $.ajax({
-         url: '{{ route('users.destroy', '') }}/' + userId,
+        url: '{{ url('users') }}' + '/' + userId,
         type: 'DELETE',
-        data: {
-            _token: '{{ csrf_token() }}'
-        },
+        headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
         success: function(response) {
-            showAlert(response.success);
-            location.reload();
+            Swal.fire({
+                html: '<div class="text-center"><i class="fa fa-check-circle" style="font-size:56px;color:#28a745"></i><h3 style="margin-top:8px;margin-bottom:6px;">Deleted</h3><div>' + (response.success || 'User deleted successfully') + '</div></div>',
+                showConfirmButton: true,
+                confirmButtonText: 'OK',
+                customClass: { popup: 'shadow-lg rounded-3' }
+            }).then(() => {
+                if ($('#myTable').length) {
+                    $('#myTable').DataTable().ajax.reload(null, false);
+                } else {
+                    location.reload();
+                }
+            });
         },
         error: function(xhr) {
-            alert('Error deleting user.');
+            let msg = 'Error deleting user.';
+            if (xhr.responseJSON && xhr.responseJSON.message) msg = xhr.responseJSON.message;
+            Swal.fire({
+                icon: 'error',
+                title: 'Delete Failed',
+                text: msg
+            });
         }
     });
 }
 
 // Add this function to show success alert
 function showAlert(message) {
-    $('<div class="alert alert-success alert-dismissible fade show" role="alert">' + 
-      message + 
-      '<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button></div>')
-      .appendTo('body').delay(3000).fadeOut(500, function() {
-        $(this).remove();
+    Swal.fire({
+        html: '<div class="text-center"><i class="fa fa-check-circle" style="font-size:48px;color:#28a745"></i><div style="margin-top:8px;">' + message + '</div></div>',
+        showConfirmButton: false,
+        timer: 2500,
+        customClass: { popup: 'shadow-lg rounded-3' }
     });
 }
 </script>

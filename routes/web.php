@@ -86,9 +86,7 @@ use App\Http\Controllers\PushSubscriptionController;
 // Subscriptions & Payments
 use App\Http\Controllers\Admin\SubscriptionPlanController;
 use App\Http\Controllers\Admin\SubscriptionController;
-use App\Http\Controllers\Admin\SubscriptionApprovalController;
 use App\Http\Controllers\Admin\AdminPaymentController;
-use App\Http\Controllers\Payment\StripeController;
 use App\Http\Controllers\Payment\ManualPaymentController;
 use App\Http\Controllers\Admin\PushTestController;
 
@@ -387,16 +385,16 @@ Route::middleware(['auth', 'subscription.active'])->group(function () {
 });
 
 // ============================================================================
-// 14. PAYMENTS (MANUAL & STRIPE)
+// 14. PAYMENTS (MANUAL ONLY - STRIPE DISABLED)
 // ============================================================================
 
 Route::middleware(['auth'])->group(function () {
-        // Stripe
+    // Stripe (disabled - controller not implemented)
     // Route::post('/stripe/pay', [StripeController::class,'pay'])
     //     ->name('stripe.pay');
-
-    Route::get('/payment/stripe', [StripeController::class,'pay'])
-    ->name('payment.stripe');
+    // Route::get('/payment/stripe', [StripeController::class,'pay'])
+    //     ->name('payment.stripe');
+    // Route::get('/stripe/success', [StripeController::class, 'success'])->name('stripe.success');
     
     // Manual Payment
     Route::get('/payment/manual/{plan}', [ManualPaymentController::class, 'form'])->name('payment.manual');
@@ -407,8 +405,8 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/invoice/{payment}', [ManualPaymentController::class, 'invoice'])->name('invoice.download');
     Route::get('/admin/payments/{payment}/invoice', [ManualPaymentController::class, 'invoice'])->name('admin.payments.invoice');
     
-    // Stripe
-    Route::get('/stripe/success', [StripeController::class, 'success'])->name('stripe.success');
+    // Stripe (disabled - controller not implemented)
+    // Route::get('/stripe/success', [StripeController::class, 'success'])->name('stripe.success');
 });
 
 // ============================================================================
@@ -427,15 +425,20 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
 });
 
 Route::middleware(['auth', 'role:Admin'])->prefix('admin')->group(function () {
-    Route::get('/subscriptions/pending', [SubscriptionApprovalController::class, 'pending']);
-    Route::post('/subscriptions/approve/{payment}', [SubscriptionApprovalController::class, 'approve']);
+    // SubscriptionApprovalController not implemented
+    // Route::get('/subscriptions/pending', [SubscriptionApprovalController::class, 'pending']);
+    // Route::post('/subscriptions/approve/{payment}', [SubscriptionApprovalController::class, 'approve']);
 });
 
 // ============================================================================
 // 16. ORGANIZATION SETUP
 // ============================================================================
 
-Route::middleware(['auth'])->group(function () {
+Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () {
+    // Employees
+    Route::get('employees/data', [EmployeeController::class, 'data'])->name('employees.data');
+    Route::resource('employees', EmployeeController::class);
+    
     // Units
     Route::get('units/data', [UnitController::class, 'data'])->name('units.data');
     Route::get('units/list', [UnitController::class, 'list'])->name('units.list');
@@ -470,19 +473,12 @@ Route::middleware(['auth'])->group(function () {
 // ============================================================================
 
 Route::middleware(['auth'])->group(function () {
-    // Employees
-    Route::resource('employees', EmployeeController::class);
-    Route::post('import', [EmployeeController::class, 'import'])->name('employee.import');
-    Route::post('importuser', [EmployeeController::class, 'importuser'])->name('employee.importuser');
-    Route::post('employee/importuser', [UserController::class, 'importUser'])->name('employee.importuser');
-    Route::post('employee/export', [UserController::class, 'exportUser'])->name('employee.export');
+    // Employees (note: admin employees routes are in the admin prefix group above)
     
     // Users
     Route::get('users/getData', [UserController::class, 'getData'])->name('users.getData');
     Route::get('users/search', [UserController::class, 'search'])->name('users.search');
-    Route::resource('users', UserController::class);
-    // Route::resource('users', UserController::class)->except(['show']);
-
+    
     Route::post('users/validate', [UserController::class, 'validateUser'])->name('users.validate');
     Route::post('users/ajaxSubmit', [UserController::class, 'ajaxSubmit'])->name('users.ajaxSubmit');
     
@@ -490,16 +486,18 @@ Route::middleware(['auth'])->group(function () {
     Route::get('users/employee-details/{employeeId}', [UserController::class, 'getEmployeeDetails'])->name('users.get-employee-details');
     
     // User Profile
+    Route::resource('users', UserController::class);
     Route::get('user-profile', [UserController::class, 'userprofile'])->name('user-profile');
     Route::post('profile-update', [UserController::class, 'updateProfile'])->name('profile-update');
     Route::post('profile-password-update', [UserController::class, 'profilepasswordupdate'])->name('profile-password-update');
+    // Route::resource('users', UserController::class)->except(['show']);
 });
 
 // ============================================================================
 // 18. PERMISSIONS & ROLES
 // ============================================================================
 
-Route::middleware(['auth'])->group(function () {
+Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () {
     // Roles
     Route::get('roles/data', [RoleController::class, 'data'])->name('roles.data');
     Route::get('roles', [RoleController::class, 'index'])->name('roles.index');
@@ -507,11 +505,14 @@ Route::middleware(['auth'])->group(function () {
     Route::post('roles/{id}/duplicate', [RoleController::class, 'duplicate'])
     ->name('roles.duplicate');
     // Permissions
-    Route::get('/permissions', [PermissionController::class, 'index'])->name('permissions.index');
-    Route::get('/permissions/list', [PermissionController::class, 'list'])->name('permissions.list');
-    Route::post('/permissions/validate', [PermissionController::class, 'validatePermission'])->name('permissions.validate');
-    
-    Route::resource('permissions', PermissionController::class);
+    Route::get('permissions', [PermissionController::class, 'index'])->name('permissions.index');
+    Route::get('permissions/create', [PermissionController::class, 'create'])->name('permissions.create');
+    Route::post('permissions/store', [PermissionController::class, 'store'])->name('permissions.store');
+    Route::get('permissions/{id}/edit', [PermissionController::class, 'edit'])->name('permissions.edit');
+    Route::post('permissions/{id}/update', [PermissionController::class, 'update'])->name('permissions.update');
+    Route::delete('permissions/{id}/delete', [PermissionController::class, 'destroy'])->name('permissions.destroy');
+    Route::get('permissions/list', [PermissionController::class, 'list'])->name('permissions.list');
+    Route::post('permissions/validate', [PermissionController::class, 'validatePermission'])->name('permissions.validate');
 });
 
 // ============================================================================

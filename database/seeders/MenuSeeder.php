@@ -6,17 +6,107 @@ use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Carbon\Carbon;
+use Spatie\Permission\Models\Permission;
+use Spatie\Permission\PermissionRegistrar;
 
 class MenuSeeder extends Seeder
 {
     public function run()
     {
+        // Clear cached permissions
+        app()[PermissionRegistrar::class]->forgetCachedPermissions();
+
         Schema::disableForeignKeyConstraints();
         DB::table('menus')->truncate();
         Schema::enableForeignKeyConstraints();
 
         $adminId = 1;
         $now = Carbon::now();
+
+        // Define all permissions used in menus
+        $allPermissions = [
+            // Dashboard
+            'dashboard',
+
+            // Settings
+            'settings-manage',
+            'settings-notification',
+
+            // Roles & Permissions
+            'role-manage',
+
+            // Users
+            'user-manage',
+            'user-create',
+
+            // Menu Management
+            'menu-manage',
+
+            // Employees
+            'employee-manage',
+            'unit-manage',
+            'company-manage',
+            'location-manage',
+            'department-manage',
+            'department-head-manage',
+            'license-type-manage',
+
+            // Drivers
+            'driver-manage',
+
+            // Vehicles
+            'vehicle-manage',
+            'vehicle-create',
+
+            // Maintenance
+            'maintenance-manage',
+            'maintenance-type-manage',
+            'maintenance-vendor-manage',
+            'maintenance-category-manage',
+
+            // Requisitions
+            'requisition-create',
+            'requisition-view',
+
+            // Department Approval
+            'department-approval-view',
+
+            // Transport Approval
+            'transport-approval-view',
+
+            // Trip Sheets
+            'trip-manage',
+
+            // Subscription & SaaS
+            'subscription-plan-manage',
+            'subscription-approve',
+
+            // Payments
+            'payment-approve',
+            'payment-view',
+
+            // Reports
+            'report-requisition',
+            'report-trip-fuel',
+            'report-vehicle-utilization',
+            'report-driver-performance',
+            'report-maintenance',
+
+            // Notifications
+            'notification-manage',
+
+            // Email Templates
+            'email-template-manage',
+            'emaillog-manage',
+        ];
+
+        // Create permissions if they don't exist
+        foreach ($allPermissions as $permission) {
+            Permission::firstOrCreate(
+                ['name' => $permission, 'guard_name' => 'web'],
+                ['created_at' => $now, 'updated_at' => $now]
+            );
+        }
 
         // Define parent menus first with their structure
         $parentMenus = [
@@ -192,7 +282,7 @@ class MenuSeeder extends Seeder
 
         // Now insert child menus with correct parent IDs
         $childMenus = [
-            // User Manage children (parent ID: User Manage)
+            // User Manage children
             [
                 'menu_name' => 'Add User',
                 'menu_slug' => 'add-user',
@@ -211,13 +301,14 @@ class MenuSeeder extends Seeder
                 'menu_order' => 2,
                 'parent_name' => 'User Manage',
             ],
-            // Menu Manage children (parent ID: Menu Manage)
+
+            // Menu Manage children
             [
                 'menu_name' => 'Add Menu',
                 'menu_slug' => 'add-menu',
                 'menu_icon' => 'fa-plus-square-o',
                 'menu_url' => 'menus.create',
-                'menu_permission' => 'menu-create',
+                'menu_permission' => 'menu-manage',
                 'menu_order' => 1,
                 'parent_name' => 'Menu Manage',
             ],
@@ -230,12 +321,13 @@ class MenuSeeder extends Seeder
                 'menu_order' => 2,
                 'parent_name' => 'Menu Manage',
             ],
-            // Employee Manage children (parent ID: Employee Manage)
+
+            // Employee Manage children
             [
                 'menu_name' => 'Manage Employees',
                 'menu_slug' => 'menu.employee.list',
                 'menu_icon' => 'fa fa-list-alt',
-                'menu_url' => 'employees.index',
+                'menu_url' => 'admin.employees.index',
                 'menu_permission' => 'employee-manage',
                 'menu_order' => 1,
                 'parent_name' => 'Employee Manage',
@@ -244,7 +336,7 @@ class MenuSeeder extends Seeder
                 'menu_name' => 'Unit Manage',
                 'menu_slug' => 'unit-manage',
                 'menu_icon' => 'fa-building-o',
-                'menu_url' => 'units.index',
+                'menu_url' => 'admin.units.index',
                 'menu_permission' => 'unit-manage',
                 'menu_order' => 2,
                 'parent_name' => 'Employee Manage',
@@ -253,7 +345,7 @@ class MenuSeeder extends Seeder
                 'menu_name' => 'Company List',
                 'menu_slug' => 'company-list',
                 'menu_icon' => 'fa-building',
-                'menu_url' => 'company.index',
+                'menu_url' => 'admin.company.index',
                 'menu_permission' => 'company-manage',
                 'menu_order' => 3,
                 'parent_name' => 'Employee Manage',
@@ -262,7 +354,7 @@ class MenuSeeder extends Seeder
                 'menu_name' => 'Location Manage',
                 'menu_slug' => 'location-manage',
                 'menu_icon' => 'fa-map-marker',
-                'menu_url' => 'locations.index',
+                'menu_url' => 'admin.locations.index',
                 'menu_permission' => 'location-manage',
                 'menu_order' => 4,
                 'parent_name' => 'Employee Manage',
@@ -271,7 +363,7 @@ class MenuSeeder extends Seeder
                 'menu_name' => 'Departments',
                 'menu_slug' => 'menu.department',
                 'menu_icon' => 'fa-briefcase',
-                'menu_url' => 'departments.index',
+                'menu_url' => 'admin.departments.index',
                 'menu_permission' => 'department-manage',
                 'menu_order' => 5,
                 'parent_name' => 'Employee Manage',
@@ -280,7 +372,7 @@ class MenuSeeder extends Seeder
                 'menu_name' => 'Department Heads',
                 'menu_slug' => 'menu.department-heads',
                 'menu_icon' => 'fa-user-tie',
-                'menu_url' => 'department-heads.index',
+                'menu_url' => 'admin.department-heads.index',
                 'menu_permission' => 'department-head-manage',
                 'menu_order' => 6,
                 'parent_name' => 'Employee Manage',
@@ -294,7 +386,8 @@ class MenuSeeder extends Seeder
                 'menu_order' => 7,
                 'parent_name' => 'Employee Manage',
             ],
-            // Vehicle Management children (parent ID: Vehicle Management)
+
+            // Vehicle Management children
             [
                 'menu_name' => 'Vehicle List',
                 'menu_slug' => 'vehicle-list',
@@ -349,7 +442,8 @@ class MenuSeeder extends Seeder
                 'menu_order' => 6,
                 'parent_name' => 'Vehicle Management',
             ],
-            // Vehicle Maintenance children (parent ID: Vehicle Maintenance)
+
+            // Vehicle Maintenance children
             [
                 'menu_name' => 'Maintenance Requests',
                 'menu_slug' => 'maintenance-requests',
@@ -395,7 +489,8 @@ class MenuSeeder extends Seeder
                 'menu_order' => 5,
                 'parent_name' => 'Vehicle Maintenance',
             ],
-            // Vehicle Requisition children (parent ID: Vehicle Requisition)
+
+            // Vehicle Requisition children
             [
                 'menu_name' => 'Add Requisition',
                 'menu_slug' => 'requisition-create',
@@ -414,7 +509,8 @@ class MenuSeeder extends Seeder
                 'menu_order' => 2,
                 'parent_name' => 'Vehicle Requisition',
             ],
-            // Department Approval children (parent ID: Department Approval)
+
+            // Department Approval children
             [
                 'menu_name' => 'Pending Department Approvals',
                 'menu_slug' => 'department-approvals',
@@ -424,7 +520,8 @@ class MenuSeeder extends Seeder
                 'menu_order' => 1,
                 'parent_name' => 'Department Approval',
             ],
-            // Transport Approval children (parent ID: Transport Approval)
+
+            // Transport Approval children
             [
                 'menu_name' => 'Pending Transport Approvals',
                 'menu_slug' => 'transport-approvals',
@@ -434,7 +531,8 @@ class MenuSeeder extends Seeder
                 'menu_order' => 1,
                 'parent_name' => 'Transport Approval',
             ],
-            // Trip Sheets children (parent ID: Trip Sheets)
+
+            // Trip Sheets children
             [
                 'menu_name' => 'All Trips',
                 'menu_slug' => 'all-trips',
@@ -462,12 +560,13 @@ class MenuSeeder extends Seeder
                 'menu_order' => 3,
                 'parent_name' => 'Trip Sheets',
             ],
-            // SaaS Management children (parent ID: SaaS Management)
+
+            // SaaS Management children
             [
                 'menu_name' => 'Subscriptions',
                 'menu_slug' => 'subscriptions',
                 'menu_icon' => 'fa-refresh',
-                'menu_url' => 'admin.subscriptions.index',
+                'menu_url' => 'admin.plans.index',
                 'menu_permission' => 'subscription-approve',
                 'menu_order' => 1,
                 'parent_name' => 'SaaS Management',
@@ -485,7 +584,7 @@ class MenuSeeder extends Seeder
                 'menu_name' => 'Approved Payments',
                 'menu_slug' => 'approved-payments',
                 'menu_icon' => 'fa-money',
-                'menu_url' => 'admin.payments.approved',
+                'menu_url' => 'admin.payments.paid',
                 'menu_permission' => 'payment-view',
                 'menu_order' => 3,
                 'parent_name' => 'SaaS Management',
@@ -494,12 +593,13 @@ class MenuSeeder extends Seeder
                 'menu_name' => 'Rejected Payments',
                 'menu_slug' => 'rejected-payments',
                 'menu_icon' => 'fa-thumbs-down',
-                'menu_url' => 'admin.payments.rejected',
+                'menu_url' => 'admin.payments.reject',
                 'menu_permission' => 'payment-view',
                 'menu_order' => 4,
                 'parent_name' => 'SaaS Management',
             ],
-            // Reports children (parent ID: Reports)
+
+            // Reports children
             [
                 'menu_name' => 'Requisition Report',
                 'menu_slug' => 'menu.report.requisition',
@@ -545,7 +645,8 @@ class MenuSeeder extends Seeder
                 'menu_order' => 5,
                 'parent_name' => 'Reports',
             ],
-            // Email & Notification Settings children (parent ID: Email & Notification Settings)
+
+            // Email & Notification Settings children
             [
                 'menu_name' => 'Notification Settings',
                 'menu_slug' => 'notification-settings',
@@ -601,5 +702,9 @@ class MenuSeeder extends Seeder
                 'updated_at' => $now,
             ]);
         }
+
+        $this->command->info('Menu seeder completed successfully!');
+        $this->command->info('Total parent menus: ' . count($parentMenus));
+        $this->command->info('Total child menus: ' . count($childMenus));
     }
 }

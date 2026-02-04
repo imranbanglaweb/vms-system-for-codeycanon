@@ -444,10 +444,38 @@ $(".location_list").change(function () {
   </script>
     <script>
 
-$(document).on('click','.deleteUser',function(){
-    var q_id=$(this).attr('data-qid');
-    $('#e_id').val(e_id); 
-    $('#applicantDeleteModal').modal('show'); 
+$(document).on('click','.deleteUser',function(e){
+    e.preventDefault();
+    var q_id = $(this).data('qid');
+    var deleteUrl = '{{ route("categories.destroy", ":id") }}'.replace(':id', q_id);
+    var csrfToken = $('meta[name="csrf-token"]').attr('content');
+    
+    Swal.fire({
+        title: 'Are you sure?',
+        text: 'This category will be permanently deleted!',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#6c757d',
+        confirmButtonText: 'Yes, delete it!'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            $.ajax({
+                url: deleteUrl,
+                type: 'DELETE',
+                headers: {
+                    'X-CSRF-TOKEN': csrfToken
+                },
+                success: function(res) {
+                    Swal.fire('Deleted!', res.message || 'Category deleted successfully.', 'success');
+                    $('.user_datatable').DataTable().ajax.reload();
+                },
+                error: function(xhr) {
+                    Swal.fire('Error!', xhr.responseJSON?.message || 'Delete failed', 'error');
+                }
+            });
+        }
+    });
 });
 
 

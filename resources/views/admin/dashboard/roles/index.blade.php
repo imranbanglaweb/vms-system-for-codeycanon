@@ -10,11 +10,11 @@
 
             <div>
                 @can('role-create')
-                    <a href="{{ route('permissions.index') }}" class="btn btn-outline-info me-2">
+                    <a href="{{ route('admin.permissions.index') }}" class="btn btn-outline-info me-2">
                         <i class="fa fa-shield"></i> Permissions
                     </a>
 
-                    <a href="{{ route('roles.create') }}" class="btn btn-success">
+                    <a href="{{ route('admin.roles.create') }}" class="btn btn-success">
                         <i class="fa fa-plus"></i> Create Role
                     </a>
                 @endcan
@@ -46,23 +46,27 @@
 
 
 @push('scripts')
-<!-- REQUIRED LIBS -->
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
-<!-- DATATABLE & SWEETALERT SCRIPT -->
 <script>
-@if(session('success'))
-Swal.fire({
-    icon: 'success',
-    title: 'Success',
-    text: "{{ session('success') }}",
-    timer: 2000,
-    showConfirmButton: false
-});
-@endif
+    // Show toast notification on page load if session success exists
+    @if(session('success'))
+        showPremiumToast(
+            'success',
+            '<i class="fas fa-check-circle me-2"></i>Success',
+            '{{ session('success') }}',
+            5000
+        );
+    @endif
+
+    @if(session('error'))
+        showPremiumToast(
+            'error',
+            '<i class="fas fa-times-circle me-2"></i>Error',
+            '{{ session('error') }}',
+            5000
+        );
+    @endif
 </script>
+
 <script>
 $(document).ready(function () {
 
@@ -73,7 +77,7 @@ $(document).ready(function () {
         processing: true,
         serverSide: true,
         responsive: true,
-        ajax: "{{ route('roles.data') }}",
+        ajax: "{{ route('admin.roles.data') }}",
         columns: [
             { data: 'DT_RowIndex', orderable: false, searchable: false },
             { data: 'name', name: 'name' },
@@ -86,43 +90,46 @@ $(document).ready(function () {
     });
 
     /* ==============================
-       DELETE ROLE (SweetAlert)
+       DELETE ROLE (Premium Confirm)
     =============================== */
     $(document).on('click', '.deleteRole', function () {
         let id = $(this).data('id');
 
         Swal.fire({
-            title: 'Delete Role?',
-            text: "This action cannot be undone!",
+            title: '<span style="font-size: 18px;"><i class="fas fa-exclamation-triangle me-2" style="color: #f59e0b;"></i>Delete Role?</span>',
+            html: '<span style="color: #64748b; font-size: 14px;">This action cannot be undone and all permissions assigned to this role will be removed.</span>',
             icon: 'warning',
             showCancelButton: true,
-            confirmButtonColor: '#d33',
-            cancelButtonColor: '#6c757d',
-            confirmButtonText: 'Yes, delete it'
+            confirmButtonColor: '#ef4444',
+            cancelButtonColor: '#6b7280',
+            confirmButtonText: '<i class="fas fa-trash me-1"></i> Yes, Delete',
+            cancelButtonText: '<i class="fas fa-times me-1"></i> Cancel',
+            reverseButtons: true,
+            backdrop: 'rgba(0, 0, 0, 0.5)'
         }).then((result) => {
             if (result.isConfirmed) {
 
                 $.ajax({
-                    url: "{{ route('roles.destroy', ':id') }}".replace(':id', id),
+                    url: "{{ route('admin.roles.destroy', ':id') }}".replace(':id', id),
                     method: 'DELETE',
                     data: {
                         _token: "{{ csrf_token() }}"
                     },
                     success: function (res) {
-                        Swal.fire({
-                            icon: 'success',
-                            title: 'Deleted',
-                            text: res.message,
-                            timer: 1500,
-                            showConfirmButton: false
-                        });
+                        showPremiumToast(
+                            'success',
+                            '<i class="fas fa-check-circle me-2"></i>Deleted',
+                            res.message,
+                            5000
+                        );
                         table.ajax.reload(null, false);
                     },
                     error: function () {
-                        Swal.fire(
-                            'Failed!',
-                            'Unable to delete role.',
-                            'error'
+                        showPremiumToast(
+                            'error',
+                            '<i class="fas fa-times-circle me-2"></i>Failed',
+                            'Unable to delete role. Please try again.',
+                            5000
                         );
                     }
                 });
@@ -133,4 +140,17 @@ $(document).ready(function () {
 
 });
 </script>
+@endpush
+
+@push('styles')
+<link rel="stylesheet" href="{{ asset('public/admin_resource/plugins/datatables-bs4/css/dataTables.bootstrap4.min.css') }}">
+<link rel="stylesheet" href="{{ asset('public/admin_resource/plugins/sweetalert2/sweetalert2.min.css') }}">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+
+<style>
+    .table th, .table td {
+        vertical-align: middle !important;
+        font-size: 15px;
+    }
+</style>
 @endpush

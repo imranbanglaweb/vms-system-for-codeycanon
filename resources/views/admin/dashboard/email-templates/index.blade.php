@@ -4,6 +4,22 @@
 Email Templates
 @endsection
 
+@push('styles')
+<link rel="stylesheet" href="{{ asset('public/admin_resource/plugins/datatables-bs4/css/dataTables.bootstrap4.min.css') }}">
+<link rel="stylesheet" href="{{ asset('public/admin_resource/plugins/sweetalert2/sweetalert2.min.css') }}">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+
+<style>
+    .table th, .table td {
+        vertical-align: middle !important;
+        font-size: 15px;
+    }
+    .badge {
+        font-size: 15px;
+    }
+</style>
+@endpush
+
 @section('main_content')
 <section role="main" class="content-body" style="background-color: #fff;">
     <div class="container-fluid">
@@ -77,18 +93,7 @@ Email Templates
 </div>
 @endsection
 
-@push('styles')
-<link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/dataTables.bootstrap4.min.css" />
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
-<link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
-@endpush
-
 @push('scripts')
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
-<script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
-<script src="https://cdn.datatables.net/1.13.7/js/dataTables.bootstrap4.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
 <script>
 $(function() {
     // Initialize DataTable
@@ -242,14 +247,4 @@ $(function() {
     });
 });
 </script>
-
-<style>
-.table th, .table td {
-    vertical-align: middle !important;
-    font-size: 15px;
-}
-.badge {
-    font-size: 15px;
-}
-</style>
 @endpush

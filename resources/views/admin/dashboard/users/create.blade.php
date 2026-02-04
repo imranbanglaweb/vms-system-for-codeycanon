@@ -27,6 +27,7 @@
             <h4 class="mb-0" style="padding: 10px;"><i class="fa fa-user-plus"></i> User Registration Form</h4>
         </div>
         <div class="card-body">
+            <div id="formAlert"></div>
             <form id="userForm" action="{{ route('users.store') }}" method="post" enctype="multipart/form-data">
                 @csrf
                 <div class="row g-3">
@@ -200,17 +201,11 @@
     </div>
 </section>
 
-{{-- Scripts --}}
-{{-- <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script> --}}
-<script src="https://cdn.jsdelivr.net/jquery.validation/1.19.3/jquery.validate.min.js" defer></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.2/additional-methods.min.js" defer></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js" defer></script>
-<script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
 <script>
-window.addEventListener('load', function() {
+$(document).ready(function() {
 
-    // Initialize Select2 (Check if not already initialized by theme)
+    // Style invalid feedback in red
+    $('head').append('<style>.invalid-feedback { display: block !important; color: #dc3545 !important; font-size: 13px; margin-top: 5px; }</style>');
     if (!$('.select2').hasClass("select2-offscreen")) {
         $('.select2').select2({ width: '100%' });
     }
@@ -219,6 +214,21 @@ window.addEventListener('load', function() {
     $('.select2').on('change', function () {
         $(this).valid();
     });
+
+    // Custom server-side message map (fieldName -> custom message)
+    const customServerMessages = {
+        company_id: 'Please choose a company.',
+        employee_id: 'Please select an employee.',
+        user_type: 'Please choose a user type.',
+        head_department_id: 'Please select department to assign as head.',
+        user_name: 'Please enter the user name.',
+        email: 'Please provide a valid email address.',
+        phone: 'Please enter a valid phone number.',
+        password: 'Password is required and must meet the criteria.',
+        'confirm-password': 'Passwords must match.',
+        roles: 'Please pick a role for this user.',
+        user_image: 'Please upload a valid image (JPG/PNG, max 5MB).'
+    };
 
     // Show/hide department head assignment section based on user type
     $('.user_type').on('change', function() {
@@ -311,12 +321,99 @@ window.addEventListener('load', function() {
     });
 
     // Custom file size validation
-    $.validator.addMethod("filesize", function(value, element, param) {
-        return this.optional(element) || (element.files[0].size <= param);
-    }, "File size must be less than 5MB.");
+    if ($.validator) {
+        $.validator.addMethod("filesize", function(value, element, param) {
+            return this.optional(element) || (element.files[0].size <= param);
+        }, "File size must be less than 5MB.");
+    }
 
-    // Initialize jQuery Validation
-    $("#userForm").validate({
+    // AJAX submission function (used by validator or fallback)
+    function ajaxSubmit(form){
+        // Re-enable disabled fields so they get submitted
+        $('#company_id, #department_id, #unit_id, #location_id').prop('disabled', false);
+
+        let formData = new FormData(form);
+        $.ajax({
+            url: $(form).attr("action"),
+            type: "POST",
+            data: formData,
+            processData: false,
+            contentType: false,
+            beforeSend: function() {
+                $("button[type='submit']").prop("disabled", true).html('<i class="fa fa-spinner fa-spin"></i> Saving...');
+                $(".invalid-feedback").html(''); // clear old errors
+                $(".is-invalid").removeClass("is-invalid");
+                $('#formAlert').hide().empty();
+            },
+            success: function(response) {
+                Swal.fire({
+                    html: '<div class="text-center"><i class="fa fa-check-circle" style="font-size:56px;color:#28a745"></i><h3 style="margin-top:8px;margin-bottom:6px;">Success!</h3><div>User added successfully.</div></div>',
+                    showConfirmButton: true,
+                    confirmButtonText: 'OK',
+                    customClass: { popup: 'shadow-lg rounded-3' }
+                }).then(() => {
+                    form.reset();
+                    $('.select2').val(null).trigger('change');
+                    $('#previewImg').attr('src', "{{ asset('public/admin_resource/assets/images/user_image/default.png') }}");
+                    if (typeof $("#userForm").validate === 'function') {
+                        $("#userForm").validate().resetForm();
+                    }
+                    $('.select2-selection').removeClass('is-invalid');
+                });
+            },
+            error: function(xhr) {
+                if(xhr.status === 422){ // Laravel validation errors
+                    let errors = xhr.responseJSON.errors;
+                    $.each(errors, function(field, messages){
+                        const baseField = field.split('.')[0];
+                        const displayMsg = (customServerMessages[baseField] || customServerMessages[field]) ? (customServerMessages[baseField] || customServerMessages[field]) : messages[0];
+
+                        // Find input element by baseField (already declared above for custom message)
+                        let input = $(`[name="${baseField}"]`);
+
+                        // If still not found, try exact field name (bracket notation, arrays, etc.)
+                        if (!input.length) {
+                            input = $(`[name="${field}"]`);
+                        }
+
+                        // Mark invalid for select2-visible element
+                        if (input.hasClass('select2-hidden-accessible')) {
+                            const sel = input.next('.select2-container').find('.select2-selection');
+                            sel.addClass('is-invalid');
+                        } else {
+                            input.addClass('is-invalid');
+                        }
+
+                        // Show error message in the nearest invalid-feedback container (use custom message when available)
+                        const feedbackEl = input.closest('.col-md-6, .col-12').find('.invalid-feedback');
+                        feedbackEl.html(displayMsg);
+
+                        // Auto-hide inline error after 5 seconds
+                        (function(inp, fb){
+                            setTimeout(function(){
+                                if (inp.hasClass('select2-hidden-accessible')) {
+                                    inp.next('.select2-container').find('.select2-selection').removeClass('is-invalid');
+                                } else {
+                                    inp.removeClass('is-invalid');
+                                }
+                                fb.fadeOut(200, function(){ $(this).html('').show(); });
+                            }, 5000);
+                        })(input, feedbackEl);
+                    });
+                } else {
+                    $('#formAlert').html('<div class="alert alert-danger"><i class="fa fa-times-circle"></i> Unexpected server error</div>').show();
+                    toastr.error("Something went wrong! Please try again.");
+                }
+            },
+            complete: function() {
+                $("button[type='submit']").prop("disabled", false).html('<i class="fa fa-save"></i> Save User');
+            }
+        });
+    }
+
+    // Initialize jQuery Validation (or fallback to AJAX submit)
+    if (typeof $.fn.validate === 'function') {
+        $("#userForm").validate({
         ignore: [],
         rules: {
             company_id: { required: true },
@@ -364,53 +461,15 @@ window.addEventListener('load', function() {
         },
 
         // AJAX submission on valid form
-        submitHandler: function(form) {
-            // Re-enable disabled fields so they get submitted
-            $('#company_id, #department_id, #unit_id, #location_id').prop('disabled', false);
-            
-            let formData = new FormData(form);
-            $.ajax({
-                url: $(form).attr("action"),
-                type: "POST",
-                data: formData,
-                processData: false,
-                contentType: false,
-                beforeSend: function() {
-                    $("button[type='submit']").prop("disabled", true).html('<i class="fa fa-spinner fa-spin"></i> Saving...');
-                    $(".invalid-feedback").html(''); // clear old errors
-                    $(".is-invalid").removeClass("is-invalid");
-                },
-                success: function(response) {
-                    Swal.fire({
-                        title: "Success!",
-                        text: "User added successfully.",
-                        icon: "success"
-                    }).then(() => {
-                        form.reset();
-                        $('.select2').val(null).trigger('change');
-                        $('#previewImg').attr('src', "{{ asset('public/admin_resource/assets/images/user_image/default.png') }}");
-                        $("#userForm").validate().resetForm();
-                        $('.select2-selection').removeClass('is-invalid');
-                    });
-                },
-                error: function(xhr) {
-                    if(xhr.status === 422){ // Laravel validation errors
-                        let errors = xhr.responseJSON.errors;
-                        $.each(errors, function(field, messages){
-                            let input = $(`[name="${field}"]`);
-                            input.addClass("is-invalid");
-                            input.closest('.col-md-6, .col-12').find('.invalid-feedback').html(messages[0]);
-                        });
-                    } else {
-                        toastr.error("Something went wrong! Please try again.");
-                    }
-                },
-                complete: function() {
-                    $("button[type='submit']").prop("disabled", false).html('<i class="fa fa-save"></i> Save User');
-                }
-            });
-        }
+        submitHandler: ajaxSubmit
     });
+    } else {
+        // Fallback: prevent default submit and use AJAX when validator not present
+        $("#userForm").on('submit', function(e){
+            e.preventDefault();
+            ajaxSubmit(this);
+        });
+    }
 });
 
 // Preview image

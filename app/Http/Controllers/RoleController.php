@@ -52,11 +52,11 @@ class RoleController extends Controller
                 })
             ->addColumn('actions', function ($row) {
                 return '
-                    <a href="'.route('roles.show', $row->id).'" class="btn btn-sm btn-info" title="View">
+                    <a href="'.route('admin.roles.show', $row->id).'" class="btn btn-sm btn-info" title="View">
                         <i class="fa fa-eye"></i>
                     </a>
 
-                    <a href="'.route('roles.edit', $row->id).'" class="btn btn-sm btn-primary" title="Edit">
+                    <a href="'.route('admin.roles.edit', $row->id).'" class="btn btn-sm btn-primary" title="Edit">
                         <i class="fa fa-edit"></i>
                     </a>
 
@@ -109,7 +109,7 @@ $general_permissions = DB::table('permissions')
         $role = Role::create(['name' => $request->input('name')]);
         $role->syncPermissions($request->input('permissions'));
         MenuService::clear();
-        return redirect()->route('roles.index')
+        return redirect()->route('admin.roles.index')
                         ->with('success','Role created successfully');
     }
     /**

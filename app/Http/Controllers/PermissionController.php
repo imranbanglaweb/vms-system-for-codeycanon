@@ -59,14 +59,14 @@ class PermissionController extends Controller
             
             // Edit button - Always show for testing, then add permission check
             if (true) { // Change to: if(auth()->user()->can('permission-edit'))
-                $actionBtn .= '<a href="' . route('permissions.edit', $row->id) . '" class="btn btn-primary btn-sm me-1">';
+                $actionBtn .= '<a href="' . route('admin.permissions.edit', $row->id) . '" class="btn btn-primary btn-sm me-1">';
                 $actionBtn .= '<i class="fa fa-edit"></i>';
                 $actionBtn .= '</a> ';
             }
             
             // Delete button
             if (true) { // Change to: if(auth()->user()->can('permission-delete'))
-                $actionBtn .= '<button type="button" class="btn btn-danger btn-sm delete-btn" data-url="' . route('permissions.destroy', $row->id) . '">';
+                $actionBtn .= '<button type="button" class="btn btn-danger btn-sm delete-btn" data-url="' . route('admin.permissions.destroy', $row->id) . '">';
                 $actionBtn .= '<i class="fa fa-minus-circle"></i>';
                 $actionBtn .= '</button>';
             }

@@ -146,7 +146,7 @@
                         </div>
                         <div class="mt-3">
                             <button type="submit" class="btn btn-primary btn-block"><i class="fa fa-save"></i> Save Employee</button>
-                            <a href="{{ route('employees.index') }}" class="btn btn-secondary btn-block mt-2"><i class="fa fa-times"></i> Cancel</a>
+                            <a href="{{ route('admin.employees.index') }}" class="btn btn-secondary btn-block mt-2"><i class="fa fa-times"></i> Cancel</a>
                         </div>
                     </div>
                 </div>

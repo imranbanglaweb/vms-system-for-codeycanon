@@ -58,6 +58,7 @@ class AppServiceProvider extends ServiceProvider
                 'admin.dashboard.common.sidebar',
                 function ($view) {
                     $user = auth()->user();
+                    $isSuperAdmin = $user->hasRole('Super Admin');
                     $isAdmin = $user->hasRole('Super Admin') || $user->hasRole('Admin');
                     $isManager = $user->hasRole('Department Head') || $user->hasRole('Manager');
                     $isTransport = $user->hasRole('Transport');
@@ -65,6 +66,7 @@ class AppServiceProvider extends ServiceProvider
                     
                     $view->with([
                         'sidebar_menus' => MenuService::sidebar(),
+                        'isSuperAdmin' => $isSuperAdmin,
                         'isAdmin' => $isAdmin,
                         'isManager' => $isManager,
                         'isTransport' => $isTransport,
@@ -76,6 +78,7 @@ class AppServiceProvider extends ServiceProvider
                 View::composer('admin.dashboard.dashboard',
                 function ($view) {
                     $user = auth()->user();
+                    $isSuperAdmin = $user->hasRole('Super Admin');
                     $isAdmin = $user->hasRole('Super Admin') || $user->hasRole('Admin');
                     $isManager = $user->hasRole('Department Head') || $user->hasRole('Manager');
                     $isTransport = $user->hasRole('Transport');
@@ -83,6 +86,7 @@ class AppServiceProvider extends ServiceProvider
                     
                     $view->with([
                         'sidebar_menus' => MenuService::sidebar(),
+                        'isSuperAdmin' => $isSuperAdmin,
                         'isAdmin' => $isAdmin,
                         'isManager' => $isManager,
                         'isTransport' => $isTransport,
@@ -99,6 +103,7 @@ class AppServiceProvider extends ServiceProvider
             function ($view) {
                 $settings = DB::table('settings')->where('id', 1)->first();
                 $user = auth()->user();
+                $isSuperAdmin = $user->hasRole('Super Admin');
                 $isAdmin = $user->hasRole('Super Admin') || $user->hasRole('Admin');
                 $isManager = $user->hasRole('Department Head') || $user->hasRole('Manager');
                 $isTransport = $user->hasRole('Transport');
@@ -106,6 +111,7 @@ class AppServiceProvider extends ServiceProvider
                 
                 $view->with([
                     'settings' => $settings,
+                    'isSuperAdmin' => $isSuperAdmin,
                     'isAdmin' => $isAdmin,
                     'isManager' => $isManager,
                     'isTransport' => $isTransport,

@@ -128,16 +128,19 @@
 
 @push('styles')
 
-<link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap4.min.css">
+<link rel="stylesheet" href="{{ asset('public/admin_resource/plugins/datatables-bs4/css/dataTables.bootstrap4.min.css') }}">
+<link rel="stylesheet" href="{{ asset('public/admin_resource/plugins/sweetalert2/sweetalert2.min.css') }}">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+
+<style>
+    .table th, .table td {
+        vertical-align: middle !important;
+        font-size: 15px;
+    }
+</style>
 @endpush
 
 @push('scripts')
-
-<script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
-
-<script src="https://cdn.datatables.net/1.13.4/js/dataTables.bootstrap4.min.js"></script>
-
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
 $(function(){
@@ -151,7 +154,7 @@ $(function(){
 
   $('.modal .close').on('click', function () {
     $(this).closest('.modal').modal('hide');
-});
+  });
 
   // =============================
   //   DATATABLE SERVER-SIDE
@@ -159,7 +162,7 @@ $(function(){
   var table = $('#companies-table').DataTable({
       processing: true,
       serverSide: true,
-      ajax: "{{ route('company.data') }}",
+      ajax: "{{ route('admin.company.data') }}",
       columns: [
           { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable:false, searchable:false },
           { data: 'company_name', name: 'company_name' },

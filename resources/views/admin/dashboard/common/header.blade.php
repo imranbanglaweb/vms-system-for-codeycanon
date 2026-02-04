@@ -1,6 +1,3 @@
-<!doctype html>
-<html class="fixed">
-	<head>
 		<!-- Basic -->
 		<meta charset="UTF-8">
 
@@ -21,13 +18,10 @@
 		<link rel="stylesheet" href="{{ asset('public/admin_resource/')}}/assets/vendor/font-awesome/css/font-awesome.css" />
 		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
 		<link rel="stylesheet" href="{{ asset('public/admin_resource/')}}/assets/vendor/magnific-popup/magnific-popup.css" />
-		<!-- <link rel="stylesheet" href="{{ asset('public/admin_resource/')}}/assets/vendor/bootstrap-datepicker/css/datepicker3.css" /> -->
 
 		<link rel="stylesheet" href="{{ asset('public/admin_resource/')}}/assets/vendor/select2/select2.css" />
 		<link rel="stylesheet" href="{{ asset('public/admin_resource/')}}/assets/vendor/jquery-datatables-bs3/assets/css/datatables.css" />
-		<!-- Specific Page Vendor CSS -->
 		<link rel="stylesheet" href="{{ asset('public/admin_resource/')}}/assets/vendor/jquery-ui/css/ui-lightness/jquery-ui-1.10.4.custom.css" />
-		<!-- <link rel="stylesheet" href="{{ asset('public/admin_resource/')}}/assets/vendor/bootstrap-multiselect/bootstrap-multiselect.css" /> -->
 		<link rel="stylesheet" href="{{ asset('public/admin_resource/')}}/assets/vendor/morris/morris.css" />
 
 		<!-- Theme CSS -->
@@ -43,28 +37,34 @@
 		<script src="{{ asset('public/admin_resource/')}}/assets/vendor/modernizr/modernizr.js"></script>
 		<script src="{{ asset('public/admin_resource/assets/vendor/jquery/jquery.js') }}"></script>
 		<script src="{{ asset('public/admin_resource/assets/vendor/bootstrap/js/bootstrap.js') }}"></script>
-    <!-- Flag Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/flag-icons/6.6.6/css/flag-icons.min.css">
- <style>
-
- 	.logo {
- 		height: 100px !important;
- 		display: flex !important;
- 		align-items: center !important;
- 		justify-content: center !important;
- 		/* padding: 15px 20px !important; */
- 		margin-top: -18px !important;
- 	}
- 	
- 	.logo img {
- 		max-height: 90px !important;
- 		max-width: 250px !important;
- 		width: auto !important;
- 		height: auto !important;
- 		object-fit: contain !important;
- 		display: block !important;
- 	}
- 	 /* Language Switcher Styles */
+		<!-- jQuery Validation -->
+		<script src="https://cdn.jsdelivr.net/jquery.validation/1.19.3/jquery.validate.min.js"></script>
+		<script src="https://cdn.jsdelivr.net/jquery.validation/1.19.3/additional-methods.min.js"></script>
+		
+		<!-- Select2 JS -->
+		<script src="{{ asset('public/admin_resource/')}}/assets/vendor/select2/select2.js"></script>
+		
+     <!-- Flag Icons -->
+     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/flag-icons/6.6.6/css/flag-icons.min.css">
+  
+  	<style>
+	  	.logo {
+	  		height: 100px !important;
+	  		display: flex !important;
+	  		align-items: center !important;
+	  		justify-content: center !important;
+	  		margin-top: -18px !important;
+	  	}
+	  	
+	  	.logo img {
+	  		max-height: 90px !important;
+	  		max-width: 250px !important;
+	  		width: auto !important;
+	  		height: auto !important;
+	  		object-fit: contain !important;
+	  		display: block !important;
+	  	}
+		 /* Language Switcher Styles */
         .language-flag {
             width: 20px;
             height: 15px;
@@ -98,108 +98,6 @@
         }
 		  .text-start { text-align: right !important; }
         .text-end { text-align: left !important; }
- </style>
- @include('admin.dashboard.includes.notification')
- <meta name="csrf-token" content="{{ csrf_token() }}">
-	</head>
-	<body>
-		<section class="body">
-
-			<!-- start: header -->
-			<header class="header">
-				<div class="logo-container">
-					<a href="{{route('home')}}" class="logo">
-						@if(!empty($settings->admin_logo)) 
-							<img src="{{ asset('public/admin_resource/assets/images/'.$settings->admin_logo)}}" alt="" />
-						@else
-							<div style="display: flex; align-items: center; gap: 12px;">
-								<i class="fa fa-bus" style="font-size: 48px; color: #4A90E2;"></i>
-								<span style="font-size: 28px; font-weight: bold; color: #333;">InayaFleet360</span>
-							</div>
-						@endif
-					</a>
-					<div class="visible-xs toggle-sidebar-left" data-toggle-class="sidebar-left-opened" data-target="html" data-fire-event="sidebar-left-opened">
-						<i class="fa fa-bars" aria-label="Toggle sidebar"></i>
-					</div>
-				</div>
-			
-				<!-- start: search & user box -->
-				<div class="header-right">
-			
-					<form action="pages-search-results.html" class="search nav-form">
-						<div class="input-group input-search">
-							<input type="text" class="form-control" name="q" id="q" placeholder="Search...">
-							<span class="input-group-btn">
-								<button class="btn btn-default" type="submit"><i class="fa fa-search"></i></button>
-							</span>
-						</div>
-					</form>
-			
-					<span class="separator"></span>
-			
-					<!-- Language Switcher -->
-					@include('admin.dashboard.languages.language-switcher')
-			
-					<span class="separator"></span>
-			
-					<div id="userbox" class="userbox">
-						<a href="#" data-toggle="dropdown">
-							<figure class="profile-picture">
-								@if(!empty(Auth::user()->user_image))
-<img src="{{ asset('public/admin_resource/assets/images/user_image/'.Auth::user()->user_image)}}" alt="Joseph Doe" class="img-circle" data-lock-picture="assets/images/!logged-user.jpg" />
-@else
-
-<i class="fa fa-user"></i>
-{{-- <img  alt="Joseph Doe" class="img-circle" data-lock-picture="assets/images/!logged-user.jpg" /> --}}
-								@endif
-							
-
-							</figure>
-							<div class="profile-info" data-lock-name="John Doe" data-lock-email="johndoe@JSOFT.com">
-									@if(!empty(Auth::user()->name))
-								<span class="name">{{Auth::user()->name}}</span>
-								@endif
-								{{-- <span class="role">administrator</span> --}}
-							</div>
-			
-							<i class="fa custom-caret"></i>
-						</a>
-			
-						<div class="dropdown-menu">
-							<ul class="list-unstyled">
-								<li class="divider"></li>
-
-								<li>
-									<a role="menuitem" tabindex="-1" href="{{ route('user-profile')}}">
-										<i class="fa fa-user"></i> My Profile</a>
-								</li>
-
-								<li>
-									<a  href="{{ route('pricing')}}">
-										<i class="fa fa-credit-card"></i>
-							Our Plans Price
-										</a>
-								</li>
-								<li>
-									
-
-									
-									    <a   role="menuitem" tabindex="-1"class="dropdown-item" href="{{ route('logout') }}"
-               onclick="event.preventDefault();
-                             document.getElementById('logout-form').submit();">
-                            <i class="fa fa-power-off"></i>
-                {{ __('Logout') }}
-            </a>
-
-            <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
-                @csrf
-            </form>
-								</li>
-
-							</ul>
-						</div>
-					</div>
-				</div>
-				<!-- end: search & user box -->
-			</header>
-			<!-- end: header -->
+  	</style>
+        
+   <meta name="csrf-token" content="{{ csrf_token() }}">

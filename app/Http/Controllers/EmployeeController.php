@@ -106,7 +106,7 @@ class EmployeeController extends Controller
                     return '<span class="badge bg-danger" style="font-size: 11px;"><i class="fa fa-times-circle me-1"></i>Inactive</span>';
                 })
                 ->addColumn('action', function($row){
-                    $edit = auth()->user() && auth()->user()->can('employee-edit') ? '<a class="btn btn-primary" href="'.route('employees.edit', $row->id).'"> <i class="fa fa-edit"></i></a>' : '';
+                    $edit = auth()->user() && auth()->user()->can('employee-edit') ? '<a class="btn btn-primary" href="'.route('admin.employees.edit', $row->id).'"> <i class="fa fa-edit"></i></a>' : '';
                     $delete = auth()->user() && auth()->user()->can('employee-delete') ? '<button class="btn btn-danger deleteUser" data-eid="'.$row->id.'"><i class="fa fa-minus-circle"></i></button>' : '';
                     return $edit.' '.$delete;
                 })

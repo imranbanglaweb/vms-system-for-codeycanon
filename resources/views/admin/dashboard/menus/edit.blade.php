@@ -53,7 +53,7 @@
             </div>
 
             <div class="col-md-6 d-flex align-items-center">
-                <a class="btn btn-outline-primary btn-sm mt-1" href="{{ route('permissions.create')}}">
+                <a class="btn btn-outline-primary btn-sm mt-1" href="{{ route('admin.permissions.create')}}">
                     <i class="fa fa-plus"></i> Add Permission
                 </a>
             </div>

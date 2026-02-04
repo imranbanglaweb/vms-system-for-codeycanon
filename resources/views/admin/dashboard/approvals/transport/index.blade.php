@@ -35,6 +35,20 @@ tr.status-approved { background-color:#e6f7ed !important; }
 tr.status-rejected { background-color:#fdecea !important; }
 </style>
 
+@push('styles')
+<link rel="stylesheet" href="{{ asset('public/admin_resource/plugins/datatables-bs4/css/dataTables.bootstrap4.min.css') }}">
+<link rel="stylesheet" href="{{ asset('public/admin_resource/plugins/sweetalert2/sweetalert2.min.css') }}">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.css" />
+
+<style>
+    .table th, .table td {
+        vertical-align: middle !important;
+        font-size: 15px;
+    }
+</style>
+@endpush
+
 @section('main_content')
 <section role="main" class="content-body">
 <div class="container-fluid">
@@ -126,12 +140,7 @@ tr.status-rejected { background-color:#fdecea !important; }
 </div>
 </section>
 
-<!-- Scripts -->
-<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js"></script>
-<script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
-<script src="https://cdn.datatables.net/1.13.7/js/dataTables.bootstrap5.min.js"></script>
-
+@push('scripts')
 <script>
 $(function(){
 
@@ -199,4 +208,6 @@ $(function(){
 
 });
 </script>
+@endpush
+
 @endsection

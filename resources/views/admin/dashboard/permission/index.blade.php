@@ -9,31 +9,15 @@
                 <h2>Permission Management</h2>
             </div>
             <div class="pull-right">
-         
-                    <a class="btn btn-success" href="{{ route('permissions.create') }}"> 
+                    <a class="btn btn-success" href="{{ route('admin.permissions.create') }}"> 
                         <i class="fa fa-plus"></i> Add Permission
                     </a>
-              
             </div>
         </div>
     </div>
 
-    @if ($message = Session::get('success'))
-        <div class="alert alert-success alert-dismissible fade show">
-            {{ $message }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-    @endif
-
-    @if ($message = Session::get('danger'))
-        <div class="alert alert-danger alert-dismissible fade show">
-            {{ $message }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-    @endif
-
     <section class="panel">
-      
+        
         <div class="panel-body">
             <table class="table table-bordered table-striped mb-none" id="permissionsTable" style="width:100%">
                 <thead>
@@ -75,16 +59,36 @@
     </div>
 </section>
 
-<!-- DataTables CSS -->
-<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
-<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/buttons/2.4.1/css/buttons.dataTables.min.css">
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+@push('styles')
+<link rel="stylesheet" href="{{ asset('public/admin_resource/plugins/datatables-bs4/css/dataTables.bootstrap4.min.css') }}">
+<link rel="stylesheet" href="{{ asset('public/admin_resource/plugins/datatables-buttons/css/buttons.bootstrap4.min.css') }}">
+<link rel="stylesheet" href="{{ asset('public/admin_resource/plugins/sweetalert2/sweetalert2.min.css') }}">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
 
-<!-- JavaScript Libraries -->
-<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
-<script src="https://cdn.datatables.net/buttons/2.4.1/js/dataTables.buttons.min.js"></script>
-<script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.colVis.min.js"></script>
+<style>
+    .dataTables_wrapper .dataTables_filter {
+        float: right;
+        text-align: right;
+    }
+    .dataTables_wrapper .dataTables_length {
+        float: left;
+    }
+    .dataTables_wrapper .dt-buttons {
+        float: left;
+        margin-right: 10px;
+    }
+    .btn-sm {
+        padding: 0.25rem 0.5rem;
+        font-size: 1.475rem;
+    }
+    .table th, .table td {
+        vertical-align: middle !important;
+        font-size: 15px;
+    }
+</style>
+@endpush
 
+@push('scripts')
 <script>
 $(document).ready(function() {
 
@@ -99,7 +103,7 @@ $(document).ready(function() {
         processing: true,
         serverSide: true,
         ajax: {
-            url: "{{ route('permissions.list') }}",
+            url: "{{ route('admin.permissions.list') }}",
             type: "GET",
             error: function(xhr, error, thrown) {
                 console.log("AJAX Error:", xhr.responseText);
@@ -164,42 +168,45 @@ $(document).ready(function() {
     });
 
     // Handle delete button clicks
-   
     $(document).on('click', '.delete-btn', function(e) {
-    e.preventDefault();
-
-    let deleteUrl = $(this).data('url');
-    $('#deleteForm').attr('action', deleteUrl);
-
-    let deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
-    deleteModal.show();
-
-    $('#deleteForm').off('submit').on('submit', function(e) {
         e.preventDefault();
 
-        $.ajax({
-            url: deleteUrl,
-            type: 'DELETE',
-            success: function(response) {
+        let deleteUrl = $(this).data('url');
+        $('#deleteForm').attr('action', deleteUrl);
 
-                deleteModal.hide();
-                $('#permissionsTable').DataTable().ajax.reload();
+        let deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
+        deleteModal.show();
 
-                // Show success alert
-                $('section.content-body').prepend(`
-                    <div class="alert alert-success alert-dismissible fade show">
-                        ${response.success}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                    </div>
-                `);
-            },
-            error: function(xhr) {
-                console.log(xhr.responseText);
-                alert("Delete failed");
-            }
+        $('#deleteForm').off('submit').on('submit', function(e) {
+            e.preventDefault();
+
+            $.ajax({
+                url: deleteUrl,
+                type: 'DELETE',
+                success: function(response) {
+                    deleteModal.hide();
+                    $('#permissionsTable').DataTable().ajax.reload();
+
+                    // Show premium toast notification
+                    showPremiumToast(
+                        'success',
+                        '<i class="fas fa-check-circle me-2"></i>Deleted',
+                        response.success || 'Permission deleted successfully',
+                        5000
+                    );
+                },
+                error: function(xhr) {
+                    console.log(xhr.responseText);
+                    showPremiumToast(
+                        'error',
+                        '<i class="fas fa-times-circle me-2"></i>Failed',
+                        'Delete failed. Please try again.',
+                        5000
+                    );
+                }
+            });
         });
     });
-});
 
     // Close modal handler
     $('#deleteModal').on('hidden.bs.modal', function () {
@@ -207,9 +214,6 @@ $(document).ready(function() {
     });
 });
 </script>
-
-<!-- Make sure Bootstrap JS is loaded (if not already in layout) -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
 <style>
     .dataTables_wrapper .dataTables_filter {
@@ -223,10 +227,8 @@ $(document).ready(function() {
         float: left;
         margin-right: 10px;
     }
-    .btn-sm {
-        padding: 0.25rem 0.5rem;
-        font-size: 1.475rem;
-    }
 </style>
+
+@endpush
 
 @endsection

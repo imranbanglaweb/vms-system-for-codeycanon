@@ -164,11 +164,11 @@
     <br>
 
     @can('employee-create')
-    <a class="btn btn-success" href="{{ route('employees.create') }}">
+    <a class="btn btn-success" href="{{ route('admin.employees.create') }}">
       <i class="fa fa-plus"></i> Add Employee
     </a>
        <br>
-    <br>
+       <br>
     @endcan
   </div>
 
@@ -263,30 +263,22 @@
 </div>
 </section>
 
+@push('styles')
+<link rel="stylesheet" href="{{ asset('public/admin_resource/plugins/datatables-bs4/css/dataTables.bootstrap4.min.css') }}">
+<link rel="stylesheet" href="{{ asset('public/admin_resource/plugins/datatables-buttons/css/buttons.bootstrap4.min.css') }}">
+<link rel="stylesheet" href="{{ asset('public/admin_resource/plugins/sweetalert2/sweetalert2.min.css') }}">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css" />
 
-<!-- JS Section -->
+<style>
+    .table th, .table td {
+        vertical-align: middle !important;
+        font-size: 15px;
+    }
+</style>
+@endpush
 
-<!-- jQuery -->
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-
-<!-- jQuery UI (sortable) -->
-<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
-
-<!-- Bootstrap 4 JS -->
-<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
-<!-- DataTables -->
-<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
-<link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.1/css/buttons.dataTables.min.css">
-
-<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
-<script src="https://cdn.datatables.net/buttons/2.4.1/js/dataTables.buttons.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
-<script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.html5.min.js"></script>
-<script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.print.min.js"></script>
+@push('scripts')
 
 <script>
 
@@ -296,7 +288,7 @@ $(".myElem").show().delay(5000).fadeOut();
 function loadFilterOptions() {
     // Load Units
     $.ajax({
-        url: '{{ route("units.list") }}',
+        url: '{{ route("admin.units.list") }}',
         type: 'GET',
         success: function(units) {
             $('#filterUnit').append('<option value="">All Units</option>');
@@ -308,7 +300,7 @@ function loadFilterOptions() {
 
     // Load Departments
     $.ajax({
-        url: '{{ route("departments.list") }}',
+        url: '{{ route("admin.departments.list") }}',
         type: 'GET',
         success: function(departments) {
             $('#filterDepartment').append('<option value="">All Departments</option>');
@@ -320,7 +312,7 @@ function loadFilterOptions() {
 
     // Load Locations
     $.ajax({
-        url: '{{ route("locations.list") }}',
+        url: '{{ route("admin.locations.list") }}',
         type: 'GET',
         success: function(locations) {
             $('#filterLocation').append('<option value="">All Locations</option>');
@@ -338,7 +330,7 @@ var table = $('#myTable').DataTable({
     processing: true,
     serverSide: true,
     ajax: {
-        url: '{{ route("employees.index") }}',
+        url: '{{ route("admin.employees.index") }}',
         type: 'GET',
         data: function(d) {
             d.search_name = $('#searchName').val();
@@ -413,7 +405,7 @@ $(document).on('click', '.deleteUser', function(e){
     e.preventDefault();
 
     var e_id = $(this).data('eid');
-    var urlTemplate = '{{ route("employees.destroy", "EMPID") }}';
+    var urlTemplate = '{{ route("admin.employees.destroy", "EMPID") }}';
     var deleteURL = urlTemplate.replace('EMPID', e_id);
 
     Swal.fire({
@@ -465,5 +457,7 @@ $('.select_employee_file').on('change', function(){
 });
 
 </script>
+
+@endpush
 
 @endsection

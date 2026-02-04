@@ -12,7 +12,7 @@
             Create New Role
             <span class="badge badge-success ml-2" id="permissionCount">0 Selected</span>
         </h3>
-        <a href="{{ route('roles.index') }}" class="btn btn-outline-primary">← Back</a>
+        <a href="{{ route('admin.roles.index') }}" class="btn btn-outline-primary">← Back</a>
     </div>
 
     {{-- Search --}}
@@ -21,7 +21,7 @@
 </div>
 
 {{-- FORM --}}
-{!! Form::open(['route' => 'roles.store','method'=>'POST']) !!}
+{!! Form::open(['route' => 'admin.roles.store','method'=>'POST']) !!}
 
 <div class="card shadow-sm border-0">
 <div class="card-body">
@@ -194,16 +194,26 @@ $(function () {
 });
 </script>
 
-{{-- SWEETALERT SUCCESS --}}
+{{-- PREMIUM TOAST SUCCESS --}}
 @if(session('success'))
 <script>
-Swal.fire({
-    icon: 'success',
-    title: 'Success!',
-    text: "{{ session('success') }}",
-    timer: 2000,
-    showConfirmButton: false
-});
+    showPremiumToast(
+        'success',
+        '<i class="fas fa-check-circle me-2"></i>Success',
+        '{{ session('success') }}',
+        5000
+    );
+</script>
+@endif
+
+@if(session('error'))
+<script>
+    showPremiumToast(
+        'error',
+        '<i class="fas fa-times-circle me-2"></i>Error',
+        '{{ session('error') }}',
+        5000
+    );
 </script>
 @endif
 

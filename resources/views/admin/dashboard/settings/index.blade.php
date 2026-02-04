@@ -6,14 +6,14 @@
     .settings-container {
         background: #ffffff;
         padding: 25px;
-        border-radius: 12px;
-        box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+        border-radius: 16px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
     }
 
     .settings-title {
         font-size: 22px;
-        font-weight: 600;
-        color: #2a2a2a;
+        font-weight: 700;
+        color: #1e293b;
     }
 
     .tab-btn {
@@ -21,43 +21,279 @@
         border-radius: 30px;
         font-weight: 600;
         transition: 0.3s;
+        border: 2px solid transparent;
+        background: #f1f5f9;
+        color: #64748b;
     }
 
     .tab-btn.active {
-        background: #4A90E2 !important;
+        background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%) !important;
         color: #fff !important;
-        box-shadow: 0 4px 10px rgba(74,144,226,0.4);
+        box-shadow: 0 4px 15px rgba(79, 70, 229, 0.4);
+        border-color: transparent;
+    }
+
+    .tab-btn:hover:not(.active) {
+        background: #e2e8f0;
+        color: #1e293b;
     }
 
     .settings-card {
-        background: #f9fafc;
+        background: #f8fafc;
         padding: 25px;
-        border-radius: 12px;
+        border-radius: 16px;
         transition: 0.3s;
-        border: 1px solid #e3e6ea;
+        border: 1px solid #e2e8f0;
     }
 
     .settings-card:hover {
-        box-shadow: 0 3px 12px rgba(0,0,0,0.06);
+        box-shadow: 0 4px 15px rgba(0,0,0,0.06);
     }
 
     label {
         font-weight: 600;
         margin-bottom: 6px;
-        color: #333;
+        color: #334155;
     }
 
     .form-control {
-        border-radius: 8px;
+        border-radius: 10px;
+        border: 1px solid #e2e8f0;
+        padding: 10px 15px;
+        transition: all 0.3s ease;
+    }
+
+    .form-control:focus {
+        border-color: #4f46e5;
+        box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
     }
 
     .btn-primary.saved {
-        padding: 10px 30px;
+        padding: 12px 35px;
         border-radius: 30px;
         font-weight: 600;
         font-size: 16px;
+        background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+        border: none;
+        box-shadow: 0 4px 15px rgba(79, 70, 229, 0.3);
+        transition: all 0.3s ease;
+    }
+
+    .btn-primary.saved:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(79, 70, 229, 0.4);
+    }
+
+    /* Premium Toast Notifications */
+    .toast-container {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 9999;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .premium-toast {
+        display: flex;
+        align-items: flex-start;
+        gap: 14px;
+        padding: 16px 20px;
+        border-radius: 12px;
+        background: #fff;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+        min-width: 350px;
+        max-width: 450px;
+        animation: slideInRight 0.4s ease-out;
+        border-left: 4px solid;
+        overflow: hidden;
+    }
+
+    .premium-toast.success {
+        border-left-color: #10b981;
+    }
+
+    .premium-toast.error {
+        border-left-color: #ef4444;
+    }
+
+    .premium-toast.warning {
+        border-left-color: #f59e0b;
+    }
+
+    .premium-toast.info {
+        border-left-color: #3b82f6;
+    }
+
+    .toast-icon {
+        width: 36px;
+        height: 36px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+
+    .premium-toast.success .toast-icon {
+        background: linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(16, 185, 129, 0.05) 100%);
+        color: #10b981;
+    }
+
+    .premium-toast.error .toast-icon {
+        background: linear-gradient(135deg, rgba(239, 68, 68, 0.15) 0%, rgba(239, 68, 68, 0.05) 100%);
+        color: #ef4444;
+    }
+
+    .premium-toast.warning .toast-icon {
+        background: linear-gradient(135deg, rgba(245, 158, 11, 0.15) 0%, rgba(245, 158, 11, 0.05) 100%);
+        color: #f59e0b;
+    }
+
+    .premium-toast.info .toast-icon {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.15) 0%, rgba(59, 130, 246, 0.05) 100%);
+        color: #3b82f6;
+    }
+
+    .toast-content {
+        flex: 1;
+    }
+
+    .toast-title {
+        font-weight: 700;
+        font-size: 15px;
+        color: #1e293b;
+        margin-bottom: 4px;
+    }
+
+    .toast-message {
+        font-size: 13px;
+        color: #64748b;
+        line-height: 1.5;
+    }
+
+    .toast-close {
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        border: none;
+        background: transparent;
+        color: #94a3b8;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s ease;
+        flex-shrink: 0;
+    }
+
+    .toast-close:hover {
+        background: #f1f5f9;
+        color: #1e293b;
+    }
+
+    .toast-progress {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        height: 3px;
+        width: 100%;
+        background: rgba(0, 0, 0, 0.05);
+        border-radius: 0 0 12px 12px;
+        overflow: hidden;
+    }
+
+    .toast-progress-bar {
+        height: 100%;
+        border-radius: 0 0 0 12px;
+        transition: width 0.1s linear;
+    }
+
+    .premium-toast.success .toast-progress-bar {
+        background: linear-gradient(90deg, #10b981, #34d399);
+    }
+
+    .premium-toast.error .toast-progress-bar {
+        background: linear-gradient(90deg, #ef4444, #f87171);
+    }
+
+    .premium-toast.warning .toast-progress-bar {
+        background: linear-gradient(90deg, #f59e0b, #fbbf24);
+    }
+
+    .premium-toast.info .toast-progress-bar {
+        background: linear-gradient(90deg, #3b82f6, #60a5fa);
+    }
+
+    @keyframes slideInRight {
+        from {
+            opacity: 0;
+            transform: translateX(100px);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+
+    @keyframes slideOutRight {
+        from {
+            opacity: 1;
+            transform: translateX(0);
+        }
+        to {
+            opacity: 0;
+            transform: translateX(100px);
+        }
+    }
+
+    @keyframes fadeOut {
+        from { opacity: 1; }
+        to { opacity: 0; }
+    }
+
+    .premium-toast.hiding {
+        animation: slideOutRight 0.3s ease-out forwards;
+    }
+
+    /* Custom SweetAlert2 Premium Theme */
+    .swal2-popup.swal2-toast {
+        border-radius: 16px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+    }
+
+    .swal2-icon.swal2-success {
+        border-color: #10b981;
+        color: #10b981;
+    }
+
+    .swal2-icon.swal2-success::before {
+        background: #10b981;
+    }
+
+    .swal2-icon.swal2-success::after {
+        background: #10b981;
+    }
+
+    .swal2-icon.swal2-error {
+        border-color: #ef4444;
+        color: #ef4444;
+    }
+
+    .swal2-icon.swal2-warning {
+        border-color: #f59e0b;
+        color: #f59e0b;
+    }
+
+    .swal2-icon.swal2-info {
+        border-color: #3b82f6;
+        color: #3b82f6;
     }
 </style>
+
+{{-- Toast Container --}}
+<div class="toast-container" id="toastContainer"></div>
 
 <section role="main" class="content-body">
     <div class="settings-container">
@@ -205,7 +441,7 @@
 
                 <h4 class="mb-4"><i class="fa fa-envelope text-primary me-2"></i>Email Configuration</h4>
 
-                <div class="alert alert-info mb-4">
+                <div class="alert alert-info mb-4" style="border-radius: 10px; background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(59, 130, 246, 0.05) 100%); border: 1px solid rgba(59, 130, 246, 0.2);">
                     <i class="fa fa-info-circle me-2"></i>
                     Configure your SMTP settings here. These settings will override the .env mail configuration.
                 </div>
@@ -307,6 +543,71 @@
 <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
+    // Premium Toast Notification Function
+    function showPremiumToast(type, title, message, duration = 5000) {
+        const container = document.getElementById('toastContainer');
+        
+        const icons = {
+            success: '<i class="fas fa-check-circle"></i>',
+            error: '<i class="fas fa-times-circle"></i>',
+            warning: '<i class="fas fa-exclamation-triangle"></i>',
+            info: '<i class="fas fa-info-circle"></i>'
+        };
+
+        const toastId = 'toast_' + Date.now();
+        
+        const toastHTML = `
+            <div class="premium-toast ${type}" id="${toastId}">
+                <div class="toast-icon">${icons[type]}</div>
+                <div class="toast-content">
+                    <div class="toast-title">${title}</div>
+                    <div class="toast-message">${message}</div>
+                </div>
+                <button class="toast-close" onclick="dismissToast('${toastId}')">
+                    <i class="fas fa-times"></i>
+                </button>
+                <div class="toast-progress">
+                    <div class="toast-progress-bar" style="width: 100%;"></div>
+                </div>
+            </div>
+        `;
+        
+        container.insertAdjacentHTML('beforeend', toastHTML);
+        
+        const toast = document.getElementById(toastId);
+        const progressBar = toast.querySelector('.toast-progress-bar');
+        
+        // Animate progress bar
+        setTimeout(() => {
+            progressBar.style.transition = `width ${duration}ms linear`;
+            progressBar.style.width = '0%';
+        }, 100);
+        
+        // Auto dismiss
+        const dismissTimer = setTimeout(() => {
+            dismissToast(toastId);
+        }, duration);
+        
+        // Store timer on element for manual dismiss
+        toast.dataset.timerId = dismissTimer;
+    }
+
+    function dismissToast(toastId) {
+        const toast = document.getElementById(toastId);
+        if (!toast) return;
+        
+        // Clear the timer
+        clearTimeout(toast.dataset.timerId);
+        
+        // Add hiding class for animation
+        toast.classList.add('hiding');
+        
+        // Remove after animation
+        setTimeout(() => {
+            toast.remove();
+        }, 300);
+    }
+
     $(document).ready(function() {
         // Initialize: Hide all cards
         $('.settings-card').hide();
@@ -350,22 +651,27 @@
             },
 
             success: (response) => {
-                Swal.fire({
-                    icon: "success",
-                    title: "Settings Updated",
-                    html: "<span style='color:green;'>Your changes have been saved successfully.</span>",
-                    confirmButtonColor: "#4A90E2"
-                }).then(() => {
-                    // Hide preloader before reload
-                    $('#globalPreloader').addClass('fade-out');
-                    setTimeout(function() {
-                        location.reload();
-                    }, 300);
-                });
+                // Show premium toast notification
+                showPremiumToast(
+                    'success',
+                    '<i class="fas fa-check-circle me-2"></i>Settings Updated',
+                    'Your changes have been saved successfully.',
+                    5000
+                );
+                
+                setTimeout(function() {
+                    location.reload();
+                }, 2000);
             },
 
             error: function(err){
                 console.log(err);
+                showPremiumToast(
+                    'error',
+                    '<i class="fas fa-times-circle me-2"></i>Error',
+                    'Failed to save settings. Please try again.',
+                    5000
+                );
             },
             complete: function() {
                 btn.prop('disabled', false).html(originalText);
@@ -376,13 +682,20 @@
     // Language Management Functions
     function clearTranslationCache() {
         Swal.fire({
-            title: 'Clear Translation Cache?',
-            text: 'This will clear all cached translations and may temporarily slow down the site.',
+            title: '<span style="font-size: 20px;"><i class="fas fa-trash-alt me-2" style="color: #f59e0b;"></i>Clear Translation Cache?</span>',
+            html: '<span style="color: #64748b; font-size: 14px;">This will clear all cached translations and may temporarily slow down the site.</span>',
             icon: 'warning',
             showCancelButton: true,
-            confirmButtonColor: '#d33',
-            cancelButtonColor: '#3085d6',
-            confirmButtonText: 'Yes, Clear Cache'
+            confirmButtonColor: '#ef4444',
+            cancelButtonColor: '#6b7280',
+            confirmButtonText: '<i class="fas fa-check me-1"></i> Yes, Clear Cache',
+            cancelButtonText: '<i class="fas fa-times me-1"></i> Cancel',
+            reverseButtons: true,
+            backdrop: 'rgba(0, 0, 0, 0.5)',
+            customClass: {
+                popup: 'swal2-premium-popup',
+                confirmButton: 'swal2-premium-confirm'
+            }
         }).then((result) => {
             if (result.isConfirmed) {
                 $.ajax({
@@ -392,20 +705,20 @@
                         _token: '{{ csrf_token() }}'
                     },
                     success: function(response) {
-                        Swal.fire({
-                            icon: 'success',
-                            title: 'Cache Cleared',
-                            text: 'Translation cache has been cleared successfully.',
-                            confirmButtonColor: '#4A90E2'
-                        });
+                        showPremiumToast(
+                            'success',
+                            '<i class="fas fa-check-circle me-2"></i>Cache Cleared',
+                            'Translation cache has been cleared successfully.',
+                            5000
+                        );
                     },
                     error: function() {
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Error',
-                            text: 'Failed to clear translation cache.',
-                            confirmButtonColor: '#d33'
-                        });
+                        showPremiumToast(
+                            'error',
+                            '<i class="fas fa-times-circle me-2"></i>Error',
+                            'Failed to clear translation cache.',
+                            5000
+                        );
                     }
                 });
             }
@@ -414,13 +727,16 @@
 
     function clearMailConfigCache() {
         Swal.fire({
-            title: 'Clear Mail Config Cache?',
-            text: 'This will clear the cached mail configuration.',
+            title: '<span style="font-size: 20px;"><i class="fas fa-envelope me-2" style="color: #f59e0b;"></i>Clear Mail Config Cache?</span>',
+            html: '<span style="color: #64748b; font-size: 14px;">This will clear the cached mail configuration.</span>',
             icon: 'warning',
             showCancelButton: true,
-            confirmButtonColor: '#d33',
-            cancelButtonColor: '#3085d6',
-            confirmButtonText: 'Yes, Clear Cache'
+            confirmButtonColor: '#ef4444',
+            cancelButtonColor: '#6b7280',
+            confirmButtonText: '<i class="fas fa-check me-1"></i> Yes, Clear Cache',
+            cancelButtonText: '<i class="fas fa-times me-1"></i> Cancel',
+            reverseButtons: true,
+            backdrop: 'rgba(0, 0, 0, 0.5)'
         }).then((result) => {
             if (result.isConfirmed) {
                 $.ajax({
@@ -430,20 +746,20 @@
                         _token: '{{ csrf_token() }}'
                     },
                     success: function(response) {
-                        Swal.fire({
-                            icon: 'success',
-                            title: 'Cache Cleared',
-                            text: 'Mail configuration cache has been cleared.',
-                            confirmButtonColor: '#4A90E2'
-                        });
+                        showPremiumToast(
+                            'success',
+                            '<i class="fas fa-check-circle me-2"></i>Cache Cleared',
+                            'Mail configuration cache has been cleared.',
+                            5000
+                        );
                     },
                     error: function() {
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Error',
-                            text: 'Failed to clear cache.',
-                            confirmButtonColor: '#d33'
-                        });
+                        showPremiumToast(
+                            'error',
+                            '<i class="fas fa-times-circle me-2"></i>Error',
+                            'Failed to clear cache.',
+                            5000
+                        );
                     }
                 });
             }
@@ -452,13 +768,16 @@
 
     function syncLanguages() {
         Swal.fire({
-            title: 'Sync Languages?',
-            text: 'This will synchronize language settings with the database.',
+            title: '<span style="font-size: 20px;"><i class="fas fa-sync-alt me-2" style="color: #3b82f6;"></i>Sync Languages?</span>',
+            html: '<span style="color: #64748b; font-size: 14px;">This will synchronize language settings with the database.</span>',
             icon: 'info',
             showCancelButton: true,
-            confirmButtonColor: '#3085d6',
-            cancelButtonColor: '#6c757d',
-            confirmButtonText: 'Sync Now'
+            confirmButtonColor: '#3b82f6',
+            cancelButtonColor: '#6b7280',
+            confirmButtonText: '<i class="fas fa-sync me-1"></i> Sync Now',
+            cancelButtonText: '<i class="fas fa-times me-1"></i> Cancel',
+            reverseButtons: true,
+            backdrop: 'rgba(0, 0, 0, 0.5)'
         }).then((result) => {
             if (result.isConfirmed) {
                 $.ajax({
@@ -468,20 +787,20 @@
                         _token: '{{ csrf_token() }}'
                     },
                     success: function(response) {
-                        Swal.fire({
-                            icon: 'success',
-                            title: 'Languages Synced',
-                            text: 'Language settings have been synchronized successfully.',
-                            confirmButtonColor: '#4A90E2'
-                        });
+                        showPremiumToast(
+                            'success',
+                            '<i class="fas fa-check-circle me-2"></i>Languages Synced',
+                            'Language settings have been synchronized successfully.',
+                            5000
+                        );
                     },
                     error: function() {
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Error',
-                            text: 'Failed to sync languages.',
-                            confirmButtonColor: '#d33'
-                        });
+                        showPremiumToast(
+                            'error',
+                            '<i class="fas fa-times-circle me-2"></i>Error',
+                            'Failed to sync languages.',
+                            5000
+                        );
                     }
                 });
             }
