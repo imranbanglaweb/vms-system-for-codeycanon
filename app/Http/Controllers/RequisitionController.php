@@ -532,7 +532,11 @@ public function validateAjax(Request $request)
         $user = Auth::user();
         $isEmployee = $user->hasRole('Employee');
         
-        $requisition = Requisition::findOrFail($id);
+        $requisition = Requisition::find($id);
+        
+        if (!$requisition) {
+            return response()->json(['status' => 'error', 'message' => 'Requisition not found']);
+        }
         
         // Employee can only delete their own requisitions
         if ($isEmployee && $requisition->requested_by != $user->id) {
@@ -541,8 +545,7 @@ public function validateAjax(Request $request)
         
         $requisition->delete();
  
-        return redirect()->route('requisitions.index')
-                         ->with('success', 'Requisition deleted successfully!');
+        return response()->json(['status' => 'success', 'message' => 'Requisition deleted successfully']);
     }
  public function getEmployeeDetails($id)
     {

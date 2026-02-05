@@ -71,8 +71,8 @@ class LocationController extends Controller
     return DataTables::of($query)
         ->addIndexColumn()
         ->addColumn('action', function($row){
-            $editBtn = '<a href="'.route('locations.edit', $row->l_id).'" class="btn btn-sm btn-primary"><i class="fa fa-edit"></i></a>';
-            $delBtn = '<button class="btn btn-sm btn-danger deleteUser" data-id="'.$row->l_id.'"><i class="fa fa-minus-circle"></i></button>';
+            $editBtn = '<a href="'.route('admin.locations.edit', $row->l_id).'" class="btn btn-sm btn-primary"><i class="fa fa-edit"></i></a>';
+            $delBtn = '<button class="btn btn-sm btn-danger deleteUser" data-lid="'.$row->l_id.'"><i class="fa fa-minus-circle"></i></button>';
             return $editBtn.' '.$delBtn;
         })
         ->filter(function ($query) {

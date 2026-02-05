@@ -2,7 +2,7 @@
 
 @section('main_content')
 
-@push('styles')
+
 
 <link rel="stylesheet" href="{{ asset('public/admin_resource/plugins/datatables-bs4/css/dataTables.bootstrap4.min.css') }}">
 <link rel="stylesheet" href="{{ asset('public/admin_resource/plugins/sweetalert2/sweetalert2.min.css') }}">
@@ -14,7 +14,7 @@
         font-size: 15px;
     }
 </style>
-@endpush
+
 
 
 <section role="main" class="content-body" style="background-color:#fff;">
@@ -41,8 +41,7 @@
 			<th>License Number</th>
 			<th>License Type</th>
 			<th>Mobile</th>
-			<th>Joining Date</th>
-			<th>Action</th>
+			<th width="8%">Action</th>
         </tr>
     </thead>
     <tbody></tbody>
@@ -50,7 +49,7 @@
 
 </section>
 
-@push('scripts')
+
 
 <script>
 $(function(){
@@ -75,7 +74,6 @@ $(function(){
     { data: 'license_number', name: 'license_number' },
     { data: 'license_type_name', name: 'license_type_name' },
     { data: 'mobile', name: 'mobile' },
-    { data: 'joining_date', name: 'joining_date' },
     { data: 'action', name: 'action', orderable:false, searchable:false }
         ],
         order:[[1, 'asc']],
@@ -124,8 +122,6 @@ $(function(){
 
 });
 </script>
-
-@endpush
 
 
 @endsection

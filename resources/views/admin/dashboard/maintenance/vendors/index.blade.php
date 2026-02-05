@@ -2,14 +2,16 @@
 
 @section('main_content')
 
-@push('styles')
+
 <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
 
 <style>
   .form-error { color: #e74a3b; font-size: 1.2rem; margin-top: .25rem; }
   .is-invalid { border-color: #e74a3b; }
+  .modal-backdrop { background-color: rgba(0, 0, 0, 0.5); opacity: 1; }
+  .modal-content { border-radius: 12px; box-shadow: 0 8px 30px rgba(0,0,0,0.12); }
 </style>
-@endpush
+
 
 <section role="main" class="content-body" style="background-color: #f8f9fc;">
     <div class="container mt-5">
@@ -99,10 +101,9 @@
     </div>
 </section>
 
-@push('scripts')
-<script src="https://cdn.jsdelivr.net/npm/jquery@3.6.4/dist/jquery.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="{{ asset('public/admin_resource/plugins/jquery/jquery.min.js') }}"></script>
+<script src="{{ asset('public/admin_resource/plugins/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
+<script src="{{ asset('public/admin_resource/plugins/sweetalert2/sweetalert2.min.js') }}"></script>
 
 <script>
 $(document).ready(function(){
@@ -127,7 +128,7 @@ $(document).ready(function(){
 
         let vendor_id = $('#vendor_id').val();
         let url = vendor_id
-            ? `{{ url('maintenance-vendors/update') }}/${vendor_id}`
+            ? `{{ route('maintenance.vendors.update', ':vendor_id') }}`.replace(':vendor_id', vendor_id)
             : `{{ route('maintenance.vendors.store') }}`;
 
         $('#submitBtn').html('<i class="fa fa-spinner fa-spin me-2"></i> Saving...')
@@ -228,7 +229,7 @@ $(document).ready(function(){
         clearErrors();
         let id = $(this).data('id');
 
-        $.get(`{{ url('maintenance-vendors/edit') }}/${id}`, function(data){
+        $.get(`{{ route('maintenance.vendors.edit', ':vendor') }}`.replace(':vendor', id), function(data){
             $('#vendor_id').val(data.id);
             $('#vendor_name').val(data.vendor_name);
             $('#contact_person').val(data.contact_person);
@@ -251,7 +252,7 @@ $(document).ready(function(){
         }).then((result)=>{
             if(result.isConfirmed){
                 $.ajax({
-                    url: `{{ url('maintenance-vendors/delete') }}/${id}`,
+                    url: `{{ route('maintenance.vendors.destroy', ':vendor') }}`.replace(':vendor', id),
                     type: 'DELETE',
                     data: { _token: '{{ csrf_token() }}' },
                     success: function(res){
@@ -273,6 +274,4 @@ $(document).ready(function(){
 
 });
 </script>
-@endpush
-
 @endsection

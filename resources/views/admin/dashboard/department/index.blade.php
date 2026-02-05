@@ -2,13 +2,15 @@
 
 @section('main_content')
 
-<section role="main" class="content-body" style="background-color:#f1f4f8;">
+<section role="main" class="content-body" style="background-color:#fff;">
     <br>
     <br>
     <br>
 <div class="container">
     <h3>Departments Manage</h3>
-    <button class="btn btn-success mb-3" id="addNew"><i class="fa fa-plus"></i> Add Department</button>
+    <button class="btn btn-success pull-right" id="addNew"><i class="fa fa-plus"></i> Add Department</button>
+    <br>
+    <br>
 <table id="departmentsTable" class="table table-bordered table-striped">
     <thead>
         <tr>
@@ -100,11 +102,18 @@
 </div>
 </section>
 
-@push('styles')
 <link rel="stylesheet" href="{{ asset('public/admin_resource/plugins/datatables-bs4/css/dataTables.bootstrap4.min.css') }}">
 <link rel="stylesheet" href="{{ asset('public/admin_resource/plugins/sweetalert2/sweetalert2.min.css') }}">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.1.0-beta.1/css/select2.min.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+<script src="{{ asset('public/admin_resource/plugins/sweetalert2/sweetalert2.min.js') }}"></script>
+
+<style>
+.modal-backdrop { background-color: rgba(0, 0, 0, 0.5); opacity: 1; }
+.modal-content { border-radius: 12px; box-shadow: 0 8px 30px rgba(0,0,0,0.12); }
+.modal .modal-content { border-radius: 12px; }
+.modal-header .btn-close { background-color:#f6f6f6; border: none; font-size: 24px; line-height: 1; color: #000; opacity: 0.5; }
+</style>
 
 <style>
     .table th, .table td {
@@ -112,9 +121,7 @@
         font-size: 15px;
     }
 </style>
-@endpush
 
-@push('scripts')
 
 <script>
 function clearErrors() {
@@ -122,6 +129,11 @@ function clearErrors() {
     $('.form-control, .form-select').removeClass('is-invalid');
 }
 $(function(){
+    $.ajaxSetup({
+        headers: {
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        }
+    });
     var table = $('#departmentsTable').DataTable({
         processing:true,
         serverSide:true,
@@ -154,7 +166,7 @@ $(function(){
     $(document).on('click','.editBtn', function(){
         var id = $(this).data('id');
         clearErrors();
-        $.get("departments/"+id+"/edit", function(data){
+        $.get("{{ route('admin.departments.edit', ':id') }}".replace(':id', id), function(data){
             $('#deptId').val(data.id);
             $('#unit_id').val(data.unit_id).trigger('change');
             $('#department_name').val(data.department_name);
@@ -175,7 +187,7 @@ $(function(){
         e.preventDefault();
         var id = $('#deptId').val();
         clearErrors();
-        var url = id ? "departments/"+id : "{{ route('departments.store') }}";
+        var url = id ? "{{ route('admin.departments.update', ':id') }}".replace(':id', id) : "{{ route('admin.departments.store') }}";
         var method = id ? 'PUT' : 'POST';
 
         $.ajax({
@@ -215,7 +227,9 @@ $(function(){
         }).then((result)=>{
             if(result.isConfirmed){
                 $.ajax({
-                    url:"departments/"+id,
+                    url:"{{ route('admin.departments.destroy', ':id') }}".replace(':id', id),
+                    type: 'POST',
+                    data: { _method: 'DELETE' },
                     type:'DELETE',
                     success:function(res){
                         Swal.fire('Deleted', res.message, 'success');
@@ -232,6 +246,5 @@ $(function(){
 });
 </script>
 
-@endpush
 
 @endsection

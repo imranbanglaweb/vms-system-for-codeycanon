@@ -34,7 +34,7 @@
     }
     
     .form-label {
-        font-size: 1rem;
+        font-size: 1.4rem;
         font-weight: 600;
     }
     
@@ -57,7 +57,7 @@
     }
     
     .form-control-lg, .form-select-lg {
-        font-size: 1rem;
+        font-size: 1.4rem;
         padding: 10px 14px;
     }
 
@@ -67,7 +67,7 @@
     }
 
     .error-text {
-        font-size: 0.875rem;
+        font-size: 1.075rem;
         font-weight: 500;
         transition: all 0.3s;
         animation: fadeIn 0.5s;
@@ -81,7 +81,7 @@
     .btn-lg {
         border-radius: 10px;
         padding: 12px 28px;
-        font-size: 1rem;
+        font-size: 1.4rem;
     }
     
     .btn-primary {
@@ -142,7 +142,7 @@
     }
     
     .passenger-count-badge {
-        font-size: 0.9rem;
+        font-size: 1.2rem;
         padding: 4px 12px;
         border-radius: 20px;
     }

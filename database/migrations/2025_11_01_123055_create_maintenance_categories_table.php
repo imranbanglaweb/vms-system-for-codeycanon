@@ -19,7 +19,7 @@ class CreateMaintenanceCategoriesTable extends Migration
             $table->string('category_name',150)->index();
             $table->string('category_slug',100)->index();
             $table->string('category_type',100)->nullable();
-            $table->integer('category_oder')->nullable();
+            $table->integer('category_order')->nullable();
             $table->tinyInteger('status')->default(1);
             $table->unsignedInteger('created_by');
             $table->unsignedInteger('updated_by')->nullable();

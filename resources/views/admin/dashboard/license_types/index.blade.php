@@ -69,11 +69,24 @@
     </div>
 </div>
 
-@endsection
-
-@push('scripts')
+<link rel="stylesheet" href="{{ asset('public/admin_resource/plugins/sweetalert2/sweetalert2.min.css') }}">
+<link rel="stylesheet" href="{{ asset('public/admin_resource/plugins/datatables-bs4/css/dataTables.bootstrap4.min.css') }}">
+<script src="{{ asset('public/admin_resource/plugins/jquery/jquery.min.js') }}"></script>
+<script src="{{ asset('public/admin_resource/plugins/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
+<script src="{{ asset('public/admin_resource/plugins/sweetalert2/sweetalert2.min.js') }}"></script>
+<script src="{{ asset('public/admin_resource/plugins/datatables/jquery.dataTables.min.js') }}"></script>
+<script src="{{ asset('public/admin_resource/plugins/datatables-bs4/js/dataTables.bootstrap4.min.js') }}"></script>
+<style>
+.modal-backdrop { background-color: rgba(0, 0, 0, 0.5); opacity: 1; }
+.modal-content { border-radius: 12px; box-shadow: 0 8px 30px rgba(0,0,0,0.12); }
+</style>
 <script>
 $(function() {
+    $.ajaxSetup({
+        headers: {
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        }
+    });
 
     let table = $('#licenseTypesTable').DataTable({
         processing: true,
@@ -102,13 +115,13 @@ $(function() {
 
         let id = $('#type_id').val();
         // let url = id ? '/license-types/' + id : "{{ route('license-types.store') }}";
-        let url = id ? "{{ url('license-types') }}/" + id : "{{ route('license-types.store') }}";
+        let url = id ? "{{ route('license-types.update', ':id') }}".replace(':id', id) : "{{ route('license-types.store') }}";
         let method = id ? "POST" : "POST"; // always POST
         let data = {
             type_name: $('#type_name').val(),
             description: $('#description').val(),
             status: $('#status').val(),
-            _token: "{{ csrf_token() }}"
+            
         };
         if(id) data._method = 'PUT';
 
@@ -133,7 +146,7 @@ $(function() {
         let id = $(this).data('id');
 
         $.ajax({
-            url: '{{ url('license-types') }}/' + id + '/edit',
+            url: '{{ route('license-types.edit', ':id') }}'.replace(':id', id),
             method: "GET",
             success: function(data){
                 $('#type_id').val(data.id);
@@ -159,9 +172,10 @@ $(function() {
         }).then(function(result){
             if(result.isConfirmed){
                 $.ajax({
-                    url: '{{ url('license-types') }}/' + id,
+                    url: '{{ route('license-types.destroy', ':id') }}'.replace(':id', id),
                     method: "POST",
-                    data: {_token:"{{ csrf_token() }}", _method:'DELETE'},
+                    type: 'POST',
+                    data: { _method: 'DELETE' },
                     success: function(res){
                         table.ajax.reload();
                         Swal.fire('Deleted!', res.message, 'success');
@@ -173,4 +187,4 @@ $(function() {
 
 });
 </script>
-@endpush
+@endsection

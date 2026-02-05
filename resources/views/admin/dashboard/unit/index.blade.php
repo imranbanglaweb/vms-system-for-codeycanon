@@ -142,13 +142,18 @@
   </div>
 </div>
 
-@endsection
 
-@push('styles')
 
 <link rel="stylesheet" href="{{ asset('public/admin_resource/plugins/datatables-bs4/css/dataTables.bootstrap4.min.css') }}">
 <link rel="stylesheet" href="{{ asset('public/admin_resource/plugins/sweetalert2/sweetalert2.min.css') }}">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+
+<style>
+.modal-backdrop {
+    background-color: rgba(0, 0, 0, 0.5);
+    opacity: 1;
+}
+</style>
 
 <style>
     .table th, .table td {
@@ -156,10 +161,8 @@
         font-size: 15px;
     }
 </style>
-@endpush
 
-@push('scripts')
-
+<script src="{{ asset('public/admin_resource/plugins/sweetalert2/sweetalert2.min.js') }}"></script>
 <script>
 $(function(){
 
@@ -233,7 +236,7 @@ $(function(){
       $('#saveUnitBtn').prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i> Saving');
 
       $.ajax({
-          url: "{{ route('units.store') }}",
+          url: "{{ route('admin.units.store') }}",
           type: "POST",
           data: formData,
           success: function(res){
@@ -272,7 +275,7 @@ $(function(){
   // =============================
   $(document).on('click','.deleteUser', function(){
       let id = $(this).data('uid');
-      let url = "{{ url('units') }}/" + id;
+      let url = "{{ route('admin.units.destroy', ':id') }}".replace(':id', id);
 
       Swal.fire({
           title: 'Are you sure?',
@@ -323,5 +326,6 @@ $(function(){
 
 });
 </script>
+@endsection
 
-@endpush
+

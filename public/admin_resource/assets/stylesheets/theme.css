@@ -179,10 +179,7 @@ a:active {
 		padding-top: 50px;
 	}
 
-	/* Layout Fixed - Content Body */
-	html.fixed .content-body {
-		/* margin-left: 300px; */
-	}
+
 
 	html.fixed .content-body.has-toolbar {
 		padding-top: 92px;
@@ -919,11 +916,7 @@ a:active {
 BOOTSTRAP EXTEND
 ------------------------------------------------------------------------------------------------------------------------------------------ */
 /* Add New Grid Tier FOR NON BOXED LAYOUT */
-html.scroll,
-html.fixed {
-	/* UNDO original bootrap LG helper classes*/
-	/* Helper classes for XL */;
-}
+
 
 @media (min-width: 1600px) {
 	html.scroll .container,
@@ -2467,7 +2460,6 @@ ul.nav-main li .nav-children .nav-children .nav-children li a {
 	-webkit-box-sizing: content-box;
 	-moz-box-sizing: content-box;
 	box-sizing: content-box;
-	display: inline-block;
 	float: left;
 	height: 50px;
 	font-size: 20px;
@@ -3491,9 +3483,7 @@ input[type="url"],
 input[type="search"],
 input[type="tel"],
 input[type="color"],
-textarea {
-	-webkit-appearance: none;
-}
+
 
 .form-control::-webkit-input-placeholder,
 input[type="text"]::-webkit-input-placeholder,
@@ -4478,11 +4468,7 @@ html.dark .inner-toolbar > ul > li {
 	position: relative;
 }
 
-body {
-	/* Button Basic */
-	/* Buttons - Social */
-	/* Buttons - States */;
-}
+
 
 body .btn:focus,
 body .btn:active:focus,
@@ -5444,7 +5430,6 @@ html.header-dark .userbox .dropdown-menu a {
 	display: block;
 	color: white;
 	font-weight: 600;
-	vertical-align: top;
 	line-height: 1.3em;
 	white-space: nowrap;
 	text-overflow: ellipsis;
@@ -8030,7 +8015,6 @@ html.dark .panel-group .panel-accordion .form-control {
 }
 
 .small-chart-wrapper .small-chart {
-	display: inline-block;
 	float: left;
 	margin-bottom: 8px;
 	min-width: 80px;
@@ -8896,6 +8880,7 @@ html.dark .modal-footer {
 /* Zoom */
 .mfp-with-zoom .mfp-container, .mfp-with-zoom.mfp-bg {
 	opacity: 0.001;
+	backface-visibility: hidden;
 	-webkit-backface-visibility: hidden;
 	-webkit-transition: all 0.3s ease-out;
 	-moz-transition: all 0.3s ease-out;
@@ -11169,7 +11154,6 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 .thumb-info .thumb-info-type {
 	background-color: #cccccc;
 	border-radius: 2px;
-	display: inline-block;
 	float: left;
 	font-size: 12px;
 	font-weight: 400;
@@ -12223,15 +12207,6 @@ ul.widget-todo-list li:last-child {
 	}
 }
 
-html.dark {
-	/* Widget Summary */
-	/* Panel Footer - Button Group */
-	/* To-do List */
-	/* Simple Post List */
-	/* Simple User List */
-	/* Simple Bullet List */
-	/* Simple Compose Box */;
-}
 
 html.dark .widget-summary .summary .title,
 html.dark .widget-summary .summary .amount {
@@ -12694,22 +12669,28 @@ html.dark .table .actions-hover a {
 }
 
 .dataTables_processing {
-	background: #cccccc;
-	border-radius: 100px;
-	box-shadow: 0 1px 1px -1px rgba(0, 0, 0, 0.3);
-	color: #FFF;
-	left: 50%;
-	margin-left: -36px;
-	padding: 5px 10px;
+	background: #ffffff;
+	border-radius: 8px;
+	box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+	color: #fff;
+	left: 50% !important;
+	margin-left: -60px;
+	padding: 12px 5px;
 	position: absolute;
-	top: 3px;
+	top: 20% !important;
+	transform: translate(-50%, -50%);
+	width: auto;
+	font-weight: 600;
+	font-size: 14px;
+	z-index: 100;
 }
 
 @media only screen and (max-width: 991px) {
 	.dataTables_processing {
-		left: auto;
-		margin-left: 0;
-		right: 0;
+		left: 50% !important;
+		right: auto;
+		margin-left: -60px;
+		transform: translate(-50%, -50%);
 	}
 }
 
@@ -12904,7 +12885,6 @@ html.dark .pricing-table .plan {
 }
 
 .fileupload .uneditable-input .fileupload-preview {
-	display: inline-block;
 	float: left;
 	overflow: hidden;
 	padding: 0 0 0 17px;
@@ -13707,8 +13687,8 @@ html.dark .wizard-progress .wizard-steps {
 	width: 100%;
 	font-size: 0;
 	text-align: justify;
+	text-justify: distribute-all-lines;
 	-ms-text-justify: distribute-all-lines;
-	/* IE8+ */;
 }
 
 html .wizard-progress .wizard-steps:after,
@@ -15645,8 +15625,8 @@ thead th.fc-last {
 	position: relative;
 	float: left;
 	margin-top: -50%;
-	*margin-top: 0;
-	*top: -50%;
+	/* *margin-top: 0; */
+	/* *top: -50%; */
 }
 
 .fc-state-default {
@@ -15882,9 +15862,6 @@ table.fc-border-separate {
 	border-top-style: dotted;
 }
 
-.fc-agenda-slots tr.fc-minor th.ui-widget-header {
-	*border-top-style: solid;
-}
 
 .fc-event-vert {
 	border-width: 0 1px;

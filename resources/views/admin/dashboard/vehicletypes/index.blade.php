@@ -37,14 +37,16 @@
 
 </div>
 </section>
-@endsection
 
-@push('styles')
 <link rel="stylesheet" href="{{ asset('public/admin_resource/plugins/datatables-bs4/css/dataTables.bootstrap4.min.css') }}">
 <link rel="stylesheet" href="{{ asset('public/admin_resource/plugins/sweetalert2/sweetalert2.min.css') }}">
-@endpush
 
-@push('scripts')
+
+<script src="{{ asset('public/admin_resource/plugins/jquery/jquery.min.js') }}"></script>
+<script src="{{ asset('public/admin_resource/plugins/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
+<script src="{{ asset('public/admin_resource/plugins/sweetalert2/sweetalert2.min.js') }}"></script>
+<script src="{{ asset('public/admin_resource/plugins/datatables/jquery.dataTables.min.js') }}"></script>
+<script src="{{ asset('public/admin_resource/plugins/datatables-bs4/js/dataTables.bootstrap4.min.js') }}"></script>
 <script>
 $(function() {
     let table = $('#vehicleTypeTable').DataTable({
@@ -162,4 +164,4 @@ $(function() {
     font-size: 15px;
 }
 </style>
-@endpush
+@endsection

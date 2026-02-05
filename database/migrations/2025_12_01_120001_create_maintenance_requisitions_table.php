@@ -18,7 +18,7 @@ class CreateMaintenanceRequisitionsTable extends Migration
 
             $table->string('requisition_no')->unique();
 
-            $table->enum('requisition_type', ['Maintenance', 'Breakdown', 'Inspection'])->default('Maintenance');
+            $table->enum('requisition_type', ['scheduled', 'emergency', 'routine','insurance'])->default('scheduled');
             $table->enum('priority', ['Low', 'Medium', 'High', 'Urgent'])->default('Low');
 
             // You already have tables:

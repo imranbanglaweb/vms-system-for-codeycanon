@@ -131,7 +131,7 @@
                     <div class="col-md-4">
                         <div class="info-box p-3 bg-white rounded-3 shadow-sm">
                             <span class="fw-bold text-secondary">Pickup Location</span>
-                            <div class="fs-5 fw-bold text-dark">none</div>
+                            <div class="fs-5 fw-bold text-dark">{{ $requisition->pickup_location ?? 'N/A' }}</div>
                         </div>
                     </div>
 <hr>

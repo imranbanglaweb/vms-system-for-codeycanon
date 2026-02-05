@@ -35,7 +35,6 @@ tr.status-approved { background-color:#e6f7ed !important; }
 tr.status-rejected { background-color:#fdecea !important; }
 </style>
 
-@push('styles')
 <link rel="stylesheet" href="{{ asset('public/admin_resource/plugins/datatables-bs4/css/dataTables.bootstrap4.min.css') }}">
 <link rel="stylesheet" href="{{ asset('public/admin_resource/plugins/sweetalert2/sweetalert2.min.css') }}">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
@@ -47,7 +46,7 @@ tr.status-rejected { background-color:#fdecea !important; }
         font-size: 15px;
     }
 </style>
-@endpush
+
 
 @section('main_content')
 <section role="main" class="content-body">
@@ -76,6 +75,16 @@ tr.status-rejected { background-color:#fdecea !important; }
                         <option value="">All</option>
                         @foreach($departments as $d)
                             <option value="{{ $d->id }}">{{ $d->department_name }}</option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <div class="col-md-2">
+                    <label class="form-label">Unit</label>
+                    <select id="filterUnit" class="form-select">
+                        <option value="">All</option>
+                        @foreach($units as $u)
+                            <option value="{{ $u->id }}">{{ $u->unit_name }}</option>
                         @endforeach
                     </select>
                 </div>
@@ -141,7 +150,7 @@ tr.status-rejected { background-color:#fdecea !important; }
 </div>
 </section>
 
-@push('scripts')
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js"></script>
 <script>
 $(function(){
 
@@ -152,12 +161,13 @@ $(function(){
         serverSide:true,
         responsive:true,
         autoWidth:false,
-        searching: false, 
+        searching: true, 
 
         ajax:{
             url:"{{ route('department.approvals.ajax') }}",
             data:function(d){
                 d.department_id = $('#filterDepartment').val();
+                d.unit_id = $('#filterUnit').val();
                 d.requested_by = $('#filterUser').val();
                 d.date_from = $('#dateFrom').val();
                 d.date_to = $('#dateTo').val();
@@ -209,6 +219,6 @@ $(function(){
 
 });
 </script>
-@endpush
+
 
 @endsection

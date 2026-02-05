@@ -269,7 +269,7 @@ function submitEndTrip() {
     }).then((result) => {
         if (result.isConfirmed) {
             $.ajax({
-                url: "{{ route('trip.end.save', $trip->id) }}",
+                url: "{{ route('trip-sheets.end.save', $trip->id) }}",
                 method: "POST",
                 data: $("#endTripForm").serialize(),
                 success: function(res) {

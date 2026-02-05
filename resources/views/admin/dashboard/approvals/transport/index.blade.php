@@ -35,7 +35,7 @@ tr.status-approved { background-color:#e6f7ed !important; }
 tr.status-rejected { background-color:#fdecea !important; }
 </style>
 
-@push('styles')
+
 <link rel="stylesheet" href="{{ asset('public/admin_resource/plugins/datatables-bs4/css/dataTables.bootstrap4.min.css') }}">
 <link rel="stylesheet" href="{{ asset('public/admin_resource/plugins/sweetalert2/sweetalert2.min.css') }}">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
@@ -47,7 +47,7 @@ tr.status-rejected { background-color:#fdecea !important; }
         font-size: 15px;
     }
 </style>
-@endpush
+
 
 @section('main_content')
 <section role="main" class="content-body">
@@ -140,7 +140,7 @@ tr.status-rejected { background-color:#fdecea !important; }
 </div>
 </section>
 
-@push('scripts')
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js"></script>
 <script>
 $(function(){
 
@@ -208,6 +208,6 @@ $(function(){
 
 });
 </script>
-@endpush
+
 
 @endsection

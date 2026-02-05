@@ -94,11 +94,13 @@
   </div>
 </div>
 
-@push('styles')
-
 <link rel="stylesheet" href="{{ asset('public/admin_resource/plugins/datatables-bs4/css/dataTables.bootstrap4.min.css') }}">
 <link rel="stylesheet" href="{{ asset('public/admin_resource/plugins/sweetalert2/sweetalert2.min.css') }}">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+<script src="{{ asset('public/admin_resource/plugins/sweetalert2/sweetalert2.min.js') }}"></script>
+<style>
+.modal-backdrop { background-color: rgba(0, 0, 0, 0.5); opacity: 1; }
+</style>
 
 <style> 
 #locations-table thead th { font-weight:600; } 
@@ -107,9 +109,7 @@
     font-size: 15px;
 }
 </style>
-@endpush
 
-@push('scripts')
 
 <script>
 $(function(){
@@ -163,7 +163,7 @@ $(function(){
         $('#saveLocationBtn').prop('disabled',true).html('<i class="fa fa-spinner fa-spin"></i> Saving');
 
         $.ajax({
-            url:'{!! route('locations.store') !!}', type:'POST', data:data,
+            url:'{!! route('admin.locations.store') !!}', type:'POST', data:data,
             success:function(res){
                 $('#locationModal').modal('hide');
                 $('#saveLocationBtn').prop('disabled',false).html('<i class="fa fa-save"></i> Save');
@@ -193,7 +193,7 @@ $(function(){
     // SweetAlert2 delete
     $(document).on('click','.deleteUser',function(){
         var lid=$(this).data('lid');
-        var deleteUrl='{{ url('locations') }}/'+lid;
+        var deleteUrl='{{ route('admin.locations.destroy', ':id') }}'.replace(':id', lid);
         var csrfToken=$('meta[name="csrf-token"]').attr('content');
 
         Swal.fire({
@@ -228,7 +228,5 @@ $(function(){
 });
 </script>
 
-@endpush
 
-</section>
 @endsection

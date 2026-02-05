@@ -98,12 +98,13 @@ class DepartmentApprovalController extends Controller
             return response()->json(['status' => 'error', 'message' => 'Unauthorized'], 403);
         }
 
-        if ($requisition->status !== 'Pending Department Approval') {
+        if ($requisition->department_status !== 'Pending') {
             return response()->json(['status' => 'error', 'message' => 'Requisition is not in a state to be rejected by the department.'], 422);
         }
 
         $requisition->update([
             'status' => 'Rejected by Department',
+            'department_status' => 'Rejected',
             'department_approved_at' => now(), // This is more like 'processed_at'
             'department_approved_by' => $user->id,
             'department_remarks' => $request->remarks,

@@ -230,9 +230,9 @@
 
 </section>
 
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-<script src="{{ asset('public/admin_resource/')}}/assets/vendor/jquery/jquery.js"></script>
-<script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="{{ asset('public/admin_resource/plugins/jquery/jquery.min.js') }}"></script>
+<script src="{{ asset('public/admin_resource/plugins/sweetalert2/sweetalert2.min.js') }}"></script>
+<link rel="stylesheet" href="{{ asset('public/admin_resource/plugins/sweetalert2/sweetalert2.min.css') }}">
 <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-beta.1/dist/css/select2.min.css" rel="stylesheet" />
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-beta.1/dist/js/select2.min.js"></script>
 
@@ -504,6 +504,10 @@
         width: auto;
         min-width: 70px;
     }
+    
+    /* Modal Backdrop */
+    .modal-backdrop { background-color: rgba(0, 0, 0, 0.5); opacity: 1; }
+    .modal-content { border-radius: 12px; box-shadow: 0 8px 30px rgba(0,0,0,0.12); }
 </style>
 
 <script>

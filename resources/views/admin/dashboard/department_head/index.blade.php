@@ -544,7 +544,7 @@
             <h5 id="modalTitle"><i class="fa fa-user-tie"></i> Assign Department Head</h5>
             <button class="custom-modal-close" id="closeModal">&times;</button>
         </div>
-        <form id="assignHeadForm" action="{{ route('department-heads.store') }}" method="POST">
+        <form id="assignHeadForm" action="{{ route('admin.department-heads.store') }}" method="POST">
             @csrf
             <input type="hidden" name="department_id" id="modal_department_id">
             <div class="custom-modal-body">
@@ -621,11 +621,11 @@
 </div>
 
 {{-- Forms for notification and remove --}}
-<form id="sendNotificationForm" action="{{ route('department-heads.send-notification') }}" method="POST" style="display: none;">
+<form id="sendNotificationForm" action="{{ route('admin.department-heads.send-notification') }}" method="POST" style="display: none;">
     @csrf
     <input type="hidden" name="department_id" id="notify_department_id">
 </form>
-<form id="removeHeadForm" action="{{ route('department-heads.remove') }}" method="POST" style="display: none;">
+<form id="removeHeadForm" action="{{ route('admin.department-heads.remove') }}" method="POST" style="display: none;">
     @csrf
     @method('DELETE')
     <input type="hidden" name="department_id" id="remove_department_id">
@@ -771,7 +771,7 @@ document.addEventListener('DOMContentLoaded', function() {
         loadingSpan.style.display = 'inline-block';
         
         if (deptId) {
-            fetch('{{ route('department-heads.employees', ['departmentId' => ':deptId']) }}'.replace(':deptId', deptId))
+            fetch('{{ route('admin.department-heads.employees', ['departmentId' => ':deptId']) }}'.replace(':deptId', deptId))
                 .then(res => res.json())
                 .then(employees => {
                     employees.forEach(emp => {
@@ -823,7 +823,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 document.getElementById('employee_selection_section').style.display = 'block';
                 document.getElementById('manual_entry_section').style.display = 'none';
                 
-                fetch('{{ route('department-heads.employees', ['departmentId' => ':deptId']) }}?selected_employee_id=' + headEmpId + '&departmentId=' + deptId)
+                fetch('{{ route('admin.department-heads.employees', ['departmentId' => ':deptId']) }}?selected_employee_id=' + headEmpId + '&departmentId=' + deptId)
                     .then(res => res.json())
                     .then(employees => {
                         const empSelect = document.getElementById('head_employee_id');

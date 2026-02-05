@@ -3,18 +3,6 @@
 @section('main_content')
 
 <style>
-  #menu_list {
-    padding: 0px;
-  }
-  #menu_list td {
-    list-style: none;
-    margin-bottom: 10px;
-    border: 1px solid #d4d4d4;
-    border-radius: 3px;
-    padding: 6px;
-    cursor: move;
-    background: linear-gradient(to bottom, #ffffff 0%, #f6f6f6 47%, #ededed 100%);
-  }
   .myDiv{
     display:none;
     padding:10px;
@@ -268,7 +256,7 @@
 <link rel="stylesheet" href="{{ asset('public/admin_resource/plugins/datatables-buttons/css/buttons.bootstrap4.min.css') }}">
 <link rel="stylesheet" href="{{ asset('public/admin_resource/plugins/sweetalert2/sweetalert2.min.css') }}">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css" />
+
 
 <style>
     .table th, .table td {
@@ -329,6 +317,9 @@ loadFilterOptions();
 var table = $('#myTable').DataTable({
     processing: true,
     serverSide: true,
+     language: {
+        processing: '<i class="fa fa-spinner fa-spin fa-2x fa-fw text-primary"></i><br>Loading employees...'
+    },
     ajax: {
         url: '{{ route("admin.employees.index") }}',
         type: 'GET',
@@ -383,21 +374,6 @@ $('#searchName').on('keypress', function(e) {
 // Change events reload table
 $('#filterUnit, #filterDepartment, #filterLocation, #filterType, #filterStatus, #filterHead').on('change', function() {
     table.ajax.reload();
-});
-
-/* ========== SORTABLE ========== */
-$(function(){
-  $("#menu_list").sortable({
-    stop: function(){
-      $.map($(this).find('tr'), function(el) {
-        $.ajax({
-          url:'{{URL::to("order-menu")}}',
-          type:'GET',
-          data: {itemID: el.id, itemIndex: $(el).index()},
-        });
-      });
-    }
-  });
 });
 
 /* ========== DELETE MODAL ========== */

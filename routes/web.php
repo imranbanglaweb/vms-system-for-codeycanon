@@ -277,8 +277,10 @@ Route::prefix('transport')->group(function () {
     Route::get('/trip-sheet/{id}', [TripSheetController::class, 'show'])->name('trip-sheets.show');
     Route::post('/trip-sheet/start/{id}', [TripSheetController::class, 'startTrip'])->name('trip-sheets.start');
     Route::post('/trip-sheet/finish/{id}', [TripSheetController::class, 'finishTrip'])->name('trip-sheets.finish');
-    Route::get('/trip-sheet/end/{id}', [TripSheetController::class, 'endTripForm'])->name('trip.end.form');
-    Route::post('/trip-sheet/end/{id}', [TripSheetController::class, 'endTripSave'])->name('trip.end.save');
+    Route::get('/trip-sheet/end/{id}', [TripSheetController::class, 'endTripForm'])
+        ->name('trip-sheets.end.form')
+        ->middleware('can:trip-manage');
+    Route::post('/trip-sheet/end/{id}', [TripSheetController::class, 'endTripSave'])->name('trip-sheets.end.save');
 });
 
 // ============================================================================

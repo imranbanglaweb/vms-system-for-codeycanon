@@ -42,9 +42,6 @@
     </div>
 </section>
 
-@endsection
-
-@push('scripts')
 <script>
 $(function () {
     let table = $('#vendorsTable').DataTable({
@@ -132,9 +129,7 @@ $(function () {
     });
 });
 </script>
-@endpush
 
-@push('styles')
 <link rel="stylesheet" href="{{ asset('public/admin_resource/plugins/datatables-bs4/css/dataTables.bootstrap4.min.css') }}">
 <link rel="stylesheet" href="{{ asset('public/admin_resource/plugins/sweetalert2/sweetalert2.min.css') }}">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
@@ -148,4 +143,4 @@ $(function () {
         font-size: 15px;
     }
 </style>
-@endpush
+@endsection
