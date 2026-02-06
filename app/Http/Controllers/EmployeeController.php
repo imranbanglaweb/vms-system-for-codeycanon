@@ -193,7 +193,7 @@ class EmployeeController extends Controller
                 return response()->json(['message' => 'Employee created', 'employee' => $employee], 201);
             }
 
-            return redirect()->route('employees.index')->with('success', 'Employee created successfully');
+            return redirect()->route('admin.employees.index')->with('success', 'Employee created successfully');
 
         } catch (ValidationException $e) {
             // Return JSON with validation errors for AJAX
@@ -211,7 +211,7 @@ class EmployeeController extends Controller
             return response()->json(['message' => 'Employee created', 'employee' => $employee], 201);
         }
 
-        return redirect()->route('employees.index')->with('success', 'Employee created successfully');
+        return redirect()->route('admin.employees.index')->with('success', 'Employee created successfully');
     }
 
     /**
@@ -308,7 +308,7 @@ class EmployeeController extends Controller
 
         $employee->update($validated);
 
-        return redirect()->route('employees.index')->with('success', 'Employee updated successfully');
+        return redirect()->route('admin.employees.index')->with('success', 'Employee updated successfully');
     }
 
     /**

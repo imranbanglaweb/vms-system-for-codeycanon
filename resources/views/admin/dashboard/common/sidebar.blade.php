@@ -439,8 +439,8 @@
                 @endif
 
                 {{-- 17. Email & Notification Settings --}}
-                @if(auth()->user()->can('settings-notification') || auth()->user()->can('email-template-manage') || $isSuperAdmin || $isAdmin)
-                <li class="nav-parent {{ request()->is('email-templates*') || request()->is('admin/notifications*') || request()->is('settings/notifications*') ? 'expanded active' : '' }}">
+                @if(auth()->user()->can('settings-notification') || auth()->user()->can('email-template-manage') || auth()->user()->can('emaillog-manage') || $isSuperAdmin || $isAdmin)
+                <li class="nav-parent {{ request()->is('email-templates*') || request()->is('admin/notifications*') || request()->is('settings/notifications*') || request()->is('emaillogs*') ? 'expanded active' : '' }}">
                     <a href="javascript:void(0)" onclick="toggleSubmenu(this)">
                         <i class="fas fa-bell"></i>
                         <span>Email & Notifications</span>
@@ -460,6 +460,14 @@
                             <a href="{{ route('settings.notifications') }}">
                                 <i class="fas fa-cog"></i>
                                 <span>Notification Settings</span>
+                            </a>
+                        </li>
+                        @endif
+                        @if(auth()->user()->can('emaillog-manage') || $isSuperAdmin || $isAdmin)
+                        <li class="{{ request()->is('emaillogs') || request()->is('emaillogs/*') ? 'active' : '' }}">
+                            <a href="{{ route('emaillogs.index') }}">
+                                <i class="fas fa-history"></i>
+                                <span>Email Log History</span>
                             </a>
                         </li>
                         @endif

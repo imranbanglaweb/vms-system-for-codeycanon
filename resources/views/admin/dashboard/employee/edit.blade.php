@@ -8,7 +8,7 @@
             <h2><i class="fa fa-edit mr-2"></i> Edit Employee</h2>
         </div>
         <div class="pull-right">
-            <a class="btn btn-primary" href="{{ route('employees.index') }}"><i class="fa fa-arrow-left mr-2"></i> Back</a>
+            <a class="btn btn-primary" href="{{ route('admin.employees.index') }}"><i class="fa fa-arrow-left mr-2"></i> Back</a>
         </div>
     </div>
 </div>
@@ -34,12 +34,12 @@
             <p class="text-muted">Update employee details. Required fields are validated via AJAX.</p>
         </div>
         <div>
-            <a href="{{ route('employees.index') }}" class="btn btn-outline-secondary"><i class="fa fa-arrow-left"></i> Back to list</a>
+            <a href="{{ route('admin.employees.index') }}" class="btn btn-outline-secondary"><i class="fa fa-arrow-left"></i> Back to list</a>
         </div>
     </header>
 
     <div class="panel-body">
-        {!! Form::model($employee_edit, ['route' => ['employees.update', $employee_edit->id], 'method' => 'PUT', 'enctype' => 'multipart/form-data', 'id' => 'employee_edit']) !!}
+        {!! Form::model($employee_edit, ['route' => ['admin.employees.update', $employee_edit->id], 'method' => 'PUT', 'enctype' => 'multipart/form-data', 'id' => 'employee_edit']) !!}
         @include('admin.dashboard.employee._form')
         {!! Form::close() !!}
     </div>
@@ -103,7 +103,7 @@ $(document).ready(function() {
         // populate departments
         $.ajax({
             type: 'GET',
-            url: "{{ route('unit-wise-department')}}",
+            url: "{{ route('admin.unit-wise-department')}}",
             data: { unit_id: unit_id},
             dataType: 'json',
             success: function (data) {
@@ -213,7 +213,7 @@ $(document).on('change', '#photo-input', function(e){
                     timer: 2000,
                     showConfirmButton: false,
                 }).then(() => {
-                    window.location.href = "{{ route('employees.index') }}";
+                    window.location.href = "{{ route('admin.employees.index') }}";
                 });
             },
             error: function(response){

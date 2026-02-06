@@ -692,7 +692,7 @@ $(function () {
     });
 
     function fetchDepartmentHeadInfo(departmentId) {
-        $.get("{{ url('/departments') }}/" + departmentId + "/head-info", function(res) {
+        $.get("{{ url('admin/departments') }}/" + departmentId + "/head-info", function(res) {
             if (res.success) {
                 $('#department_head_name').val(res.head_name || '');
                 $('#department_head_email').val(res.head_email || '');

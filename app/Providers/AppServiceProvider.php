@@ -5,14 +5,52 @@ namespace App\Providers;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Blade;
+use Illuminate\Support\Facades\DB;
 use App\Models\Menu;
 use App\Models\Requisition;
 use App\Observers\RequisitionObserver;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Translation\FileLoader;
 use App\Services\CustomTranslationLoader;
 use App\Services\MenuService;
 use Illuminate\Support\Facades\View;
+
+/**
+ * Admin Settings Helper Functions
+ * These functions retrieve admin settings from the database for use in email templates and views
+ */
+if (!function_exists('admin_title')) {
+    /**
+     * Get admin title from settings
+     */
+    function admin_title() {
+        $settings = DB::table('settings')->where('id', 1)->first();
+        return $settings->admin_title ?? 'Transport Management System';
+    }
+}
+
+if (!function_exists('admin_description')) {
+    /**
+     * Get admin description from settings
+     */
+    function admin_description() {
+        $settings = DB::table('settings')->where('id', 1)->first();
+        return $settings->admin_description ?? 'Fleet Management Solution';
+    }
+}
+
+if (!function_exists('admin_logo_url')) {
+    /**
+     * Get admin logo URL from settings
+     */
+    function admin_logo_url() {
+        $settings = DB::table('settings')->where('id', 1)->first();
+        if (!empty($settings->admin_logo)) {
+            return asset('public/admin_resource/assets/images/' . $settings->admin_logo);
+        }
+        // Return default logo
+        return asset('public/admin_resource/assets/images/default.png');
+    }
+}
 
 class AppServiceProvider extends ServiceProvider
 {

@@ -116,7 +116,7 @@ Edit Email Template
                             <small class="text-danger error-text subject_error"></small>
                         </div>
 
-                        {{-- Email Body with CKEditor --}}
+                        {{-- Email Body --}}
                         <div class="col-12">
                             <label class="form-label fw-semibold small mb-1">Email Body *</label>
                             <textarea 
@@ -124,10 +124,10 @@ Edit Email Template
                                 id="body"
                                 class="form-control border-start-0" 
                                 rows="10" 
-                                placeholder="Email body content...">{{ old('body', $emailTemplate->body) }}</textarea>
+                                placeholder="Email body content (HTML supported)..."><?php echo old('body', $escapedBody ?? ''); ?></textarea>
                             <small class="text-danger error-text body_error"></small>
                             <div class="mt-2">
-                                <span class="badge bg-info">Use @{{variable_name}} for dynamic content</span>
+                                <span class="badge bg-info">Use @@&#123;&#123;variable_name&#125;&#125; for dynamic content</span>
                             </div>
                         </div>
 
@@ -165,25 +165,24 @@ Edit Email Template
 </section>
 
 <!-- Preview Modal -->
-<div class="modal fade" id="previewModal" tabindex="-1" aria-hidden="true">
+<div class="modal" id="previewModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-xl modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header bg-info text-white">
                 <h5 class="modal-title"><i class="fa fa-envelope-open me-2"></i>Email Preview</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                <button type="button" class="btn-close btn-close-white" data-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body p-0">
                 <iframe id="previewFrame" style="width: 100%; height: 600px; border: none;"></iframe>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
             </div>
         </div>
     </div>
 </div>
 @endsection
 
-@push('styles')
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
 <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
 <style>
@@ -206,35 +205,42 @@ Edit Email Template
     margin-bottom: 8px;
 }
 textarea.form-control {
-    font-size: 1.2em;
+    resize: vertical;
+    font-family: 'Courier New', Courier, monospace;
+}
+/* Modal styles fix */
+.modal-backdrop {
+    background-color: rgba(0, 0, 0, 0.5) !important;
+    opacity: 1 !important;
+    z-index: 1040;
+}
+.modal-content {
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    overflow: hidden;
+}
+#previewModal {
+    z-index: 1050;
+}
+#previewModal .modal-dialog {
+    max-width: 900px;
+}
+#previewModal .modal-body {
+    background-color: #fff;
+    padding: 0;
+}
+#previewFrame {
+    background-color: #ffffff;
+    min-height: 600px;
 }
 </style>
-@endpush
+
 
 @push('scripts')
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script src="https://cdn.ckeditor.com/4.22.1/standard/ckeditor.js"></script>
-
 <script>
 $(function() {
-    // Initialize CKEditor
-    CKEDITOR.replace('body', {
-        height: 300,
-        toolbar: [
-            { name: 'document', items: ['Source'] },
-            { name: 'clipboard', items: ['Cut', 'Copy', 'Paste', 'Undo', 'Redo'] },
-            { name: 'editing', items: ['Find', 'Replace', 'SelectAll'] },
-            { name: 'basicstyles', items: ['Bold', 'Italic', 'Underline', 'Strike', 'RemoveFormat'] },
-            { name: 'paragraph', items: ['NumberedList', 'BulletedList', 'Outdent', 'Indent', 'Blockquote'] },
-            { name: 'links', items: ['Link', 'Unlink', 'Anchor'] },
-            { name: 'insert', items: ['Image', 'Table', 'HorizontalRule', 'SpecialChar'] },
-            { name: 'styles', items: ['Styles', 'Format'] },
-            { name: 'tools', items: ['Maximize'] }
-        ],
-        allowedContent: true,
-        bodyClass: 'email-body'
-    });
-
     // Auto-generate slug from name (only if slug is empty or user wants to regenerate)
     let originalSlug = '{{ $emailTemplate->slug }}';
     
@@ -253,11 +259,6 @@ $(function() {
     // Form validation and submission
     $('#emailTemplateForm').on('submit', function(e) {
         e.preventDefault();
-
-        // Update CKEditor content before submitting
-        for (var instanceName in CKEDITOR.instances) {
-            CKEDITOR.instances[instanceName].updateElement();
-        }
 
         let form = $(this);
         let url = form.attr('action');
@@ -317,31 +318,47 @@ $(function() {
 
 // Preview Email Function
 function previewEmail() {
-    // Update CKEditor content
-    for (var instanceName in CKEDITOR.instances) {
-        CKEDITOR.instances[instanceName].updateElement();
-    }
-
     const subject = $('#subject').val() || 'Email Subject';
-    const body = CKEDITOR.instances.body.getData() || 'Email body content...';
+    let logoUrl = $('#admin_logo_url').val() || '';
+
+    // Get body content from textarea
+    let body = $('#body').val() || 'Email body content...';
+    // ================== PREVIEW VARIABLE REPLACEMENT ==================
+
+body = body
+    .replaceAll('@@adminlogo_url', logoUrl || '')
+    .replaceAll('@@admin_logo_url', logoUrl || '')
+    .replaceAll('@@company_name', 'Transport Management System')
+    .replaceAll('@@year', new Date().getFullYear());
+
+// Blade-safe cleanup of unresolved variables
+body = body
+    .replace(new RegExp('\\{\\{.*?\\}\\}', 'g'), '')
+    .replace(new RegExp('@@\\w+', 'g'), '');
+
+// ================== END ==================
 
     // Get logo from settings
     $.ajax({
         url: '{{ route("admin.settings.get-logo") }}',
         method: 'GET',
         success: function(logoData) {
-            const logoUrl = logoData.logo_url || '';
+            let logoUrl = logoData.logo_url || '';
+            
+            // Check if logo URL contains template variables
+            if (logoUrl && (logoUrl.includes('{') || logoUrl.includes('}'))) {
+                logoUrl = '';
+            }
             
             // Create preview HTML
-            const previewHtml = `
-<!DOCTYPE html>
+            const previewHtml = `<!DOCTYPE html>
 <html>
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>${subject}</title>
     <style>
-        body { margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f1f5f9; }
+        body { margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #fff; }
         .email-wrapper { padding: 40px 15px; }
         .email-container { max-width: 700px; margin: 0 auto; background: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 10px 40px rgba(0,0,0,0.1); }
         .email-header { background: linear-gradient(135deg, #1e3a5f 0%, #2d5a87 100%); padding: 35px 40px; text-align: center; color: #ffffff; }
@@ -384,8 +401,7 @@ function previewEmail() {
         },
         error: function() {
             // Fallback without logo
-            const previewHtml = `
-<!DOCTYPE html>
+            const previewHtml = `<!DOCTYPE html>
 <html>
 <head>
     <meta charset="utf-8">

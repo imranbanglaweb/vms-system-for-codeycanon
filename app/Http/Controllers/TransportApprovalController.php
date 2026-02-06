@@ -12,6 +12,9 @@ use App\Services\EmailService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Facades\Log;
+use App\Notifications\TransportApproved;
 
 class TransportApprovalController extends Controller
 {
@@ -142,7 +145,7 @@ class TransportApprovalController extends Controller
     /**
      * Approve final transport.
      */
-   
+    
     public function approve(Request $request, $id)
     {
         $requisition = Requisition::findOrFail($id);
@@ -161,9 +164,52 @@ class TransportApprovalController extends Controller
         $requisition->save();
 
         // Send email notification to requester, driver, and transport head
-        $this->emailService->sendTransportApproved($requisition);
+        try {
+            $this->emailService->sendTransportApproved($requisition);
+            Log::info('Transport approval email sent for requisition: ' . $requisition->requisition_number);
+        } catch (\Exception $e) {
+            Log::error('Failed to send transport approval email: ' . $e->getMessage());
+        }
 
-        // Optionally send notifications to requester, driver, vehicle owner, etc.
+        // Send push notification to requester and driver
+        $notificationUsers = collect();
+        
+        // Get requester if they have a user account (linked via employee_id)
+        $requesterUser = User::where('employee_id', $requisition->requested_by)->first();
+        if ($requesterUser) {
+            $notificationUsers = $notificationUsers->push($requesterUser);
+        }
+        
+        // Get driver if they have a user account
+        if ($requisition->assignedDriver) {
+            $driverUser = User::where('employee_id', $requisition->assignedDriver->employee_id ?? null)->first();
+            if ($driverUser && !$notificationUsers->contains('id', $driverUser->id)) {
+                $notificationUsers = $notificationUsers->push($driverUser);
+            }
+        }
+        
+        // Also notify Transport Head, Transport Managers, Super Admin, Admin
+        $transportUsers = User::whereHas('roles', function ($query) {
+                $query->whereIn('name', ['Transport_Head', 'Transport', 'Super Admin', 'Admin']);
+            })
+            ->where('id', '!=', Auth::id())
+            ->get();
+            
+        $notificationUsers = $notificationUsers->merge($transportUsers);
+        
+        // Log the users we found
+        Log::info('Transport approval push notification target users count: ' . $notificationUsers->count());
+        foreach ($notificationUsers as $notificationUser) {
+            Log::info('User ID: ' . $notificationUser->id . ', Email: ' . $notificationUser->email);
+        }
+        
+        // Send notification to these users
+        if ($notificationUsers->isNotEmpty()) {
+            Notification::send($notificationUsers, new TransportApproved($requisition));
+            Log::info('Transport approval push notification sent');
+        } else {
+            Log::warning('No users found for transport approval push notification.');
+        }
 
         //  // Update vehicle status
         $vehicle = Vehicle::find($requisition->assigned_vehicle_id);

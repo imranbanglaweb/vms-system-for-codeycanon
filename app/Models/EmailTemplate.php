@@ -99,6 +99,30 @@ class EmailTemplate extends Model
         $subject = str_replace(['&lbrace;', '&rbrace;', '&#123;', '&#125;'], ['{', '}', '{', '}'], $subject);
         $body = str_replace(['&lbrace;', '&rbrace;', '&#123;', '&#125;'], ['{', '}', '{', '}'], $body);
         
+        // Remove blade-style comments {{-- comment --}}
+        $body = preg_replace('/\{\{--.*?--\}\}/s', '', $body);
+        $subject = preg_replace('/\{\{--.*?--\}\}/s', '', $subject);
+        
+        // First, handle conditional blocks: {{#if variable}} ... {{/if}}
+        // These blocks are kept if variable has a non-null/non-empty value, removed otherwise
+        preg_match_all('/\{\{#if\s+(\w+)\}\}(.*?)\{\{\/if\}\}/s', $body, $conditionals);
+        foreach ($conditionals[0] as $index => $fullMatch) {
+            $variable = $conditionals[1][$index];
+            $content = $conditionals[2][$index];
+            
+            // Check if variable exists and has a non-null/non-empty value
+            $hasValue = isset($data[$variable]) && !empty($data[$variable]);
+            
+            if ($hasValue) {
+                // Keep the content, but remove the conditional tags
+                $body = str_replace($fullMatch, $content, $body);
+            } else {
+                // Remove the entire conditional block
+                $body = str_replace($fullMatch, '', $body);
+            }
+        }
+        
+        // Then replace all variables
         foreach ($data as $key => $value) {
             // Support both {{variable}} and @{{variable}} formats
             $placeholders = [
@@ -107,8 +131,10 @@ class EmailTemplate extends Model
                 '{{ ' . $key . ' }}',
                 '@{{ ' . $key . ' }}'
             ];
-            $subject = str_replace($placeholders, $value, $subject);
-            $body = str_replace($placeholders, $value, $body);
+            // Convert value to string for replacement
+            $stringValue = is_null($value) ? '' : (is_array($value) ? json_encode($value) : (string)$value);
+            $subject = str_replace($placeholders, $stringValue, $subject);
+            $body = str_replace($placeholders, $stringValue, $body);
         }
 
         return [

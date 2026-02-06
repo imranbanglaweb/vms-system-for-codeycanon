@@ -57,7 +57,7 @@ class SettingController extends Controller
             
             $imagePath = $request->file('admin_logo');
        $request->validate([
-          'admin_logo' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+          'admin_logo' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:5048',
         ]);
             $imageName = $imagePath->getClientOriginalName();
 
@@ -214,10 +214,11 @@ class SettingController extends Controller
     public function getLogo()
     {
         $settings = DB::table('settings')->where('id', 1)->first();
-        
+        //  dd($settings);
         $logoUrl = null;
-        if ($settings && $settings->site_logo) {
-            $logoUrl = asset('admin_resource/assets/images/' . $settings->site_logo);
+        if ($settings && $settings->admin_logo) {
+            $logoUrl = asset('public/admin_resource/assets/images/' . $settings->admin_logo);
+            // dd($logoUrl);
         }
         
         return response()->json([

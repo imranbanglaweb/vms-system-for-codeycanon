@@ -5,6 +5,8 @@ namespace App\Services;
 use App\Models\EmailLog;
 use App\Models\EmailTemplate;
 use App\Models\Requisition;
+use App\Models\User;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Database\Eloquent\Model;
@@ -286,8 +288,11 @@ class EmailService
                 break;
 
             case 'dept_approved':
-                // Send to Transport Head
-                $recipients = $this->getTransportHeadEmails($requisition);
+                // Send to Transport Head AND Requester
+                $recipients = array_merge(
+                    $this->getTransportHeadEmails($requisition),
+                    $this->getRequesterEmails($requisition)
+                );
                 break;
 
             case 'transport_approved':
@@ -416,15 +421,43 @@ class EmailService
         $department = $requisition->department;
         $driver = $requisition->assignedDriver ?? $requisition->driver;
         $vehicle = $requisition->assignedVehicle ?? $requisition->vehicle;
+        
+        // Get department head info for department approval emails
+        $headName = null;
+        $approvedByName = null;
+        $approvedByEmail = null;
+        
+        // Get department head name from the department's head_employee relationship
+        if ($department && $department->headEmployee) {
+            $headName = $department->headEmployee->name;
+        }
+        
+        // Get the user who approved (for approval emails)
+        if ($requisition->department_approved_by) {
+            $approvedBy = User::find($requisition->department_approved_by);
+            if ($approvedBy) {
+                $approvedByName = $approvedBy->name;
+                $approvedByEmail = $approvedBy->email;
+            }
+        }
+        
+        // Get admin settings for email templates
+        $adminSettings = DB::table('settings')->where('id', 1)->first();
+        $adminTitle = $adminSettings->admin_title ?? 'Transport Management System';
+        $adminDescription = $adminSettings->admin_description ?? 'Fleet Management Solution';
+        $adminLogo = $adminSettings->admin_logo ?? 'default.png';
+        $adminLogoUrl = !empty($adminSettings->admin_logo) 
+            ? asset('public/admin_resource/assets/images/' . $adminSettings->admin_logo) 
+            : asset('public/admin_resource/assets/images/default.png');
 
         return [
             'requisition_number' => $requisition->requisition_number ?? 'N/A',
             'requester_name' => $requester ? ($requester->name ?? $requester->first_name . ' ' . $requester->last_name) : 'N/A',
             'requester_email' => $requester->email ?? 'N/A',
-            'department_name' => $department ? ($department->name ?? 'N/A') : 'N/A',
+            'department_name' => $department ? ($department->department_name ?? 'N/A') : 'N/A',
             'pickup_location' => $requisition->from_location ?? 'N/A',
             'dropoff_location' => $requisition->to_location ?? 'N/A',
-            'pickup_date' => $requisition->travel_date ? $requisition->travel_date->format('Y-m-d') : 'N/A',
+            'pickup_date' => $requisition->travel_date ? $requisition->travel_date->format('d M, Y') : 'N/A',
             'pickup_time' => $requisition->travel_time ? $requisition->travel_time->format('H:i') : 'N/A',
             'purpose' => $requisition->purpose ?? 'N/A',
             'vehicle_type' => $vehicle ? ($vehicle->vehicle_type ?? $vehicle->name) : ($requisition->vehicle_type ?? 'N/A'),
@@ -432,6 +465,20 @@ class EmailService
             'status' => $requisition->status ?? 'N/A',
             'approval_url' => route('requisitions.show', $requisition->id),
             'company_name' => config('app.name', 'Transport Management System'),
+            'year' => date('Y'),
+            // Department head info
+            'head_name' => $headName,
+            // Approval info
+            'approved_by_name' => $approvedByName,
+            'approved_by_email' => $approvedByEmail,
+            // Vehicle & Driver info (for transport approved emails)
+            'vehicle_assigned' => $vehicle ? ($vehicle->vehicle_name ?? $vehicle->name) : null,
+            'driver_assigned' => $driver ? ($driver->driver_name ?? $driver->name) : null,
+            'driver_phone' => $driver ? ($driver->phone ?? $driver->contact_number) : null,
+            // Admin settings for email templates
+            'admin_title' => $adminTitle,
+            'admin_description' => $adminDescription,
+            'admin_logo_url' => $adminLogoUrl,
         ];
     }
 }

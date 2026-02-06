@@ -105,6 +105,9 @@ class EmailTemplateController extends Controller
             'subject' => 'required|string|max:255',
             'body' => 'required|string',
             'type' => 'required|string|in:' . implode(',', array_keys(EmailTemplate::getTemplateTypes())),
+            'greeting' => 'nullable|string',
+            'content_text' => 'nullable|string',
+            'footer_text' => 'nullable|string',
             'variables' => 'nullable|json',
             'is_active' => 'nullable|boolean',
         ]);
@@ -118,13 +121,29 @@ class EmailTemplateController extends Controller
 
         DB::beginTransaction();
         try {
+            // Merge greeting, content_text, and footer_text into variables
+            $variables = $request->variables ? json_decode($request->variables, true) : [];
+            if (!is_array($variables)) {
+                $variables = [];
+            }
+            
+            if ($request->greeting) {
+                $variables['greeting'] = $request->greeting;
+            }
+            if ($request->content_text) {
+                $variables['content_text'] = $request->content_text;
+            }
+            if ($request->footer_text) {
+                $variables['footer_text'] = $request->footer_text;
+            }
+            
             $template = EmailTemplate::create([
                 'name' => $request->name,
                 'slug' => $request->slug,
                 'subject' => $request->subject,
                 'body' => $request->body,
                 'type' => $request->type,
-                'variables' => $request->variables ? json_decode($request->variables) : null,
+                'variables' => !empty($variables) ? json_encode($variables) : null,
                 'is_active' => $request->is_active ?? true,
                 'created_by' => Auth::id(),
             ]);
@@ -167,7 +186,20 @@ class EmailTemplateController extends Controller
     public function edit(EmailTemplate $emailTemplate)
     {
         $templateTypes = EmailTemplate::getTemplateTypes();
-        return view('admin.dashboard.email-templates.edit', compact('emailTemplate', 'templateTypes'));
+        
+        // Create a temporary escaped version for the view (don't modify the model)
+        $escapedBody = str_replace(
+            ['{{', '}}', '@{{'],
+            ['&#123;&#123;', '&#125;&#125;', '@&#123;&#123;'],
+            $emailTemplate->body
+        );
+        
+        // Pass both the original template and escaped body
+        return view('admin.dashboard.email-templates.edit', [
+            'emailTemplate' => $emailTemplate,
+            'templateTypes' => $templateTypes,
+            'escapedBody' => $escapedBody
+        ]);
     }
 
     /**
@@ -185,6 +217,9 @@ class EmailTemplateController extends Controller
             'subject' => 'required|string|max:255',
             'body' => 'required|string',
             'type' => 'required|string|in:' . implode(',', array_keys(EmailTemplate::getTemplateTypes())),
+            'greeting' => 'nullable|string',
+            'content_text' => 'nullable|string',
+            'footer_text' => 'nullable|string',
             'variables' => 'nullable|json',
             'is_active' => 'nullable|boolean',
         ]);
@@ -198,13 +233,29 @@ class EmailTemplateController extends Controller
 
         DB::beginTransaction();
         try {
+            // Merge greeting, content_text, and footer_text into variables
+            $variables = $request->variables ? json_decode($request->variables, true) : [];
+            if (!is_array($variables)) {
+                $variables = [];
+            }
+            
+            if ($request->greeting) {
+                $variables['greeting'] = $request->greeting;
+            }
+            if ($request->content_text) {
+                $variables['content_text'] = $request->content_text;
+            }
+            if ($request->footer_text) {
+                $variables['footer_text'] = $request->footer_text;
+            }
+            
             $template = $emailTemplate->update([
                 'name' => $request->name,
                 'slug' => $request->slug,
                 'subject' => $request->subject,
                 'body' => $request->body,
                 'type' => $request->type,
-                'variables' => $request->variables ? json_decode($request->variables) : null,
+                'variables' => !empty($variables) ? json_encode($variables) : null,
                 'is_active' => $request->is_active ?? true,
                 'updated_by' => Auth::id(),
             ]);

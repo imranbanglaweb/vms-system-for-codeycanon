@@ -5,153 +5,237 @@ Create Email Template
 @endsection
 
 @section('main_content')
-<section role="main" class="content-body" style="background-color: #fff;">
-    <div class="container">
+<section role="main" class="content-body" style="background: linear-gradient(135deg, #f5f7fa 0%, #e8ecf1 100%); min-height: 100vh;">
+    <div class="container-fluid">
 
-        <div class="d-flex justify-content-between align-items-center mb-3">
-            <h4 class="fw-bold text-primary mb-0">
-                <i class="fa fa-envelope"></i> Create Email Template
-            </h4>
-            <div>
-                <button type="button" class="btn btn-info btn-sm me-2" onclick="previewEmail()">
-                    <i class="fa fa-eye"></i> Preview Email
-                </button>
-                <a href="{{ route('email-templates.index') }}" class="btn btn-primary btn-sm pull-right">
-                    <i class="fa fa-arrow-left"></i> Back
-                </a>
+        {{-- Header Section --}}
+        <div class="mb-4">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h2 class="fw-bold mb-2" style="color: #1e3a5f;">
+                        <i class="fa fa-envelope-open-text me-3" style="color: #2d5a87;"></i> Create New Email Template
+                    </h2>
+                    <p class="text-muted mb-0">Design and configure your email communication template</p>
+                </div>
+                <div class="d-flex gap-2">
+                    <button type="button" class="btn btn-outline-info px-3" onclick="previewEmail()" title="Preview email template">
+                        <i class="fa fa-eye me-2"></i> Preview
+                    </button>
+                    <a href="{{ route('email-templates.index') }}" class="btn btn-outline-secondary px-3">
+                        <i class="fa fa-arrow-left me-2"></i> Back
+                    </a>
+                </div>
             </div>
         </div>
 
-        <div class="card shadow-sm border-0 rounded-3 mx-auto" style="max-width: 1200px;">
-            <div class="card-body p-4 bg-light">
+        {{-- Main Card --}}
+        <div class="card shadow-lg border-0 rounded-4 mx-auto" style="max-width: 1200px; background: white;">
+            <div class="card-body p-5">
                 <form id="emailTemplateForm" action="{{ route('email-templates.store') }}" method="POST">
                     @csrf
 
-                    <div class="row gy-3 gx-4 align-items-center">
-                        {{-- Template Name --}}
-                        <div class="col-md-6">
-                            <label class="form-label fw-semibold small mb-1">Template Name *</label>
-                            <div class="input-group input-group-sm shadow-sm rounded">
-                                <span class="input-group-text bg-white border-end-0">
-                                    <i class="fa fa-tag text-secondary"></i>
-                                </span>
+                    {{-- Basic Information Section --}}
+                    <div class="mb-5">
+                        <h5 class="fw-bold mb-4" style="color: #1e3a5f; border-bottom: 2px solid #2d5a87; padding-bottom: 10px;">
+                            <i class="fa fa-info-circle me-2" style="color: #2d5a87;"></i> Basic Information
+                        </h5>
+                        <div class="row gy-4 gx-4">
+                            {{-- Template Name --}}
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold mb-2" style="color: #1e293b;">Template Name <span class="text-danger">*</span></label>
                                 <input 
                                     type="text" 
                                     name="name" 
                                     id="name"
-                                    class="form-control border-start-0 py-2" 
-                                    placeholder="Template Name" 
-                                    value="{{ old('name') }}">
+                                    class="form-control form-control-lg border-2" 
+                                    placeholder="e.g., Requisition Created Notification"
+                                    value="{{ old('name') }}"
+                                    style="border-color: #e2e8f0;">
+                                <small class="text-danger error-text name_error"></small>
+                                <small class="d-block text-muted mt-1">A descriptive name for this email template</small>
                             </div>
-                            <small class="text-danger error-text name_error"></small>
-                        </div>
 
-                        {{-- Template Slug --}}
-                        <div class="col-md-6">
-                            <label class="form-label fw-semibold small mb-1">Slug *</label>
-                            <div class="input-group input-group-sm shadow-sm rounded">
-                                <span class="input-group-text bg-white border-end-0">
-                                    <i class="fa fa-code text-secondary"></i>
-                                </span>
+                            {{-- Template Slug --}}
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold mb-2" style="color: #1e293b;">Slug <span class="text-danger">*</span></label>
                                 <input 
                                     type="text" 
                                     name="slug" 
                                     id="slug"
-                                    class="form-control border-start-0 py-2" 
-                                    placeholder="template-slug" 
-                                    value="{{ old('slug') }}">
+                                    class="form-control form-control-lg border-2" 
+                                    placeholder="e.g., requisition-created"
+                                    value="{{ old('slug') }}"
+                                    style="border-color: #e2e8f0;">
+                                <small class="text-danger error-text slug_error"></small>
+                                <small class="d-block text-muted mt-1">Unique identifier (use lowercase and hyphens)</small>
                             </div>
-                            <small class="text-danger error-text slug_error"></small>
-                        </div>
 
-                        {{-- Template Type --}}
-                        <div class="col-md-6">
-                            <label class="form-label fw-semibold small mb-1">Template Type *</label>
-                            <div class="input-group input-group-sm shadow-sm rounded">
-                                <span class="input-group-text bg-white border-end-0">
-                                    <i class="fa fa-list text-secondary"></i>
-                                </span>
-                                <select name="type" id="type" class="form-select border-start-0 py-2">
-                                    <option value="">Select Type</option>
+                            {{-- Template Type --}}
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold mb-2" style="color: #1e293b;">Template Type <span class="text-danger">*</span></label>
+                                <select name="type" id="type" class="form-select form-select-lg border-2">
+                                    <option value="">Select a template type...</option>
                                     @foreach($templateTypes as $key => $label)
                                         <option value="{{ $key }}" {{ old('type') == $key ? 'selected' : '' }}>
                                             {{ $label }}
                                         </option>
                                     @endforeach
                                 </select>
+                                <small class="text-danger error-text type_error"></small>
+                                <small class="d-block text-muted mt-1">Choose the purpose of this email</small>
                             </div>
-                            <small class="text-danger error-text type_error"></small>
-                        </div>
 
-                        {{-- Active Status --}}
-                        <div class="col-md-6">
-                            <label class="form-label fw-semibold small mb-1">Status</label>
-                            <div class="input-group input-group-sm shadow-sm rounded">
-                                <span class="input-group-text bg-white border-end-0">
-                                    <i class="fa fa-power-off text-secondary"></i>
-                                </span>
-                                <select name="is_active" class="form-select border-start-0 py-2">
-                                    <option value="1" {{ old('is_active', '1') == '1' ? 'selected' : '' }}>Active</option>
-                                    <option value="0" {{ old('is_active') == '0' ? 'selected' : '' }}>Inactive</option>
+                            {{-- Active Status --}}
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold mb-2" style="color: #1e293b;">Status</label>
+                                <select name="is_active" class="form-select form-select-lg border-2">
+                                    <option value="1" {{ old('is_active', '1') == '1' ? 'selected' : '' }}>
+                                        <i class="fa fa-check-circle"></i> Active
+                                    </option>
+                                    <option value="0" {{ old('is_active') == '0' ? 'selected' : '' }}>
+                                        <i class="fa fa-times-circle"></i> Inactive
+                                    </option>
                                 </select>
+                                <small class="d-block text-muted mt-1">Enable or disable this template</small>
                             </div>
                         </div>
+                    </div>
 
-                        {{-- Email Subject --}}
-                        <div class="col-12">
-                            <label class="form-label fw-semibold small mb-1">Email Subject *</label>
-                            <div class="input-group input-group-sm shadow-sm rounded">
-                                <span class="input-group-text bg-white border-end-0">
-                                    <i class="fa fa-heading text-secondary"></i>
-                                </span>
+                    {{-- Email Content Section --}}
+                    <div class="mb-5">
+                        <h5 class="fw-bold mb-4" style="color: #1e3a5f; border-bottom: 2px solid #2d5a87; padding-bottom: 10px;">
+                            <i class="fa fa-file-text me-2" style="color: #2d5a87;"></i> Email Content
+                        </h5>
+                        <div class="row gy-4 gx-4">
+                            {{-- Email Subject --}}
+                            <div class="col-12">
+                                <label class="form-label fw-semibold mb-2" style="color: #1e293b;">Email Subject <span class="text-danger">*</span></label>
                                 <input 
                                     type="text" 
                                     name="subject" 
                                     id="subject"
-                                    class="form-control border-start-0 py-2" 
-                                    placeholder="Email Subject" 
-                                    value="{{ old('subject') }}">
+                                    class="form-control form-control-lg border-2" 
+                                    placeholder="e.g., New Vehicle Requisition: @@requisition_number"
+                                    value="{{ old('subject') }}"
+                                    style="border-color: #e2e8f0;">
+                                <small class="text-danger error-text subject_error"></small>
+                                <small class="d-block text-muted mt-1">The subject line recipients will see in their inbox</small>
                             </div>
-                            <small class="text-danger error-text subject_error"></small>
-                        </div>
 
-                        {{-- Email Body with CKEditor --}}
-                        <div class="col-12">
-                            <label class="form-label fw-semibold small mb-1">Email Body *</label>
-                            <textarea 
-                                name="body" 
-                                id="body"
-                                class="form-control border-start-0" 
-                                rows="10" 
-                                placeholder="Email body content...">{{ old('body') }}</textarea>
-                            <small class="text-danger error-text body_error"></small>
-                            <div class="mt-2">
-                                <span class="badge bg-info">Use @{{variable_name}} for dynamic content</span>
+                            {{-- Email Greeting --}}
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold mb-2" style="color: #1e293b;">Greeting</label>
+                                <input 
+                                    type="text" 
+                                    name="greeting" 
+                                    id="greeting"
+                                    class="form-control form-control-lg border-2" 
+                                    placeholder="e.g., Dear @@head_name,"
+                                    value="{{ old('greeting') }}"
+                                    style="border-color: #e2e8f0;">
+                                <small class="d-block text-muted mt-1">Opening greeting with personalization variables</small>
                             </div>
-                        </div>
 
-                        {{-- Variables (JSON) --}}
-                        <div class="col-12">
-                            <label class="form-label fw-semibold small mb-1">Available Variables (JSON)</label>
-                            <div class="input-group input-group-sm shadow-sm rounded">
-                                <span class="input-group-text bg-white border-end-0">
-                                    <i class="fa fa-code-branch text-secondary"></i>
-                                </span>
+                            {{-- Email Main Content --}}
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold mb-2" style="color: #1e293b;">Main Message</label>
                                 <textarea 
-                                    name="variables" 
-                                    id="variables"
-                                    class="form-control border-start-0 py-2" 
+                                    name="content_text" 
+                                    id="content_text"
+                                    class="form-control form-control-lg border-2" 
                                     rows="3" 
-                                    placeholder='{"variable_name": "description", ...}'>{{ old('variables') }}</textarea>
+                                    placeholder="Primary message content..."
+                                    style="border-color: #e2e8f0;">{{ old('content_text') }}</textarea>
+                                <small class="d-block text-muted mt-1">Core message of the email</small>
                             </div>
-                            <small class="text-muted">Define available variables in JSON format for documentation purposes.</small>
-                            <small class="text-danger error-text variables_error"></small>
+
+                            {{-- Email Body (HTML) --}}
+                            <div class="col-12">
+                                <label class="form-label fw-semibold mb-2" style="color: #1e293b;">Email Body (HTML Template) <span class="text-danger">*</span></label>
+                                <textarea 
+                                    name="body" 
+                                    id="body"
+                                    class="form-control border-2" 
+                                    rows="14" 
+                                    placeholder="Paste your email HTML template here..."
+                                    style="border-color: #e2e8f0; font-family: 'Courier New', monospace; font-size: 12px;">{{ old('body') }}</textarea>
+                                <small class="text-danger error-text body_error"></small>
+                                <div class="mt-3 p-3 rounded" style="background-color: #fef3c7; border-left: 4px solid #f59e0b;">
+                                    <strong class="text-warning"><i class="fa fa-lightbulb me-2"></i> Available Variables:</strong><br>
+                                    <small class="text-dark">
+                                        <code>@@requisition_number</code> 
+                                        <code>@@requester_name</code> 
+                                        <code>@@department_name</code> 
+                                        <code>@@pickup_location</code> 
+                                        <code>@@dropoff_location</code> 
+                                        <code>@@pickup_date</code> 
+                                        <code>@@pickup_time</code> 
+                                        <code>@@purpose</code> 
+                                        <code>@@passengers</code> 
+                                        <code>@@admin_logo_url</code> 
+                                        <code>@@admin_title</code> 
+                                        <code>@@company_name</code> 
+                                        <code>@@year</code>
+                                    </small>
+                                </div>
+                            </div>
+
+                            {{-- Email Footer Text --}}
+                            <div class="col-12">
+                                <label class="form-label fw-semibold mb-2" style="color: #1e293b;">Footer Message</label>
+                                <textarea 
+                                    name="footer_text" 
+                                    id="footer_text"
+                                    class="form-control form-control-lg border-2" 
+                                    rows="3" 
+                                    placeholder="e.g., Copyright notice, unsubscribe info, etc."
+                                    style="border-color: #e2e8f0;">{{ old('footer_text') }}</textarea>
+                                <small class="d-block text-muted mt-1">Footer text (copyright, contact info, etc.)</small>
+                            </div>
                         </div>
                     </div>
 
-                    <div class="text-center mt-4">
-                        <button type="submit" class="btn btn-primary px-4 py-2" id="submitBtn">
-                            <span class="spinner-border spinner-border-sm d-none" id="loader" role="status"></span>
+                    {{-- Advanced Section --}}
+                    <div class="mb-5">
+                        <h5 class="fw-bold mb-4" style="color: #1e3a5f; border-bottom: 2px solid #2d5a87; padding-bottom: 10px;">
+                            <i class="fa fa-sliders-h me-2" style="color: #2d5a87;"></i> Additional Variables (Optional)
+                        </h5>
+                        <div class="row gy-4 gx-4">
+                            <div class="col-12">
+                                <label class="form-label fw-semibold mb-2" style="color: #1e293b;">Custom Variables (JSON Format)</label>
+                                <textarea 
+                                    name="variables" 
+                                    id="variables"
+                                    class="form-control border-2" 
+                                    rows="6" 
+                                    placeholder='{"variable_name": "description", "key": "value"}'
+                                    style="border-color: #e2e8f0; font-family: 'Courier New', monospace; font-size: 12px;">{{ old('variables') }}</textarea>
+                                <small class="d-block text-muted mt-1">Define additional variables in JSON format for custom use cases</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    {{-- Action Buttons --}}
+                    <div class="row mt-5 pt-4 border-top">
+                        <div class="col-12 d-flex gap-3 justify-content-between">
+                            <a href="{{ route('email-templates.index') }}" class="btn btn-outline-secondary px-5 py-2">
+                                <i class="fa fa-times me-2"></i> Cancel
+                            </a>
+                            <button type="submit" class="btn btn-primary px-5 py-2 fw-semibold" id="submitBtn" style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); border: none;">
+                                <span class="spinner-border spinner-border-sm d-none me-2" id="loader" role="status"></span>
+                                <i class="fa fa-save me-2"></i> Create Template
+                            </button>
+                        </div>
+                    </div>
+
+                </form>
+            </div>
+        </div>
+
+    </div>
+</section>
+
+<!-- Preview Modal -->
                             <i class="fa fa-save"></i> Save Template
                         </button>
                     </div>
@@ -187,53 +271,52 @@ Create Email Template
 <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
 <style>
 .form-label {
-    color: #000;
-    font-size: 15px;
+    color: #1e293b;
+    font-size: 14px;
+    font-weight: 600;
 }
 .card {
-    background-color: #fff;
-    padding: 20px;
+    border-radius: 16px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
 }
 .form-control, .form-select {
-    font-size: 1.2em;
+    border: 2px solid #e2e8f0;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+.form-control:focus, .form-select:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 .input-group-text {
-    width: 38px;
-    justify-content: center;
-}
-.row > [class*="col-"] {
-    margin-bottom: 8px;
+    background-color: transparent;
+    border: none;
 }
 textarea.form-control {
-    font-size: 1.2em;
+    resize: vertical;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
+.btn {
+    border-radius: 8px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+.btn-primary {
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+}
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(59, 130, 246, 0.4);
+}
+
 </style>
 @endpush
 
 @push('scripts')
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script src="https://cdn.ckeditor.com/4.22.1/standard/ckeditor.js"></script>
 
 <script>
 $(function() {
-    // Initialize CKEditor
-    CKEDITOR.replace('body', {
-        height: 300,
-        toolbar: [
-            { name: 'document', items: ['Source'] },
-            { name: 'clipboard', items: ['Cut', 'Copy', 'Paste', 'Undo', 'Redo'] },
-            { name: 'editing', items: ['Find', 'Replace', 'SelectAll'] },
-            { name: 'basicstyles', items: ['Bold', 'Italic', 'Underline', 'Strike', 'RemoveFormat'] },
-            { name: 'paragraph', items: ['NumberedList', 'BulletedList', 'Outdent', 'Indent', 'Blockquote'] },
-            { name: 'links', items: ['Link', 'Unlink', 'Anchor'] },
-            { name: 'insert', items: ['Image', 'Table', 'HorizontalRule', 'SpecialChar'] },
-            { name: 'styles', items: ['Styles', 'Format'] },
-            { name: 'tools', items: ['Maximize'] }
-        ],
-        allowedContent: true,
-        bodyClass: 'email-body'
-    });
-
     // Auto-generate slug from name
     $('#name').on('input', function() {
         let name = $(this).val();
@@ -246,11 +329,6 @@ $(function() {
     // Form validation and submission
     $('#emailTemplateForm').on('submit', function(e) {
         e.preventDefault();
-
-        // Update CKEditor content before submitting
-        for (var instanceName in CKEDITOR.instances) {
-            CKEDITOR.instances[instanceName].updateElement();
-        }
 
         let form = $(this);
         let url = form.attr('action');
