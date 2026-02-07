@@ -15,8 +15,11 @@ class RoleSeeder extends Seeder
      */
     public function run()
     {
+        // Clear cached permissions
+        app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
+
         // Create Super Admin role with ALL permissions
-        $superAdminRole = Role::firstOrCreate(['name' => 'Super Admin']);
+        $superAdminRole = Role::firstOrCreate(['name' => 'Super Admin', 'guard_name' => 'web']);
         
         // Get all permissions and assign to Super Admin
         $allPermissions = Permission::all();
@@ -24,10 +27,15 @@ class RoleSeeder extends Seeder
             $superAdminRole->syncPermissions($allPermissions);
         }
 
-        Role::firstOrCreate(['name' => 'Admin']);
-        Role::firstOrCreate(['name' => 'Transport']);
-        Role::firstOrCreate(['name' => 'Employee']);
-        Role::firstOrCreate(['name' => 'Department Head']);
-        Role::firstOrCreate(['name' => 'Manager']);
+        // Create other roles
+        Role::firstOrCreate(['name' => 'Admin', 'guard_name' => 'web']);
+        Role::firstOrCreate(['name' => 'Transport', 'guard_name' => 'web']);
+        Role::firstOrCreate(['name' => 'Employee', 'guard_name' => 'web']);
+        Role::firstOrCreate(['name' => 'Department Head', 'guard_name' => 'web']);
+        Role::firstOrCreate(['name' => 'Manager', 'guard_name' => 'web']);
+        Role::firstOrCreate(['name' => 'Driver', 'guard_name' => 'web']);
+
+        $this->command->info('Role seeder completed successfully!');
+        $this->command->info('Created roles: Super Admin, Admin, Transport, Employee, Department Head, Manager');
     }
-} 
+}
