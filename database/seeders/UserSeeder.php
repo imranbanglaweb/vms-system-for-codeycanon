@@ -275,7 +275,6 @@ class UserSeeder extends Seeder
                     'department_id' => $firstDepartment ? $firstDepartment->id : 1,
                     'unit_id' => $firstUnit ? $firstUnit->id : 1,
                     'location_id' => $firstLocation ? $firstLocation->id : 1,
-                    'employee_type' => 'driver',
                     'join_date' => now()->format('Y-m-d'),
                     'status' => 1,
                     'photo' => $dummyImage,
