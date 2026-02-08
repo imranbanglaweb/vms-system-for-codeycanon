@@ -78,6 +78,7 @@ class MenuSeeder extends Seeder
             'maintenance-type-manage',
             'maintenance-vendor-manage',
             'maintenance-category-manage',
+            'maintenance-approval-view',
 
             // Requisitions
             'requisition-create',
@@ -463,6 +464,24 @@ class MenuSeeder extends Seeder
                 'menu_url' => 'admin-maintenance.history',
                 'menu_permission' => 'maintenance-manage',
                 'menu_order' => 5,
+                'parent_name' => 'Vehicle Maintenance',
+            ],
+            [
+                'menu_name' => 'Pending Approvals',
+                'menu_slug' => 'maintenance-pending-approvals',
+                'menu_icon' => 'fa-check-circle',
+                'menu_url' => 'maintenance_approvals.index',
+                'menu_permission' => 'maintenance-approval-view',
+                'menu_order' => 6,
+                'parent_name' => 'Vehicle Maintenance',
+            ],
+            [
+                'menu_name' => 'Approved List',
+                'menu_slug' => 'maintenance-approved-list',
+                'menu_icon' => 'fa-list-check',
+                'menu_url' => 'maintenance_approvals.approved',
+                'menu_permission' => 'maintenance-approval-view',
+                'menu_order' => 7,
                 'parent_name' => 'Vehicle Maintenance',
             ],
 

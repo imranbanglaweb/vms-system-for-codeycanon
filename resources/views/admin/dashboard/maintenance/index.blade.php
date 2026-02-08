@@ -5,9 +5,17 @@
     <div class="container-fluid">
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h3 class="fw-bold text-primary"><i class="fa fa-tools me-2"></i> Maintenance Requisitions</h3>
-            <a href="{{ route('maintenance.create') }}" class="btn btn-primary btn-sm pull-right">
-                <i class="fa fa-plus me-1"></i> Create New
-            </a>
+            <div class="d-flex gap-2">
+                <a href="{{ route('maintenance_approvals.index') }}" class="btn btn-success btn-sm">
+                    <i class="fa fa-check-circle me-1"></i> Pending Approvals
+                </a>
+                <a href="{{ route('maintenance_approvals.approved') }}" class="btn btn-info btn-sm">
+                    <i class="fa fa-list me-1"></i> Approved List
+                </a>
+                <a href="{{ route('maintenance.create') }}" class="btn btn-primary btn-sm">
+                    <i class="fa fa-plus me-1"></i> Create New
+                </a>
+            </div>
         </div>
 <br>
 <br>
@@ -133,6 +141,42 @@ $(document).ready(function() {
 
     $('#searchType, #searchPriority').on('change', function() {
         table.draw();
+    });
+
+    // Submit for approval button click
+    $('#requisitionsTable').on('click', '.submitBtn', function() {
+        var id = $(this).data('id');
+        
+        Swal.fire({
+            title: 'Submit for Approval?',
+            text: 'This requisition will be sent for approval.',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#198754',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: 'Yes, submit!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    url: '/admin/approvals/maintenance/' + id + '/submit',
+                    type: 'POST',
+                    data: {
+                        _token: '{{ csrf_token() }}'
+                    },
+                    success: function(response) {
+                        if (response.status === 'success') {
+                            Swal.fire('Submitted!', response.message, 'success')
+                                .then(() => table.ajax.reload(null, false));
+                        } else {
+                            Swal.fire('Error!', response.message, 'error');
+                        }
+                    },
+                    error: function(xhr) {
+                        Swal.fire('Error!', xhr.responseJSON?.message || 'Something went wrong', 'error');
+                    }
+                });
+            }
+        });
     });
 
       // Delete button click

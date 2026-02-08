@@ -21,7 +21,7 @@ class MaintenanceRequisitionSeeder extends Seeder
     {
         $requisitionTypes = ['scheduled', 'emergency', 'routine', 'insurance'];
         $priorities = ['Low', 'Medium', 'High', 'Urgent'];
-        $statuses = ['Pending', 'Approved', 'Completed', 'Rejected'];
+        $statuses = ['Pending', 'Pending Approval', 'Approved', 'Completed', 'Rejected'];
         $chargeBearers = ['Company', 'Employee', 'Department'];
 
         $serviceTitles = [
@@ -73,7 +73,9 @@ class MaintenanceRequisitionSeeder extends Seeder
         ];
 
         for ($i = 0; $i < 100; $i++) {
-            $requisition = MaintenanceRequisition::create([
+            $status = $faker->randomElement($statuses);
+            
+            $requisitionData = [
                 'requisition_no' => $faker->unique()->bothify('MMR-#####'),
                 'requisition_type' => $faker->randomElement($requisitionTypes),
                 'priority' => $faker->randomElement($priorities),
@@ -87,9 +89,21 @@ class MaintenanceRequisitionSeeder extends Seeder
                 'remarks' => $faker->sentence(3),
                 'total_parts_cost' => $faker->randomFloat(2, 100, 10000),
                 'total_cost' => $faker->randomFloat(2, 500, 20000),
-                'status' => $faker->randomElement($statuses),
+                'status' => $status,
                 'created_by' => 1,
-            ]);
+            ];
+            
+            // Add approval fields if status is Approved or Rejected
+            if (in_array($status, ['Approved', 'Rejected', 'Pending Approval'])) {
+                $requisitionData['approved_by'] = 1;
+                $requisitionData['approved_at'] = now();
+            }
+            
+            if ($status === 'Rejected') {
+                $requisitionData['approval_remarks'] = $faker->sentence(3);
+            }
+            
+            $requisition = MaintenanceRequisition::create($requisitionData);
 
             // Create 1-4 items for each requisition
             $numItems = $faker->numberBetween(1, 4);

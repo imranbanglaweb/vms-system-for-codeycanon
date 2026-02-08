@@ -66,23 +66,48 @@ class MaintenanceRequisitionController extends Controller
                 $color = match($row->status) {
                     'Approved' => 'green',
                     'Rejected' => 'red',
+                    'Completed' => 'blue',
+                    'Pending Approval' => 'warning',
                     default     => 'orange'
                 };
                 return '<span style="color:'.$color.';font-weight:bold;">'.$row->status.'</span>';
             })
 
             ->addColumn('actions', function($row){
-                return '
+                $actions = '
                     <a href="'.route("maintenance.show",$row->id).'" class="btn btn-info btn-sm">
                         <i class="fa fa-eye"></i>
                     </a>
-                    <a href="'.route("maintenance.edit",$row->id).'" class="btn btn-warning btn-sm">
-                        <i class="fa fa-edit"></i>
-                    </a>
-                    <button data-id="'.$row->id.'" class="btn btn-danger btn-sm deleteBtn">
-                        <i class="fa fa-minus"></i>
-                    </button>
                 ';
+                
+                // Add submit for approval button if status is Pending
+                if ($row->status === 'Pending') {
+                    $actions .= '
+                        <button data-id="'.$row->id.'" class="btn btn-success btn-sm submitBtn" title="Submit for Approval">
+                            <i class="fa fa-paper-plane"></i>
+                        </button>
+                    ';
+                }
+                
+                // Add edit button if not approved or rejected
+                if (!in_array($row->status, ['Approved', 'Rejected', 'Completed'])) {
+                    $actions .= '
+                        <a href="'.route("maintenance.edit",$row->id).'" class="btn btn-warning btn-sm">
+                            <i class="fa fa-edit"></i>
+                        </a>
+                    ';
+                }
+                
+                // Add delete button only for pending
+                if ($row->status === 'Pending') {
+                    $actions .= '
+                        <button data-id="'.$row->id.'" class="btn btn-danger btn-sm deleteBtn">
+                            <i class="fa fa-minus"></i>
+                        </button>
+                    ';
+                }
+                
+                return $actions;
             })
 
             ->rawColumns(['status','actions'])

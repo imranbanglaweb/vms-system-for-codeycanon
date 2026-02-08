@@ -128,6 +128,7 @@ class PermissionSeeder extends Seeder
             'maintenance-edit',
             'maintenance-delete',
             'maintenance-approve',
+            'maintenance-approval-view',
             'maintenance-history',
 
             'maintenance-type-manage',

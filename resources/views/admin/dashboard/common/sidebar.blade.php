@@ -323,6 +323,31 @@
                 </li>
                 @endif
 
+                {{-- 12. Maintenance Approval --}}
+                @if(auth()->user()->can('maintenance-approval-view') || $isSuperAdmin || $isAdmin || $isTransport)
+                <li class="nav-parent {{ request()->is('admin/approvals/maintenance*') ? 'expanded active' : '' }}">
+                    <a href="javascript:void(0)" onclick="toggleSubmenu(this)">
+                        <i class="fas fa-wrench"></i>
+                        <span>Maintenance Approval</span>
+                        <i class="fas fa-chevron-right arrow"></i>
+                    </a>
+                    <ul class="nav-children {{ request()->is('admin/approvals/maintenance*') ? 'show' : '' }}">
+                        <li class="{{ request()->is('admin/approvals/maintenance') && !request()->is('admin/approvals/maintenance/*') ? 'active' : '' }}">
+                            <a href="{{ route('maintenance_approvals.index') }}">
+                                <i class="fas fa-list"></i>
+                                <span>Pending Approvals</span>
+                            </a>
+                        </li>
+                        <li class="{{ request()->is('admin/approvals/maintenance/approved') ? 'active' : '' }}">
+                            <a href="{{ route('maintenance_approvals.approved') }}">
+                                <i class="fas fa-check-circle"></i>
+                                <span>Approved List</span>
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+                @endif
+
                 {{-- 13. Trip Sheets --}}
                 @if(auth()->user()->can('trip-manage') || $isSuperAdmin || $isAdmin || $isTransport)
                 <li class="nav-parent {{ request()->is('transport/trip-sheets*') ? 'expanded active' : '' }}">

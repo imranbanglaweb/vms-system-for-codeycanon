@@ -14,6 +14,7 @@ class MaintenanceRequisition extends Model
         'employee_id',
         'vehicle_id',
         'maintenance_type_id',
+        'vendor_id',
         'maintenance_date',
         'service_title',
         'charge_bear_by',
@@ -22,7 +23,18 @@ class MaintenanceRequisition extends Model
         'total_parts_cost',
         'total_cost',
         'status',
+        'approved_by',
+        'approved_at',
+        'approval_remarks',
         'created_by',
+    ];
+
+    protected $casts = [
+        'maintenance_date' => 'date',
+        'approved_at' => 'datetime',
+        'charge_amount' => 'decimal:2',
+        'total_parts_cost' => 'decimal:2',
+        'total_cost' => 'decimal:2',
     ];
 
     public function employee()
@@ -40,7 +52,10 @@ class MaintenanceRequisition extends Model
         return $this->belongsTo(MaintenanceType::class);
     }
 
-   
+    public function vendor()
+    {
+        return $this->belongsTo(MaintenanceVendor::class, 'vendor_id');
+    }
 
     public function items()
     {
@@ -57,7 +72,39 @@ class MaintenanceRequisition extends Model
         return $this->belongsTo(User::class, 'requested_by');
     }
 
-   
+    public function approvedBy()
+    {
+        return $this->belongsTo(User::class, 'approved_by');
+    }
 
-    
+    public function creator()
+    {
+        return $this->belongsTo(User::class, 'created_by');
+    }
+
+    // Scopes
+    public function scopePending($query)
+    {
+        return $query->where('status', 'Pending');
+    }
+
+    public function scopePendingApproval($query)
+    {
+        return $query->where('status', 'Pending Approval');
+    }
+
+    public function scopeApproved($query)
+    {
+        return $query->where('status', 'Approved');
+    }
+
+    public function scopeRejected($query)
+    {
+        return $query->where('status', 'Rejected');
+    }
+
+    public function scopeCompleted($query)
+    {
+        return $query->where('status', 'Completed');
+    }
 }

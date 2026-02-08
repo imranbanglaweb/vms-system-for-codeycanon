@@ -65,6 +65,7 @@ use App\Http\Controllers\MaintenanceTypeController;
 use App\Http\Controllers\MaintenanceVendorController;
 use App\Http\Controllers\MaintenanceScheduleController;
 use App\Http\Controllers\MaintenanceRequisitionController;
+use App\Http\Controllers\MaintenanceApprovalController;
 use App\Http\Controllers\MaintenanceCategoryController;
 
 // Reports
@@ -289,6 +290,23 @@ Route::prefix('transport')->group(function () {
 
 Route::get('admin/maintenance/history', [MaintenanceRequisitionController::class, 'history'])->name('admin-maintenance.history');
 Route::resource('maintenance', MaintenanceRequisitionController::class);
+
+// ============================================================================
+// MAINTENANCE APPROVAL WORKFLOW
+// ============================================================================
+Route::middleware(['auth'])->prefix('admin')->name('maintenance_approvals.')->group(function () {
+    Route::get('/approvals/maintenance', [MaintenanceApprovalController::class, 'index'])->name('index');
+    Route::get('/approvals/maintenance/ajax', [MaintenanceApprovalController::class, 'ajax'])->name('ajax');
+    Route::get('/approvals/maintenance/{id}', [MaintenanceApprovalController::class, 'show'])->name('show');
+    Route::post('/approvals/maintenance/{id}/approve', [MaintenanceApprovalController::class, 'approve'])->name('approve');
+    Route::post('/approvals/maintenance/{id}/reject', [MaintenanceApprovalController::class, 'reject'])->name('reject');
+    Route::post('/approvals/maintenance/{id}/submit', [MaintenanceApprovalController::class, 'submit'])->name('submit');
+    Route::post('/approvals/maintenance/{id}/complete', [MaintenanceApprovalController::class, 'complete'])->name('complete');
+    
+    // Approved requisitions list
+    Route::get('/approvals/maintenance/approved', [MaintenanceApprovalController::class, 'approved'])->name('approved');
+    Route::get('/approvals/maintenance/approved/ajax', [MaintenanceApprovalController::class, 'approved'])->name('approved.ajax');
+});
 
 
 

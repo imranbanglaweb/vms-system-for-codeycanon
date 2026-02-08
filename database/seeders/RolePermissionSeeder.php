@@ -124,6 +124,7 @@ class RolePermissionSeeder extends Seeder
             'maintenance-create',
             'maintenance-edit',
             'maintenance-approve',
+            'maintenance-approval-view',
             'maintenance-history',
             'maintenance-type-manage',
             'maintenance-vendor-manage',
@@ -216,6 +217,7 @@ class RolePermissionSeeder extends Seeder
             // Maintenance
             'maintenance-view',
             'maintenance-create',
+            'maintenance-approval-view',
 
             // Reports
             'report-trip-fuel',
@@ -280,6 +282,11 @@ class RolePermissionSeeder extends Seeder
             
             // Vehicles
             'vehicle-view',
+            
+            // Maintenance
+            'maintenance-view',
+            'maintenance-create',
+            'maintenance-approval-view',
             
             // Reports
             'report-requisition',
