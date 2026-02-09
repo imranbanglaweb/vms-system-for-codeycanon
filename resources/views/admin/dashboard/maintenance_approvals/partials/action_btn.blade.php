@@ -1,4 +1,4 @@
-<a href="{{ route('maintenance_approvals.show', $r->id) }}" class="btn btn-info btn-sm" title="View & Process">
+<a href="{{ route('maintenance_approvals.show', $r->id) }}" class="btn btn-info btn-sm" title="View Details">
     <i class="fa fa-eye"></i>
 </a>
 @if($r->status == 'Pending Approval')

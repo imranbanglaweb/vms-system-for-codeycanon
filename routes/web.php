@@ -294,18 +294,20 @@ Route::resource('maintenance', MaintenanceRequisitionController::class);
 // ============================================================================
 // MAINTENANCE APPROVAL WORKFLOW
 // ============================================================================
-Route::middleware(['auth'])->prefix('admin')->name('maintenance_approvals.')->group(function () {
-    Route::get('/approvals/maintenance', [MaintenanceApprovalController::class, 'index'])->name('index');
-    Route::get('/approvals/maintenance/ajax', [MaintenanceApprovalController::class, 'ajax'])->name('ajax');
-    Route::get('/approvals/maintenance/{id}', [MaintenanceApprovalController::class, 'show'])->name('show');
-    Route::post('/approvals/maintenance/{id}/approve', [MaintenanceApprovalController::class, 'approve'])->name('approve');
-    Route::post('/approvals/maintenance/{id}/reject', [MaintenanceApprovalController::class, 'reject'])->name('reject');
-    Route::post('/approvals/maintenance/{id}/submit', [MaintenanceApprovalController::class, 'submit'])->name('submit');
-    Route::post('/approvals/maintenance/{id}/complete', [MaintenanceApprovalController::class, 'complete'])->name('complete');
-    
-    // Approved requisitions list
-    Route::get('/approvals/maintenance/approved', [MaintenanceApprovalController::class, 'approved'])->name('approved');
-    Route::get('/approvals/maintenance/approved/ajax', [MaintenanceApprovalController::class, 'approved'])->name('approved.ajax');
+Route::middleware(['auth'])->prefix('admin')->group(function () {
+    Route::prefix('approvals/maintenance')->name('maintenance_approvals.')->group(function () {
+        Route::get('/', [MaintenanceApprovalController::class, 'index'])->name('index');
+        Route::get('/ajax', [MaintenanceApprovalController::class, 'ajax'])->name('ajax');
+        Route::get('/{id}', [MaintenanceApprovalController::class, 'show'])->name('show');
+        Route::post('/{id}/approve', [MaintenanceApprovalController::class, 'approve'])->name('approve');
+        Route::post('/{id}/reject', [MaintenanceApprovalController::class, 'reject'])->name('reject');
+        Route::post('/{id}/submit', [MaintenanceApprovalController::class, 'submit'])->name('submit');
+        Route::post('/{id}/complete', [MaintenanceApprovalController::class, 'complete'])->name('complete');
+        
+        // Approved requisitions list - must be before {id} route
+        Route::get('/approved', [MaintenanceApprovalController::class, 'approved'])->name('approved');
+        Route::get('/approved/ajax', [MaintenanceApprovalController::class, 'approved'])->name('approved.ajax');
+    });
 });
 
 
