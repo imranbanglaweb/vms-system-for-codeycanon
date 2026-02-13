@@ -1,8 +1,8 @@
-# InayaFleet360 - All-in-One Fleet & Transport Automation System
+# InayaFleet360 – Fleet & Transport Management System (Laravel)
 
 ## Smart Logistics. Better Operations.
 
-A comprehensive Laravel-based fleet and transport management system designed to streamline your organization's vehicle and transportation operations. This all-in-one solution combines fleet management, driver management, requisition workflows, maintenance tracking, and multi-language support.
+A comprehensive Laravel-based transport management system designed to streamline your organization's vehicle and transportation operations. This all-in-one solution combines fleet management, driver management, requisition workflows, maintenance tracking, and multi-language support.
 
 ![License](https://img.shields.io/badge/license-Proprietary-green)
 ![Laravel](https://img.shields.io/badge/Laravel-9.x%20|%2010.x-orange)
@@ -50,6 +50,28 @@ InayaFleet360 is a powerful, feature-rich fleet and transport automation system 
 - Multi-company support
 - Location tracking
 
+### HR Module - Employee Management
+- Comprehensive employee management with detailed profiles
+- Department management and organizational hierarchy
+- Designation and position tracking
+- Department Head assignment for approval workflows
+- Employee-Transport linking for requisition system
+- Employee self-service portal
+
+### Notification System
+- **Push Notifications**: Real-time alerts for requisition status, approvals, trip assignments
+- **Email Templates**: Customizable templates for requisitions, approvals, driver assignments
+- **Email Log History**: Complete audit trail of all sent emails
+- **Notification Settings**: Configure channels, recipients, and preferences
+- **Push Subscribers Management**: Track and manage notification subscriptions
+
+### Multi-Level Approval System
+- **Employee Login**: Submit requisitions, view status, track trips
+- **Driver Login**: View assigned trips, manage availability, log fuel
+- **Department Head Login**: Approve/reject department requisitions (first approval level)
+- **Transport Admin Login**: Final approval authority, vehicle/driver assignment
+- Complete audit trail and approval history
+
 ### Additional Features
 - 📋 Multi-language support (translation system)
 - 📧 Email templates and logging
@@ -59,6 +81,16 @@ InayaFleet360 is a powerful, feature-rich fleet and transport automation system 
 - 📝 Activity logging and audit trail
 - 📄 Document approval workflow
 - 📈 Reporting and analytics
+
+## 👥 User Roles & Access Levels
+
+| Role | Access Level | Approval Authority |
+|------|-------------|-------------------|
+| Admin | Full System Access | Complete Control |
+| Employee | Submit requisitions, view status | Submit only |
+| Driver | View assigned trips, availability | View only |
+| Department Head | Department management | First Approval Level |
+| Transport Admin | Fleet oversight | Final Approval Level |
 
 ## 🛠️ Technology Stack
 
@@ -94,8 +126,8 @@ InayaFleet360 is a powerful, feature-rich fleet and transport automation system 
 
 ### Step 1: Clone and Install
 ```bash
-git clone https://github.com/inayafleet/inayafleet360.git
-cd inayafleet360
+git clone https://github.com/codeaycanon/tms.git
+cd tms-for-codeaycanon-update
 composer install
 npm install
 ```
@@ -108,7 +140,7 @@ php artisan key:generate
 
 Update your `.env` file with database credentials:
 ```env
-APP_NAME="InayaFleet360"
+APP_NAME="InayaFleet360 – Fleet & Transport Management System"
 APP_URL=http://localhost
 
 DB_CONNECTION=mysql
@@ -154,16 +186,21 @@ php artisan serve
 ## 📖 Default Access
 
 After installation, access the admin panel:
-- **Admin URL:** `http://localhost/admin`
-- **Email:** `admin@inayafleet360.com`
-- **Password:** `password`
+
+| Role | URL | Email | Password |
+|------|-----|-------|----------|
+| Admin | /admin | admin@codeaycanon.com | password |
+| Employee | /employee/login | employee@codeaycanon.com | password |
+| Driver | /driver/login | driver@codeaycanon.com | password |
+| Dept Head | /department-head/login | depthead@codeaycanon.com | password |
+| Transport Admin | /transport-admin/login | transport@codeaycanon.com | password |
 
 > ⚠️ **Security Note:** Change these credentials immediately after first login.
 
 ## 📁 Project Structure
 
 ```
-inayafleet360/
+codeaycanon-tms/
 ├── app/
 │   ├── Console/
 │   ├── Exceptions/
@@ -178,7 +215,7 @@ inayafleet360/
 │   ├── migrations/
 │   └── seeders/
 ├── public/
-│   └── admin_resource/
+│   └── frontend_resource/
 ├── resources/
 │   └── views/
 ├── routes/
@@ -206,6 +243,12 @@ Configure WebSocket and push notifications:
 Settings > Notifications
 ```
 
+### Approval Workflow Settings
+Configure department heads and approval levels:
+```
+Settings > Approval Workflow
+```
+
 ## 📊 Database Schema
 
 Key tables include:
@@ -216,6 +259,8 @@ Key tables include:
 - `trip_sheets` - Trip documentation
 - `maintenance_records` - Vehicle maintenance
 - `departments` - Organization structure
+- `employees` - HR module employee records
+- `email_logs` - Email notification history
 - `settings` - System configuration
 
 ## 🔌 API Endpoints
@@ -226,13 +271,15 @@ The system provides RESTful APIs for:
 - Requisition workflows
 - Trip sheet operations
 - Maintenance tracking
+- Employee management
+- Notification management
 
 ## 🎨 Customization
 
 ### Theme Customization
 Edit CSS files in:
 ```
-public/admin_resource/assets/stylesheets/
+public/frontend_resource/css/
 ```
 
 ### Menu Configuration
@@ -279,9 +326,9 @@ This is a proprietary software. You are purchasing a license according to the te
 ## 🤝 Support
 
 For technical support:
-- Email: support@inayafleet360.com
-- Documentation: https://docs.inayafleet360.com
-- Issues: https://github.com/inayafleet360/tms/issues
+- Email: support@codeaycanon.com
+- Documentation: https://docs.codeaycanon.com
+- Issues: https://github.com/codeaycanon/tms/issues
 
 ## 🙏 Acknowledgments
 
@@ -300,6 +347,9 @@ Built with:
 - Driver management module
 - Transport requisition workflow
 - Maintenance tracking system
+- HR Module for employee management
+- Multi-Level Approval System
+- Notification System (Push & Email)
 - Multi-language support
 - Responsive admin dashboard
 - Export functionality (PDF, Excel)
@@ -307,8 +357,8 @@ Built with:
 
 ---
 
-**InayaFleet360** - All-in-One Fleet & Transport Automation System
+**InayaFleet360** – Fleet & Transport Management System (Laravel)
 
 Smart Logistics. Better Operations.
 
-© 2024 InayaFleet360. All rights reserved.
+© 2025 InayaFleet360. All rights reserved.

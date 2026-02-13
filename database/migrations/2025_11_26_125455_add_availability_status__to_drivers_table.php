@@ -15,7 +15,7 @@ class AddAvailabilityStatusToDriversTable extends Migration
     {
         Schema::table('drivers', function (Blueprint $table) {
             // migration
-$table->enum('availability_status', ['available', 'busy', 'on_leave'])->default('available');
+            $table->enum('availability_status', ['available', 'busy', 'on_leave'])->default('available');
 
         });
     }

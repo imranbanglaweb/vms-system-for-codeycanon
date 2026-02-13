@@ -4,7 +4,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>InayaFleet360 – All-in-One Fleet & Transport Automation System</title>
+    <title>InayaFleet360 – Fleet & Transport Management System (Laravel)</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <!-- Bootstrap + FontAwesome -->
@@ -567,8 +567,8 @@ if ($settings && $settings->site_logo) {
                         <i class="fas fa-truck"></i>
                     </div>
                 @endif
-                <!-- <h1 class="brand-title">InayaFleet360</h1>
-                <p class="brand-tagline">All-in-One Fleet & Transport Automation System</p> -->
+                <!-- <h1 class="brand-title">InayaFleet360 – Fleet & Transport Management System</h1>
+                <p class="brand-tagline">Fleet & Transport Management System (Laravel)</p> -->
             </div>
             <h5>Login to your account</h5>
 <hr>

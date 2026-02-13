@@ -4,24 +4,66 @@
 <section role="main" class="content-body" style="background-color: #fff; padding: 10px;">
 
 <div class="row">
-    <div class="col-md-4">
-
-
+    <div class="col-md-12">
+        <h4 class="mb-3"><i class="fa fa-users"></i> User Management</h4>
     </div>
-    <div class="col-md-8 text-right">
-    <br>
-    <br>
+</div>
+
+<!-- Filters -->
+<div class="row mb-3">
+    <div class="col-md-12">
+        <div class="card" style="background-color: #f8f9fa; border: 1px solid #ddd;">
+            <div class="card-body">
+                <div class="row align-items-end">
+                    <div class="col-md-3">
+                        <label class="form-label fw-bold">Search</label>
+                        <input type="text" id="search_filter" class="form-control form-control-sm" placeholder="Search by name, email...">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label fw-bold">User Type</label>
+                        <select id="user_type_filter" class="form-control form-control-sm select2">
+                            <option value="">All User Types</option>
+                            @foreach($userTypes as $key => $label)
+                                <option value="{{ $key }}">{{ $label }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label fw-bold">Role</label>
+                        <select id="role_filter" class="form-control form-control-sm select2">
+                            <option value="">All Roles</option>
+                            @foreach($roles as $role)
+                                <option value="{{ $role }}">{{ $role }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label fw-bold">Status</label>
+                        <select id="status_filter" class="form-control form-control-sm select2">
+                            <option value="">All Status</option>
+                            <option value="1">Active</option>
+                            <option value="0">Inactive</option>
+                        </select>
+                    </div>
+                    <div class="col-md-1">
+                        <button type="button" id="filter_reset" class="btn btn-secondary btn-sm w-100">
+                            <i class="fa fa-refresh"></i> Reset
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-12 text-right">
         <div class="btn-group">
             <a class="btn btn-success" href="{{ route('users.create') }}">
                 <i class="fa fa-plus"></i> Add User
             </a>
-            <br>
         </div>
-
-        <br>
-        </div>
-
-
+    </div>
 </div>
 
 @if ($message = Session::get('success'))
@@ -40,9 +82,9 @@
                 <th>Name</th>
                 <th>Email</th>
                 <th>Employee</th>
+                <th>User Type</th>
+                <th>Roles</th>
                 <th>Department</th>
-                <th>Unit</th>
-                <th>Location</th>
                 <th>Status</th>
                 <th>Image</th>
                 <th width="150px">Action</th>
@@ -53,7 +95,7 @@
 
 </section>
 
-@push('styles')
+
 <link rel="stylesheet" href="{{ asset('public/admin_resource/plugins/datatables-bs4/css/dataTables.bootstrap4.min.css') }}">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
@@ -64,34 +106,75 @@
         font-size: 15px;
     }
 </style>
-@endpush
 
 @push('scripts')
 <!-- Load SweetAlert2 from CDN to ensure it's available -->
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<!-- Select2 -->
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
 <script>
 $(document).ready(function() {
     console.log('jQuery loaded:', typeof $);
     console.log('Swal loaded:', typeof Swal);
     
-    $('#myTable').DataTable({
+    // Initialize Select2
+    $('.select2').select2({
+        width: '100%',
+        placeholder: 'Select option',
+        allowClear: true
+    });
+    
+    // DataTable with advanced filtering
+    var table = $('#myTable').DataTable({
         processing: true,
         serverSide: true,
-        ajax: "{{ route('users.getData') }}",
+        ajax: {
+            url: "{{ route('users.getData') }}",
+            data: function(d) {
+                d.user_type_filter = $('#user_type_filter').val();
+                d.role_filter = $('#role_filter').val();
+                d.status_filter = $('#status_filter').val();
+                d.search = $('#search_filter').val();
+            }
+        },
         columns: [
             { data: 'DT_RowIndex', orderable: false, searchable: false },
             { data: 'user_name' },
             { data: 'name' },
             { data: 'email' },
             { data: 'employee' },
+            { data: 'user_type' },
+            { data: 'roles' },
             { data: 'department' },
-            { data: 'unit' },
-            { data: 'location' },
             { data: 'status' },
             { data: 'user_image', orderable: false, searchable: false },
             { data: 'action', orderable: false, searchable: false }
         ]
+    });
+
+    // Apply filters on change
+    $('#user_type_filter, #role_filter, #status_filter').on('change', function() {
+        table.draw();
+    });
+    
+    // Search with debounce
+    var searchTimeout = null;
+    $('#search_filter').on('keyup', function() {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(function() {
+            table.draw();
+        }, 500);
+    });
+
+    // Reset filters
+    $('#filter_reset').on('click', function() {
+        $('#search_filter').val('');
+        $('#user_type_filter').val('').trigger('change');
+        $('#role_filter').val('').trigger('change');
+        $('#status_filter').val('').trigger('change');
+        table.draw();
     });
 
     // Delete click handler

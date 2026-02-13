@@ -34,9 +34,9 @@ table th {
         <tr>
             <td>{{ $r->id }}</td>
             <td>{{ $r->requestedBy->name ?? '' }}</td>
-            <td>{{ $r->requestedBy->department ?? '' }}</td>
+            <td>{{ $r->department->department_name ?? '' }}</td>
             <td>{{ $r->vehicle->vehicle_name ?? '' }}</td>
-            <td>{{ $r->driver->driver_name ?? '' }}</td>
+            <td>{{ $r->driver->name ?? $r->driver->driver_name ?? '' }}</td>
             <td>{{ $r->travel_date }}</td>
             <td>{{ $r->return_date }}</td>
             <td>{{ $r->status }}</td>

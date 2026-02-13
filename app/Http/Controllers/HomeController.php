@@ -7,6 +7,8 @@ use App\Models\Requisition;
 use App\Models\Menu;
 use App\Models\Contact;
 use App\Models\Document;
+use App\Models\Notification;
+use App\Models\Vehicle;
 Use \Carbon\Carbon;
 use DB;
 use Auth;
@@ -90,6 +92,7 @@ class HomeController extends Controller
         $isManager = $user->hasRole('Department Head') || $user->hasRole('Manager');
         $isTransport = $user->hasRole('Transport');
         $isEmployee = $user->hasRole('Employee');
+        $isDriver = $user->hasRole('Driver');
         
         // Debug: Log role detection
         \Log::info('Role Detection', [
@@ -97,16 +100,24 @@ class HomeController extends Controller
             'isManager' => $isManager,
             'isTransport' => $isTransport,
             'isEmployee' => $isEmployee,
+            'isDriver' => $isDriver,
+            'user_roles' => $user->getRoleNames()->toArray(),
         ]);
         
         // Fallback to 'role' column if no Spatie role is assigned
-        if (!$isAdmin && !$isManager && !$isTransport && !$isEmployee) {
+        if (!$isAdmin && !$isManager && !$isTransport && !$isEmployee && !$isDriver) {
             $userRole = $user->role ?? 'employee';
             $isAdmin = ($userRole === 'admin');
             $isManager = ($userRole === 'manager');
             $isTransport = ($userRole === 'transport');
             $isEmployee = ($userRole === 'employee');
+            $isDriver = ($userRole === 'driver');
             \Log::info('Fallback to role column', ['userRole' => $userRole]);
+        }
+        
+        // Force employee flag for regular users without specific roles
+        if (!$isAdmin && !$isManager && !$isTransport && !$isDriver) {
+            $isEmployee = true;
         }
         
         // Build base query based on role
@@ -119,7 +130,8 @@ class HomeController extends Controller
         
         // Role-based requisition visibility for lists
         if ($isEmployee) {
-            $requisitions = Requisition::where('requested_by', $user->id)->latest()->get();
+            $requisitions = Requisition::where('created_by', $user->id)->latest()->get();
+            // dd($requisitions);
         } elseif ($isTransport) {
             // Transport sees pending transport approval (department_status = Approved, transport_status = Pending)
             $requisitions = Requisition::where('department_status', 'Approved')
@@ -169,46 +181,62 @@ class HomeController extends Controller
 
         // Dashboard counters (overall with role-based filtering)
         $statusQuery = Requisition::query();
-        if ($isManager && $user->department_id) {
+        
+        // For employees, always filter by requested_by
+        // This ensures employees see their own data even if role is not assigned
+        if ($isEmployee) {
+            $statusQuery->where('created_by', $user->id);
+        }
+        // If not admin/manager/transport, treat as employee and filter by requested_by
+        elseif (!$isAdmin && !$isManager && !$isTransport) {
+            $statusQuery->where('created_by', $user->id);
+        }
+        // For managers, filter by department
+        elseif ($isManager && $user->department_id) {
             $statusQuery->where('department_id', $user->department_id);
-        } elseif ($isEmployee) {
-            $statusQuery->where('requested_by', $user->id);
+         
+           
         }
         // Note: Transport users see all requisitions for counting purposes
-        // The filtering for transport users is done in the requisition list
         
-        $chartData = [
-            'Pending' => (clone $statusQuery)->where('department_status', 'Pending')->count(),
-            'Dept_Approved' => (clone $statusQuery)->where('department_status', 'Approved')->count(),
-            'Transport_Pending' => (clone $statusQuery)->where('department_status', 'Approved')->where('transport_status', 'Pending')->count(),
-            'Transport_Approved' => (clone $statusQuery)->where('transport_status', 'Approved')->count(),
-            'Rejected' => (clone $statusQuery)->where(function($q) {
-                $q->where('department_status', 'Rejected')->orWhere('transport_status', 'Rejected');
-            })->count(),
-            'Completed' => (clone $statusQuery)->where('status', 'Completed')->count(),
-        ];
-
-        $pendingRequisitions = (clone $statusQuery)->where('department_status', 'Pending')->latest()->take(5)->get();
-        $recentRequisitions = (clone $statusQuery)->latest()->take(10)->get();
-
-        // Overall counts (role-based)
-        $total = (clone $statusQuery)->count();
-        $pending = (clone $statusQuery)->where('department_status', 'Pending')->count();
-        $deptApproved = (clone $statusQuery)->where('department_status', 'Approved')->count();
+        // Use clone to prevent query modification between counts
+        $totalQuery = clone $statusQuery;
+        $deptApprovedQuery = clone $statusQuery;
+        $pendingQuery = clone $statusQuery;
+        
+        // Debug: Check actual department_status values
+        \Log::info('Department Status Check', [
+            'total_records' => $totalQuery->count(),
+            'distinct_statuses' => Requisition::select('department_status')->distinct()->pluck('department_status')->toArray(),
+            'isAdmin' => $isAdmin,
+            'isEmployee' => $isEmployee,
+            'isManager' => $isManager,
+            'isTransport' => $isTransport,
+            'user_id' => $user->id,
+        ]);
+        
+        // Overall counts (using cloned queries)
+        $total = $totalQuery->count();
+        $deptApproved = $deptApprovedQuery->where('department_status', 'Approved')->count();
+        // dd($deptApproved);
+        $pending = $pendingQuery->where('department_status', 'Pending')->count();
+        
         $transportPendingCount = (clone $statusQuery)->where('department_status', 'Approved')->where('transport_status', 'Pending')->count();
-        $transportApproved = (clone $statusQuery)->where('transport_status', 'Approved')->count();
-        $rejected = (clone $statusQuery)->where(function($q) {
+        $transportApproved = $statusQuery->where('transport_status', 'Approved')->count();
+        $rejected = $statusQuery->where(function($q) {
             $q->where('department_status', 'Rejected')->orWhere('transport_status', 'Rejected');
         })->count();
-        $completed = (clone $statusQuery)->where('status', 'Completed')->count();
-        $cancelled = (clone $statusQuery)->where('status', 'Cancelled')->count();
+        $completed = $statusQuery->where('status', 'Completed')->count();
+        $cancelled = $statusQuery->where('status', 'Cancelled')->count();
 
         // Latest requisitions (role-based)
         $latestQuery = Requisition::with(['employee', 'vehicleType']);
-        if ($isManager && $user->department_id) {
+        if ($isEmployee) {
+            $latestQuery->where('created_by', $user->id);
+        } elseif (!$isAdmin && !$isManager && !$isTransport) {
+            $latestQuery->where('created_by', $user->id);
+        } elseif ($isManager && $user->department_id) {
             $latestQuery->where('department_id', $user->department_id);
-        } elseif ($isEmployee) {
-            $latestQuery->where('requested_by', $user->id);
         }
         $latest = $latestQuery->orderBy('created_at', 'desc')->take(10)->get();
 
@@ -229,10 +257,12 @@ class HomeController extends Controller
             )
             ->whereBetween('travel_date', [Carbon::now()->subMonths(11)->startOfMonth(), Carbon::now()->endOfMonth()]);
         
-        if ($isManager && $user->department_id) {
+        if ($isEmployee) {
+            $monthlyQuery->where('created_by', $user->id);
+        } elseif (!$isAdmin && !$isManager && !$isTransport) {
+            $monthlyQuery->where('created_by', $user->id);
+        } elseif ($isManager && $user->department_id) {
             $monthlyQuery->where('department_id', $user->department_id);
-        } elseif ($isEmployee) {
-            $monthlyQuery->where('requested_by', $user->id);
         }
         
         $monthlyCounts = $monthlyQuery
@@ -248,12 +278,15 @@ class HomeController extends Controller
         $deptQuery = Requisition::select('departments.department_name as label', DB::raw('count(*) as value'))
             ->join('departments', 'requisitions.department_id', '=', 'departments.id');
         
-        if ($isManager && $user->department_id) {
+        if ($isEmployee) {
+            $deptQuery->where('requisitions.created_by', $user->id);
+            $deptData = $deptQuery->groupBy('departments.department_name')->orderBy('value','desc')->limit(10)->get();
+        } elseif (!$isAdmin && !$isManager && !$isTransport) {
+            $deptQuery->where('requisitions.created_by', $user->id);
+            $deptData = $deptQuery->groupBy('departments.department_name')->orderBy('value','desc')->limit(10)->get();
+        } elseif ($isManager && $user->department_id) {
             $deptQuery->where('requisitions.department_id', $user->department_id);
             $deptData = collect([['label' => $user->department->department_name ?? 'Department', 'value' => $total]]);
-        } elseif ($isEmployee) {
-            $deptQuery->where('requisitions.requested_by', $user->id);
-            $deptData = $deptQuery->groupBy('departments.department_name')->orderBy('value','desc')->limit(10)->get();
         } else {
             $deptData = $deptQuery->groupBy('departments.department_name')->orderBy('value','desc')->limit(10)->get();
         }
@@ -269,22 +302,24 @@ class HomeController extends Controller
         ]);
 
         // Top active users (chart 4) - role-based
-        $topUsersQuery = Requisition::select('requested_by', DB::raw('count(*) as total'))
-            ->groupBy('requested_by')
+        $topUsersQuery = Requisition::select('created_by', DB::raw('count(*) as total'))
+            ->groupBy('created_by')
             ->orderBy('total','desc')
             ->with('requestedBy')
             ->limit(8);
         
-        if ($isManager && $user->department_id) {
+        if ($isEmployee) {
+            $topUsersQuery->where('created_by', $user->id);
+        } elseif (!$isAdmin && !$isManager && !$isTransport) {
+            $topUsersQuery->where('created_by', $user->id);
+        } elseif ($isManager && $user->department_id) {
             $topUsersQuery->where('department_id', $user->department_id);
-        } elseif ($isEmployee) {
-            $topUsersQuery->where('requested_by', $user->id);
         }
         
         $topUsers = $topUsersQuery->get()
             ->map(function($r){
                 return [
-                    'name' => optional($r->requestedBy)->name ?? 'User '.$r->requested_by,
+                    'name' => optional($r->requestedBy)->name ?? 'User '.$r->created_by,
                     'total' => (int) $r->total
                 ];
             });
@@ -296,14 +331,32 @@ class HomeController extends Controller
             ->orderBy('requisition_loghistories.created_at', 'desc')
             ->limit(10);
         
-        if ($isManager && $user->department_id) {
+        if ($isEmployee) {
+            $timelineQuery->where('requisition_loghistories.created_by', $user->id);
+        } elseif (!$isAdmin && !$isManager && !$isTransport) {
+            $timelineQuery->where('requisition_loghistories.created_by', $user->id);
+        } elseif ($isManager && $user->department_id) {
             $timelineQuery->join('requisitions', 'requisition_loghistories.requisition_id', '=', 'requisitions.id')
                 ->where('requisitions.department_id', $user->department_id);
-        } elseif ($isEmployee) {
-            $timelineQuery->where('requisition_loghistories.created_by', $user->id);
         }
         
         $timeline = $timelineQuery->get();
+
+        // Recent notifications - role-based
+        $notificationsQuery = Notification::where('notifiable_id', $user->id)
+            ->orderBy('created_at', 'desc')
+            ->limit(5);
+        $notifications = $notificationsQuery->get();
+
+        // Top vehicles by usage (for Admin/Transport only)
+        if ($isAdmin || $isTransport) {
+            $topVehicles = Vehicle::withCount('requisitions')
+                ->orderBy('requisitions_count', 'desc')
+                ->limit(5)
+                ->get();
+        } else {
+            $topVehicles = collect();
+        }
 
         // Build payload for view
         $cards = [
@@ -315,6 +368,28 @@ class HomeController extends Controller
             ['key' => 'rejected', 'label' => $this->translationService->get('rejected', 'backend'), 'value' => $rejected, 'color' => '#dc3545', 'icon' => 'fa-times-circle'],
             ['key' => 'completed', 'label' => $this->translationService->get('completed', 'backend'), 'value' => $completed, 'color' => '#28a745', 'icon' => 'fa-flag-checkered'],
         ];
+
+        // Stats array for view compatibility
+        $stats = [
+            'total' => $total,
+            'pending' => $pending,
+            'approved' => $transportApproved + $deptApproved,
+            'rejected' => $rejected,
+            'dept_approved' => $deptApproved,
+            'transport_pending' => $transportPendingCount,
+            'transport_approved' => $transportApproved,
+            'completed' => $completed,
+            'cancelled' => $cancelled,
+        ];
+        
+        // Debug: Log stats
+        \Log::info('Dashboard Stats', [
+            'isEmployee' => $isEmployee,
+            'user_id' => $user->id,
+            'total' => $total,
+            'pending' => $pending,
+            'approved' => $transportApproved + $deptApproved,
+        ]);
 
         // Sparkline data (dummy for last 7 days)
         $sparklineLabels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
@@ -344,6 +419,7 @@ class HomeController extends Controller
             'topUsers' => $topUsers,
             'timeline' => $timeline,
             'cards' => $cards,
+            'stats' => $stats,
             'sparklineLabels' => $sparklineLabels,
             'sparklineData' => $sparklineData,
             'transportPendingCount' => $transportPending,
@@ -353,6 +429,10 @@ class HomeController extends Controller
             'isManager' => $isManager,
             'isTransport' => $isTransport,
             'isEmployee' => $isEmployee,
+            'isDriver' => $isDriver,
+            'user' => $user,
+            'notifications' => $notifications,
+            'topVehicles' => $topVehicles,
         ];
 
         return view('admin.dashboard.dashboard', $payload);
@@ -386,13 +466,19 @@ class HomeController extends Controller
         if ($isManager && $user->department_id) {
             $baseQuery->where('department_id', $user->department_id);
         } elseif ($isEmployee) {
-            $baseQuery->where('requested_by', $user->id);
+            $baseQuery->where('created_by', $user->id);
         }
         // Note: Transport users see all requisitions for counting purposes
         
         $total = (clone $baseQuery)->count();
-        $pending = (clone $baseQuery)->where('department_status', 'Pending')->count();
-        $deptApproved = (clone $baseQuery)->where('department_status', 'Approved')->count();
+        $pending = (clone $baseQuery)->where(function($q) {
+            $q->where('department_status', 'Pending')
+              ->orWhere('status', 'Pending');
+        })->count();
+        $deptApproved = (clone $baseQuery)->where(function($q) {
+            $q->where('department_status', 'Approved')
+              ->orWhere('status', 'Approved');
+        })->count();
         $transportPending = (clone $baseQuery)->where('department_status', 'Approved')->where('transport_status', 'Pending')->count();
         $transportApproved = (clone $baseQuery)->where('transport_status', 'Approved')->count();
         $rejected = (clone $baseQuery)->where(function($q) {
@@ -404,7 +490,7 @@ class HomeController extends Controller
         if ($isManager && $user->department_id) {
             $latestQuery->where('department_id', $user->department_id);
         } elseif ($isEmployee) {
-            $latestQuery->where('requested_by', $user->id);
+            $latestQuery->where('created_by', $user->id);
         } elseif ($isTransport) {
             $latestQuery->where('department_status', 'Approved')->where('transport_status', 'Pending');
         }
@@ -417,7 +503,7 @@ class HomeController extends Controller
         if ($isManager && $user->department_id) {
             $deptData = collect([['label' => $user->department->department_name ?? 'Department', 'value' => $total]]);
         } elseif ($isEmployee) {
-            $deptQuery->where('requisitions.requested_by', $user->id);
+            $deptQuery->where('requisitions.created_by', $user->id);
             $deptData = $deptQuery->groupBy('departments.department_name')->orderBy('value','desc')->limit(10)->get();
         } elseif ($isTransport) {
             // Transport users see all departments for counting purposes

@@ -13,7 +13,7 @@ return [
     |
     */
 
-    'name' => env('APP_NAME', 'Vault Document Register Tracking System'),
+    'name' => env('APP_NAME', 'InayaFleet360 – Fleet & Transport Management System'),
 
     /*
     |--------------------------------------------------------------------------

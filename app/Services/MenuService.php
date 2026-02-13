@@ -23,9 +23,9 @@ class MenuService
         // Check if user is Super Admin
         $isSuperAdmin = $user->hasRole('Super Admin');
 
-        // Load all parent menus
+        // Load all parent menus ordered by menu_order
         $menus = Menu::where('menu_parent', 0)
-            ->orderBy('id', 'ASC')
+            ->orderBy('menu_order', 'ASC')
             ->get();
         
         $filtered = $menus->map(function ($menu) use ($user, $isSuperAdmin) {

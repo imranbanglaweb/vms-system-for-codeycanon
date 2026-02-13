@@ -79,6 +79,7 @@ class PermissionSeeder extends Seeder
             'driver-schedule-view',
             'driver-schedule-assign',
             'driver-schedule-edit',
+            'driver-schedule-own',
             
             // Driver Performance
             'driver-performance-manage',
@@ -89,6 +90,22 @@ class PermissionSeeder extends Seeder
             'driver-availability-manage',
             'driver-availability-view',
             'driver-availability-update',
+            'driver-availability-own',
+            
+            // Trip Sheets
+            'trip-manage',
+            'trip-sheet-view',
+            'trip-sheet-own',
+            'trip-create',
+            'trip-start',
+            'trip-finish',
+            'trip-end',
+            'trip-export',
+            
+            // Trip Fuel
+            'trip-fuel-log',
+            'trip-fuel-own',
+            'trip-fuel-view',
 
             // ================= EMPLOYEE MANAGEMENT =================
             'employee-manage',
@@ -157,10 +174,20 @@ class PermissionSeeder extends Seeder
             'document-manage',
             'document-create',
             'document-edit',
+            'document-delete',
+            'document-view',
             'document-approve',
             'document-reject',
             'document-history',
             'document-export',
+
+            // ================= PROFILE & SETTINGS =================
+            'profile-view',
+            'profile-edit',
+
+            // ================= EMPLOYEE SELF-SERVICE =================
+            'my-requisitions',
+            'my-documents',
 
             // ================= SUBSCRIPTION & PAYMENTS =================
             'subscription-plan-manage',
@@ -177,6 +204,7 @@ class PermissionSeeder extends Seeder
             'support-manage',
             'support-create',
             'support-edit',
+            'support-view',
             'support-delete',
             'support-emergency',
 
@@ -307,8 +335,26 @@ class PermissionSeeder extends Seeder
         // Employee permissions
         $employee->syncPermissions([
             'dashboard',
+            // Requisitions - Create, View, Edit (No Delete)
             'requisition-create',
             'requisition-view',
+            'requisition-edit',
+            'requisition-pending-view',
+            'requisition-approved-view',
+            // Documents
+            'document-create',
+            'document-view',
+            'document-history',
+            // Notifications
+            'notification-view',
+            // Support
+            'support-create',
+            'support-edit',
+            // Profile & Self-service
+            'profile-view',
+            'profile-edit',
+            'my-requisitions',
+            'my-documents',
         ]);
 
         // Department Head permissions

@@ -32,7 +32,12 @@ class Requisition extends Model
       'approval_level_2_date',
       'total_passenger_count',
       'created_by',
-      'updated_by'
+      'updated_by',
+      'assigned_vehicle_id',
+      'assigned_driver_id',
+      'transport_remarks',
+      'transport_admin_id',
+      'transport_approved_at',
     ];
 
     
@@ -62,7 +67,7 @@ public const STATUS_COMPLETED = 'Completed';
     public function driver(){ return $this->belongsTo(Driver::class); }
     public function logs(){ return $this->hasMany(RequisitionLogHistory::class); }
     public function notifications(){ return $this->hasMany(Notification::class); }
-    public function requestedBy(){return $this->belongsTo(Employee::class, 'requested_by', 'id');}
+    public function requestedBy(){return $this->belongsTo(Employee::class, 'requested_by');}
     public function departmentHead()
     {
         return $this->belongsTo(Employee::class, 'approved_by_department');

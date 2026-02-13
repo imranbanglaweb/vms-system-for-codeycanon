@@ -523,6 +523,7 @@ $(document).ready(function(){
             var $select = $('#vehicleSelect');
             var requiredCapacity = this.getRequiredCapacity();
             var preSelectedVehicleId = $select.val();
+            var assignedVehicleId = '{{ $requisition->assigned_vehicle_id ?? "" }}';
             
             if (!transportTypeId || transportTypeId === 'all') {
                 // Show all options
@@ -530,11 +531,15 @@ $(document).ready(function(){
                     var capacity = parseInt($(this).data('capacity')) || 0;
                     var status = $(this).data('status') || '';
                     var isAvailable = status.toLowerCase() !== 'assigned';
-                    // Show if available and has sufficient capacity
-                    if (isAvailable && capacity >= requiredCapacity) {
+                    var thisVehicleId = $(this).val();
+                    
+                    // Always show if it's the assigned vehicle for this requisition
+                    var isAssignedVehicle = String(thisVehicleId) === String(assignedVehicleId);
+                    
+                    // Show if available, has sufficient capacity, or is the assigned vehicle
+                    if (isAssignedVehicle || (isAvailable && capacity >= requiredCapacity)) {
                         $(this).show();
                     } else if (isAvailable) {
-                        // Show with warning if capacity is insufficient
                         $(this).show();
                     } else {
                         $(this).hide();
@@ -550,8 +555,10 @@ $(document).ready(function(){
                     var isAvailable = status.toLowerCase() !== 'assigned';
                     var thisVehicleId = $(this).val();
                     
-                    // Always show pre-selected vehicle
-                    if (String(thisVehicleId) === String(preSelectedVehicleId)) {
+                    // Always show if it's the assigned vehicle for this requisition
+                    var isAssignedVehicle = String(thisVehicleId) === String(assignedVehicleId);
+                    
+                    if (isAssignedVehicle) {
                         $(this).show();
                     } else if (String(vehicleTypeId) === String(transportTypeId) && isAvailable) {
                         $(this).show();
@@ -571,6 +578,7 @@ $(document).ready(function(){
             var $select = $('#vehicleSelect');
             var requiredCapacity = this.getRequiredCapacity();
             var preSelectedVehicleId = $select.val();
+            var assignedVehicleId = '{{ $requisition->assigned_vehicle_id ?? "" }}';
             
             $select.find('option').not(':first').each(function() {
                 var capacity = parseInt($(this).data('capacity')) || 0;
@@ -578,8 +586,10 @@ $(document).ready(function(){
                 var isAvailable = status.toLowerCase() !== 'assigned';
                 var thisVehicleId = $(this).val();
                 
-                // Always show pre-selected vehicle
-                if (String(thisVehicleId) === String(preSelectedVehicleId)) {
+                // Always show if it's the assigned vehicle for this requisition
+                var isAssignedVehicle = String(thisVehicleId) === String(assignedVehicleId);
+                
+                if (isAssignedVehicle) {
                     $(this).show();
                 } else if (isAvailable) {
                     if (capacity >= requiredCapacity) {
@@ -598,14 +608,17 @@ $(document).ready(function(){
         filterVehiclesByAvailability: function() {
             var $select = $('#vehicleSelect');
             var preSelectedVehicleId = $select.val();
+            var assignedVehicleId = '{{ $requisition->assigned_vehicle_id ?? "" }}';
             
             $select.find('option').not(':first').each(function() {
                 var status = $(this).data('status') || '';
                 var isAvailable = status.toLowerCase() !== 'assigned';
                 var thisVehicleId = $(this).val();
                 
-                // Always show pre-selected vehicle
-                if (String(thisVehicleId) === String(preSelectedVehicleId)) {
+                // Always show if it's the assigned vehicle for this requisition
+                var isAssignedVehicle = String(thisVehicleId) === String(assignedVehicleId);
+                
+                if (isAssignedVehicle) {
                     $(this).prop('disabled', false);
                 } else if (!isAvailable) {
                     $(this).prop('disabled', true);
@@ -645,6 +658,7 @@ $(document).ready(function(){
         updateDriverSuggestions: function(vehicleId) {
             var $driverSelect = $('#driverSelect');
             var requisitionId = {{ $requisition->id }};
+            var assignedDriverId = '{{ $requisition->assigned_driver_id ?? "" }}';
             
             // Show loading state
             $driverSelect.next('.select2-container').find('.select2-selection').addClass('select-loading');
@@ -662,7 +676,13 @@ $(document).ready(function(){
                         var status = $(this).data('status') || '';
                         var isAvailable = status.toLowerCase() !== 'assigned';
                         
-                        if (driverIds.indexOf(parseInt(driverId)) !== -1 && isAvailable) {
+                        // Always show if it's the assigned driver for this requisition
+                        var isAssignedDriver = String(driverId) === String(assignedDriverId);
+                        
+                        if (isAssignedDriver) {
+                            $(this).show();
+                            $(this).data('available', true);
+                        } else if (driverIds.indexOf(parseInt(driverId)) !== -1 && isAvailable) {
                             $(this).show();
                             $(this).data('available', true);
                         } else if (isAvailable) {
@@ -683,11 +703,16 @@ $(document).ready(function(){
                 })
                 .fail(function() {
                     // Fallback: just show all available drivers
+                    var assignedDriverId = '{{ $requisition->assigned_driver_id ?? "" }}';
                     $driverSelect.find('option').not(':first').each(function() {
+                        var driverId = $(this).val();
                         var status = $(this).data('status') || '';
                         var isAvailable = status.toLowerCase() !== 'assigned';
                         
-                        if (isAvailable) {
+                        // Always show if it's the assigned driver for this requisition
+                        var isAssignedDriver = String(driverId) === String(assignedDriverId);
+                        
+                        if (isAssignedDriver || isAvailable) {
                             $(this).show();
                         } else {
                             $(this).hide();
@@ -983,31 +1008,40 @@ $(document).ready(function(){
 function alertBox(type, message, title = ''){
     Swal.fire({
         icon: type,
-        title: title,
+        title: title || (type === 'success' ? 'Success!' : (type === 'error' ? 'Error!' : (type === 'warning' ? 'Warning!' : ''))),
         text: message,
-        confirmButtonColor: type === 'success' ? '#28a745' : '#dc3545',
-        confirmButtonText: 'OK',
-        background: '#f4f6f9',
-        color: '#333',
-        customClass: { popup: 'rounded-4 shadow' }
+        confirmButtonText: 'OK'
     });
 }
 
 // Assign Vehicle & Driver with loading effect
 function submitAssign() {
-    if (!$('#vehicleSelect').val() || !$('#driverSelect').val()) {
-        alertBox('error', 'Please select both vehicle and driver.');
+    // DEBUG: Log form data
+    console.log('[DEBUG] Form serialize:', $('#assignForm').serialize());
+    console.log('[DEBUG] Vehicle value:', $('#vehicleSelect').val());
+    console.log('[DEBUG] Driver value:', $('#driverSelect').val());
+    console.log('[DEBUG] Transport type:', $('#transportTypeSelect').val());
+    
+    let transportTypeId = $('#transportTypeSelect').val();
+    
+    if (!transportTypeId) {
+        alert('Please select a Transport Type before assigning vehicle and driver.');
         return;
     }
     
-    var $btn = $('#assignForm button[type="submit"]');
+    if (!$('#vehicleSelect').val() || !$('#driverSelect').val()) {
+        alert('Please select both vehicle and driver.');
+        return;
+    }
+    
+    var $btn = $('#actionForm button[type="submit"]');
     var originalText = $btn.html();
     $btn.prop('disabled', true).html('<i class="fa fa-spinner fa-spin me-2"></i> Assigning...');
 
     $.ajax({
         url: "{{ route('transport.approvals.assign', $requisition->id) }}",
         type: 'POST',
-        data: $('#assignForm').serialize(),
+        data: $('#actionForm').serialize(),
         success: function(res) {
             alertBox('success', res.message, 'Success!');
             setTimeout(() => location.reload(), 1500);
@@ -1032,6 +1066,13 @@ function submitAssign() {
 
 // Approve or Reject
 function submitAction(type){
+    // Check server assigned values (read from data attributes on the form)
+    let assignedVehicleId = $('#actionForm').data('assigned-vehicle') || '';
+    let assignedDriverId = $('#actionForm').data('assigned-driver') || '';
+    
+    console.log('[DEBUG] Assigned Vehicle ID:', assignedVehicleId);
+    console.log('[DEBUG] Assigned Driver ID:', assignedDriverId);
+    
     let remarks = $('textarea[name="remarks"]').val().trim();
     
     if(type === 'reject' && !remarks){
@@ -1040,23 +1081,28 @@ function submitAction(type){
     }
     
     if(type === 'approve') {
+        // Validate Transport Type
+        let transportTypeId = $('#transportTypeSelect').val();
+      
+        if (!transportTypeId) {
+            alertBox('warning', 'Please select a Transport Type before proceeding.', 'Transport Type Required');
+            return;
+        }
+        
         let vehicleId = $('#vehicleSelect').val();
         let driverId = $('#driverSelect').val();
         
+        alert('vehicleId=' + vehicleId + ', driverId=' + driverId);
+        
+        // If dropdowns are empty but we have assigned values from server, use those
+        if ((!vehicleId || !driverId) && assignedVehicleId && assignedDriverId) {
+            console.log('[DEBUG] Using server-assigned values');
+            vehicleId = assignedVehicleId;
+            driverId = assignedDriverId;
+        }
+        
         if (!vehicleId || !driverId) {
             alertBox('warning', 'Please assign both a vehicle and driver before approving.', 'Assignment Required');
-            return;
-        }
-        
-        let vehicleStatus = $('#vehicleSelect option:selected').data('status') || '';
-        if (vehicleStatus.toLowerCase() === 'assigned') {
-            alertBox('error', 'Selected vehicle is already assigned. Please choose an available vehicle.', 'Vehicle Unavailable');
-            return;
-        }
-        
-        let driverStatus = $('#driverSelect option:selected').data('status') || '';
-        if (driverStatus.toLowerCase() === 'assigned') {
-            alertBox('error', 'Selected driver is already assigned. Please choose an available driver.', 'Driver Unavailable');
             return;
         }
         

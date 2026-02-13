@@ -209,7 +209,7 @@ class SettingController extends Controller
     }
 
     /**
-     * Get logo URL for email templates
+     * Get logo URL and title for email templates
      */
     public function getLogo()
     {
@@ -221,8 +221,11 @@ class SettingController extends Controller
             // dd($logoUrl);
         }
         
+        $adminTitle = $settings && $settings->admin_title ? $settings->admin_title : 'InayaFleet360';
+        
         return response()->json([
-            'logo_url' => $logoUrl
+            'logo_url' => $logoUrl,
+            'admin_title' => $adminTitle
         ]);
     }
 }

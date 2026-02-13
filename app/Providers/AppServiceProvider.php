@@ -122,6 +122,20 @@ class AppServiceProvider extends ServiceProvider
                     $isTransport = $user->hasRole('Transport');
                     $isEmployee = $user->hasRole('Employee');
                     
+                    // Fallback to 'role' column if no Spatie role is assigned
+                    if (!$isAdmin && !$isManager && !$isTransport && !$isEmployee) {
+                        $userRole = $user->role ?? 'employee';
+                        $isAdmin = ($userRole === 'admin');
+                        $isManager = ($userRole === 'manager');
+                        $isTransport = ($userRole === 'transport');
+                        $isEmployee = ($userRole === 'employee');
+                    }
+                    
+                    // Force employee flag for regular users without specific roles
+                    if (!$isAdmin && !$isManager && !$isTransport) {
+                        $isEmployee = true;
+                    }
+                    
                     $view->with([
                         'sidebar_menus' => MenuService::sidebar(),
                         'isSuperAdmin' => $isSuperAdmin,

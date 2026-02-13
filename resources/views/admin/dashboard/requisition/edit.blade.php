@@ -46,6 +46,19 @@
         padding: 10px 28px;
         font-size: 1.45rem;
     }
+    
+    /* Back Button Styles */
+    .btn-info {
+        background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
+        border: none;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-info:hover {
+        background: linear-gradient(135deg, #138496 0%, #117a8b 100%);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(23, 162, 184, 0.4);
+    }
 </style>
 
 <section role="main" class="content-body" style="background:#fff">
@@ -57,8 +70,8 @@
                 <i class="fa fa-car-side me-2 text-warning"></i>
                 Edit Requisition
             </h3>
-            <a href="{{ route('requisitions.index') }}" class="btn btn-secondary btn-sm">
-                <i class="fa fa-arrow-left"></i> Back
+            <a href="{{ route('requisitions.index') }}" class="btn btn-info btn-sm text-white fw-bold shadow-sm">
+                <i class="fa fa-arrow-left me-1"></i> Back
             </a>
         </div>
 
@@ -326,7 +339,8 @@
 @endsection
 
 @push('scripts')
-{{-- Flatpickr --}}
+{{-- Flatpickr Premium Theme with Clock --}}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/themes/airbnb.css">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -343,8 +357,12 @@ $(function () {
     flatpickr('.datetimepicker', {
         enableTime: true,
         dateFormat: "Y-m-d H:i",
-        time_24hr: true,
-        minDate: "today"
+        time_24hr: false,
+        minDate: "today",
+        theme: "airbnb",
+        showMonths: 1,
+        disableMobile: "true",
+        position: "auto"
     });
 
     function updateHiddenPassengerField() {
@@ -587,7 +605,7 @@ $(function () {
     });
 
     function fetchDepartmentHeadInfo(departmentId) {
-        $.get("{{ url('/departments') }}/" + departmentId + "/head-info", function(res) {
+        $.get("{{ url('admin/departments') }}/" + departmentId + "/head-info", function(res) {
             if (res.success) {
                 $('#department_head_name').val(res.head_name || '');
                 $('#department_head_email').val(res.head_email || '');

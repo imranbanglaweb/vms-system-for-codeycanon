@@ -423,13 +423,16 @@ class EmailService
         $vehicle = $requisition->assignedVehicle ?? $requisition->vehicle;
         
         // Get department head info for department approval emails
-        $headName = null;
+        $headName = 'Department Head';
         $approvedByName = null;
         $approvedByEmail = null;
         
         // Get department head name from the department's head_employee relationship
         if ($department && $department->headEmployee) {
             $headName = $department->headEmployee->name;
+        } elseif ($department && $department->head_email) {
+            // Use department name as fallback if head name not available
+            $headName = $department->department_name . ' Department Head';
         }
         
         // Get the user who approved (for approval emails)
@@ -446,9 +449,11 @@ class EmailService
         $adminTitle = $adminSettings->admin_title ?? 'Transport Management System';
         $adminDescription = $adminSettings->admin_description ?? 'Fleet Management Solution';
         $adminLogo = $adminSettings->admin_logo ?? 'default.png';
+        // Generate absolute URL for logo - needed for emails
+        $baseUrl = config('app.url', 'http://localhost');
         $adminLogoUrl = !empty($adminSettings->admin_logo) 
-            ? asset('public/admin_resource/assets/images/' . $adminSettings->admin_logo) 
-            : asset('public/admin_resource/assets/images/default.png');
+            ? $baseUrl . '/public/admin_resource/assets/images/' . $adminSettings->admin_logo
+            : $baseUrl . '/public/admin_resource/assets/images/default.png';
 
         return [
             'requisition_number' => $requisition->requisition_number ?? 'N/A',

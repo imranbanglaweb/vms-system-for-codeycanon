@@ -9,12 +9,14 @@ use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
+use App\Models\Setting;
 
 class DepartmentHeadAssignedMail extends Mailable
 {
     use Queueable, SerializesModels;
 
     public $department;
+    public $adminTitle;
 
     /**
      * Create a new message instance.
@@ -24,6 +26,10 @@ class DepartmentHeadAssignedMail extends Mailable
     public function __construct(Department $department)
     {
         $this->department = $department;
+        
+        // Get admin title from settings
+        $settings = Setting::first();
+        $this->adminTitle = $settings && $settings->admin_title ? $settings->admin_title : 'InayaFleet360';
     }
 
     /**
@@ -34,7 +40,7 @@ class DepartmentHeadAssignedMail extends Mailable
     public function envelope()
     {
         return new Envelope(
-            subject: 'Department Head Assignment - ' . config('app.name'),
+            subject: 'Department Head Assignment - ' . $this->adminTitle,
         );
     }
 
@@ -52,7 +58,7 @@ class DepartmentHeadAssignedMail extends Mailable
                 'headName' => $this->department->head_name,
                 'headEmail' => $this->department->head_email,
                 'departmentName' => $this->department->department_name,
-                'companyName' => config('app.name'),
+                'companyName' => $this->adminTitle,
             ],
         );
     }

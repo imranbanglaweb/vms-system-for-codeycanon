@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>InayaFleet360 - Documentation</title>
+    <title>Fleet & Transport Management System (Laravel)</title>
     <style>
         * {
             margin: 0;
@@ -95,6 +95,10 @@
             color: #4A90E2;
             margin: 20px 0 10px;
         }
+        section h4 {
+            color: #2d3748;
+            margin: 15px 0 8px;
+        }
         section p {
             margin-bottom: 15px;
         }
@@ -179,6 +183,31 @@
         tr:hover {
             background: #f8f9fa;
         }
+        .approval-flow {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 15px 0;
+        }
+        .approval-flow ol {
+            margin-left: 20px;
+        }
+        .approval-flow li {
+            margin-bottom: 10px;
+        }
+        .role-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: 600;
+            margin-right: 8px;
+        }
+        .role-admin { background: #e74c3c; color: white; }
+        .role-employee { background: #3498db; color: white; }
+        .role-driver { background: #27ae60; color: white; }
+        .role-depthead { background: #9b59b6; color: white; }
+        .role-transport { background: #f39c12; color: white; }
         footer {
             text-align: center;
             padding: 30px;
@@ -194,7 +223,7 @@
 <body>
     <header>
         <h1>InayaFleet360</h1>
-        <p>All-in-One Fleet & Transport Automation System</p>
+        <p>Fleet & Transport Management System (Laravel)</p>
         <div class="tagline">Smart Logistics. Better Operations.</div>
     </header>
 
@@ -204,11 +233,14 @@
             <ul>
                 <li><a href="#introduction">Introduction</a></li>
                 <li><a href="#features">Features Overview</a></li>
+                <li><a href="#user-roles">User Roles & Access</a></li>
                 <li><a href="#requirements">Requirements</a></li>
                 <li><a href="#installation">Installation</a></li>
                 <li><a href="#configuration">Configuration</a></li>
                 <li><a href="#usage">Usage Guide</a></li>
                 <li><a href="#modules">Module Details</a></li>
+                <li><a href="#notifications">Notification System</a></li>
+                <li><a href="#approvals">Approval System</a></li>
                 <li><a href="#api">API & Exports</a></li>
                 <li><a href="#support">Support</a></li>
                 <li><a href="#license">License</a></li>
@@ -238,24 +270,53 @@
                     <p>Requisition system, trip sheets, vehicle assignment, and transport notifications.</p>
                 </div>
                 <div class="feature-card">
-                    <h4>Task Management</h4>
-                    <p>Create, assign, and track tasks with progress monitoring and file attachments.</p>
+                    <h4>HR Module</h4>
+                    <p>Comprehensive employee management with departments, designations, and organizational hierarchy.</p>
                 </div>
                 <div class="feature-card">
                     <h4>Maintenance System</h4>
                     <p>Vehicle maintenance tracking, scheduling, requisitions, and vendor management.</p>
                 </div>
                 <div class="feature-card">
-                    <h4>Requisition Workflow</h4>
-                    <p>Multi-level approval workflow with full tracking and audit trail.</p>
+                    <h4>Multi-Level Approvals</h4>
+                    <p>Employee, Department Head, and Transport Admin approval workflows.</p>
                 </div>
                 <div class="feature-card">
-                    <h4>Multi-Language</h4>
-                    <p>Built-in translation system supporting multiple languages.</p>
+                    <h4>Notification System</h4>
+                    <p>Push notifications, email templates, and comprehensive notification history.</p>
                 </div>
                 <div class="feature-card">
                     <h4>Export Functions</h4>
                     <p>Export data to PDF and Excel formats with one click.</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="user-roles">
+            <h2>User Roles & Access Levels</h2>
+            <p>InayaFleet360 provides multiple user roles with specific permissions and approval capabilities:</p>
+            
+            <h3>User Types</h3>
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <h4><span class="role-badge role-admin">Admin</span> System Administrator</h4>
+                    <p>Full system access including settings, user management, and all modules.</p>
+                </div>
+                <div class="feature-card">
+                    <h4><span class="role-badge role-employee">Employee</span> Regular Employee</h4>
+                    <p>Can submit requisitions, view assigned vehicles and drivers, track trip status.</p>
+                </div>
+                <div class="feature-card">
+                    <h4><span class="role-badge role-driver">Driver</span> Driver</h4>
+                    <p>Access to personal dashboard, schedule, trips, fuel log, and availability management.</p>
+                </div>
+                <div class="feature-card">
+                    <h4><span class="role-badge role-depthead">Dept Head</span> Department Head</h4>
+                    <p>Can approve/reject requisitions from department members, view department statistics.</p>
+                </div>
+                <div class="feature-card">
+                    <h4><span class="role-badge role-transport">Transport Admin</span> Transport Admin</h4>
+                    <p>Final approval authority for transport requisitions, fleet management oversight.</p>
                 </div>
             </div>
         </section>
@@ -326,7 +387,7 @@ npm install</code></pre>
             <pre><code>cp .env.example .env</code></pre>
 
             <p>Edit the <code>.env</code> file with your database credentials:</p>
-            <pre><code>APP_NAME="InayaFleet360"
+            <pre><code>APP_NAME="Codeaycanon TMS"
 APP_URL=http://yourdomain.com
 
 DB_CONNECTION=mysql
@@ -402,33 +463,73 @@ MAIL_ENCRYPTION=tls</code></pre>
                     <th>URL</th>
                     <th>Email</th>
                     <th>Password</th>
+                    <th>Approval Authority</th>
                 </tr>
                 <tr>
-                    <td>Admin</td>
+                    <td><span class="role-badge role-admin">Admin</span></td>
                     <td>/admin</td>
-                    <td>admin@inayafleet360.com</td>
+                    <td>admin@codeaycanon.com</td>
                     <td>password</td>
+                    <td>Full System Access</td>
+                </tr>
+                <tr>
+                    <td><span class="role-badge role-employee">Employee</span></td>
+                    <td>/employee/login</td>
+                    <td>employee@codeaycanon.com</td>
+                    <td>password</td>
+                    <td>Submit Requisitions Only</td>
+                </tr>
+                <tr>
+                    <td><span class="role-badge role-driver">Driver</span></td>
+                    <td>/driver/login</td>
+                    <td>driver@codeaycanon.com</td>
+                    <td>password</td>
+                    <td>View Assigned Trips</td>
+                </tr>
+                <tr>
+                    <td><span class="role-badge role-depthead">Dept Head</span></td>
+                    <td>/department-head/login</td>
+                    <td>depthead@codeaycanon.com</td>
+                    <td>password</td>
+                    <td>Department Approval</td>
+                </tr>
+                <tr>
+                    <td><span class="role-badge role-transport">Transport Admin</span></td>
+                    <td>/transport-admin/login</td>
+                    <td>transport@codeaycanon.com</td>
+                    <td>password</td>
+                    <td>Final Approval</td>
                 </tr>
             </table>
 
             <div class="warning">
-                <strong>Security Warning:</strong> Change the admin password immediately after first login!
+                <strong>Security Warning:</strong> Change all passwords immediately after first login!
             </div>
 
             <h3>Getting Started</h3>
             <ol>
                 <li>Login to the admin panel</li>
                 <li>Navigate to <strong>Settings</strong> to configure basic options</li>
-                <li>Create departments and roles</li>
-                <li>Add employees and assign roles</li>
+                <li>Create departments and assign Department Heads</li>
+                <li>Add employees and assign roles (Employee, Driver, Transport Admin)</li>
                 <li>Add vehicles and drivers</li>
-                <li>Configure modules based on your needs</li>
+                <li>Configure notification settings</li>
                 <li>Add initial data (if needed)</li>
             </ol>
         </section>
 
         <section id="modules">
             <h2>Module Details</h2>
+
+            <h3>HR Module - Employee Management</h3>
+            <p>The HR Module provides comprehensive employee management capabilities:</p>
+            <ul>
+                <li><strong>Employee Registration:</strong> Add and manage employee profiles with personal details</li>
+                <li><strong>Department Management:</strong> Create and manage organizational departments</li>
+                <li><strong>Designation Tracking:</strong> Manage job titles and positions</li>
+                <li><strong>Department Heads:</strong> Assign department heads for approval workflows</li>
+                <li><strong>Employee-Transport Linking:</strong> Link employees to transport requisition system</li>
+            </ul>
 
             <h3>Fleet Management</h3>
             <p>Manage your vehicle fleet with comprehensive features including vehicle registration, type categorization, document management, and real-time availability tracking.</p>
@@ -439,14 +540,155 @@ MAIL_ENCRYPTION=tls</code></pre>
             <h3>Transport Management</h3>
             <p>Handle transport requisitions with multi-level approval workflows, create trip sheets, assign vehicles and drivers, and track all transport activities.</p>
 
-            <h3>Task Management</h3>
-            <p>Create and assign tasks to employees, track progress, attach files, and receive notifications on task updates.</p>
-
             <h3>Maintenance System</h3>
             <p>Schedule and track maintenance for vehicles and equipment, manage maintenance categories, and coordinate with vendors.</p>
 
             <h3>Requisition System</h3>
             <p>Submit requisitions with multi-level approval, track status changes, and maintain complete audit logs.</p>
+        </section>
+
+        <section id="notifications">
+            <h2>Notification System</h2>
+            <p>InayaFleet360 includes a comprehensive notification system with multiple channels:</p>
+
+            <h3>Push Notifications</h3>
+            <p>Real-time push notifications for immediate alerts:</p>
+            <ul>
+                <li>Requisition status updates</li>
+                <li>Approval/rejection notifications</li>
+                <li>Trip assignments for drivers</li>
+                <li>Maintenance reminders</li>
+            </ul>
+
+            <h3>Email Notifications</h3>
+            <p>Configurable email templates for automated communications:</p>
+            <ul>
+                <li>Requisition submission confirmations</li>
+                <li>Approval request emails to Department Heads</li>
+                <li>Final approval notifications</li>
+                <li>Trip sheet distributions</li>
+                <li>Maintenance alerts</li>
+            </ul>
+
+            <h3>Notification Settings</h3>
+            <p>Configure notification preferences in the admin panel:</p>
+            <ol>
+                <li>Navigate to <strong>Email & Notification > Notification Settings</strong></li>
+                <li>Enable/disable notification channels</li>
+                <li>Configure email recipients</li>
+                <li>Set notification frequency</li>
+            </ol>
+
+            <h3>Push Subscribers Management</h3>
+            <p>Manage push notification subscriptions:</p>
+            <ul>
+                <li>View all active subscribers</li>
+                <li>Manage notification preferences</li>
+                <li>Track subscription history</li>
+            </ul>
+
+            <h3>Email Templates</h3>
+            <p>Customize email templates for various notifications:</p>
+            <ul>
+                <li>Requisition approval templates</li>
+                <li>Driver assignment notifications</li>
+                <li>Maintenance alerts</li>
+                <li>System announcements</li>
+            </ul>
+
+            <h3>Email Log History</h3>
+            <p>Maintain a complete audit trail of all sent emails:</p>
+            <ul>
+                <li>View sent email history</li>
+                <li>Track delivery status</li>
+                <li>Resend failed emails</li>
+                <li>Export email logs for reporting</li>
+            </ul>
+        </section>
+
+        <section id="approvals">
+            <h2>Multi-Level Approval System</h2>
+            <p>InayaFleet360 implements a comprehensive multi-level approval workflow for transport requisitions:</p>
+
+            <h3>Approval Hierarchy</h3>
+            <div class="approval-flow">
+                <ol>
+                    <li><strong>Employee</strong> submits transport requisition</li>
+                    <li><strong>Department Head</strong> receives notification and reviews (First Approval Level)</li>
+                    <li><strong>Transport Admin</strong> receives notification and provides final approval (Final Approval Level)</li>
+                    <li><strong>System</strong> generates trip sheet and assigns vehicle/driver</li>
+                </ol>
+            </div>
+
+            <h3>User Roles in Approval Workflow</h3>
+            
+            <h4><span class="role-badge role-employee">Employee</span> Employee Login</h4>
+            <p>Employees can:</p>
+            <ul>
+                <li>Submit transport requisitions</li>
+                <li>View requisition history and status</li>
+                <li>Track trip progress</li>
+                <li>Cancel pending requisitions</li>
+            </ul>
+
+            <h4><span class="role-badge role-driver">Driver</span> Driver Login</h4>
+            <p>Drivers can:</p>
+            <ul>
+                <li>View assigned trips</li>
+                <li>Access personal dashboard</li>
+                <li>Manage availability status</li>
+                <li>Log fuel consumption</li>
+                <li>View schedule and calendar</li>
+            </ul>
+
+            <h4><span class="role-badge role-depthead">Dept Head</span> Department Head Login</h4>
+            <p>Department Heads have approval authority:</p>
+            <ul>
+                <li>View all requisitions from department employees</li>
+                <li><strong>Approve</strong> requisitions (first approval level)</li>
+                <li><strong>Reject</strong> requisitions with reason</li>
+                <li>View department transport statistics</li>
+                <li>Receive email and push notifications for pending approvals</li>
+            </ul>
+
+            <h4><span class="role-badge role-transport">Transport Admin</span> Transport Admin Login</h4>
+            <p>Transport Admins have final approval authority:</p>
+            <ul>
+                <li>View all approved requisitions from all departments</li>
+                <li><strong>Approve</strong> for final authorization (final approval level)</li>
+                <li><strong>Reject</strong> requisitions with reason</li>
+                <li>Assign vehicles and drivers to approved requisitions</li>
+                <li>Generate and manage trip sheets</li>
+                <li>View overall fleet utilization</li>
+            </ul>
+
+            <h3>Approval Status Tracking</h3>
+            <table>
+                <tr>
+                    <th>Status</th>
+                    <th>Description</th>
+                </tr>
+                <tr>
+                    <td>Pending</td>
+                    <td>Submitted, awaiting Department Head approval</td>
+                </tr>
+                <tr>
+                    <td>Department Approved</td>
+                    <td>Approved by Department Head, awaiting Transport Admin</td>
+                </tr>
+                <tr>
+                    <td>Transport Approved</td>
+                    <td>Fully approved, trip sheet can be generated</td>
+                </tr>
+                <tr>
+                    <td>Rejected</td>
+                    <td>Rejected by Department Head or Transport Admin</td>
+                </tr>
+                <tr>
+                    <td>Cancelled</td>
+                    <td>Cancelled by the requester</td>
+                </tr>
+            </table>
         </section>
 
         <section id="api">
@@ -464,10 +706,10 @@ MAIL_ENCRYPTION=tls</code></pre>
             <ul>
                 <li>Vehicle fleet lists and reports</li>
                 <li>Driver records and performance reports</li>
-                <li>Task reports</li>
                 <li>Maintenance records</li>
                 <li>Requisition reports</li>
                 <li>Trip sheets</li>
+                <li>Email log history</li>
             </ul>
         </section>
 
@@ -476,7 +718,7 @@ MAIL_ENCRYPTION=tls</code></pre>
             <p>We provide comprehensive support for our product:</p>
             <ul>
                 <li><strong>Documentation:</strong> This complete guide covers all aspects of the system</li>
-                <li><strong>Email Support:</strong> Contact support@inayafleet360.com</li>
+                <li><strong>Email Support:</strong> Contact support@codeaycanon.com</li>
                 <li><strong>Updates:</strong> Regular updates to improve functionality and fix issues</li>
             </ul>
 
@@ -497,9 +739,9 @@ MAIL_ENCRYPTION=tls</code></pre>
     </div>
 
     <footer>
-        <p><strong>InayaFleet360</strong> - All-in-One Fleet & Transport Automation System</p>
+        <p><strong>InayaFleet360</strong> – Fleet & Transport Management System (Laravel)</p>
         <p>Smart Logistics. Better Operations.</p>
-        <p>Version 1.0.0 | &copy; 2024 InayaFleet360</p>
+        <p>Version 1.0.0 | &copy; 2025 InayaFleet360</p>
     </footer>
 </body>
 </html>

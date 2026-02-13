@@ -131,6 +131,7 @@ Route::middleware(['auth'])->group(function () {
     
     // Test Email Routes
     Route::get('email/test', [TestEmailController::class, 'index'])->name('admin.email.test');
+    Route::post('email/test/preview', [TestEmailController::class, 'preview'])->name('admin.email.test.preview');
     Route::post('email/test/send', [TestEmailController::class, 'send'])->name('admin.email.test.send');
 });
 
@@ -219,7 +220,40 @@ Route::get('/vehicles/{id}/details', [VehicleController::class, 'getVehicleDetai
 
 Route::get('/drivers/by-vehicle/{vehicle}', [DriverController::class, 'getByVehicle'])
     ->name('drivers.by.vehicle');
-   
+
+// ============================================================================
+// DRIVER PORTAL ROUTES
+// ============================================================================
+
+Route::middleware(['auth'])->prefix('driver')->name('driver.')->group(function () {
+    // Driver Dashboard
+    Route::get('/dashboard', [DriverController::class, 'driverDashboard'])->name('dashboard');
+    
+    // My Schedule
+    Route::get('/schedule', [DriverController::class, 'driverSchedule'])->name('schedule');
+    
+    // My Trips
+    Route::get('/trips', [DriverController::class, 'driverTrips'])->name('trips');
+    
+    // Trip Status Update
+    Route::get('/trip-status', [DriverController::class, 'driverTripStatus'])->name('trip.status');
+    Route::get('/trip-status/{id}', [DriverController::class, 'driverTripStatus'])->name('trip.status.view');
+    Route::post('/trip/{id}/start', [DriverController::class, 'startTrip'])->name('trip.start');
+    Route::post('/trip/{id}/finish', [DriverController::class, 'finishTrip'])->name('trip.finish');
+    Route::post('/trip/{id}/end', [DriverController::class, 'endTrip'])->name('trip.end');
+    
+    // Fuel Log
+    Route::get('/fuel-log', [DriverController::class, 'driverFuelLog'])->name('fuel.log');
+    Route::post('/fuel-log/store', [DriverController::class, 'storeFuelLog'])->name('fuel.store');
+    
+    // Availability
+    Route::get('/availability', [DriverController::class, 'driverAvailability'])->name('availability');
+    Route::post('/availability/update', [DriverController::class, 'updateAvailability'])->name('availability.update');
+    
+    // My Vehicle
+    Route::get('/vehicle', [DriverController::class, 'driverVehicle'])->name('vehicle');
+});
+
 Route::resource('requisitions', RequisitionController::class);
     
     // Status & Workflow
@@ -297,16 +331,12 @@ Route::resource('maintenance', MaintenanceRequisitionController::class);
 Route::middleware(['auth'])->prefix('admin')->group(function () {
     Route::prefix('approvals/maintenance')->name('maintenance_approvals.')->group(function () {
         Route::get('/', [MaintenanceApprovalController::class, 'index'])->name('index');
-        Route::get('/ajax', [MaintenanceApprovalController::class, 'ajax'])->name('ajax');
-        Route::get('/{id}', [MaintenanceApprovalController::class, 'show'])->name('show');
-        Route::post('/{id}/approve', [MaintenanceApprovalController::class, 'approve'])->name('approve');
-        Route::post('/{id}/reject', [MaintenanceApprovalController::class, 'reject'])->name('reject');
-        Route::post('/{id}/submit', [MaintenanceApprovalController::class, 'submit'])->name('submit');
-        Route::post('/{id}/complete', [MaintenanceApprovalController::class, 'complete'])->name('complete');
-        
         // Approved requisitions list - must be before {id} route
         Route::get('/approved', [MaintenanceApprovalController::class, 'approved'])->name('approved');
         Route::get('/approved/ajax', [MaintenanceApprovalController::class, 'approved'])->name('approved.ajax');
+        
+        Route::get('/ajax', [MaintenanceApprovalController::class, 'ajax'])->name('ajax');
+        Route::get('/{id}', [MaintenanceApprovalController::class, 'show'])->name('show');
     });
 });
 
@@ -435,7 +465,7 @@ Route::middleware(['auth'])->group(function () {
 // 15. ADMIN CONTROLS & PAYMENTS
 // ============================================================================
 
-Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () {
+Route::middleware(['auth'])->prefix('admin')->name('admin')->group(function () {
     // Payment Management
     Route::get('payments/pending', [AdminPaymentController::class, 'pending'])->name('payments.pending');
     Route::get('payments/paid', [AdminPaymentController::class, 'paid'])->name('payments.paid');

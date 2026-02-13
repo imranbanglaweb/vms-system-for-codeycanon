@@ -1,7 +1,7 @@
 		<!-- Basic -->
 		<meta charset="UTF-8">
 
-		<title>Dashboard |  {{ $settings->admin_title ?? 'InayaFleet360' }}</title>
+		<title>Dashboard | {{ $settings->admin_title ?? 'InayaFleet360 – Fleet & Transport Management System' }}</title>
 		<meta name="keywords" content="HTML5 Admin Template" />
 		<meta name="description" content="@if(!empty($settings->admin_description)) @endif">
 		<meta name="author" content="Imran Rahman">
@@ -14,11 +14,8 @@
 
 		<!-- Vendor CSS -->
 		<link rel="stylesheet" href="{{ asset('public/admin_resource/')}}/assets/vendor/bootstrap/css/bootstrap.css" />
-		
-		<link rel="stylesheet" href="{{ asset('public/admin_resource/')}}/assets/vendor/font-awesome/css/font-awesome.css" />
 		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
 		<link rel="stylesheet" href="{{ asset('public/admin_resource/')}}/assets/vendor/magnific-popup/magnific-popup.css" />
-
 		<link rel="stylesheet" href="{{ asset('public/admin_resource/')}}/assets/vendor/select2/select2.css" />
 		<link rel="stylesheet" href="{{ asset('public/admin_resource/')}}/assets/vendor/jquery-datatables-bs3/assets/css/datatables.css" />
 		<link rel="stylesheet" href="{{ asset('public/admin_resource/')}}/assets/vendor/jquery-ui/css/ui-lightness/jquery-ui-1.10.4.custom.css" />
@@ -46,8 +43,8 @@
 		
      <!-- Flag Icons -->
      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/flag-icons/6.6.6/css/flag-icons.min.css">
-  
-  	<style>
+   
+    	<style>
 	  	.logo {
 	  		height: 100px !important;
 	  		display: flex !important;
@@ -98,6 +95,6 @@
         }
 		  .text-start { text-align: right !important; }
         .text-end { text-align: left !important; }
-  	</style>
-        
-   <meta name="csrf-token" content="{{ csrf_token() }}">
+    	</style>
+         
+    <meta name="csrf-token" content="{{ csrf_token() }}">

@@ -74,6 +74,7 @@ class DepartmentApprovalController extends Controller
         }
 
         $requisition->update([
+            'status' => 'Approved',
             'department_status' => 'Approved',
             'transport_status' => 'Pending',
             'department_approved_at' => now(),
@@ -203,10 +204,29 @@ class DepartmentApprovalController extends Controller
     }
 
     return \DataTables::eloquent($query)
-
-        ->addColumn('requested_by', fn($r) => $r->requestedBy->name ?? '-')
-        ->addColumn('department', fn($r) => $r->department->department_name ?? '-')
-        ->addColumn('unit', fn($r) => $r->unit->unit_name ?? '-')
+        ->addColumn('requested_by', function($r) {
+            // Eager load check - if relationship not loaded, try to get from the model
+            if ($r->relationLoaded('requestedBy') && $r->requestedBy) {
+                return $r->requestedBy->name;
+            }
+            // Fallback: try to get employee directly
+            $employee = \App\Models\Employee::find($r->requested_by);
+            return $employee ? $employee->name : '-';
+        })
+        ->addColumn('department', function($r) {
+            if ($r->relationLoaded('department') && $r->department) {
+                return $r->department->department_name;
+            }
+            $dept = \App\Models\Department::find($r->department_id);
+            return $dept ? $dept->department_name : '-';
+        })
+        ->addColumn('unit', function($r) {
+            if ($r->relationLoaded('unit') && $r->unit) {
+                return $r->unit->unit_name;
+            }
+            $unit = \App\Models\Unit::find($r->unit_id);
+            return $unit ? $unit->unit_name : '-';
+        })
 
         ->addColumn('department_status_badge', function ($r) {
             return $r->department_status;

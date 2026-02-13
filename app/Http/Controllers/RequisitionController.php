@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Maatwebsite\Excel\Facades\Excel;
 use App\Mail\RequisitionStatusChangedMail;
 use Illuminate\Support\Facades\Mail;
 use App\Notifications\RequisitionCreated;
@@ -116,9 +117,9 @@ class RequisitionController extends Controller
         $departments = Department::all();
         $stats = [
             'total' => $query->count(),
-            'pending' => (clone $query)->where('status', 0)->count(),
-            'approved' => (clone $query)->where('status', 1)->count(),
-            'rejected' => (clone $query)->where('status', 2)->count(),
+            'pending' => (clone $query)->where('department_status','pending')->count(),
+            'approved' => (clone $query)->where('department_status', 'approved')->count(),
+            'rejected' => (clone $query)->where('department_status', 'rejected')->count(),
         ];
         
         return view('admin.dashboard.requisition.index', compact('requisitions', 'departments', 'stats'));
@@ -128,7 +129,7 @@ class RequisitionController extends Controller
 // EXPORT EXCEL
     public function exportExcel()
     {
-        return Excel::download(new RequisitionExport, 'requisitions.xlsx');
+        return Excel::download(new \App\Exports\RequisitionExport(), 'requisitions.xlsx');
     }
  
     // EXPORT PDF
@@ -276,7 +277,7 @@ public function validateAjax(Request $request)
  
  
      
-    DB::beginTransaction();
+    // Get employee record to auto-populate department and unit if not provided`n      `$employee = Employee::find(`$request->employee_id);`n      `n      DB::beginTransaction();
     try {
         $requisition = Requisition::create([
             'requested_by' => $request->employee_id,
@@ -401,8 +402,8 @@ public function validateAjax(Request $request)
         
         $requisition = Requisition::with(['employee', 'department', 'vehicle', 'driver', 'passengers.employee'])->findOrFail($id);
         
-        // Employee can only edit their own requisitions
-        if ($isEmployee && $requisition->requested_by != $user->id) {
+        // Employee can only edit their own requisitions (check created_by which stores user_id)
+        if ($isEmployee && $requisition->created_by != $user->id) {
             abort(403, 'You can only edit your own requisitions.');
         }
  
@@ -431,8 +432,8 @@ public function validateAjax(Request $request)
  
         $requisition = Requisition::findOrFail($id);
         
-        // Employee can only update their own requisitions
-        if ($isEmployee && $requisition->requested_by != $user->id) {
+        // Employee can only update their own requisitions (check created_by which stores user_id)
+        if ($isEmployee && $requisition->created_by != $user->id) {
             abort(403, 'You can only update your own requisitions.');
         }
  
@@ -865,3 +866,4 @@ public function downloadPDF($id)
  
     
     }
+

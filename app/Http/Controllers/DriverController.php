@@ -326,4 +326,350 @@ class DriverController extends Controller
         ]);
     }
 
+    /**
+     * Get driver by authenticated user
+     */
+    private function getDriverByUser()
+    {
+        $user = auth()->user();
+        
+        // Try to find driver by employee_id linking to employee which links to user
+        $employee = \App\Models\Employee::where('email', $user->email)->first();
+        
+        if ($employee) {
+            $driver = Driver::where('employee_id', $employee->id)->first();
+            if ($driver) {
+                return $driver;
+            }
+        }
+        
+        // Try to find driver by mobile number matching user's phone
+        $driver = Driver::where('mobile', $user->phone)->first();
+        if ($driver) {
+            return $driver;
+        }
+        
+        // Try to find driver by name matching user's name
+        $driver = Driver::where('driver_name', $user->name)->first();
+        if ($driver) {
+            return $driver;
+        }
+        
+        return null;
+    }
+
+    // ============================================================================
+    // DRIVER PORTAL METHODS
+    // ============================================================================
+
+    /**
+     * Driver Dashboard - shows assigned trips and schedule
+     */
+    public function driverDashboard()
+    {
+        $driver = $this->getDriverByUser();
+        $todayTrips = collect();
+        $upcomingTrips = collect();
+        $recentTrips = collect();
+        $assignedTrips = collect();
+        
+        if (!$driver) {
+            return view('admin.dashboard.driver.dashboard', compact('driver', 'todayTrips', 'upcomingTrips', 'recentTrips', 'assignedTrips'));
+        }
+        
+        // Get assigned trips for today
+        $todayTrips = \App\Models\Requisition::where('driver_id', $driver->id)
+            ->whereDate('travel_date', today())
+            ->whereIn('transport_status', ['Approved', 'Pending'])
+            ->with(['vehicle', 'employee'])
+            ->get();
+        
+        // Upcoming trips
+        $upcomingTrips = \App\Models\Requisition::where('driver_id', $driver->id)
+            ->whereDate('travel_date', '>', today())
+            ->where('transport_status', 'Approved')
+            ->with(['vehicle', 'employee'])
+            ->orderBy('travel_date', 'asc')
+            ->take(5)
+            ->get();
+        
+        // Recent completed trips
+        $recentTrips = \App\Models\Requisition::where('driver_id', $driver->id)
+            ->where('status', 'Completed')
+            ->with(['vehicle', 'employee'])
+            ->orderBy('travel_date', 'desc')
+            ->take(5)
+            ->get();
+        
+        // Get all assigned trips (for dashboard display)
+        $assignedTrips = \App\Models\Requisition::where('driver_id', $driver->id)
+            ->whereDate('travel_date', today())
+            ->whereIn('transport_status', ['Approved', 'Pending'])
+            ->with(['vehicle', 'employee'])
+            ->get();
+        
+        return view('admin.dashboard.driver.dashboard', compact('driver', 'todayTrips', 'upcomingTrips', 'recentTrips', 'assignedTrips'));
+    }
+
+    /**
+     * Driver Schedule - shows all assigned trips in a calendar/list view
+     */
+    public function driverSchedule()
+    {
+        $driver = $this->getDriverByUser();
+        $schedules = collect(); // Initialize empty collection
+        
+        if (!$driver) {
+            return view('admin.dashboard.driver.schedule', compact('driver', 'schedules'));
+        }
+        
+        // Get all assigned trips
+        $schedules = \App\Models\Requisition::where('driver_id', $driver->id)
+            ->whereDate('travel_date', '>=', today())
+            ->whereIn('transport_status', ['Approved', 'Pending'])
+            ->with(['vehicle', 'employee'])
+            ->orderBy('travel_date', 'asc')
+            ->get();
+        
+        return view('admin.dashboard.driver.schedule', compact('driver', 'schedules'));
+    }
+
+    /**
+     * Driver Trips - list all trips for the driver
+     */
+    public function driverTrips()
+    {
+        $driver = $this->getDriverByUser();
+        $trips = collect();
+        
+        if (!$driver) {
+            return view('admin.dashboard.driver.trips', compact('driver', 'trips'));
+        }
+        
+        $trips = \App\Models\Requisition::where('driver_id', $driver->id)
+            ->with(['vehicle', 'employee'])
+            ->orderBy('travel_date', 'desc')
+            ->paginate(10);
+        
+        return view('admin.dashboard.driver.trips', compact('driver', 'trips'));
+    }
+
+    /**
+     * Driver Trip Status - shows trip status update form
+     */
+    public function driverTripStatus($id = null)
+    {
+        $driver = $this->getDriverByUser();
+        $activeTrips = collect();
+        $trip = null;
+        
+        if (!$driver) {
+            return view('admin.dashboard.driver.trip-status', compact('driver', 'activeTrips', 'trip'));
+        }
+        
+        if ($id) {
+            $trip = \App\Models\Requisition::where('id', $id)
+                ->where('driver_id', $driver->id)
+                ->with(['vehicle', 'employee'])
+                ->first();
+            
+            if (!$trip) {
+                return redirect()->route('driver.trip.status')->with('error', 'Trip not found.');
+            }
+            
+            return view('admin.dashboard.driver.trip-status', compact('driver', 'trip'));
+        }
+        
+        // Get pending trips for status update (trips that haven't been started/completed yet)
+        $activeTrips = \App\Models\Requisition::where('driver_id', $driver->id)
+            ->whereIn('transport_status', ['Approved', 'Pending'])
+            ->whereNotIn('status', ['Completed'])
+            ->with(['vehicle', 'employee'])
+            ->get();
+        
+        return view('admin.dashboard.driver.trip-status', compact('driver', 'activeTrips'));
+    }
+
+    /**
+     * Start a trip
+     */
+    public function startTrip($id)
+    {
+        $driver = $this->getDriverByUser();
+        
+        $trip = \App\Models\Requisition::where('id', $id)
+            ->where('driver_id', $driver->id)
+            ->first();
+        
+        if (!$trip) {
+            return response()->json(['error' => 'Trip not found.'], 404);
+        }
+        
+        $trip->transport_status = 'In Transit';
+        $trip->save();
+        
+        return response()->json(['success' => true, 'message' => 'Trip started successfully.']);
+    }
+
+    /**
+     * Finish a trip
+     */
+    public function finishTrip($id)
+    {
+        $driver = $this->getDriverByUser();
+        
+        $trip = \App\Models\Requisition::where('id', $id)
+            ->where('driver_id', $driver->id)
+            ->first();
+        
+        if (!$trip) {
+            return response()->json(['error' => 'Trip not found.'], 404);
+        }
+        
+        $trip->transport_status = 'Trip Completed';
+        $trip->save();
+        
+        return response()->json(['success' => true, 'message' => 'Trip finished successfully.']);
+    }
+
+    /**
+     * End a trip (final completion)
+     */
+    public function endTrip($id)
+    {
+        $driver = $this->getDriverByUser();
+        
+        $trip = \App\Models\Requisition::where('id', $id)
+            ->where('driver_id', $driver->id)
+            ->first();
+        
+        if (!$trip) {
+            return response()->json(['error' => 'Trip not found.'], 404);
+        }
+        
+        $trip->status = 'Completed';
+        $trip->save();
+        
+        return response()->json(['success' => true, 'message' => 'Trip ended successfully.']);
+    }
+
+    /**
+     * Driver Fuel Log - shows fuel consumption log form
+     */
+    public function driverFuelLog()
+    {
+        $driver = $this->getDriverByUser();
+        $fuelLogs = collect();
+        $vehicles = collect();
+        
+        if (!$driver) {
+            return view('admin.dashboard.driver.fuel-log', compact('driver', 'fuelLogs', 'vehicles'));
+        }
+        
+        // Get fuel logs for this driver
+        $fuelLogs = \App\Models\FuelLog::where('driver_id', $driver->id)
+            ->orderBy('created_at', 'desc')
+            ->paginate(10);
+        
+        // Get vehicles assigned to driver
+        $vehicles = Vehicle::where('driver_id', $driver->id)->get();
+        
+        return view('admin.dashboard.driver.fuel-log', compact('driver', 'fuelLogs', 'vehicles'));
+    }
+
+    /**
+     * Store fuel log entry
+     */
+    public function storeFuelLog(Request $request)
+    {
+        $driver = $this->getDriverByUser();
+        
+        if (!$driver) {
+            return response()->json(['error' => 'Driver profile not found.'], 404);
+        }
+        
+        $validated = $request->validate([
+            'vehicle_id' => 'required|exists:vehicles,id',
+            'fuel_date' => 'required|date',
+            'fuel_quantity' => 'required|numeric|min:0',
+            'fuel_cost' => 'required|numeric|min:0',
+            'fuel_station' => 'nullable|string|max:255',
+            'odometer_reading' => 'required|numeric|min:0',
+            'notes' => 'nullable|string|max:500',
+        ]);
+        
+        $validated['driver_id'] = $driver->id;
+        $validated['created_by'] = auth()->id();
+        
+        \App\Models\FuelLog::create($validated);
+        
+        return response()->json(['success' => true, 'message' => 'Fuel log added successfully.']);
+    }
+
+    /**
+     * Driver Availability - update availability status
+     */
+    public function driverAvailability()
+    {
+        $driver = $this->getDriverByUser();
+        
+        if (!$driver) {
+            return view('admin.dashboard.driver.availability', compact('driver'));
+        }
+        
+        return view('admin.dashboard.driver.availability', compact('driver'));
+    }
+
+    /**
+     * Update driver availability
+     */
+    public function updateAvailability(Request $request)
+    {
+        $driver = $this->getDriverByUser();
+        
+        if (!$driver) {
+            return response()->json(['error' => 'Driver profile not found.'], 404);
+        }
+        
+        $validated = $request->validate([
+            'availability_status' => 'required|in:available,on_leave,unavailable',
+            'availability_notes' => 'nullable|string|max:500',
+            'available_from' => 'nullable|date|required_if:availability_status,on_leave',
+            'available_until' => 'nullable|date|required_if:availability_status,on_leave',
+        ]);
+        
+        $driver->availability_status = $validated['availability_status'];
+        $driver->availability_notes = $validated['availability_notes'] ?? null;
+        $driver->available_from = $validated['available_from'] ?? null;
+        $driver->available_until = $validated['available_until'] ?? null;
+        $driver->save();
+        
+        return response()->json(['success' => true, 'message' => 'Availability updated successfully.']);
+    }
+
+    /**
+     * Driver Vehicle - show assigned vehicle details
+     */
+    public function driverVehicle()
+    {
+        $driver = $this->getDriverByUser();
+        $vehicle = null;
+        $maintenanceRecords = collect();
+        
+        if (!$driver) {
+            return view('admin.dashboard.driver.vehicle', compact('driver', 'vehicle', 'maintenanceRecords'));
+        }
+        
+        // Get assigned vehicle
+        $vehicle = Vehicle::where('driver_id', $driver->id)->first();
+        
+        // Get recent maintenance records for the vehicle
+        $maintenanceRecords = \App\Models\MaintenanceRequisition::where('vehicle_id', $vehicle->id ?? 0)
+            ->where('status', 'Approved')
+            ->orderBy('created_at', 'desc')
+            ->take(5)
+            ->get();
+        
+        return view('admin.dashboard.driver.vehicle', compact('driver', 'vehicle', 'maintenanceRecords'));
+    }
 }

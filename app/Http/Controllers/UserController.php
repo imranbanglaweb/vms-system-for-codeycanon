@@ -33,7 +33,16 @@ class UserController extends Controller
     ------------------------------------------------------------------ */
     public function index()
     {
-        return view('admin.dashboard.users.index');
+        $roles = Role::orderBy('name', 'ASC')->pluck('name', 'name')->toArray();
+        $userTypes = [
+            'super_user' => 'Super User',
+            'admin' => 'Admin',
+            'normal_user' => 'Normal User',
+            'department_head' => 'Department Head',
+            'driver' => 'Driver',
+            'maintenance_head' => 'Maintenance Head',
+        ];
+        return view('admin.dashboard.users.index', compact('roles', 'userTypes'));
     }
 
      /* ------------------------------------------------------------------
@@ -42,19 +51,46 @@ class UserController extends Controller
         public function getData(Request $request)
         {
 
-            $users = User::with(['employee', 'department', 'unit', 'location', 'company'])
+            $users = User::with(['employee', 'department', 'unit', 'location', 'company', 'roles'])
                 ->select([
                     'id',
                     'user_name',
                     'name',
                     'email',
                     'user_image',
+                    'user_type',
                     'employee_id',
                     'department_id',
                     'unit_id',
                     'location_id',
                     'company_id'
-                ])->orderBy('id', 'DESC');
+                ]);
+
+            // Advance Filters
+            if ($request->filled('user_type_filter')) {
+                $users->where('user_type', $request->user_type_filter);
+            }
+
+            if ($request->filled('role_filter')) {
+                $users->whereHas('roles', function ($query) use ($request) {
+                    $query->where('name', $request->role_filter);
+                });
+            }
+
+            if ($request->filled('status_filter')) {
+                $users->where('status', $request->status_filter);
+            }
+
+            if ($request->filled('search')) {
+                $search = $request->search;
+                $users->where(function($query) use ($search) {
+                    $query->where('name', 'like', "%{$search}%")
+                          ->orWhere('email', 'like', "%{$search}%")
+                          ->orWhere('user_name', 'like', "%{$search}%");
+                });
+            }
+
+            $users->orderBy('id', 'DESC');
 
             return DataTables::of($users)
                 ->addIndexColumn() // DT_RowIndex
@@ -70,6 +106,39 @@ class UserController extends Controller
                     return '<img src="'.$imageUrl.'" width="45" height="45"
                             class="rounded-circle"
                             onerror="this.onerror=null;this.src=\''.asset('public/admin_resource/assets/images/user_image/default.png').'\'">';
+                })
+
+                ->addColumn('user_type', function ($row) {
+                    $userTypeLabels = [
+                        'super_user' => '<span class="badge bg-dark">Super User</span>',
+                        'admin' => '<span class="badge bg-primary">Admin</span>',
+                        'normal_user' => '<span class="badge bg-info">Normal User</span>',
+                        'department_head' => '<span class="badge bg-warning">Dept. Head</span>',
+                        'driver' => '<span class="badge bg-secondary">Driver</span>',
+                        'maintenance_head' => '<span class="badge bg-success">Maintenance Head</span>',
+                    ];
+                    return $userTypeLabels[$row->user_type] ?? '<span class="badge bg-light text-dark">'.$row->user_type.'</span>';
+                })
+
+                ->addColumn('roles', function ($row) {
+                    $roles = $row->getRoleNames();
+                    if ($roles->isNotEmpty()) {
+                        return $roles->map(function($role) {
+                            $badgeClass = match($role) {
+                                'Super Admin' => 'bg-dark',
+                                'Admin' => 'bg-primary',
+                                'Department Head' => 'bg-warning',
+                                'Transport' => 'info',
+                                'Employee' => 'info',
+                                'Driver' => 'secondary',
+                                'Maintenance_Head' => 'success',
+                                'Maintenance' => 'success',
+                                default => 'light'
+                            };
+                            return '<span class="badge bg-'.$badgeClass.' me-1">'.$role.'</span>';
+                        })->implode(' ');
+                    }
+                    return '<span class="text-muted">No Role</span>';
                 })
 
                 ->addColumn('employee', function ($row) {
@@ -114,7 +183,7 @@ class UserController extends Controller
                     ';
                 })
 
-                ->rawColumns(['user_image','action','status','employee','email'])
+                ->rawColumns(['user_image','action','status','employee','email','user_type','roles'])
                 ->make(true);
         }
 

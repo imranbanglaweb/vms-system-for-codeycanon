@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Mail;
 
 use Illuminate\Bus\Queueable;
@@ -14,6 +15,7 @@ class RequisitionStatusMail extends Mailable implements ShouldQueue
     public $oldStatus;
     public $newStatus;
     public $remarks;
+    public $adminTitle;
 
     public function __construct(Requisition $requisition, $oldStatus, $newStatus, $remarks = null)
     {
@@ -21,17 +23,22 @@ class RequisitionStatusMail extends Mailable implements ShouldQueue
         $this->oldStatus = $oldStatus;
         $this->newStatus = $newStatus;
         $this->remarks = $remarks;
+        
+        // Get admin title from settings
+        $settings = \App\Models\Setting::first();
+        $this->adminTitle = $settings && $settings->admin_title ? $settings->admin_title : 'InayaFleet360';
     }
 
     public function build()
     {
-        return $this->subject("Requisition #{$this->requisition->id} status changed")
+        return $this->subject("Requisition #{$this->requisition->id} status changed to {$this->newStatus->name}")
                     ->markdown('emails.requisition.status')
                     ->with([
                         'requisition' => $this->requisition,
                         'oldStatus' => $this->oldStatus,
                         'newStatus' => $this->newStatus,
                         'remarks' => $this->remarks,
+                        'adminTitle' => $this->adminTitle,
                     ]);
     }
 }

@@ -6,6 +6,7 @@
             {{ $requisition->requisition_number ?? 'N/A' }}
         </a>
     </td>
+    @if(!auth()->user()->hasRole('Employee'))
     <td>
         <span class="fw-semibold text-dark">{{ $requisition->employee->name ?? 'Unknown' }}</span>
         @if($requisition->employee->employee_code)
@@ -15,6 +16,7 @@
     <td>
         <span class="text-dark">{{ $requisition->department->department_name ?? 'N/A' }}</span>
     </td>
+    @endif
     <td>
         <div class="d-flex align-items-center">
             <div class="text-end">
@@ -97,7 +99,10 @@
             <a href="{{ route('requisitions.edit', $requisition->id) }}" class="btn btn-primary text-white" title="Edit" style="background: #007bff; border-color: #007bff;">
                 <i class="fa fa-edit"></i>
             </a>
+            @endif
             
+            @can('requisition-delete')
+            @if(!in_array($requisition->status, ['Approved', 'Completed']))
             <button class="btn btn-danger text-white deleteItem" 
                     data-id="{{ $requisition->id }}"
                     data-req-number="{{ $requisition->requisition_number }}"
@@ -106,12 +111,13 @@
                 <i class="fa fa-trash"></i>
             </button>
             @endif
+            @endcan
         </div>
     </td>
 </tr>
 @empty
 <tr>
-    <td colspan="11" class="text-center py-5">
+    <td colspan="{{ auth()->user()->hasRole('Employee') ? '9' : '11' }}" class="text-center py-5">
         <div class="text-muted">
             <div class="mb-3">
                 <i class="fa fa-inbox fa-4x text-secondary opacity-25"></i>

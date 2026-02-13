@@ -93,6 +93,19 @@
         background: linear-gradient(135deg, #5a6fd6 0%, #6a4190 100%);
     }
     
+    /* Back Button Styles */
+    .btn-info {
+        background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
+        border: none;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-info:hover {
+        background: linear-gradient(135deg, #138496 0%, #117a8b 100%);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(23, 162, 184, 0.4);
+    }
+    
     .form-control[readonly] {
         background-color: #f8f9fa;
         cursor: not-allowed;
@@ -157,8 +170,8 @@
                 <i class="fa fa-car-side me-2 text-warning"></i>
                 Create Requisition
             </h3>
-            <a href="{{ route('requisitions.index') }}" class="btn btn-secondary btn-sm">
-                <i class="fa fa-arrow-left"></i> Back
+            <a href="{{ route('requisitions.index') }}" class="btn btn-info btn-sm text-white fw-bold shadow-sm">
+                <i class="fa fa-arrow-left me-1"></i> Back
             </a>
         </div>
 
@@ -198,39 +211,13 @@
                         <small class="text-danger error-text employee_id_error"></small>
                     </div>
 
-                    <div class="col-md-4">
-                        <label class="form-label"><i class="fa fa-building text-primary me-1"></i> Department <span class="text-danger">*</span></label>
-                        <div class="input-group input-group-lg">
-                            <span class="input-group-text bg-light"><i class="fa fa-sitemap text-muted"></i></span>
-                            <select id="department_id" name="department_id" class="form-select form-select-lg">
-                                <option value="">-- Select Department --</option>
-                                @foreach($departments as $dept)
-                                    <option value="{{ $dept->id }}">{{ $dept->department_name }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-                        <small class="text-danger error-text department_id_error"></small>
-                    </div>
-
-                    <div class="col-md-4">
-                        <label class="form-label"><i class="fa fa-layer-group text-primary me-1"></i> Unit <span class="text-danger">*</span></label>
-                        <div class="input-group input-group-lg">
-                            <span class="input-group-text bg-light"><i class="fa fa-cubes text-muted"></i></span>
-                            <select id="unit_id" name="unit_id" class="form-select form-select-lg">
-                                <option value="">-- Select Unit --</option>
-                                @foreach($units as $unit)
-                                    <option value="{{ $unit->id }}">{{ $unit->unit_name }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-                        <small class="text-danger error-text unit_id_error"></small>
-                    </div>
+                    <!-- Hidden fields for department and unit (populated via JavaScript) -->
+                    <input type="hidden" id="department_id" name="department_id" value="">
+                    <input type="hidden" id="unit_id" name="unit_id" value="">
 
                 </div>
 
-                <!-- ============================ -->
                 <!-- EMAIL TO DEPARTMENT HEAD TOGGLE -->
-                <!-- ============================ -->
                 <div class="row mb-4">
                     <div class="col-md-12">
                         <div class="form-check form-switch">
@@ -403,7 +390,8 @@
 
 </section>
 
-{{-- Flatpickr --}}
+{{-- Flatpickr Premium Theme with Clock --}}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/themes/airbnb.css">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -431,12 +419,10 @@ $(function () {
             // Set the employee dropdown value
             $('#employee_id').val(selectedEmployeeId).trigger('change');
             
-            // Fetch employee details using named route
+            // Fetch employee details and populate hidden fields
             $.get("{{ route('employee.details', ['id' => $selectedEmployeeId]) }}", function (res) {
-                // Set department dropdown
-                $('#department_id').val(res.department_id || '').trigger('change');
-                // Set unit dropdown
-                $('#unit_id').val(res.unit_id || '').trigger('change');
+                $('#department_id').val(res.department_id || '');
+                $('#unit_id').val(res.unit_id || '');
             });
         });
     @endif
@@ -448,8 +434,12 @@ $(function () {
     flatpickr('.datetimepicker', {
         enableTime: true,
         dateFormat: "Y-m-d H:i",
-        time_24hr: true,
-        minDate: "today"
+        time_24hr: false,
+        minDate: "today",
+        theme: "airbnb",
+        showMonths: 1,
+        disableMobile: "true",
+        position: "auto"
     });
 
     function updateHiddenPassengerField() {
@@ -525,21 +515,22 @@ $(function () {
         }
     }
 
-    /* ================= EMPLOYEE DETAILS ================= */
+    /* ================= EMPLOYEE CHANGE HANDLER ================= */
     $('#employee_id').on('change', function () {
         let id = $(this).val();
-        if(!id) return clearEmployeeInfo();
+        if(!id) {
+            // Clear hidden fields when no employee selected
+            $('#department_id').val('');
+            $('#unit_id').val('');
+            return;
+        }
+        
+        // Fetch employee details and populate hidden fields
         $.get("{{ route('employee.details', ['id' => '__ID__']) }}".replace('__ID__', id), function (res) {
-            // Set department dropdown
-            $('#department_id').val(res.department_id || '').trigger('change');
-            // Set unit dropdown
-            $('#unit_id').val(res.unit_id || '').trigger('change');
+            $('#department_id').val(res.department_id || '');
+            $('#unit_id').val(res.unit_id || '');
         });
     });
-
-    function clearEmployeeInfo(){
-        $('#department_id, #unit_id').val('').trigger('change');
-    }
 
     /* ================= PASSENGER SELECTION ================= */
     $(document).on('change','.passenger-employee',function(){
@@ -666,11 +657,8 @@ $(function () {
     $('#send_email_to_head').on('change', function() {
         if ($(this).is(':checked')) {
             $('#emailDetailsSection').slideDown();
-            // Auto-populate department head info if department is selected
-            let departmentId = $('#department_id').val();
-            if (departmentId) {
-                fetchDepartmentHeadInfo(departmentId);
-            }
+            // Fetch department head info based on selected employee's department
+            fetchDepartmentHeadFromEmployee();
         } else {
             $('#emailDetailsSection').slideUp();
             $('#department_head_name').val('');
@@ -678,18 +666,19 @@ $(function () {
         }
     });
 
-    // Fetch department head info when department changes
-    $('#department_id').on('change', function() {
+    // Fetch department head info when employee changes
+    $('#employee_id').on('change', function() {
         if ($('#send_email_to_head').is(':checked')) {
-            let departmentId = $(this).val();
-            if (departmentId) {
-                fetchDepartmentHeadInfo(departmentId);
-            } else {
-                $('#department_head_name').val('');
-                $('#department_head_email').val('');
-            }
+            fetchDepartmentHeadFromEmployee();
         }
     });
+
+    function fetchDepartmentHeadFromEmployee() {
+        var departmentId = $('#department_id').val();
+        if (departmentId) {
+            fetchDepartmentHeadInfo(departmentId);
+        }
+    }
 
     function fetchDepartmentHeadInfo(departmentId) {
         $.get("{{ url('admin/departments') }}/" + departmentId + "/head-info", function(res) {

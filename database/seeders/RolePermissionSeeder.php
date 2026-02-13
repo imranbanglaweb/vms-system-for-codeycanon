@@ -231,15 +231,33 @@ class RolePermissionSeeder extends Seeder
 
             'dashboard',
 
-            // Requisitions
+            // Requisitions - Create, View, Edit (No Delete)
             'requisition-create',
             'requisition-view',
+            'requisition-edit',
+            'requisition-pending-view',
+            'requisition-approved-view',
 
             // Documents
             'document-manage',
+            'document-create',
+            'document-view',
+            'document-history',
 
             // Notifications
             'notification-view',
+
+            // Support / Helpdesk
+            'support-create',
+            'support-edit',
+
+            // Profile & Settings
+            'profile-view',
+            'profile-edit',
+
+            // Employee self-service
+            'my-requisitions',
+            'my-documents',
         ];
 
         $employee?->syncPermissions($employeePermissions);
@@ -301,15 +319,29 @@ class RolePermissionSeeder extends Seeder
         $driverPermissions = [
             'dashboard',
             
-            // View own schedule
+            // Driver Schedule
             'driver-schedule-view',
+            'driver-schedule-own',
             'driver-availability-view',
+            'driver-availability-update',
             
-            // Trip management
+            // Trip Sheets - Own trips only
             'trip-sheet-view',
+            'trip-sheet-own',
+            'trip-start',
+            'trip-finish',
+            'trip-end',
+            
+            // Fuel & Expense Logging
+            'trip-fuel-log',
+            'trip-fuel-own',
             
             // Notifications
             'notification-view',
+            
+            // Profile
+            'profile-view',
+            'profile-edit',
         ];
 
         $driver?->syncPermissions($driverPermissions);

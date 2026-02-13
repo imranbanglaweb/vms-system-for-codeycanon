@@ -32,307 +32,390 @@ class UserSeeder extends Seeder
 
         $dummyImage = 'default.png';
 
+        // ================= SUPER ADMIN EMPLOYEE =================
+        $superAdminEmpData = [
+            'name' => 'Super Admin User',
+            'email' => 'superadmin@demo.com',
+            'employee_code' => 'SA001',
+            'mobile' => '01700000001',
+            'designation' => 'Super Administrator',
+            'department_id' => 1,
+        ];
+        
+        $superAdminEmp = Employee::firstOrCreate(
+            ['email' => $superAdminEmpData['email']],
+            [
+                'name' => $superAdminEmpData['name'],
+                'employee_code' => $superAdminEmpData['employee_code'],
+                'email' => $superAdminEmpData['email'],
+                'phone' => $superAdminEmpData['mobile'],
+                'designation' => $superAdminEmpData['designation'],
+                'company_id' => 1,
+                'department_id' => $superAdminEmpData['department_id'],
+                'unit_id' => $firstUnit ? $firstUnit->id : 1,
+                'location_id' => $firstLocation ? $firstLocation->id : 1,
+                'join_date' => now()->format('Y-m-d'),
+                'status' => 1,
+                'photo' => $dummyImage,
+                'present_address' => 'Dhaka, Bangladesh',
+                'permanent_address' => 'Dhaka, Bangladesh',
+            ]
+        );
+
         // ================= SUPER ADMIN =================
         $superAdmin = User::firstOrCreate(
             ['email' => 'superadmin@demo.com'],
             [
-                'name' => 'Super Admin',
-                'user_name' => 'SA001',
+                'name' => $superAdminEmpData['name'],
+                'user_name' => $superAdminEmpData['employee_code'],
                 'password' => Hash::make('password'),
                 'status' => 1,
                 'user_type' => 'super_user',
-                'employee_id' => $firstEmployee ? $firstEmployee->id : null,
+                'employee_id' => $superAdminEmp->id,
                 'company_id' => 1,
-                'department_id' => $firstDepartment ? $firstDepartment->id : null,
+                'department_id' => $superAdminEmpData['department_id'],
                 'unit_id' => $firstUnit ? $firstUnit->id : null,
                 'location_id' => $firstLocation ? $firstLocation->id : null,
                 'user_image' => $dummyImage,
-                'cell_phone' => '01700000001',
+                'cell_phone' => $superAdminEmpData['mobile'],
             ]
         );
         $superAdmin->assignRole($superAdminRole);
+        $this->command->info("Created Super Admin: superadmin@demo.com / password");
+
+        // ================= ADMIN EMPLOYEE =================
+        $adminEmpData = [
+            'name' => 'System Admin User',
+            'email' => 'admin@demo.com',
+            'employee_code' => 'AD001',
+            'mobile' => '01700000002',
+            'designation' => 'System Administrator',
+            'department_id' => 1,
+        ];
+        
+        $adminEmp = Employee::firstOrCreate(
+            ['email' => $adminEmpData['email']],
+            [
+                'name' => $adminEmpData['name'],
+                'employee_code' => $adminEmpData['employee_code'],
+                'email' => $adminEmpData['email'],
+                'phone' => $adminEmpData['mobile'],
+                'designation' => $adminEmpData['designation'],
+                'company_id' => 1,
+                'department_id' => $adminEmpData['department_id'],
+                'unit_id' => $firstUnit ? $firstUnit->id : 1,
+                'location_id' => $firstLocation ? $firstLocation->id : 1,
+                'join_date' => now()->format('Y-m-d'),
+                'status' => 1,
+                'photo' => $dummyImage,
+                'present_address' => 'Dhaka, Bangladesh',
+                'permanent_address' => 'Dhaka, Bangladesh',
+            ]
+        );
 
         // ================= ADMIN =================
         $admin = User::firstOrCreate(
             ['email' => 'admin@demo.com'],
             [
-                'name' => 'System Admin',
-                'user_name' => 'AD001',
+                'name' => $adminEmpData['name'],
+                'user_name' => $adminEmpData['employee_code'],
                 'password' => Hash::make('password'),
                 'status' => 1,
                 'user_type' => 'admin',
-                'employee_id' => $firstEmployee ? $firstEmployee->id : null,
+                'employee_id' => $adminEmp->id,
                 'company_id' => 1,
-                'department_id' => $firstDepartment ? $firstDepartment->id : null,
+                'department_id' => $adminEmpData['department_id'],
                 'unit_id' => $firstUnit ? $firstUnit->id : null,
                 'location_id' => $firstLocation ? $firstLocation->id : null,
                 'user_image' => $dummyImage,
-                'cell_phone' => '01700000002',
+                'cell_phone' => $adminEmpData['mobile'],
             ]
         );
         $admin->assignRole($adminRole);
+        $this->command->info("Created Admin: admin@demo.com / password");
 
-        // ================= TRANSPORT MANAGER =================
+        // ================= TRANSPORT ADMIN EMPLOYEE =================
+        $transportEmpData = [
+            'name' => 'Transport Admin User',
+            'email' => 'transport@demo.com',
+            'employee_code' => 'TA001',
+            'mobile' => '01700000003',
+            'designation' => 'Transport Manager',
+            'department_id' => 9, // Transport department
+        ];
+        
+        $transportEmp = Employee::firstOrCreate(
+            ['email' => $transportEmpData['email']],
+            [
+                'name' => $transportEmpData['name'],
+                'employee_code' => $transportEmpData['employee_code'],
+                'email' => $transportEmpData['email'],
+                'phone' => $transportEmpData['mobile'],
+                'designation' => $transportEmpData['designation'],
+                'company_id' => 1,
+                'department_id' => $transportEmpData['department_id'],
+                'unit_id' => $firstUnit ? $firstUnit->id : 1,
+                'location_id' => $firstLocation ? $firstLocation->id : 1,
+                'join_date' => now()->format('Y-m-d'),
+                'status' => 1,
+                'photo' => $dummyImage,
+                'present_address' => 'Dhaka, Bangladesh',
+                'permanent_address' => 'Dhaka, Bangladesh',
+            ]
+        );
+
+        // ================= TRANSPORT ADMIN =================
         $transport = User::firstOrCreate(
             ['email' => 'transport@demo.com'],
             [
-                'name' => 'Transport Manager',
-                'user_name' => 'TM001',
+                'name' => $transportEmpData['name'],
+                'user_name' => $transportEmpData['employee_code'],
                 'password' => Hash::make('password'),
                 'status' => 1,
                 'user_type' => 'super_user',
-                'employee_id' => $firstEmployee ? $firstEmployee->id : null,
+                'employee_id' => $transportEmp->id,
                 'company_id' => 1,
-                'department_id' => $firstDepartment ? $firstDepartment->id : null,
+                'department_id' => $transportEmpData['department_id'],
                 'unit_id' => $firstUnit ? $firstUnit->id : null,
                 'location_id' => $firstLocation ? $firstLocation->id : null,
                 'user_image' => $dummyImage,
-                'cell_phone' => '01700000004',
+                'cell_phone' => $transportEmpData['mobile'],
             ]
         );
         $transport->assignRole($transportRole);
+        $this->command->info("Created Transport Admin: transport@demo.com / password");
 
-        // ================= EMPLOYEE USERS (Linked to Employees) =================
-        
-        // Get all employees with their emails
-        $employees = Employee::whereIn('email', [
-            'employee@demo.com',
-            'john.doe@demo.com',
-            'jane.smith@demo.com',
-            'mike.johnson@demo.com',
-            'sarah.williams@demo.com',
-            'alex.brown@demo.com',
-        ])->get();
-
-        foreach ($employees as $emp) {
-            // Create or update user for each employee
-            $user = User::firstOrCreate(
-                ['email' => $emp->email],
-                [
-                    'name' => $emp->name,
-                    'user_name' => $emp->employee_code,
-                    'password' => Hash::make('password'),
-                    'status' => 1,
-                    'user_type' => 'normal_user',
-                    'employee_id' => $emp->id,
-                    'company_id' => 1,
-                    'department_id' => $emp->department_id,
-                    'unit_id' => $emp->unit_id,
-                    'location_id' => $emp->location_id,
-                    'user_image' => $dummyImage,
-                    'cell_phone' => $emp->phone ?? '01700000000',
-                ]
-            );
-            
-            // Assign employee role
-            $user->syncRoles([$employeeRole]);
-            
-            $this->command->info("Created user for employee: {$emp->name} ({$emp->email})");
-        }
-
-        // ================= DEPARTMENT HEAD USERS =================
-        
-        // Create department head users based on assigned heads
-        $departmentHeads = [
-            'HR' => 'Demo Employee',
-            'IT' => 'John Doe',
-            'Accounts' => 'Jane Smith',
-            'Operations' => 'Mike Johnson',
-            'Finance' => 'Sarah Williams',
+        // ================= DEPARTMENT HEAD EMPLOYEE =================
+        $deptHeadEmpData = [
+            'name' => 'Department Head User',
+            'email' => 'department.head@demo.com',
+            'employee_code' => 'DH001',
+            'mobile' => '01700000004',
+            'designation' => 'Department Head',
+            'department_id' => 1,
         ];
-
-        foreach ($departmentHeads as $deptName => $empName) {
-            $department = Department::where('department_name', $deptName)->first();
-            if ($department && $department->headEmployee) {
-                $headEmployee = $department->headEmployee;
-                
-                // Create or update user as department head
-                $headUser = User::firstOrCreate(
-                    ['email' => $headEmployee->email],
-                    [
-                        'name' => $headEmployee->name,
-                        'user_name' => $headEmployee->employee_code,
-                        'password' => Hash::make('password'),
-                        'status' => 1,
-                        'user_type' => 'department_head',
-                        'employee_id' => $headEmployee->id,
-                        'company_id' => 1,
-                        'department_id' => $department->id,
-                        'unit_id' => $headEmployee->unit_id,
-                        'location_id' => $headEmployee->location_id,
-                        'user_image' => $dummyImage,
-                        'cell_phone' => $headEmployee->phone ?? '01700000000',
-                    ]
-                );
-                
-                // Assign department head role
-                $headUser->syncRoles([$deptHeadRole, $employeeRole]);
-                
-                $this->command->info("Created department head user: {$headEmployee->name} for {$deptName}");
-            }
-        }
-
-        // ================= DRIVER USERS WITH EMPLOYEE RECORDS =================
         
-        // Driver data with employee information
+        $deptHeadEmp = Employee::firstOrCreate(
+            ['email' => $deptHeadEmpData['email']],
+            [
+                'name' => $deptHeadEmpData['name'],
+                'employee_code' => $deptHeadEmpData['employee_code'],
+                'email' => $deptHeadEmpData['email'],
+                'phone' => $deptHeadEmpData['mobile'],
+                'designation' => $deptHeadEmpData['designation'],
+                'company_id' => 1,
+                'department_id' => $deptHeadEmpData['department_id'],
+                'unit_id' => $firstUnit ? $firstUnit->id : 1,
+                'location_id' => $firstLocation ? $firstLocation->id : 1,
+                'join_date' => now()->format('Y-m-d'),
+                'status' => 1,
+                'photo' => $dummyImage,
+                'present_address' => 'Dhaka, Bangladesh',
+                'permanent_address' => 'Dhaka, Bangladesh',
+            ]
+        );
+
+        // ================= DEPARTMENT HEAD =================
+        $deptHead = User::firstOrCreate(
+            ['email' => 'department.head@demo.com'],
+            [
+                'name' => $deptHeadEmpData['name'],
+                'user_name' => $deptHeadEmpData['employee_code'],
+                'password' => Hash::make('password'),
+                'status' => 1,
+                'user_type' => 'department_head',
+                'employee_id' => $deptHeadEmp->id,
+                'company_id' => 1,
+                'department_id' => $deptHeadEmpData['department_id'],
+                'unit_id' => $firstUnit ? $firstUnit->id : null,
+                'location_id' => $firstLocation ? $firstLocation->id : null,
+                'user_image' => $dummyImage,
+                'cell_phone' => $deptHeadEmpData['mobile'],
+            ]
+        );
+        $deptHead->assignRole($deptHeadRole);
+        $this->command->info("Created Department Head: department.head@demo.com / password");
+
+        // ================= EMPLOYEE USER =================
+        // Create employee record first, then user
+        $employeeData = [
+            'name' => 'John Doe',
+            'email' => 'employee@demo.com',
+            'employee_code' => 'EMP001',
+            'mobile' => '01700000005',
+            'designation' => 'Officer',
+        ];
+        
+        // Create employee record for the employee user
+        $employeeRecord = Employee::firstOrCreate(
+            ['email' => $employeeData['email']],
+            [
+                'name' => $employeeData['name'],
+                'employee_code' => $employeeData['employee_code'],
+                'email' => $employeeData['email'],
+                'phone' => $employeeData['mobile'],
+                'designation' => $employeeData['designation'],
+                'company_id' => 1,
+                'department_id' => $firstDepartment ? $firstDepartment->id : 1,
+                'unit_id' => $firstUnit ? $firstUnit->id : 1,
+                'location_id' => $firstLocation ? $firstLocation->id : 1,
+                'join_date' => now()->format('Y-m-d'),
+                'status' => 1,
+                'photo' => $dummyImage,
+                'present_address' => 'Dhaka, Bangladesh',
+                'permanent_address' => 'Dhaka, Bangladesh',
+            ]
+        );
+        
+        // Create user for employee
+        $employeeUser = User::firstOrCreate(
+            ['email' => $employeeData['email']],
+            [
+                'name' => $employeeData['name'],
+                'user_name' => $employeeData['employee_code'],
+                'password' => Hash::make('password'),
+                'status' => 1,
+                'user_type' => 'normal_user',
+                'employee_id' => $employeeRecord->id,
+                'company_id' => 1,
+                'department_id' => $firstDepartment ? $firstDepartment->id : 1,
+                'unit_id' => $firstUnit ? $firstUnit->id : 1,
+                'location_id' => $firstLocation ? $firstLocation->id : 1,
+                'user_image' => $dummyImage,
+                'cell_phone' => $employeeData['mobile'],
+            ]
+        );
+        $employeeUser->assignRole($employeeRole);
+        $this->command->info("Created Employee User: employee@demo.com / password");
+
+        // ================= ADDITIONAL EMPLOYEE USER =================
+        // Create additional employee record first, then user
+        $employeeData2 = [
+            'name' => 'Jane Smith',
+            'email' => 'employee2@demo.com',
+            'employee_code' => 'EMP500',
+            'mobile' => '01700000006',
+            'designation' => 'Senior Officer',
+        ];
+        
+        // Create employee record for the additional employee user
+        $employeeRecord2 = Employee::firstOrCreate(
+            ['email' => $employeeData2['email']],
+            [
+                'name' => $employeeData2['name'],
+                'employee_code' => $employeeData2['employee_code'],
+                'email' => $employeeData2['email'],
+                'phone' => $employeeData2['mobile'],
+                'designation' => $employeeData2['designation'],
+                'company_id' => 1,
+                'department_id' => $firstDepartment ? $firstDepartment->id : 1,
+                'unit_id' => $firstUnit ? $firstUnit->id : 1,
+                'location_id' => $firstLocation ? $firstLocation->id : 1,
+                'join_date' => now()->format('Y-m-d'),
+                'status' => 1,
+                'photo' => $dummyImage,
+                'present_address' => 'Dhaka, Bangladesh',
+                'permanent_address' => 'Dhaka, Bangladesh',
+            ]
+        );
+        
+        // Create user for additional employee
+        $employeeUser2 = User::firstOrCreate(
+            ['email' => $employeeData2['email']],
+            [
+                'name' => $employeeData2['name'],
+                'user_name' => $employeeData2['employee_code'],
+                'password' => Hash::make('password'),
+                'status' => 1,
+                'user_type' => 'normal_user',
+                'employee_id' => $employeeRecord2->id,
+                'company_id' => 1,
+                'department_id' => $firstDepartment ? $firstDepartment->id : 1,
+                'unit_id' => $firstUnit ? $firstUnit->id : 1,
+                'location_id' => $firstLocation ? $firstLocation->id : 1,
+                'user_image' => $dummyImage,
+                'cell_phone' => $employeeData2['mobile'],
+            ]
+        );
+        $employeeUser2->assignRole($employeeRole);
+        $this->command->info("Created Employee User: employee2@demo.com / password");
+
+        // ================= DRIVER USER (ONLY ONE) =================
+        // Create only one driver with employee record
         $driverData = [
-            [
-                'license_number' => 'DL-001-2024',
-                'name' => 'Mohammad Karim Ahmed',
-                'email' => 'karim.ahmed@demo.com',
-                'username' => 'DR001',
-                'mobile' => '01711000001',
-                'designation' => 'Driver',
-            ],
-            [
-                'license_number' => 'DL-002-2024',
-                'name' => 'Abdul Rahim',
-                'email' => 'abdul.rahim@demo.com',
-                'username' => 'DR002',
-                'mobile' => '01711000002',
-                'designation' => 'Driver',
-            ],
-            [
-                'license_number' => 'DL-003-2024',
-                'name' => 'Jamal Hossain',
-                'email' => 'jamal.hossain@demo.com',
-                'username' => 'DR003',
-                'mobile' => '01711000003',
-                'designation' => 'Driver',
-            ],
-            [
-                'license_number' => 'DL-004-2024',
-                'name' => 'Salam Khan',
-                'email' => 'salam.khan@demo.com',
-                'username' => 'DR004',
-                'mobile' => '01711000004',
-                'designation' => 'Driver',
-            ],
-            [
-                'license_number' => 'DL-005-2024',
-                'name' => 'Rafiq Islam',
-                'email' => 'rafiq.islam@demo.com',
-                'username' => 'DR005',
-                'mobile' => '01711000005',
-                'designation' => 'Driver',
-            ],
-            [
-                'license_number' => 'DL-006-2024',
-                'name' => 'Mostafa Ali',
-                'email' => 'mostafa.ali@demo.com',
-                'username' => 'DR006',
-                'mobile' => '01711000006',
-                'designation' => 'Driver',
-            ],
-            [
-                'license_number' => 'DL-007-2024',
-                'name' => 'Harun Or Rashid',
-                'email' => 'harun.rashid@demo.com',
-                'username' => 'DR007',
-                'mobile' => '01711000007',
-                'designation' => 'Driver',
-            ],
-            [
-                'license_number' => 'DL-008-2024',
-                'name' => 'Anwar Hossain',
-                'email' => 'anwar.hossain@demo.com',
-                'username' => 'DR008',
-                'mobile' => '01711000008',
-                'designation' => 'Driver',
-            ],
-            [
-                'license_number' => 'DL-009-2024',
-                'name' => 'Ziaur Rahman',
-                'email' => 'ziaur.rahman@demo.com',
-                'username' => 'DR009',
-                'mobile' => '01711000010',
-                'designation' => 'Driver',
-            ],
-            [
-                'license_number' => 'DL-010-2024',
-                'name' => 'Monir Hossain',
-                'email' => 'monir.hossain@demo.com',
-                'username' => 'DR010',
-                'mobile' => '01711000012',
-                'designation' => 'Driver',
-            ],
+            'license_number' => 'DL-001-2024',
+            'name' => 'Mohammad Karim Ahmed',
+            'email' => 'driver@demo.com',
+            'username' => 'DR001',
+            'mobile' => '01711000001',
+            'designation' => 'Driver',
         ];
 
-        foreach ($driverData as $driver) {
-            // Get the driver record
-            $driverRecord = Driver::where('license_number', $driver['license_number'])->first();
-            
-            // Create employee record for the driver
-            $employee = Employee::firstOrCreate(
-                ['email' => $driver['email']],
-                [
-                    'name' => $driver['name'],
-                    'employee_code' => $driver['username'],
-                    'email' => $driver['email'],
-                    'phone' => $driver['mobile'],
-                    'designation' => $driver['designation'],
-                    'company_id' => 1,
-                    'department_id' => $firstDepartment ? $firstDepartment->id : 1,
-                    'unit_id' => $firstUnit ? $firstUnit->id : 1,
-                    'location_id' => $firstLocation ? $firstLocation->id : 1,
-                    'join_date' => now()->format('Y-m-d'),
-                    'status' => 1,
-                    'photo' => $dummyImage,
-                    'present_address' => $driverRecord ? $driverRecord->present_address : 'Dhaka, Bangladesh',
-                    'permanent_address' => $driverRecord ? $driverRecord->permanent_address : 'Dhaka, Bangladesh',
-                ]
-            );
-            
-            // Create or update user for driver
-            $driverUser = User::firstOrCreate(
-                ['email' => $driver['email']],
-                [
-                    'name' => $driver['name'],
-                    'user_name' => $driver['username'],
-                    'password' => Hash::make('password'),
-                    'status' => 1,
-                    'user_type' => 'driver',
-                    'employee_id' => $employee->id,
-                    'company_id' => 1,
-                    'department_id' => $firstDepartment ? $firstDepartment->id : 1,
-                    'unit_id' => $firstUnit ? $firstUnit->id : 1,
-                    'location_id' => $firstLocation ? $firstLocation->id : 1,
-                    'user_image' => $dummyImage,
-                    'cell_phone' => $driver['mobile'],
-                ]
-            );
-            
-            // Create driver role if doesn't exist
-            if (!$driverRole) {
-                $driverRole = Role::firstOrCreate(['name' => 'Driver', 'guard_name' => 'web']);
-            }
-            
-            // Assign driver role
-            $driverUser->syncRoles([$driverRole]);
-            
-            $this->command->info("Created driver user with employee record: {$driver['name']} ({$driver['email']}) | Password: password");
+        // Get the driver record
+        $driverRecord = Driver::where('license_number', $driverData['license_number'])->first();
+        
+        // Create employee record for the driver
+        $employeeDriver = Employee::firstOrCreate(
+            ['email' => $driverData['email']],
+            [
+                'name' => $driverData['name'],
+                'employee_code' => $driverData['username'],
+                'email' => $driverData['email'],
+                'phone' => $driverData['mobile'],
+                'designation' => $driverData['designation'],
+                'company_id' => 1,
+                'department_id' => $firstDepartment ? $firstDepartment->id : 1,
+                'unit_id' => $firstUnit ? $firstUnit->id : 1,
+                'location_id' => $firstLocation ? $firstLocation->id : 1,
+                'join_date' => now()->format('Y-m-d'),
+                'status' => 1,
+                'photo' => $dummyImage,
+                'present_address' => $driverRecord ? $driverRecord->present_address : 'Dhaka, Bangladesh',
+                'permanent_address' => $driverRecord ? $driverRecord->permanent_address : 'Dhaka, Bangladesh',
+            ]
+        );
+        
+        // Create or update user for driver
+        $driverUser = User::firstOrCreate(
+            ['email' => $driverData['email']],
+            [
+                'name' => $driverData['name'],
+                'user_name' => $driverData['username'],
+                'password' => Hash::make('password'),
+                'status' => 1,
+                'user_type' => 'driver',
+                'employee_id' => $employeeDriver->id,
+                'company_id' => 1,
+                'department_id' => $firstDepartment ? $firstDepartment->id : 1,
+                'unit_id' => $firstUnit ? $firstUnit->id : 1,
+                'location_id' => $firstLocation ? $firstLocation->id : 1,
+                'user_image' => $dummyImage,
+                'cell_phone' => $driverData['mobile'],
+            ]
+        );
+        
+        // Create driver role if doesn't exist
+        if (!$driverRole) {
+            $driverRole = Role::firstOrCreate(['name' => 'Driver', 'guard_name' => 'web']);
         }
+        
+        // Assign driver role
+        $driverUser->syncRoles([$driverRole]);
+        $this->command->info("Created Driver User: driver@demo.com / password");
 
         // ================= SUMMARY =================
         $this->command->info('');
+        $this->command->info('========================================');
         $this->command->info('User seeding completed!');
         $this->command->info('========================================');
-        $this->command->info('System Users:');
-        $this->command->info('  - superadmin@demo.com / password (Super Admin)');
-        $this->command->info('  - admin@demo.com / password (Admin)');
-        $this->command->info('  - transport@demo.com / password (Transport Manager)');
-        $this->command->info('');
-        $this->command->info('Driver Users with Employee Records:');
-        $this->command->info('  - karim.ahmed@demo.com / password');
-        $this->command->info('  - abdul.rahim@demo.com / password');
-        $this->command->info('  - Jamal.hossain@demo.com / password');
-        $this->command->info('  - salam.khan@demo.com / password');
-        $this->command->info('  - rafiq.islam@demo.com / password');
-        $this->command->info('  - mostafa.ali@demo.com / password');
-        $this->command->info('  - harun.rashid@demo.com / password');
-        $this->command->info('  - anwar.hossain@demo.com / password');
-        $this->command->info('  - ziaur.rahman@demo.com / password');
-        $this->command->info('  - monir.hossain@demo.com / password');
+        $this->command->info('Users with Employee Records:');
+        $this->command->info('  1. superadmin@demo.com / password (Super Admin | SA001)');
+        $this->command->info('  2. admin@demo.com / password (Admin | AD001)');
+        $this->command->info('  3. transport@demo.com / password (Transport Admin | TA001)');
+        $this->command->info('  4. department.head@demo.com / password (Department Head | DH001)');
+        $this->command->info('  5. employee@demo.com / password (Employee | EMP001)');
+        $this->command->info('  6. employee2@demo.com / password (Employee | EMP500)');
+        $this->command->info('  7. driver@demo.com / password (Driver | DR001)');
         $this->command->info('========================================');
     }
 }

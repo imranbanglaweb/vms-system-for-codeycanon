@@ -201,26 +201,74 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
-<script>
+// DEBUG: Log when page loads
+console.log('[DEBUG] Department approval page loaded for requisition:', {{ $requisition->id }});
+
 function submitApproval(action) {
+    console.log('[DEBUG] submitApproval called with action:', action);
+    
     let url = action === 'approve'
         ? '{{ route("department.approvals.approve", $requisition->id) }}'
         : '{{ route("department.approvals.reject", $requisition->id) }}';
+    
+    console.log('[DEBUG] Target URL:', url);
+    console.log('[DEBUG] Form data:', $("#actionForm").serialize());
 
-    $.ajax({
-        url: url,
-        method: "POST",
-        data: $("#actionForm").serialize(),
-        success: function(res) {
-            Swal.fire({
-                icon: 'success',
-                title: res.message,
-                timer: 1500,
-                showConfirmButton: false
+    // Show confirmation modal before submitting
+    Swal.fire({
+        title: action === 'approve' ? 'Confirm Approval' : 'Confirm Rejection',
+        text: action === 'approve' 
+            ? 'Are you sure you want to approve this requisition?'
+            : 'Are you sure you want to reject this requisition? This action cannot be undone.',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: action === 'approve' ? '#28a745' : '#dc3545',
+        cancelButtonColor: '#6c757d',
+        confirmButtonText: action === 'approve' ? 'Yes, Approve!' : 'Yes, Reject!'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            console.log('[DEBUG] User confirmed action:', action);
+            
+            $.ajax({
+                url: url,
+                method: "POST",
+                data: $("#actionForm").serialize(),
+                beforeSend: function() {
+                    console.log('[DEBUG] AJAX request starting...');
+                    Swal.fire({
+                        title: 'Processing...',
+                        text: 'Please wait while we process your request.',
+                        allowOutsideClick: false,
+                        didOpen: () => {
+                            Swal.showLoading();
+                        }
+                    });
+                },
+                success: function(res) {
+                    console.log('[DEBUG] AJAX success response:', res);
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Success!',
+                        text: res.message || 'Action completed successfully',
+                        timer: 2000,
+                        showConfirmButton: true
+                    });
+                    setTimeout(() => {
+                        window.location.href = "{{ route('department.approvals.index') }}";
+                    }, 2000);
+                },
+                error: function(xhr, status, error) {
+                    console.log('[DEBUG] AJAX error:', {xhr: xhr, status: status, error: error});
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error!',
+                        text: xhr.responseJSON?.message || 'Something went wrong! Please try again.',
+                        confirmButtonColor: '#dc3545'
+                    });
+                }
             });
-            setTimeout(() => {
-                window.location.href = "{{ route('department.approvals.index') }}";
-            }, 1500);
+        } else {
+            console.log('[DEBUG] User cancelled action:', action);
         }
     });
 }

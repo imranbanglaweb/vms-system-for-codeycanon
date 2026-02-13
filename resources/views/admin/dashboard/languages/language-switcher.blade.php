@@ -75,16 +75,15 @@
 </style>
 
 @if($languages->count() > 1)
-<li class="dropdown language-dropdown">
-    <a href="#"
-       class="dropdown-toggle"
+<div class="dropdown language-dropdown" style="margin-right: 10px;">
+    <a href="#" 
+       class="header-icon-btn language-toggle"
        role="button"
        aria-haspopup="true"
-       aria-expanded="false">
-
-        <span class="fi fi-{{ $currentLanguage->flag_icon ?? 'us' }}"></span>
-        <span class="hidden-xs">{{ strtoupper($currentLocale) }}</span>
-        <span class="caret"></span>
+       aria-expanded="false"
+       title="Language">
+        <i class="fa fa-globe"></i>
+        <span class="fi fi-{{ $currentLanguage->flag_icon ?? 'us' }}" style="margin-left: 5px;"></span>
     </a>
 
     <ul class="dropdown-menu pull-right language-menu">
@@ -130,14 +129,14 @@
             </a>
         </li>
     </ul>
-</li>
+</div>
 @endif
 <!-- jQuery is already loaded in the master layout -->
 <script>
 $(document).ready(function () {
 
     // Manual dropdown toggle since Bootstrap might not be initializing properly
-    $(document).on('click', '.dropdown-toggle', function(e) {
+    $(document).on('click', '.language-toggle', function(e) {
         e.preventDefault();
         $(this).parent('.dropdown').toggleClass('open');
     });

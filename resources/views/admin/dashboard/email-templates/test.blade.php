@@ -65,7 +65,10 @@ Test Email - Transport Management System
                             placeholder="<h2>Hello!</h2>"></textarea>
                     </div>
 
-                    <div class="text-center mt-4">
+                    <div class="d-flex gap-2 justify-content-center mt-4">
+                        <button type="button" class="btn btn-info px-4 py-2" id="previewBtn">
+                            <i class="fa fa-eye"></i> Preview
+                        </button>
                         <button type="submit" class="btn btn-primary px-4 py-2" id="submitBtn">
                             <span class="spinner-border spinner-border-sm d-none" id="loader"></span>
                             <i class="fa fa-paper-plane"></i> Send Test Email
@@ -115,6 +118,26 @@ Test Email - Transport Management System
 
     </div>
 </section>
+
+<!-- Preview Modal -->
+<div class="modal fade" id="previewModal" tabindex="-1" role="dialog" aria-labelledby="previewModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-info text-white">
+                <h5 class="modal-title" id="previewModalLabel">
+                    <i class="fa fa-eye"></i> Email Preview
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-0" style="background-color: #f1f5f9;">
+                <iframe id="previewFrame" style="width: 100%; height: 500px; border: none;"></iframe>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
 @endsection
 
 @push('scripts')
@@ -123,6 +146,54 @@ Test Email - Transport Management System
 
 <script>
 $(function() {
+    // Preview button click handler
+    $('#previewBtn').on('click', function() {
+        let form = $('#testEmailForm');
+        let subject = $('#subject').val() || 'Test Email Preview';
+        let body = $('#body').val() || '<p>This is a test email preview.</p>';
+        let templateId = $('#template_id').val();
+
+        $('#previewBtn').attr('disabled', true);
+        $('#previewBtn').html('<span class="spinner-border spinner-border-sm"></span> Loading...');
+
+        $.ajax({
+            url: "{{ route('admin.email.test.preview') }}",
+            method: 'POST',
+            data: {
+                _token: $('input[name="_token"]').val(),
+                template_id: templateId,
+                subject: subject,
+                body: body
+            },
+            success: function(response) {
+                $('#previewBtn').attr('disabled', false);
+                $('#previewBtn').html('<i class="fa fa-eye"></i> Preview');
+
+                if (response.success) {
+                    $('#previewModal').modal('show');
+                    $('#previewFrame').contents().find('html').html(response.html);
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Preview Failed',
+                        text: response.message
+                    });
+                }
+            },
+            error: function(xhr) {
+                $('#previewBtn').attr('disabled', false);
+                $('#previewBtn').html('<i class="fa fa-eye"></i> Preview');
+
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: xhr.responseJSON?.message || 'Failed to generate preview'
+                });
+            }
+        });
+    });
+
+    // Send email form handler
     $('#testEmailForm').on('submit', function(e) {
         e.preventDefault();
 
@@ -203,6 +274,12 @@ $(function() {
 }
 .form-control, .form-select {
     font-size: 1em;
+}
+.modal-lg {
+    max-width: 800px;
+}
+#previewFrame {
+    background-color: #fff;
 }
 </style>
 @endpush

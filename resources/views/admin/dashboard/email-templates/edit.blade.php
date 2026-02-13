@@ -323,32 +323,32 @@ function previewEmail() {
 
     // Get body content from textarea
     let body = $('#body').val() || 'Email body content...';
-    // ================== PREVIEW VARIABLE REPLACEMENT ==================
 
-body = body
-    .replaceAll('@@adminlogo_url', logoUrl || '')
-    .replaceAll('@@admin_logo_url', logoUrl || '')
-    .replaceAll('@@company_name', 'Transport Management System')
-    .replaceAll('@@year', new Date().getFullYear());
-
-// Blade-safe cleanup of unresolved variables
-body = body
-    .replace(new RegExp('\\{\\{.*?\\}\\}', 'g'), '')
-    .replace(new RegExp('@@\\w+', 'g'), '');
-
-// ================== END ==================
-
-    // Get logo from settings
+    // Get logo and admin title from settings
     $.ajax({
         url: '{{ route("admin.settings.get-logo") }}',
         method: 'GET',
         success: function(logoData) {
             let logoUrl = logoData.logo_url || '';
+            let adminTitle = logoData.admin_title || 'InayaFleet360';
             
             // Check if logo URL contains template variables
             if (logoUrl && (logoUrl.includes('{') || logoUrl.includes('}'))) {
                 logoUrl = '';
             }
+            
+            // ================== PREVIEW VARIABLE REPLACEMENT ==================
+            body = body
+                .replaceAll('@@adminlogo_url', logoUrl || '')
+                .replaceAll('@@admin_logo_url', logoUrl || '')
+                .replaceAll('@@company_name', adminTitle)
+                .replaceAll('@@year', new Date().getFullYear());
+
+            // Blade-safe cleanup of unresolved variables
+            body = body
+                .replace(new RegExp('\\{\\{.*?\\}\\}', 'g'), '')
+                .replace(new RegExp('@@\\w+', 'g'), '');
+            // ================== END ==================
             
             // Create preview HTML
             const previewHtml = `<!DOCTYPE html>
@@ -375,7 +375,7 @@ body = body
     <div class="email-wrapper">
         <div class="email-container">
             <div class="email-header">
-                ${logoUrl ? `<img src="${logoUrl}" alt="Logo">` : '<h1>Transport Management System</h1>'}
+                ${logoUrl ? `<img src="${logoUrl}" alt="${adminTitle}">` : `<h1>${adminTitle}</h1>`}
                 <p>Vehicle Management System</p>
             </div>
             <div class="email-content">
@@ -383,11 +383,11 @@ body = body
                 <div>${body}</div>
                 <div style="margin-top: 30px; padding-top: 25px; border-top: 1px dashed #e2e8f0;">
                     <p style="margin: 0 0 8px 0; color: #1e293b; font-weight: 600;">Best regards,</p>
-                    <p style="margin: 0; color: #64748b;">The Transport Management System Team</p>
+                    <p style="margin: 0; color: #64748b;">The ${adminTitle} Team</p>
                 </div>
             </div>
             <div class="email-footer">
-                <p>&copy; ${new Date().getFullYear()} Transport Management System. All rights reserved.</p>
+                <p>&copy; ${new Date().getFullYear()} ${adminTitle}. All rights reserved.</p>
                 <small>This is an automated message. Please do not reply directly to this email.</small>
             </div>
         </div>
@@ -400,7 +400,22 @@ body = body
             $('#previewFrame').contents().find('html').html(previewHtml);
         },
         error: function() {
-            // Fallback without logo
+            // Fallback without logo - use default title
+            const adminTitle = 'InayaFleet360';
+            
+            // ================== PREVIEW VARIABLE REPLACEMENT ==================
+            body = body
+                .replaceAll('@@adminlogo_url', '')
+                .replaceAll('@@admin_logo_url', '')
+                .replaceAll('@@company_name', adminTitle)
+                .replaceAll('@@year', new Date().getFullYear());
+
+            // Blade-safe cleanup of unresolved variables
+            body = body
+                .replace(new RegExp('\\{\\{.*?\\}\\}', 'g'), '')
+                .replace(new RegExp('@@\\w+', 'g'), '');
+            // ================== END ==================
+            
             const previewHtml = `<!DOCTYPE html>
 <html>
 <head>
@@ -424,7 +439,7 @@ body = body
     <div class="email-wrapper">
         <div class="email-container">
             <div class="email-header">
-                <h1>Transport Management System</h1>
+                <h1>${adminTitle}</h1>
                 <p>Vehicle Management System</p>
             </div>
             <div class="email-content">
@@ -432,11 +447,11 @@ body = body
                 <div>${body}</div>
                 <div style="margin-top: 30px; padding-top: 25px; border-top: 1px dashed #e2e8f0;">
                     <p style="margin: 0 0 8px 0; color: #1e293b; font-weight: 600;">Best regards,</p>
-                    <p style="margin: 0; color: #64748b;">The Transport Management System Team</p>
+                    <p style="margin: 0; color: #64748b;">The ${adminTitle} Team</p>
                 </div>
             </div>
             <div class="email-footer">
-                <p>&copy; ${new Date().getFullYear()} Transport Management System. All rights reserved.</p>
+                <p>&copy; ${new Date().getFullYear()} ${adminTitle}. All rights reserved.</p>
                 <small>This is an automated message. Please do not reply directly to this email.</small>
             </div>
         </div>

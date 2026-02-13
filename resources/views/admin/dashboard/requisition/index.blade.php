@@ -94,7 +94,8 @@
                             </div>
                         </div>
 
-                        {{-- Employee Search --}}
+                        {{-- Employee Search - Hidden for Employee Role --}}
+                        @if(!auth()->user()->hasRole('Employee'))
                         <div class="col-md-3">
                             <label for="employee_name" class="form-label fw-semibold mb-2" style="font-size: 14px; color: #495057;">Employee</label>
                             <div class="input-group">
@@ -103,8 +104,10 @@
                                        class="form-control border-start-0 ps-0" style="font-size: 14px;" placeholder="Search employee...">
                             </div>
                         </div>
+                        @endif
 
-                        {{-- Department --}}
+                        {{-- Department - Hidden for Employee Role --}}
+                        @if(!auth()->user()->hasRole('Employee'))
                         <div class="col-md-3">
                             <label for="department_id" class="form-label fw-semibold mb-2" style="font-size: 14px; color: #495057;">Department</label>
                             <select name="department_id" id="department_id" class="form-select" style="font-size: 14px;">
@@ -114,6 +117,7 @@
                                 @endforeach
                             </select>
                         </div>
+                        @endif
 
                         {{-- Status --}}
                         <div class="col-md-3">
@@ -127,7 +131,8 @@
                             </select>
                         </div>
 
-                        {{-- Date Range --}}
+                        {{-- Date Range - Hidden for Employee Role --}}
+                        @if(!auth()->user()->hasRole('Employee'))
                         <div class="col-md-3">
                             <label for="start_date" class="form-label fw-semibold mb-2" style="font-size: 14px; color: #495057;">From Date</label>
                             <input type="date" name="start_date" id="start_date" class="form-control" style="font-size: 14px;">
@@ -137,6 +142,7 @@
                             <label for="end_date" class="form-label fw-semibold mb-2" style="font-size: 14px; color: #495057;">To Date</label>
                             <input type="date" name="end_date" id="end_date" class="form-control" style="font-size: 14px;">
                         </div>
+                        @endif
 
                         {{-- Action Buttons --}}
                         <div class="col-md-6 d-flex align-items-end">
@@ -147,9 +153,11 @@
                                 <button type="button" id="resetBtn" class="btn btn-outline-secondary" style="font-size: 14px; padding: 10px 20px; border-radius: 6px;">
                                     <i class="fa fa-redo me-2"></i>Reset
                                 </button>
+                                @if(!auth()->user()->hasRole('Employee'))
                                 <button type="button" id="exportBtn" class="btn btn-success" style="font-size: 14px; padding: 10px 20px; border-radius: 6px;">
                                     <i class="fa fa-file-export me-2"></i>Export
                                 </button>
+                                @endif
                             </div>
                         </div>
                     </div>
@@ -201,8 +209,10 @@
                             <tr class="table-dark">
                                 <th width="50" class="text-center rounded-start">#</th>
                                 <th>Req. Number</th>
+                                @if(!auth()->user()->hasRole('Employee'))
                                 <th>Requested By</th>
                                 <th>Department</th>
+                                @endif
                                 <th>Route</th>
                                 <th>Travel Date</th>
                                 <th>Return Date</th>

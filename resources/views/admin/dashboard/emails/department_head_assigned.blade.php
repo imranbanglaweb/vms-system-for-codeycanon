@@ -27,7 +27,7 @@
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
         }
         .header {
-            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #a855f7 100%);
+            background: linear-gradient(135deg, #1e3a5f 0%, #2d5a87 100%);
             color: white;
             padding: 50px 40px;
             text-align: center;
@@ -52,16 +52,10 @@
             position: relative;
             z-index: 1;
         }
-        .header-icon {
-            width: 80px;
-            height: 80px;
-            background: rgba(255, 255, 255, 0.2);
-            border-radius: 20px;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 20px;
-            font-size: 36px;
+        .header-logo {
+            max-width: 200px;
+            height: auto;
+            margin-bottom: 15px;
         }
         .header h1 {
             margin: 0;
@@ -104,13 +98,13 @@
             left: 0;
             right: 0;
             height: 4px;
-            background: linear-gradient(90deg, #6366f1, #8b5cf6, #a855f7);
+            background: linear-gradient(90deg, #1e3a5f, #2d5a87);
         }
         .card-title {
             font-size: 14px;
             text-transform: uppercase;
             letter-spacing: 1px;
-            color: #8b5cf6;
+            color: #1e3a5f;
             font-weight: 600;
             margin-bottom: 20px;
         }
@@ -163,7 +157,7 @@
             content: '✓';
             width: 24px;
             height: 24px;
-            background: linear-gradient(135deg, #10b981, #059669);
+            background: linear-gradient(135deg, #1e3a5f, #2d5a87);
             color: white;
             border-radius: 8px;
             display: inline-flex;
@@ -180,19 +174,19 @@
         }
         .button {
             display: inline-block;
-            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            background: linear-gradient(135deg, #1e3a5f 0%, #2d5a87 100%);
             color: white;
             text-decoration: none;
             padding: 16px 40px;
             border-radius: 12px;
             font-weight: 600;
             font-size: 16px;
-            box-shadow: 0 10px 25px -5px rgba(99, 102, 241, 0.4);
+            box-shadow: 0 10px 25px -5px rgba(30, 58, 95, 0.4);
             transition: all 0.3s ease;
         }
         .button:hover {
             transform: translateY(-2px);
-            box-shadow: 0 20px 35px -5px rgba(99, 102, 241, 0.5);
+            box-shadow: 0 20px 35px -5px rgba(30, 58, 95, 0.5);
         }
         .footer {
             background-color: #f8fafc;
@@ -203,7 +197,7 @@
         .footer-logo {
             font-size: 24px;
             font-weight: 700;
-            color: #1e293b;
+            color: #1e3a5f;
             margin-bottom: 15px;
         }
         .footer p {
@@ -212,27 +206,8 @@
             color: #64748b;
         }
         .footer a {
-            color: #6366f1;
+            color: #1e3a5f;
             text-decoration: none;
-        }
-        .social-links {
-            margin: 20px 0;
-        }
-        .social-links a {
-            display: inline-block;
-            width: 40px;
-            height: 40px;
-            background: #e2e8f0;
-            border-radius: 10px;
-            margin: 0 5px;
-            line-height: 40px;
-            color: #64748b;
-            text-decoration: none;
-            transition: all 0.3s ease;
-        }
-        .social-links a:hover {
-            background: #6366f1;
-            color: white;
         }
         .divider {
             height: 1px;
@@ -259,16 +234,27 @@
         <div class="container">
             <div class="header">
                 <div class="header-content">
-                    <div class="header-icon">👔</div>
-                    <h1>Department Head Assignment</h1>
-                    <p>Your new leadership role awaits</p>
+                    @php
+                        $settings = \App\Models\Setting::first();
+                        $logoUrl = $settings && $settings->admin_logo 
+                            ? asset('public/admin_resource/assets/images/' . $settings->admin_logo) 
+                            : null;
+                        $companyName = $companyName ?? ($settings && $settings->admin_title ? $settings->admin_title : 'InayaFleet360');
+                    @endphp
+                    
+                    @if($logoUrl)
+                        <img src="{{ $logoUrl }}" alt="{{ $companyName }}" class="header-logo">
+                    @else
+                        <h1>{{ $companyName }}</h1>
+                    @endif
+                    <p>All-in-One Fleet & Transport Automation System</p>
                 </div>
             </div>
             
             <div class="content">
                 <div class="greeting">Dear {{ $headName }},</div>
                 
-                <p class="intro-text">Congratulations! We are pleased to inform you that you have been appointed as the <strong style="color: #6366f1;">Department Head</strong>. This appointment reflects your dedication and leadership capabilities.</p>
+                <p class="intro-text">Congratulations! We are pleased to inform you that you have been appointed as the <strong style="color: #1e3a5f;">Department Head</strong>. This appointment reflects your dedication and leadership capabilities.</p>
                 
                 <div class="card">
                     <div class="card-title">Assignment Details</div>
@@ -282,12 +268,12 @@
                     </div>
                     <div class="detail-row">
                         <span class="detail-label">Assigned By</span>
-                        <span class="detail-value">{{ config('app.name') }} Administration</span>
+                        <span class="detail-value">{{ $companyName }} Administration</span>
                     </div>
                 </div>
                 
                 <div class="responsibilities">
-                    <h3><i class="fa fa-tasks" style="margin-right: 10px; color: #6366f1;"></i>Key Responsibilities</h3>
+                    <h3><i class="fa fa-tasks" style="margin-right: 10px; color: #1e3a5f;"></i>Key Responsibilities</h3>
                     <ul>
                         <li>Review and approve requisitions submitted by your department team</li>
                         <li>Coordinate with transport and logistics for smooth operations</li>
@@ -311,25 +297,15 @@
                 
                 <p style="color: #1e293b; font-size: 16px; font-weight: 600;">
                     Best regards,<br>
-                    <span style="color: #6366f1;">{{ config('app.name') }} Team</span>
+                    <span style="color: #1e3a5f;">{{ $companyName }} Team</span>
                 </p>
             </div>
             
             <div class="footer">
-                <div class="footer-logo">{{ config('app.name') }}</div>
-                <div class="social-links">
-                    <a href="#"><i class="fa fa-facebook"></i></a>
-                    <a href="#"><i class="fa fa-twitter"></i></a>
-                    <a href="#"><i class="fa fa-linkedin"></i></a>
-                </div>
-                <p>This is an automated message from {{ config('app.name') }}</p>
+                <div class="footer-logo">{{ $companyName }}</div>
+                <p>This is an automated message from {{ $companyName }}</p>
                 <p>Please do not reply directly to this email.</p>
-                <p>&copy; {{ date('Y') }} {{ config('app.name') }}. All rights reserved.</p>
-                <p>
-                    <a href="#">Privacy Policy</a> &bull; 
-                    <a href="#">Terms of Service</a> &bull; 
-                    <a href="#">Contact Us</a>
-                </p>
+                <p>&copy; {{ date('Y') }} {{ $companyName }}. All rights reserved.</p>
             </div>
         </div>
     </div>

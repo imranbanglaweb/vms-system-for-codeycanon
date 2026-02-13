@@ -4,7 +4,7 @@
         <i class="fa fa-car me-2"></i> Vehicle & Driver Assignment
     </h4>
     @if(isset($vehicles) && isset($drivers))
-    <form id="assignForm" action="{{ route('transport.approvals.assign', $requisition->id) }}" method="POST" class="mt-4" onsubmit="event.preventDefault(); submitAssign();">
+    <form id="actionForm" action="{{ route('transport.approvals.assign', $requisition->id) }}" method="POST" class="mt-4" onsubmit="event.preventDefault(); submitAssign();" data-assigned-vehicle="{{ $requisition->assigned_vehicle_id ?? '' }}" data-assigned-driver="{{ $requisition->assigned_driver_id ?? '' }}">
         @csrf
         <div class="row">
             <!-- Transport Type Selection -->
@@ -17,9 +17,8 @@
                     $selectedVehicleType = $requisition->vehicle_type ?? null;
                     @endphp
                     @foreach($transportTypes as $type)
-                        <option value="{{ $type->id }}" {{ $selectedVehicleType == $type->id ? 'selected' : '' }}>{{ $type->name }}</option>
+                        <option value="{{ $type->id }}" {{ $selectedVehicleType = $type->id ? 'selected' : '' }}>{{ $type->name }}</option>
                     @endforeach
-                    <option value="all">All Types</option>
                 </select>
                 <div id="transportTypeStatus" class="mt-2 fw-semibold"></div>
             </div>
@@ -28,7 +27,7 @@
                 <select name="assigned_vehicle_id" id="vehicleSelect" class="form-select form-select-lg select2" style="width:100%" data-initial-vehicle="{{ $requisition->assigned_vehicle_id ?? '' }}">
                     <option value="">-- Select Vehicle --</option>
                     @php
-                    $selectedVehicleId = $requisition->vehicle_id ?? null;
+                    $selectedVehicleId = $requisition->assigned_vehicle_id ?? null;
                     @endphp
                     @foreach($vehicles as $vehicle)
                         <option value="{{ $vehicle->id }}" data-transport-type="{{ $vehicle->vehicle_type_id ?? '' }}" data-capacity="{{ $vehicle->capacity ?? 0 }}" data-status="{{ $vehicle->availability_status }}" @if(strtolower($vehicle->availability_status) === 'assigned') disabled @endif {{ $selectedVehicleId == $vehicle->id ? 'selected' : '' }}>
@@ -45,7 +44,7 @@
                 <select name="assigned_driver_id" id="driverSelect" class="form-select form-select-lg select2" style="width:100%" data-initial-driver="{{ $requisition->assigned_driver_id ?? '' }}">
                     <option value="">-- Select Driver --</option>
                     @php
-                    $selectedDriverId = $requisition->driver_id ?? null;
+                    $selectedDriverId = $requisition->assigned_driver_id ?? null;
                     @endphp
                     @foreach($drivers as $driver)
                         <option 
@@ -56,7 +55,8 @@
                             {{ $selectedDriverId == $driver->id ? 'selected' : '' }}
                         >
                             {{ $driver->driver_name }} 
-                            @if($driver->phone) - [{{ $driver->phone }}] @endif
+                            @if($driver->employee && $driver->employee->employee_id) - [{{ $driver->employee->employee_id }}] @endif
+                            @if($driver->phone) - {{ $driver->phone }} @endif
                         </option>
                     @endforeach
                 </select>

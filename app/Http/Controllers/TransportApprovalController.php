@@ -91,6 +91,7 @@ class TransportApprovalController extends Controller
         $validator = Validator::make($request->all(), [
             'assigned_vehicle_id' => 'required|exists:vehicles,id',
             'assigned_driver_id'  => 'required|exists:drivers,id',
+            'transport_type'      => 'nullable|exists:vehicle_types,id',
         ]);
         if ($validator->fails()) {
             return response()->json(['status'=>'validation_error','errors'=>$validator->errors()], 422);
@@ -132,11 +133,21 @@ class TransportApprovalController extends Controller
         $requisition->transport_status    = 'Assigned';
         $requisition->transport_remarks   = $request->remarks ?? null;
         $requisition->transport_admin_id = Auth::id();
+        // Save transport type if provided
+        if ($request->filled('transport_type') && $request->transport_type !== 'all') {
+            $requisition->vehicle_type = $request->transport_type;
+        }
         $requisition->save();
 
         // Optionally update vehicle/driver status to Assigned
-        $vehicle->update(['availability_status' => 'Assigned']);
-        $driver->update(['availability_status' => 'Assigned']);
+        if ($vehicle) {
+            $vehicle->availability_status = 'assigned';
+            $vehicle->save();
+        }
+        if ($driver) {
+            $driver->availability_status = 'assigned';
+            $driver->save();
+        }
 
         // TODO: Notify requester + driver if needed
 
@@ -211,15 +222,19 @@ class TransportApprovalController extends Controller
             Log::warning('No users found for transport approval push notification.');
         }
 
-        //  // Update vehicle status
+        // Update vehicle status
         $vehicle = Vehicle::find($requisition->assigned_vehicle_id);
-        $vehicle->availability_status = 'busy';  // ENUM value
-        $vehicle->save();
+        if ($vehicle) {
+            $vehicle->availability_status = 'assigned';
+            $vehicle->save();
+        }
 
         // // Update driver status
         $driver = Driver::find($requisition->assigned_driver_id);
-        $driver->availability_status = 'busy';   // ENUM value
-        $driver->save();
+        if ($driver) {
+            $driver->availability_status = 'assigned';
+            $driver->save();
+        }
 
 
         // dd($requisition->assigned_vehicle_id);
