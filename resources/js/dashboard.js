@@ -77,3 +77,76 @@ window.Echo.channel('dashboard')
             fetchNotifications();
         }
     });
+
+// Service Worker Registration for Push Notifications
+if ('serviceWorker' in navigator && 'PushManager' in window) {
+    window.addEventListener('load', async () => {
+        try {
+            // Register service worker from public folder
+            const registration = await navigator.serviceWorker.register('/service-worker.js');
+            console.log('Service Worker registered:', registration.scope);
+
+            // Request notification permission
+            if (Notification.permission !== 'granted') {
+                const permission = await Notification.requestPermission();
+                console.log('Notification permission:', permission);
+                
+                if (permission === 'granted') {
+                    await subscribeToPush(registration);
+                }
+            } else {
+                await subscribeToPush(registration);
+            }
+        } catch (error) {
+            console.error('Service Worker registration failed:', error);
+        }
+    });
+}
+
+async function subscribeToPush(registration) {
+    try {
+        // Get VAPID public key from server or use hardcoded one
+        const vapidPublicKey = document.querySelector('meta[name="vapid-public-key"]')?.content 
+            || 'BEkkdb87YCDHjZWnzebTVIBEPJvMTpfSbs7VgUTy5ENCjyh0F9P6HEble1uGTdiu-EWeiArsz5poHChcfzwQsUM';
+        
+        // Convert VAPID key to Uint8Array
+        const applicationServerKey = urlBase64ToUint8Array(vapidPublicKey);
+        
+        // Subscribe to push
+        const subscription = await registration.pushManager.subscribe({
+            userVisibleOnly: true,
+            applicationServerKey: applicationServerKey
+        });
+        
+        console.log('Push subscription:', subscription);
+        
+        // Send subscription to server
+        await fetch('/api/push/subscribe', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || ''
+            },
+            body: JSON.stringify(subscription)
+        });
+        
+        console.log('Push subscription sent to server');
+    } catch (error) {
+        console.error('Push subscription failed:', error);
+    }
+}
+
+function urlBase64ToUint8Array(base64String) {
+    const padding = '='.repeat((4 - base64String.length % 4) % 4);
+    const base64 = (base64String + padding)
+        .replace(/-/g, '+')
+        .replace(/_/g, '/');
+    
+    const rawData = window.atob(base64);
+    const outputArray = new Uint8Array(rawData.length);
+    
+    for (let i = 0; i < rawData.length; ++i) {
+        outputArray[i] = rawData.charCodeAt(i);
+    }
+    return outputArray;
+}

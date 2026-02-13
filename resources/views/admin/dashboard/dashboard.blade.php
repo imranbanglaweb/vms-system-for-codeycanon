@@ -466,6 +466,103 @@ if (document.readyState === 'loading') {
 }
 </script>
 
+{{-- Push Notifications Initialization --}}
+<script>
+// Service Worker Registration for Push Notifications
+if ('serviceWorker' in navigator && 'PushManager' in window) {
+    window.addEventListener('load', async () => {
+        try {
+            // Register service worker from public folder
+            const registration = await navigator.serviceWorker.register('{{ url('/public/service-worker.js') }}');
+            console.log('Service Worker registered:', registration.scope);
+
+            // Wait for the service worker to be ready
+            await registration.ready;
+            console.log('Service Worker ready');
+
+            // Request notification permission
+            if (Notification.permission !== 'granted') {
+                const permission = await Notification.requestPermission();
+                console.log('Notification permission:', permission);
+                
+                if (permission === 'granted') {
+                    await subscribeToPush(registration);
+                }
+            } else {
+                await subscribeToPush(registration);
+            }
+        } catch (error) {
+            console.error('Service Worker registration failed:', error);
+        }
+    });
+}
+
+async function subscribeToPush(registration) {
+    try {
+        // VAPID public key (hardcoded for testing)
+        const vapidPublicKey = 'BL8nB7H3jyXBugZ7NQbhyBidyynLlM9Ieuc1DaEYGpAp_adPZ1v8wGr94K2MGF1iXmX-qQSkZD9FdoNgXjY8SOY';
+        
+        // Validate VAPID key
+        if (!vapidPublicKey || vapidPublicKey.length < 10) {
+            console.error('Invalid VAPID public key:', vapidPublicKey);
+            return;
+        }
+        
+        console.log('VAPID key length:', vapidPublicKey.length);
+        console.log('VAPID key:', vapidPublicKey);
+        
+        // Convert VAPID key to Uint8Array
+        const applicationServerKey = urlBase64ToUint8Array(vapidPublicKey);
+        
+        console.log('Application server key:', applicationServerKey);
+        
+        // Subscribe to push
+        const subscription = await registration.pushManager.subscribe({
+            userVisibleOnly: true,
+            applicationServerKey: applicationServerKey
+        });
+        
+        console.log('Push subscription:', subscription);
+        
+        // Send subscription to server
+        const subscriptionData = subscription.toJSON();
+        
+        // Format data for the controller
+        const formData = new FormData();
+        formData.append('endpoint', subscriptionData.endpoint);
+        formData.append('keys[auth]', subscriptionData.keys.auth);
+        formData.append('keys[p256dh]', subscriptionData.keys.p256dh);
+        
+        await fetch('{{ url('/api/push/subscribe') }}', {
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+            },
+            body: formData
+        });
+        
+        console.log('Push subscription sent to server');
+    } catch (error) {
+        console.error('Push subscription failed:', error);
+    }
+}
+
+function urlBase64ToUint8Array(base64String) {
+    const padding = '='.repeat((4 - base64String.length % 4) % 4);
+    const base64 = (base64String + padding)
+        .replace(/-/g, '+')
+        .replace(/_/g, '/');
+    
+    const rawData = window.atob(base64);
+    const outputArray = new Uint8Array(rawData.length);
+    
+    for (let i = 0; i < rawData.length; ++i) {
+        outputArray[i] = rawData.charCodeAt(i);
+    }
+    return outputArray;
+}
+</script>
+
 
 <style>
 /* Dashboard Container */

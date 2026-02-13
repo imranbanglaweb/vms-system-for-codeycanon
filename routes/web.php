@@ -37,6 +37,7 @@
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Http\Request;
 
 // ============================================================================
 // CONTROLLER IMPORTS
@@ -45,6 +46,7 @@ use Illuminate\Support\Facades\Mail;
 // Core Controllers
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\FrontendController;
+use App\Http\Controllers\PushSubscriptionController;
 
 // Vehicle & Transport
 use App\Http\Controllers\VehicleController;
@@ -82,8 +84,6 @@ use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\SettingController;
 use App\Http\Controllers\MenuController;
 use App\Http\Controllers\NotificationController;
-use App\Http\Controllers\PushSubscriptionController;
-
 // Subscriptions & Payments
 use App\Http\Controllers\Admin\SubscriptionPlanController;
 use App\Http\Controllers\Admin\SubscriptionController;
@@ -144,6 +144,15 @@ Auth::routes();
 // ============================================================================
 // 2. DASHBOARD & HOME
 // ============================================================================
+
+// Route for service worker (must be accessible without auth)
+Route::get('/service-worker.js', function () {
+    return response()->file(public_path('service-worker.js'))
+        ->header('Content-Type', 'application/javascript');
+});
+
+// Web Push Subscription Route (uses existing controller)
+Route::middleware('web')->post('/api/push/subscribe', [PushSubscriptionController::class, 'store']);
 
 Route::middleware(['auth'])->group(function () {
     Route::redirect('/', 'login');

@@ -10,6 +10,14 @@ use Minishlink\WebPush\Subscription;
 
 class PushTestController extends Controller
 {
+    public function __construct()
+    {
+        // Set OpenSSL config path for Windows XAMPP
+        if (PHP_OS === 'WINNT' && !getenv('OPENSSL_CONF')) {
+            putenv('OPENSSL_CONF=F:/xampp php8/apache/conf/openssl.cnf');
+        }
+    }
+
     public function send(Request $request)
     {
         $request->validate([

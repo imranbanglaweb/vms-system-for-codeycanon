@@ -1,26 +1,21 @@
 <?php
 
+// Set OpenSSL config path for Windows XAMPP before loading
+if (PHP_OS === 'WINNT' && !getenv('OPENSSL_CONF')) {
+    putenv('OPENSSL_CONF=F:/xampp php8/apache/conf/openssl.cnf');
+}
+
 return [
 
     /**
      * These are the keys for authentication (VAPID).
      * These keys must be safely stored and should not change.
      */
-    // 'vapid' => [
-    //     'subject' => env('VAPID_SUBJECT'),
-    //     'public_key' => env('VAPID_PUBLIC_KEY'),
-    //     'private_key' => env('VAPID_PRIVATE_KEY'),
-    //     'pem_file' => env('VAPID_PEM_FILE'),
-    // ],
-
     'vapid' => [
         'subject' => 'mailto:md.imran1200@gmail.com',
-        'public_key' => env('VAPID_PUBLIC_KEY'),
-        'private_key' => env('VAPID_PRIVATE_KEY'),
-        
+        'public_key' => env('VAPID_PUBLIC_KEY', 'BL8nB7H3jyXBugZ7NQbhyBidyynLlM9Ieuc1DaEYGpAp_adPZ1v8wGr94K2MGF1iXmX-qQSkZD9FdoNgXjY8SOY'),
+        'private_key' => env('VAPID_PRIVATE_KEY', 'tkx0-90569Jleb0zToTjJ_WaTH-bqfqbbpbz-8ww3Dk'),
     ],
-
-
 
     /**
      * This is model that will be used to for push subscriptions.
