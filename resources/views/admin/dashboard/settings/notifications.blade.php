@@ -222,6 +222,8 @@ btnUnsubscribe.addEventListener('click', async () => {
 
 /* 🔄 CLEAR ALL & RESUBSCRIBE */
 btnResubscribe.addEventListener('click', async () => {
+    console.log('Resubscribe button clicked');
+    
     try {
         // Show confirmation
         const result = await Swal.fire({
@@ -233,20 +235,28 @@ btnResubscribe.addEventListener('click', async () => {
             cancelButtonText: 'Cancel'
         });
 
-        if (!result.isConfirmed) return;
+        if (!result.isConfirmed) {
+            console.log('User cancelled');
+            return;
+        }
 
         btnResubscribe.disabled = true;
-        btnResubscribe.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Processing...';
+        btnResubscribe.innerHTML = '<span class="spinner-border spinner-border-sm" role="status"></span> Processing...';
 
+        console.log('Getting service worker...');
         const reg = await navigator.serviceWorker.ready;
+        console.log('Service worker ready:', reg);
 
         // First, unsubscribe from browser
         const oldSub = await reg.pushManager.getSubscription();
+        console.log('Old subscription:', oldSub);
         if (oldSub) {
             await oldSub.unsubscribe();
+            console.log('Unsubscribed from browser');
         }
 
         // Clear server-side subscriptions
+        console.log('Clearing server subscriptions...');
         const clearResponse = await fetch("{{ route('push.clearAll') }}", {
             method: 'POST',
             headers: {
@@ -254,21 +264,26 @@ btnResubscribe.addEventListener('click', async () => {
                 'X-CSRF-TOKEN': csrfToken
             }
         });
+        console.log('Clear response:', clearResponse.status);
 
         if (!clearResponse.ok) {
             throw new Error('Failed to clear subscriptions on server');
         }
 
         // Now subscribe with fresh keys
+        console.log('Requesting notification permission...');
         const permission = await Notification.requestPermission();
+        console.log('Permission:', permission);
         if (permission !== 'granted') {
             throw new Error('Notification permission denied');
         }
 
+        console.log('Subscribing to push...');
         const newSub = await reg.pushManager.subscribe({
             userVisibleOnly: true,
             applicationServerKey: urlBase64ToUint8Array(vapidPublicKey)
         });
+        console.log('New subscription:', newSub);
 
         const subscribeResponse = await fetch("{{ route('push.subscribe') }}", {
             method: 'POST',
@@ -278,6 +293,7 @@ btnResubscribe.addEventListener('click', async () => {
             },
             body: JSON.stringify(newSub)
         });
+        console.log('Subscribe response:', subscribeResponse.status);
 
         if (!subscribeResponse.ok) {
             throw new Error('Failed to subscribe on server');
