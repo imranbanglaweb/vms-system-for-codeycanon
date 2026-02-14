@@ -17,7 +17,6 @@ self.addEventListener('activate', function(event) {
 
 self.addEventListener('push', function(event) {
     console.log('Push event received!', event);
-    console.log('Push data:', event.data ? event.data.json() : 'No data');
 
     let notificationData = {
         title: 'InayaFleet360',
@@ -40,8 +39,13 @@ self.addEventListener('push', function(event) {
             notificationData.icon = jsonData.icon || notificationData.icon;
             notificationData.data = jsonData.data?.url || jsonData.url || notificationData.data;
         } catch (e) {
-            console.log('Not JSON, using text');
-            notificationData.body = event.data.text() || notificationData.body;
+            console.log('Not JSON format, trying text:', e.message);
+            event.data.text().then(text => {
+                console.log('Plain text received:', text);
+                notificationData.body = text || notificationData.body;
+            }).catch(err => {
+                console.log('Could not get text:', err);
+            });
         }
     }
 

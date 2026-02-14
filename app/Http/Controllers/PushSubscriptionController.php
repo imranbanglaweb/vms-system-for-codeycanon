@@ -31,7 +31,7 @@ class PushSubscriptionController extends Controller
             $request->endpoint,
             $request->keys['p256dh'],
             $request->keys['auth'],
-            'aesgcm'
+            'aes128gcm'
         );
 
         return response()->json(['success' => true], 200);

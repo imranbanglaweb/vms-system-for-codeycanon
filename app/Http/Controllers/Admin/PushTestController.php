@@ -62,16 +62,12 @@ class PushTestController extends Controller
             $errors = [];
 
             foreach ($subscriptions as $sub) {
-                // Determine content encoding - FCM uses aesgcm, others use aes128gcm
+                // Determine content encoding - Modern browsers use aes128gcm, older ones use aesgcm
                 $contentEncoding = $sub->content_encoding;
                 
                 if (empty($contentEncoding)) {
-                    // Default to aesgcm for FCM endpoints, aes128gcm for others
-                    if (strpos($sub->endpoint, 'fcm.googleapis.com') !== false) {
-                        $contentEncoding = 'aesgcm';
-                    } else {
-                        $contentEncoding = 'aes128gcm';
-                    }
+                    // Default to aes128gcm for all endpoints (modern standard)
+                    $contentEncoding = 'aes128gcm';
                 }
 
                 try {
@@ -131,6 +127,37 @@ class PushTestController extends Controller
                 'message' => 'Error sending notification',
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString()
+            ], 500);
+        }
+    }
+
+    /**
+     * Clear all push subscriptions (admin function to fix key mismatches)
+     */
+    public function clearAllSubscriptions()
+    {
+        try {
+            // Set OpenSSL config for Windows
+            $opensslPath = 'F:/xampp php8/apache/conf/openssl.cnf';
+            if (PHP_OS === 'WINNT' && file_exists($opensslPath)) {
+                putenv('OPENSSL_CONF=' . $opensslPath);
+                $_ENV['OPENSSL_CONF'] = $opensslPath;
+            }
+
+            // Use the custom PushSubscription model
+            $count = \App\Models\PushSubscription::count();
+            \App\Models\PushSubscription::truncate();
+
+            return response()->json([
+                'success' => true,
+                'message' => "Cleared {$count} push subscriptions. Users need to re-subscribe with the new VAPID key.",
+                'cleared_count' => $count
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error clearing subscriptions',
+                'error' => $e->getMessage()
             ], 500);
         }
     }

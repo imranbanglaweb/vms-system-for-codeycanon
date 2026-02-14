@@ -29,6 +29,12 @@
                     <i class="fa fa-refresh"></i> Clear & Re-subscribe
                 </button>
 
+                @if(auth()->user()->hasRole('Super Admin') || auth()->user()->hasRole('Admin'))
+                <button id="btn-clear-all-admin" class="btn btn-danger">
+                    <i class="fa fa-trash"></i> Clear ALL Subscriptions (Admin)
+                </button>
+                @endif
+
                 <button id="btn-test-push" class="btn btn-primary">
                     <i class="fa fa-paper-plane"></i> Send Test Push
                 </button>
@@ -104,6 +110,7 @@ const csrfToken = "{{ csrf_token() }}";
 const btnSubscribe = document.getElementById('btn-subscribe');
 const btnUnsubscribe = document.getElementById('btn-unsubscribe');
 const btnResubscribe = document.getElementById('btn-resubscribe');
+const btnClearAllAdmin = document.getElementById('btn-clear-all-admin');
 const statusText = document.getElementById('push-status');
 
 function urlBase64ToUint8Array(base64String) {
@@ -317,6 +324,54 @@ btnResubscribe.addEventListener('click', async () => {
         btnResubscribe.innerHTML = '<i class="fa fa-refresh"></i> Clear & Re-subscribe';
     }
 });
+
+/* 🗑️ ADMIN CLEAR ALL SUBSCRIPTIONS */
+if (btnClearAllAdmin) {
+    btnClearAllAdmin.addEventListener('click', async () => {
+        const result = await Swal.fire({
+            title: 'Clear ALL Push Subscriptions?',
+            text: 'This will remove ALL push subscriptions from the database. All users will need to re-subscribe. This is useful when VAPID keys have changed.',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Yes, clear all!',
+            cancelButtonText: 'Cancel'
+        });
+
+        if (!result.isConfirmed) return;
+
+        btnClearAllAdmin.disabled = true;
+        btnClearAllAdmin.innerHTML = '<span class="spinner-border spinner-border-sm" role="status"></span> Clearing...';
+
+        try {
+            const response = await fetch("{{ route('admin.push.clearAll') }}", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': csrfToken
+                }
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Cleared!',
+                    text: data.message,
+                    timer: 3000
+                });
+            } else {
+                throw new Error(data.message || 'Failed to clear');
+            }
+        } catch (err) {
+            console.error('Clear all error:', err);
+            Swal.fire('Error', err.message || 'Failed to clear subscriptions', 'error');
+        } finally {
+            btnClearAllAdmin.disabled = false;
+            btnClearAllAdmin.innerHTML = '<i class="fa fa-trash"></i> Clear ALL Subscriptions (Admin)';
+        }
+    });
+}
 </script>
 
 

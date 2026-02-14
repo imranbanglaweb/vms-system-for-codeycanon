@@ -596,6 +596,9 @@ Route::middleware(['auth'])->group(function () {
     });
 
     Route::post('/admin/push/test', [PushTestController::class, 'send'])->name('admin.push.test');
+    
+    // Admin: Clear ALL push subscriptions (for fixing key mismatches)
+    Route::post('/admin/push/clear-all', [PushTestController::class, 'clearAllSubscriptions'])->name('admin.push.clearAll');
 
 });
 
