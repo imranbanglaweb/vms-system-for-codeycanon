@@ -30,7 +30,9 @@ self.addEventListener('push', function(event) {
         data: '/admin/dashboard'
     };
 
-    if (event.data) {
+    const handlePushData = async () => {
+        if (!event.data) return;
+        
         try {
             const jsonData = event.data.json();
             console.log('JSON data:', jsonData);
@@ -40,19 +42,19 @@ self.addEventListener('push', function(event) {
             notificationData.data = jsonData.data?.url || jsonData.url || notificationData.data;
         } catch (e) {
             console.log('Not JSON format, trying text:', e.message);
-            event.data.text().then(text => {
+            try {
+                const text = await event.data.text();
                 console.log('Plain text received:', text);
                 notificationData.body = text || notificationData.body;
-            }).catch(err => {
+            } catch (err) {
                 console.log('Could not get text:', err);
-            });
+            }
         }
-    }
+    };
 
-    console.log('Showing notification:', notificationData);
-    
-    event.waitUntil(
-        self.registration.showNotification(notificationData.title, {
+    event.waitUntil(handlePushData().then(() => {
+        console.log('Showing notification:', notificationData);
+        return self.registration.showNotification(notificationData.title, {
             body: notificationData.body,
             icon: notificationData.icon,
             badge: notificationData.badge,
@@ -61,12 +63,8 @@ self.addEventListener('push', function(event) {
             data: notificationData.data,
             vibrate: notificationData.vibrate,
             requireInteraction: notificationData.requireInteraction
-        }).then(() => {
-            console.log('Notification shown!');
-        }).catch(err => {
-            console.error('Error showing notification:', err);
-        })
-    );
+        });
+    }));
 });
 
 self.addEventListener('notificationclick', function(event) {
