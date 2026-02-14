@@ -147,8 +147,10 @@ Auth::routes();
 
 // Route for service worker (must be accessible without auth)
 Route::get('/service-worker.js', function () {
-    return response()->file(public_path('service-worker.js'))
-        ->header('Content-Type', 'application/javascript');
+    $path = public_path('service-worker.js');
+    return response()->file($path, [
+        'Content-Type' => 'application/javascript',
+    ]);
 });
 
 // Web Push Subscription Route (uses existing controller)
