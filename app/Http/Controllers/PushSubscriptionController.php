@@ -30,7 +30,8 @@ class PushSubscriptionController extends Controller
         $user->updatePushSubscription(
             $request->endpoint,
             $request->keys['p256dh'],
-            $request->keys['auth']
+            $request->keys['auth'],
+            'aesgcm'
         );
 
         return response()->json(['success' => true], 200);
@@ -50,6 +51,19 @@ class PushSubscriptionController extends Controller
         $user->deletePushSubscription($request->endpoint);
 
         return response()->json(['success' => true], 200);
+    }
+
+    /**
+     * Clear all push subscriptions for the current user.
+     */
+    public function clearAll(Request $request)
+    {
+        $user = Auth::user();
+        
+        // Delete all push subscriptions for this user
+        $user->pushSubscriptions()->delete();
+
+        return response()->json(['success' => true, 'message' => 'All subscriptions cleared'], 200);
     }
 
     

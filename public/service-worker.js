@@ -1,7 +1,7 @@
 // Service Worker for Push Notifications
 
 // VAPID public key (must match server configuration)
-const VAPID_PUBLIC_KEY = 'BL8nB7H3jyXBugZ7NQbhyBidyynLlM9Ieuc1DaEYGpAp_adPZ1v8wGr94K2MGF1iXmX-qQSkZD9FdoNgXjY8SOY';
+const VAPID_PUBLIC_KEY = 'BMwjbHQJYbALDOGyRVOtXhGWNfUmm552XQVbhl30Nwcst623GnzznvZSvvQtBTakwi2zgVLJsckGiwFke7oCi6s';
 
 self.addEventListener('push', function(event) {
     console.log('Push received:', event.data ? event.data.text() : 'No data');

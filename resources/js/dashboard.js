@@ -107,7 +107,7 @@ async function subscribeToPush(registration) {
     try {
         // Get VAPID public key from server or use hardcoded one
         const vapidPublicKey = document.querySelector('meta[name="vapid-public-key"]')?.content 
-            || 'BEkkdb87YCDHjZWnzebTVIBEPJvMTpfSbs7VgUTy5ENCjyh0F9P6HEble1uGTdiu-EWeiArsz5poHChcfzwQsUM';
+            || 'BMwjbHQJYbALDOGyRVOtXhGWNfUmm552XQVbhl30Nwcst623GnzznvZSvvQtBTakwi2zgVLJsckGiwFke7oCi6s';
         
         // Convert VAPID key to Uint8Array
         const applicationServerKey = urlBase64ToUint8Array(vapidPublicKey);

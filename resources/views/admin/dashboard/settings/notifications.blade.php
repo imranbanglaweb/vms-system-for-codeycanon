@@ -16,16 +16,28 @@
                 Checking notification status...
             </p>
 
-            <button id="btn-subscribe" class="btn btn-success d-none">
-                <i class="fa  fa-bell"></i> Enable Notifications
-            </button>
+            <div class="d-flex gap-2 flex-wrap mb-3">
+                <button id="btn-subscribe" class="btn btn-success d-none">
+                    <i class="fa  fa-bell"></i> Enable Notifications
+                </button>
 
-            <button id="btn-unsubscribe" class="btn btn-danger d-none">
-                <i class="fa fa-bell-slash"></i> Disable Notifications
-            </button>
+                <button id="btn-unsubscribe" class="btn btn-danger d-none">
+                    <i class="fa fa-bell-slash"></i> Disable Notifications
+                </button>
+
+                <button id="btn-resubscribe" class="btn btn-warning">
+                    <i class="fa fa-refresh"></i> Clear & Re-subscribe
+                </button>
+
                 <button id="btn-test-push" class="btn btn-primary">
                     <i class="fa fa-paper-plane"></i> Send Test Push
                 </button>
+            </div>
+
+            <div class="alert alert-info mt-2">
+                <i class="fa fa-info-circle"></i> 
+                <strong>Note:</strong> If push notifications aren't working, click "Clear & Re-subscribe" to remove old subscriptions and create a new one with the correct encryption keys.
+            </div>
         </div>
     </div>
 
@@ -91,6 +103,7 @@ const csrfToken = "{{ csrf_token() }}";
 
 const btnSubscribe = document.getElementById('btn-subscribe');
 const btnUnsubscribe = document.getElementById('btn-unsubscribe');
+const btnResubscribe = document.getElementById('btn-resubscribe');
 const statusText = document.getElementById('push-status');
 
 function urlBase64ToUint8Array(base64String) {
@@ -204,6 +217,88 @@ btnUnsubscribe.addEventListener('click', async () => {
     } catch (err) {
         console.error(err);
         Swal.fire('Error', 'Unsubscribe failed', 'error');
+    }
+});
+
+/* 🔄 CLEAR ALL & RESUBSCRIBE */
+btnResubscribe.addEventListener('click', async () => {
+    try {
+        // Show confirmation
+        const result = await Swal.fire({
+            icon: 'warning',
+            title: 'Clear & Re-subscribe?',
+            text: 'This will remove all your push subscriptions and create a new one with fresh encryption keys.',
+            showCancelButton: true,
+            confirmButtonText: 'Yes, do it!',
+            cancelButtonText: 'Cancel'
+        });
+
+        if (!result.isConfirmed) return;
+
+        btnResubscribe.disabled = true;
+        btnResubscribe.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Processing...';
+
+        const reg = await navigator.serviceWorker.ready;
+
+        // First, unsubscribe from browser
+        const oldSub = await reg.pushManager.getSubscription();
+        if (oldSub) {
+            await oldSub.unsubscribe();
+        }
+
+        // Clear server-side subscriptions
+        const clearResponse = await fetch("{{ route('push.clearAll') }}", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': csrfToken
+            }
+        });
+
+        if (!clearResponse.ok) {
+            throw new Error('Failed to clear subscriptions on server');
+        }
+
+        // Now subscribe with fresh keys
+        const permission = await Notification.requestPermission();
+        if (permission !== 'granted') {
+            throw new Error('Notification permission denied');
+        }
+
+        const newSub = await reg.pushManager.subscribe({
+            userVisibleOnly: true,
+            applicationServerKey: urlBase64ToUint8Array(vapidPublicKey)
+        });
+
+        const subscribeResponse = await fetch("{{ route('push.subscribe') }}", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': csrfToken
+            },
+            body: JSON.stringify(newSub)
+        });
+
+        if (!subscribeResponse.ok) {
+            throw new Error('Failed to subscribe on server');
+        }
+
+        setEnabledUI();
+
+        Swal.fire({
+            icon: 'success',
+            title: 'Re-subscribed!',
+            text: 'You have been re-subscribed with fresh encryption keys',
+            timer: 3000,
+            showConfirmButton: false
+        });
+
+    } catch (err) {
+        console.error('Resubscribe error:', err);
+        Swal.fire('Error', err.message || 'Re-subscribe failed. Check console for details.', 'error');
+    } finally {
+        btnResubscribe.disabled = false;
+        btnResubscribe.innerHTML = '<i class="fa fa-refresh"></i> Clear & Re-subscribe';
     }
 });
 </script>

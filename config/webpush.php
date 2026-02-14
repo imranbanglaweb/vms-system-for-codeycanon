@@ -1,8 +1,11 @@
 <?php
 
 // Set OpenSSL config path for Windows XAMPP before loading
-if (PHP_OS === 'WINNT' && !getenv('OPENSSL_CONF')) {
-    putenv('OPENSSL_CONF=F:/xampp php8/apache/conf/openssl.cnf');
+if (PHP_OS === 'WINNT') {
+    $opensslPath = 'F:/xampp php8/apache/conf/openssl.cnf';
+    if (file_exists($opensslPath) && !getenv('OPENSSL_CONF')) {
+        putenv('OPENSSL_CONF=' . $opensslPath);
+    }
 }
 
 return [

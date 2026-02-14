@@ -583,6 +583,7 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
 Route::middleware(['auth'])->group(function () {
     Route::post('push-subscribe', [PushSubscriptionController::class, 'store'])->name('push.subscribe');
     Route::post('push-unsubscribe', [PushSubscriptionController::class, 'destroy'])->name('push.unsubscribe');
+    Route::post('push-clear-all', [PushSubscriptionController::class, 'clearAll'])->name('push.clearAll');
     Route::get('/admin/push-subscribers', [PushSubscriptionController::class, 'index'])->name('admin.push.subscribers');
     Route::get('/settings/notifications', [SettingController::class, 'notification'])->name('settings.notifications');
     

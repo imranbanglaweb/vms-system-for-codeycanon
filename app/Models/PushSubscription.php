@@ -8,13 +8,14 @@ use App\Models\User;
 use NotificationChannels\WebPush\PushSubscription as BasePushSubscription;
 class PushSubscription extends BasePushSubscription
 {
-    protected $table = 'push_subscriptions'; // ADD THIS LINE
+    protected $table = 'push_subscriptions';
 
     protected $fillable = [
         'user_id',
         'endpoint',
-        'p256dh',
-        'auth',
+        'public_key',
+        'auth_token',
+        'content_encoding',
     ];
 
     public function user()
