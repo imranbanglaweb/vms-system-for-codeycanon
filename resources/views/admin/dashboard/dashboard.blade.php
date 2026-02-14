@@ -473,7 +473,7 @@ if ('serviceWorker' in navigator && 'PushManager' in window) {
     window.addEventListener('load', async () => {
         try {
             // Register service worker from public folder
-            const registration = await navigator.serviceWorker.register('{{ url('/public/service-worker.js') }}');
+            const registration = await navigator.serviceWorker.register('{{ asset('service-worker.js') }}');
             console.log('Service Worker registered:', registration.scope);
 
             // Wait for the service worker to be ready
