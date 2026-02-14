@@ -3,52 +3,64 @@
 // VAPID public key (must match server configuration)
 const VAPID_PUBLIC_KEY = 'BH713nXU9JhRgVkli85ccpcAKlNIkEMfJFz1vPtCTHR7DgaBObtDyYAgsK72nQteTcEA-zKRoBTVvpDC9Z9vsG0';
 
-self.addEventListener('push', function(event) {
-    console.log('Push received:', event.data ? event.data.text() : 'No data');
+console.log('Service Worker loaded');
 
-    let data = {
+self.addEventListener('install', function(event) {
+    console.log('Service Worker installing');
+    self.skipWaiting();
+});
+
+self.addEventListener('activate', function(event) {
+    console.log('Service Worker activating');
+    event.waitUntil(clients.claim());
+});
+
+self.addEventListener('push', function(event) {
+    console.log('Push event received!', event);
+    console.log('Push data:', event.data ? event.data.json() : 'No data');
+
+    let notificationData = {
         title: 'InayaFleet360',
-        body: 'You have a new notification',
+        body: 'You have a new notification!',
         icon: '/admin_resource/assets/images/icons.png',
         badge: '/admin_resource/assets/images/icons.png',
         tag: 'inayafleet-notification',
         renotify: true,
-        data: { url: '/admin/dashboard' }
+        vibrate: [200, 100, 200],
+        requireInteraction: true,
+        data: '/admin/dashboard'
     };
 
     if (event.data) {
         try {
             const jsonData = event.data.json();
-            console.log('Push data:', jsonData);
-            data.title = jsonData.title || data.title;
-            data.body = jsonData.body || data.body;
-            data.icon = jsonData.icon || data.icon;
-            data.data = jsonData.data || { url: jsonData.url || '/admin/dashboard' };
-        } catch (err) {
-            console.log('Parse error, using text:', err);
-            data.body = event.data.text() || data.body;
+            console.log('JSON data:', jsonData);
+            notificationData.title = jsonData.title || notificationData.title;
+            notificationData.body = jsonData.body || notificationData.body;
+            notificationData.icon = jsonData.icon || notificationData.icon;
+            notificationData.data = jsonData.data?.url || jsonData.url || notificationData.data;
+        } catch (e) {
+            console.log('Not JSON, using text');
+            notificationData.body = event.data.text() || notificationData.body;
         }
     }
 
-    // Show the notification
+    console.log('Showing notification:', notificationData);
+    
     event.waitUntil(
-        self.registration.showNotification(data.title, {
-            body: data.body,
-            icon: data.icon,
-            badge: data.badge,
-            tag: data.tag,
-            renotify: data.renotify,
-            data: typeof data.data === 'object' ? (data.data.url || '/admin/dashboard') : data.data,
-            vibrate: [200, 100, 200],
-            requireInteraction: true,
-            actions: [
-                { action: 'open', title: 'Open' },
-                { action: 'close', title: 'Close' }
-            ]
+        self.registration.showNotification(notificationData.title, {
+            body: notificationData.body,
+            icon: notificationData.icon,
+            badge: notificationData.badge,
+            tag: notificationData.tag,
+            renotify: notificationData.renotify,
+            data: notificationData.data,
+            vibrate: notificationData.vibrate,
+            requireInteraction: notificationData.requireInteraction
         }).then(() => {
-            console.log('Notification shown successfully');
+            console.log('Notification shown!');
         }).catch(err => {
-            console.error('Notification error:', err);
+            console.error('Error showing notification:', err);
         })
     );
 });

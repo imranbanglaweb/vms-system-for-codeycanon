@@ -75,6 +75,10 @@ class PushTestController extends Controller
                 }
 
                 try {
+                    \Log::info('Creating subscription with encoding: ' . $contentEncoding);
+                    \Log::info('Endpoint: ' . $sub->endpoint);
+                    \Log::info('Public key: ' . $sub->public_key);
+                    
                     $subscription = Subscription::create([
                         'endpoint' => $sub->endpoint,
                         'publicKey' => $sub->public_key,
@@ -89,31 +93,20 @@ class PushTestController extends Controller
                         'data' => ['url' => '/admin/dashboard']
                     ]);
 
+                    \Log::info('Sending notification to: ' . $sub->endpoint);
                     $report = $webPush->sendOneNotification($subscription, $payload);
+                    \Log::info('Report isSuccess: ' . ($report->isSuccess() ? 'yes' : 'no'));
 
                     if ($report->isSuccess()) {
                         $successCount++;
                     } else {
                         $failedCount++;
                         $reason = $report->getReasonPhrase();
-                        $endpoint = $sub->endpoint;
-                        
-                        // Try to get more details from the report
-                        $errorMsg = $reason;
-                        if (method_exists($report, 'getResponse')) {
-                            $response = $report->getResponse();
-                            if ($response) {
-                                $errorMsg .= ' - Status: ' . $response->getStatusCode();
-                                $body = (string) $response->getBody();
-                                $errorMsg .= ' - Body: ' . $body;
-                            }
-                        }
-                        
+                        \Log::error('Push failed reason: ' . $reason);
                         $errors[] = [
-                            'endpoint' => substr($endpoint, 0, 50) . '...',
-                            'reason' => $errorMsg
+                            'endpoint' => substr($sub->endpoint, 0, 50) . '...',
+                            'reason' => $reason
                         ];
-                        \Log::error('Push notification failed for user ' . $sub->user_id . ': ' . $errorMsg);
                     }
                 } catch (\Exception $e) {
                     $failedCount++;
