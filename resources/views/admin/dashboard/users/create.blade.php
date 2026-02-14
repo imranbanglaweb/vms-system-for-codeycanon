@@ -6,10 +6,10 @@
     <div class="row">
         <div class="col-12 mb-3 d-flex justify-content-between align-items-center">
             <h2>Create New User</h2>
-            <a class="btn btn-primary" href="{{ route('users.index') }}">Back</a>
+            <a class="btn btn-primary" href="{{ route('users.index') }}"><i class="fa fa-arrow-left me-1"></i> Back</a>
         </div>
     </div>
-
+<br>
     {{-- Error Messages --}}
     @if ($errors->any())
         <div class="alert alert-danger">
@@ -24,7 +24,7 @@
 
     <div class="card shadow-lg border-0 rounded-lg mt-3">
         <div class="card-header bg-primary text-white">
-            <h4 class="mb-0" style="padding: 10px;"><i class="fa fa-user-plus"></i> User Registration Form</h4>
+            <h4 class="mb-0"><i class="fa fa-user-plus"></i> User Registration Form</h4>
         </div>
         <div class="card-body">
             <div id="formAlert"></div>
@@ -179,7 +179,7 @@
                     <div class="col-md-6">
                         <label class="form-label"><strong>User Image Upload</strong></label>
                         <div class="text-center mb-3">
-                            <img id="previewImg" src="{{ asset('public/admin_resource/assets/images/user_image/default.png') }}" class="img-thumbnail rounded-circle" width="100" height="100">
+                            <img id="previewImg" src="{{ asset('public/admin_resource/assets/images/user_image/default.jpg') }}" class="img-thumbnail rounded-circle" width="100" height="100">
                         </div>
                         <input type="file" class="form-control" id="user_image" name="user_image" onchange="previewFile(this);">
                         <small class="form-text text-muted">
@@ -203,6 +203,9 @@
 
 <script>
 $(document).ready(function() {
+    
+    // Add CSS for readonly select2
+    $('head').append('<style>.readonly-select { pointer-events: none; opacity: 0.8; } .readonly-select .select2-selection { background-color: #e9ecef !important; }</style>');
 
     // Style invalid feedback in red
     $('head').append('<style>.invalid-feedback { display: block !important; color: #dc3545 !important; font-size: 13px; margin-top: 5px; }</style>');
@@ -212,7 +215,9 @@ $(document).ready(function() {
 
     // Trigger validation on Select2 change
     $('.select2').on('change', function () {
-        $(this).valid();
+        if ($.fn.validate) {
+            $(this).valid();
+        }
     });
 
     // Custom server-side message map (fieldName -> custom message)
@@ -262,9 +267,6 @@ $(document).ready(function() {
             // Show loading indicator
             $('#company_id, #department_id, #unit_id, #location_id').next('.select2-container').find('.select2-selection').css('opacity', '0.6');
             
-            // Make fields readonly while loading
-            $('#company_id, #department_id, #unit_id, #location_id').prop('disabled', true);
-            
             // Fetch employee details via AJAX
             fetch('{{ route('users.get-employee-details', ':employeeId') }}'.replace(':employeeId', employeeId))
                 .then(res => res.json())
@@ -282,24 +284,28 @@ $(document).ready(function() {
                             $('#company_id').val(employee.company_id).trigger('change');
                         }
                         $('#company_id').prop('disabled', true).addClass('bg-light');
+                        $('#company_id').next('.select2-container').addClass('readonly-select');
                         
-                        // Auto-populate department
+                        // Auto-populate department (readonly)
                         if (employee.department_id) {
                             $('#department_id').val(employee.department_id).trigger('change');
                         }
                         $('#department_id').prop('disabled', true).addClass('bg-light');
+                        $('#department_id').next('.select2-container').addClass('readonly-select');
                         
-                        // Auto-populate unit
+                        // Auto-populate unit (readonly)
                         if (employee.unit_id) {
                             $('#unit_id').val(employee.unit_id).trigger('change');
                         }
                         $('#unit_id').prop('disabled', true).addClass('bg-light');
+                        $('#unit_id').next('.select2-container').addClass('readonly-select');
                         
-                        // Auto-populate location
+                        // Auto-populate location (readonly)
                         if (employee.location_id) {
                             $('#location_id').val(employee.location_id).trigger('change');
                         }
                         $('#location_id').prop('disabled', true).addClass('bg-light');
+                        $('#location_id').next('.select2-container').addClass('readonly-select');
                     }
                 })
                 .catch(error => {
@@ -314,10 +320,19 @@ $(document).ready(function() {
             $('#user_email').val('');
             $('#user_phone').val('');
             $('#company_id').val('').trigger('change').prop('disabled', false).removeClass('bg-light');
+            $('#company_id').next('.select2-container').removeClass('readonly-select');
             $('#department_id').val('').trigger('change').prop('disabled', false).removeClass('bg-light');
+            $('#department_id').next('.select2-container').removeClass('readonly-select');
             $('#unit_id').val('').trigger('change').prop('disabled', false).removeClass('bg-light');
+            $('#unit_id').next('.select2-container').removeClass('readonly-select');
             $('#location_id').val('').trigger('change').prop('disabled', false).removeClass('bg-light');
+            $('#location_id').next('.select2-container').removeClass('readonly-select');
         }
+    });
+    
+    // Prevent opening select2 for readonly fields
+    $(document).on('select2-opening', '.readonly-select', function(e) {
+        e.preventDefault();
     });
 
     // Custom file size validation

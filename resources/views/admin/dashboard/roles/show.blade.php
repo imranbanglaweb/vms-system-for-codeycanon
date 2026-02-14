@@ -16,9 +16,9 @@
         </h3>
         <div>
             @can('role-edit')
-            <a href="{{ route('roles.edit', $role->id) }}" class="btn btn-primary">✏️ Edit</a>
+            <a href="{{ route('admin.roles.edit', $role->id) }}" class="btn btn-primary">✏️ Edit</a>
             @endcan
-            <a href="{{ route('roles.index') }}" class="btn btn-outline-secondary">← Back</a>
+            <a href="{{ route('admin.roles.index') }}" class="btn btn-outline-secondary">← Back</a>
         </div>
     </div>
 

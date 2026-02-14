@@ -1,43 +1,13 @@
 <?php
 
-/**
- * ===============================================================================
- * VMS - Vehicle Management System Routes
- * ===============================================================================
- * 
- * This file defines all application routes organized by functional area.
- * Each section is clearly commented for easy navigation and maintenance.
- * 
- * Route Structure:
- * 1. Authentication Routes (Laravel Auth scaffolding)
- * 2. Dashboard & Home
- * 3. Vehicle Management
- * 4. Driver Management
- * 5. Vendor Management
- * 6. Requisitions & Approvals
- * 7. Transport Approval Workflow
- * 8. Trip Sheet Operations
- * 9. Maintenance Management
- * 10. Maintenance Schedule
- * 11. Maintenance Types & Vendors
- * 12. Reports (Requisitions, Trips, Vehicles, Drivers, Maintenance)
- * 13. Subscriptions & Plans
- * 14. Payments (Manual & Stripe)
- * 15. Admin Controls & Settings
- * 16. Organization Setup (Units, Companies, Departments, Locations)
- * 17. Employee & User Management
- * 18. Permissions & Roles
- * 19. Push Notifications
- * 20. Documents Management
- * 21. Languages & Localization
- * 22. Miscellaneous Routes
- * ===============================================================================
- */
+/*
+|==========================================================================
+| VMS - Vehicle Management System Routes
+|==========================================================================
+*/
 
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Mail;
-use Illuminate\Http\Request;
 
 // ============================================================================
 // CONTROLLER IMPORTS
@@ -45,7 +15,6 @@ use Illuminate\Http\Request;
 
 // Core Controllers
 use App\Http\Controllers\HomeController;
-use App\Http\Controllers\FrontendController;
 use App\Http\Controllers\PushSubscriptionController;
 
 // Vehicle & Transport
@@ -216,16 +185,6 @@ Route::middleware(['prevent-back-history'])->group(function () {
     Route::get('/get-employee-details/{id}', [EmployeeController::class, 'getEmployeeDetails'])->name('employee.details');
     
     // Export options
-    Route::get('/requisitions/{id}/download', [RequisitionController::class, 'downloadPDF'])->name('requisitions.download');
-    Route::get('/requisitions/export-excel', [RequisitionController::class, 'exportExcel'])->name('requisitions.export.excel');
-    Route::get('/requisitions/export-pdf', [RequisitionController::class, 'exportPDF'])->name('requisitions.export.pdf');
-    Route::get('/get-drivers-by-vehicle/{vehicleId}', [RequisitionController::class, 'getDriversByVehicle']);
-Route::get('/requisitions/vehicles/by-capacity', [RequisitionController::class, 'getVehiclesByCapacity'])->name('vehicles.by.capacity');
-
-
-Route::get('/employee/details/{id}', [EmployeeController::class, 'details'])->name('employee.details');
-
-Route::get('/vehicles/by-capacity', [VehicleController::class, 'byCapacity'])->name('vehicles.by.capacity');
 
 Route::get('/vehicles/{id}/details', [VehicleController::class, 'getVehicleDetails'])->name('vehicles.details');
 
@@ -283,7 +242,6 @@ Route::resource('requisitions', RequisitionController::class);
     
     // Role-based requisition access
     Route::group(['middleware' => 'role:employee,transport,admin'], function() {
-        Route::resource('requisitions', RequisitionController::class);
     });
 });
 
@@ -589,13 +547,13 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/admin/push-subscribers', [PushSubscriptionController::class, 'index'])->name('admin.push.subscribers');
     Route::get('/settings/notifications', [SettingController::class, 'notification'])->name('settings.notifications');
     
+    Route::post('/admin/push/test', [PushTestController::class, 'send'])->name('admin.push.test');
+    
     // Test Push Notification
     Route::get('/test-push', function () {
         auth()->user()->notify(new \App\Notifications\RequisitionCreated());
         return 'Push Sent';
     });
-
-    Route::post('/admin/push/test', [PushTestController::class, 'send'])->name('admin.push.test');
     
     // Admin: Clear ALL push subscriptions (for fixing key mismatches)
     Route::post('/admin/push/clear-all', [PushTestController::class, 'clearAllSubscriptions'])->name('admin.push.clearAll');

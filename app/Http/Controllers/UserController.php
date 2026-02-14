@@ -81,7 +81,7 @@ class UserController extends Controller
                 $users->where('status', $request->status_filter);
             }
 
-            if ($request->filled('search')) {
+            if ($request->filled('search') && is_string($request->search)) {
                 $search = $request->search;
                 $users->where(function($query) use ($search) {
                     $query->where('name', 'like', "%{$search}%")
@@ -97,15 +97,15 @@ class UserController extends Controller
 
                 ->editColumn('user_image', function ($row) {
                     $imagePath = public_path('admin_resource/assets/images/user_image/' . $row->user_image);
-                    $imageUrl = asset('public/admin_resource/assets/images/default.png');
+                    $imageUrl = asset('public/admin_resource/assets/images/user_image/default.jpg');
 
                     if (!empty($row->user_image) && file_exists($imagePath)) {
-                        $imageUrl = asset('public/admin_resource/assets/images/user_image/' . $row->user_image);
+                        $imageUrl = asset('admin_resource/assets/images/user_image/' . $row->user_image);
                     }
 
                     return '<img src="'.$imageUrl.'" width="45" height="45"
                             class="rounded-circle"
-                            onerror="this.onerror=null;this.src=\''.asset('public/admin_resource/assets/images/user_image/default.png').'\'">';
+                            onerror="this.onerror=null;this.src=\''.asset('public/admin_resource/assets/images/user_image/default.jpg').'\'">';
                 })
 
                 ->addColumn('user_type', function ($row) {
@@ -166,8 +166,8 @@ class UserController extends Controller
                 })
 
                 ->addColumn('status', function ($row) {
-                    if ($row->status == 1) {
-                        return '<span class="badge bg-success" style="font-size: 11px;"><i class="fa fa-check-circle me-1"></i>Active</span>';
+                    if ($row->status =1) {
+                        return '<span class="badge bg-success" style="font-size: 11px;"><i class="fa fa-check-circle me-1"></i> Active</span>';
                     }
                     return '<span class="badge bg-danger" style="font-size: 11px;"><i class="fa fa-times-circle me-1"></i>Inactive</span>';
                 })

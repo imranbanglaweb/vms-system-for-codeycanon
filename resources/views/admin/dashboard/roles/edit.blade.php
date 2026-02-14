@@ -14,7 +14,7 @@
                 {{ count($rolePermissions) }} Selected
             </span>
         </h3>
-        <a href="{{ route('admin.roles.index') }}" class="btn btn-outline-primary">← Back</a>
+        <a href="{{ route('admin.roles.index') }}" class="btn btn-outline-primary"><i class="fa fa-arrow-left me-1"></i>Back</a>
     </div>
 
     {{-- Search --}}
@@ -186,32 +186,48 @@ $(function () {
         });
     });
 
-    // AJAX UPDATE with Premium Toast
+    // AJAX UPDATE with validation and proper alerts
     $('#roleEditForm').submit(function (e) {
         e.preventDefault();
+        
+        var submitBtn = $(this).find('button[type="submit"]');
+        var originalText = submitBtn.html();
+        submitBtn.prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i> Updating...');
 
         $.ajax({
             url: "{{ route('admin.roles.update', $role->id) }}",
             method: "POST",
             data: $(this).serialize(),
             success: function (res) {
-                showPremiumToast(
-                    'success',
-                    '<i class="fas fa-check-circle me-2"></i>Updated',
-                    res.message,
-                    5000
-                );
-                setTimeout(function() {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Updated!',
+                    text: res.message || 'Role updated successfully.',
+                    confirmButtonText: 'OK'
+                }).then(() => {
                     window.location.href = "{{ route('admin.roles.index') }}";
-                }, 2000);
+                });
             },
-            error: function () {
-                showPremiumToast(
-                    'error',
-                    '<i class="fas fa-times-circle me-2"></i>Error',
-                    'Validation failed. Please check your input.',
-                    5000
-                );
+            error: function (xhr) {
+                var errorMessage = 'Validation failed. Please check your input.';
+                if (xhr.responseJSON && xhr.responseJSON.message) {
+                    errorMessage = xhr.responseJSON.message;
+                } else if (xhr.responseJSON && xhr.responseJSON.errors) {
+                    // Build error message from validation errors
+                    var errors = xhr.responseJSON.errors;
+                    errorMessage = '';
+                    for (var key in errors) {
+                        errorMessage += errors[key][0] + '\n';
+                    }
+                }
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error!',
+                    text: errorMessage
+                });
+            },
+            complete: function() {
+                submitBtn.prop('disabled', false).html(originalText);
             }
         });
     });

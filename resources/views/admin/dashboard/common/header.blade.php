@@ -2,6 +2,8 @@
 		<meta charset="UTF-8">
 
 		<title>Dashboard | {{ $settings->admin_title ?? 'InayaFleet360 – Fleet & Transport Management System' }}</title>
+		<link rel="shortcut icon" type="image/png" href="{{ asset('favicon.ico') }}">
+		<link rel="shortcut icon" type="image/x-icon" href="{{ asset('favicon.ico') }}">
 		<meta name="keywords" content="HTML5 Admin Template" />
 		<meta name="description" content="@if(!empty($settings->admin_description)) @endif">
 		<meta name="author" content="Imran Rahman">

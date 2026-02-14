@@ -16,10 +16,6 @@
             <div class="card-body">
                 <div class="row align-items-end">
                     <div class="col-md-3">
-                        <label class="form-label fw-bold">Search</label>
-                        <input type="text" id="search_filter" class="form-control form-control-sm" placeholder="Search by name, email...">
-                    </div>
-                    <div class="col-md-3">
                         <label class="form-label fw-bold">User Type</label>
                         <select id="user_type_filter" class="form-control form-control-sm select2">
                             <option value="">All User Types</option>
@@ -46,6 +42,7 @@
                         </select>
                     </div>
                     <div class="col-md-1">
+                        <br>
                         <button type="button" id="filter_reset" class="btn btn-secondary btn-sm w-100">
                             <i class="fa fa-refresh"></i> Reset
                         </button>
@@ -107,7 +104,6 @@
     }
 </style>
 
-@push('scripts')
 <!-- Load SweetAlert2 from CDN to ensure it's available -->
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <!-- Select2 -->
@@ -130,25 +126,28 @@ $(document).ready(function() {
     var table = $('#myTable').DataTable({
         processing: true,
         serverSide: true,
+        search: false,
+        dom: 'lrtip',
+    
+     
         ajax: {
             url: "{{ route('users.getData') }}",
             data: function(d) {
                 d.user_type_filter = $('#user_type_filter').val();
                 d.role_filter = $('#role_filter').val();
                 d.status_filter = $('#status_filter').val();
-                d.search = $('#search_filter').val();
             }
         },
         columns: [
             { data: 'DT_RowIndex', orderable: false, searchable: false },
-            { data: 'user_name' },
-            { data: 'name' },
-            { data: 'email' },
-            { data: 'employee' },
+            { data: 'user_name', searchable: false },
+            { data: 'name', searchable: false },
+            { data: 'email', searchable: false },
+            { data: 'employee', searchable: false },
             { data: 'user_type' },
-            { data: 'roles' },
-            { data: 'department' },
-            { data: 'status' },
+            { data: 'roles', searchable: false },
+            { data: 'department', searchable: false },
+            { data: 'status', searchable: false },
             { data: 'user_image', orderable: false, searchable: false },
             { data: 'action', orderable: false, searchable: false }
         ]
@@ -159,18 +158,8 @@ $(document).ready(function() {
         table.draw();
     });
     
-    // Search with debounce
-    var searchTimeout = null;
-    $('#search_filter').on('keyup', function() {
-        clearTimeout(searchTimeout);
-        searchTimeout = setTimeout(function() {
-            table.draw();
-        }, 500);
-    });
-
     // Reset filters
     $('#filter_reset').on('click', function() {
-        $('#search_filter').val('');
         $('#user_type_filter').val('').trigger('change');
         $('#role_filter').val('').trigger('change');
         $('#status_filter').val('').trigger('change');
@@ -215,6 +204,5 @@ $(document).ready(function() {
     });
 });
 </script>
-@endpush
 
 @endsection

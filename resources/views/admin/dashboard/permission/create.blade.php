@@ -7,7 +7,7 @@
             <nav aria-label="breadcrumb">
                 <ol class="breadcrumb bg-white py-3 px-4 rounded shadow-sm">
                     
-                    <li class="breadcrumb-item"><a href="{{ route('permissions.index') }}" class="text-decoration-none"><i class="fa fa-shield-alt"></i> Permissions</a></li>
+                    <li class="breadcrumb-item"><a href="{{ route('admin.permissions.index') }}" class="text-decoration-none"><i class="fa fa-shield-alt"></i> Permissions</a></li>
                     <li class="breadcrumb-item active" aria-current="page"><i class="fa fa-plus-circle"></i> Create New</li>
                 </ol>
             </nav>
@@ -24,7 +24,7 @@
                     <p class="text-strong mb-0" style="font-size:16px;color:green">Add a new permission to the system</p>
                 </div>
                 <div>
-                    <a href="{{ route('permissions.index') }}" class="btn btn-light btn-lg border">
+                    <a href="{{ route('admin.permissions.index') }}" class="btn btn-light btn-lg border">
                         <i class="fa fa-arrow-left me-2"></i>Back to List
                     </a>
                 </div>
@@ -251,7 +251,7 @@
                 <button type="button" class="btn btn-outline-secondary me-2" onclick="createAnother()">
                     <i class="fa fa-plus me-2"></i>Create Another
                 </button>
-                <a href="{{ route('permissions.index') }}" class="btn btn-success">
+                <a href="{{ route('admin.permissions.index') }}" class="btn btn-success">
                     <i class="fa fa-list me-2"></i>View All Permissions
                 </a>
             </div>
@@ -365,7 +365,7 @@ $(document).ready(function() {
         
         // Send AJAX request
         $.ajax({
-            url: "{{ route('permissions.store') }}",
+            url: "{{ route('admin.permissions.store') }}",
             type: "POST",
             data: formData,
             processData: false,
@@ -463,7 +463,7 @@ function getDefaultTitle(type) {
 // Function to validate permission name
 function validatePermissionName(name) {
     $.ajax({
-        url: "{{ route('permissions.validate') }}",
+        url: "{{ route('admin.permissions.validate') }}",
         type: "POST",
         data: {
             _token: "{{ csrf_token() }}",

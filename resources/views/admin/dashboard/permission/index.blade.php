@@ -1,9 +1,8 @@
 @extends('admin.dashboard.master')
 
 @section('main_content')
-<br>
-<section role="main" class="content-body" style="background-color: #f8f9fa; padding: 20px;">
-    <div class="row">
+<section role="main" class="content-body" style="background-color: #fff;">
+<div class="row mb-3">
         <div class="col-lg-12">
             <div class="pull-left">
                 <h2>Permission Management</h2>
@@ -36,18 +35,20 @@
     </section>
 
     <!-- Delete Confirmation Modal -->
-    <div class="modal" id="deleteModal" tabindex="-1" role="dialog" aria-hidden="true">
-        <div class="modal-dialog">
+    <div class="modal" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">Confirm Delete</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    <h5 class="modal-title" id="deleteModalLabel">Confirm Delete</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
                 </div>
                 <div class="modal-body">
                     <p>Are you sure you want to delete this permission?</p>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
                     <form id="deleteForm" method="POST" style="display: inline;">
                         @csrf
                         @method('DELETE')
@@ -59,7 +60,6 @@
     </div>
 </section>
 
-@push('styles')
 <link rel="stylesheet" href="{{ asset('public/admin_resource/plugins/datatables-bs4/css/dataTables.bootstrap4.min.css') }}">
 <link rel="stylesheet" href="{{ asset('public/admin_resource/plugins/datatables-buttons/css/buttons.bootstrap4.min.css') }}">
 <link rel="stylesheet" href="{{ asset('public/admin_resource/plugins/sweetalert2/sweetalert2.min.css') }}">
@@ -85,10 +85,27 @@
         vertical-align: middle !important;
         font-size: 15px;
     }
+    /* Fix modal background */
+    .modal-backdrop {
+        background-color: rgba(0, 0, 0, 0.5);
+        opacity: 1;
+    }
+    .modal {
+        background-color: rgba(0, 0, 0, 0.5);
+    }
+    .modal.show {
+        display: flex !important;
+        align-items: center;
+        justify-content: center;
+    }
+    .modal-dialog {
+        margin: 1.75rem auto;
+    }
 </style>
-@endpush
 
-@push('scripts')
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 <script>
 $(document).ready(function() {
 
@@ -174,35 +191,39 @@ $(document).ready(function() {
         let deleteUrl = $(this).data('url');
         $('#deleteForm').attr('action', deleteUrl);
 
-        let deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
-        deleteModal.show();
+        $('#deleteModal').modal('show');
 
         $('#deleteForm').off('submit').on('submit', function(e) {
             e.preventDefault();
+            
+            var submitBtn = $(this).find('button[type="submit"]');
+            submitBtn.prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i> Deleting...');
 
             $.ajax({
                 url: deleteUrl,
                 type: 'DELETE',
                 success: function(response) {
-                    deleteModal.hide();
+                    $('#deleteModal').modal('hide');
                     $('#permissionsTable').DataTable().ajax.reload();
 
-                    // Show premium toast notification
-                    showPremiumToast(
-                        'success',
-                        '<i class="fas fa-check-circle me-2"></i>Deleted',
-                        response.success || 'Permission deleted successfully',
-                        5000
-                    );
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Deleted!',
+                        text: response.success || 'Permission deleted successfully',
+                        confirmButtonText: 'OK'
+                    });
                 },
                 error: function(xhr) {
                     console.log(xhr.responseText);
-                    showPremiumToast(
-                        'error',
-                        '<i class="fas fa-times-circle me-2"></i>Failed',
-                        'Delete failed. Please try again.',
-                        5000
-                    );
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Failed!',
+                        text: 'Delete failed. Please try again.',
+                        confirmButtonText: 'OK'
+                    });
+                },
+                complete: function() {
+                    submitBtn.prop('disabled', false).html('Delete');
                 }
             });
         });
@@ -214,21 +235,5 @@ $(document).ready(function() {
     });
 });
 </script>
-
-<style>
-    .dataTables_wrapper .dataTables_filter {
-        float: right;
-        text-align: right;
-    }
-    .dataTables_wrapper .dataTables_length {
-        float: left;
-    }
-    .dataTables_wrapper .dt-buttons {
-        float: left;
-        margin-right: 10px;
-    }
-</style>
-
-@endpush
 
 @endsection

@@ -52,6 +52,7 @@
     $('#myTable').DataTable({
         processing: true,
         serverSide: true,
+         search: false,
         ajax: {
             url: '{{ route('users.getData') }}',
             type: 'GET',
