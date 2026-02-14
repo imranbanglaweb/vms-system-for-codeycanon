@@ -7,31 +7,48 @@ self.addEventListener('push', function(event) {
     console.log('Push received:', event.data ? event.data.text() : 'No data');
 
     let data = {
-        title: 'Notification',
-        body: 'You have a new message',
+        title: 'InayaFleet360',
+        body: 'You have a new notification',
         icon: '/admin_resource/assets/images/icons.png',
-        data: { url: '/' }
+        badge: '/admin_resource/assets/images/icons.png',
+        tag: 'inayafleet-notification',
+        renotify: true,
+        data: { url: '/admin/dashboard' }
     };
 
     if (event.data) {
         try {
             const jsonData = event.data.json();
+            console.log('Push data:', jsonData);
             data.title = jsonData.title || data.title;
             data.body = jsonData.body || data.body;
             data.icon = jsonData.icon || data.icon;
-            data.data = jsonData.data || jsonData.url || data.data;
+            data.data = jsonData.data || { url: jsonData.url || '/admin/dashboard' };
         } catch (err) {
-            data.body = event.data.text();
+            console.log('Parse error, using text:', err);
+            data.body = event.data.text() || data.body;
         }
     }
 
+    // Show the notification
     event.waitUntil(
         self.registration.showNotification(data.title, {
             body: data.body,
             icon: data.icon,
-            data: typeof data.data === 'object' ? (data.data.url || '/') : data.data,
+            badge: data.badge,
+            tag: data.tag,
+            renotify: data.renotify,
+            data: typeof data.data === 'object' ? (data.data.url || '/admin/dashboard') : data.data,
             vibrate: [200, 100, 200],
-            requireInteraction: true
+            requireInteraction: true,
+            actions: [
+                { action: 'open', title: 'Open' },
+                { action: 'close', title: 'Close' }
+            ]
+        }).then(() => {
+            console.log('Notification shown successfully');
+        }).catch(err => {
+            console.error('Notification error:', err);
         })
     );
 });

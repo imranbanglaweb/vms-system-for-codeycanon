@@ -95,11 +95,25 @@ class PushTestController extends Controller
                         $successCount++;
                     } else {
                         $failedCount++;
+                        $reason = $report->getReasonPhrase();
+                        $endpoint = $sub->endpoint;
+                        
+                        // Try to get more details from the report
+                        $errorMsg = $reason;
+                        if (method_exists($report, 'getResponse')) {
+                            $response = $report->getResponse();
+                            if ($response) {
+                                $errorMsg .= ' - Status: ' . $response->getStatusCode();
+                                $body = (string) $response->getBody();
+                                $errorMsg .= ' - Body: ' . $body;
+                            }
+                        }
+                        
                         $errors[] = [
-                            'endpoint' => substr($sub->endpoint, 0, 50) . '...',
-                            'reason' => $report->getReasonPhrase()
+                            'endpoint' => substr($endpoint, 0, 50) . '...',
+                            'reason' => $errorMsg
                         ];
-                        \Log::error('Push notification failed for user ' . $sub->user_id . ': ' . $report->getReasonPhrase());
+                        \Log::error('Push notification failed for user ' . $sub->user_id . ': ' . $errorMsg);
                     }
                 } catch (\Exception $e) {
                     $failedCount++;

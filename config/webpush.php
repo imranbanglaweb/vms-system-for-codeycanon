@@ -1,10 +1,21 @@
 <?php
 
-// Set OpenSSL config path for Windows XAMPP before loading
+// Set OpenSSL config path for Windows XAMPP before loading - MUST be done first
 if (PHP_OS === 'WINNT') {
-    $opensslPath = 'F:/xampp php8/apache/conf/openssl.cnf';
-    if (file_exists($opensslPath) && !getenv('OPENSSL_CONF')) {
-        putenv('OPENSSL_CONF=' . $opensslPath);
+    // Try multiple possible paths
+    $possiblePaths = [
+        'F:/xampp php8/apache/conf/openssl.cnf',
+        'F:/xampp/php/extras/ssl/openssl.cnf',
+        'F:/xampp/php/extras/openssl/openssl.cnf',
+    ];
+    
+    foreach ($possiblePaths as $path) {
+        if (file_exists($path)) {
+            putenv('OPENSSL_CONF=' . $path);
+            $_ENV['OPENSSL_CONF'] = $path;
+            $_SERVER['OPENSSL_CONF'] = $path;
+            break;
+        }
     }
 }
 
@@ -16,8 +27,8 @@ return [
      */
     'vapid' => [
         'subject' => 'mailto:md.imran1200@gmail.com',
-        'public_key' => env('VAPID_PUBLIC_KEY', 'BL8nB7H3jyXBugZ7NQbhyBidyynLlM9Ieuc1DaEYGpAp_adPZ1v8wGr94K2MGF1iXmX-qQSkZD9FdoNgXjY8SOY'),
-        'private_key' => env('VAPID_PRIVATE_KEY', 'tkx0-90569Jleb0zToTjJ_WaTH-bqfqbbpbz-8ww3Dk'),
+        'public_key' => env('VAPID_PUBLIC_KEY', 'BH713nXU9JhRgVkli85ccpcAKlNIkEMfJFz1vPtCTHR7DgaBObtDyYAgsK72nQteTcEA-zKRoBTVvpDC9Z9vsG0'),
+        'private_key' => env('VAPID_PRIVATE_KEY', 'hGmq08IRrmHwRH8wP5XmikzmjyeAtIOTq3hzua8Ph1k'),
     ],
 
     /**
