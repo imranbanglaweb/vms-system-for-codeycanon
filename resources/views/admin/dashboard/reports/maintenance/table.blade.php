@@ -15,7 +15,7 @@
             @forelse($records as $r)
             <tr>
                 <td class="text-muted">{{ $loop->iteration + ($records->currentPage() - 1) * $records->perPage() }}</td>
-                <td class="fw-medium">{{ $r->vehicle->vehicle_no ?? '-' }}</td>
+                <td class="fw-medium">{{ $r->vehicle->vehicle_name ?? '-' }}</td>
                 <td>{{ $r->maintenanceType->name ?? '-' }}</td>
                 <td>{{ $r->vendor->name ?? '-' }}</td>
                 <td>{{ \Carbon\Carbon::parse($r->maintenance_date)->format('d M Y') }}</td>

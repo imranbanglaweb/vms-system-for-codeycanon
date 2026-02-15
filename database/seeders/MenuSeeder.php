@@ -632,7 +632,7 @@ class MenuSeeder extends Seeder
                 'menu_name' => 'Requisition Report',
                 'menu_slug' => 'requisition-report',
                 'menu_icon' => 'fa-clipboard',
-                'menu_url' => 'admin.reports.requisitions',
+                'menu_url' => 'reports.requisitions',
                 'menu_permission' => 'report-requisition',
                 'menu_order' => 1,
                 'parent_name' => 'Reports',

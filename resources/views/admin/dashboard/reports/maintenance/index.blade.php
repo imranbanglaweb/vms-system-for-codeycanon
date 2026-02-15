@@ -103,19 +103,28 @@
                         <form id="filterForm" class="row g-3">
                             <div class="col-md-3">
                                 <label class="form-label small fw-medium">Vehicle</label>
-                                <select name="vehicle_id" class="form-select form-select-sm">
+                                <select name="vehicle_id" class="form-select form-select-sm select2">
                                     <option value="">All Vehicles</option>
                                     @foreach($vehicles as $v)
-                                        <option value="{{ $v->id }}">{{ $v->vehicle_no }} - {{ $v->vehicle_name }}</option>
+                                        <option value="{{ $v->id }}">{{ $v->vehicle_number }} - {{ $v->vehicle_name }}</option>
                                     @endforeach
                                 </select>
                             </div>
                             <div class="col-md-3">
                                 <label class="form-label small fw-medium">Type</label>
-                                <select name="type_id" class="form-select form-select-sm">
+                                <select name="type_id" class="form-select form-select-sm select2">
                                     <option value="">All Types</option>
                                     @foreach($types as $t)
                                         <option value="{{ $t->id }}">{{ $t->name }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label small fw-medium">Vendor</label>
+                                <select name="vendor_id" class="form-select form-select-sm select2">
+                                    <option value="">All Vendors</option>
+                                    @foreach($vendors as $vendor)
+                                        <option value="{{ $vendor->id }}">{{ $vendor->name }}</option>
                                     @endforeach
                                 </select>
                             </div>
@@ -178,8 +187,12 @@
 @endsection
 
 @push('scripts')
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-beta.1/dist/css/select2.min.css" rel="stylesheet" />
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-beta.1/dist/js/select2.min.js"></script>
 <script>
 $(function() {
+    // Initialize Select2
+    $('.select2').select2({ width: '100%' });
     function fetchData(page) {
         $('#loading').show();
         $('#reportTable').hide();
@@ -212,7 +225,11 @@ $(function() {
         });
     }
     $('#filterForm').on('submit', function(e) { e.preventDefault(); fetchData(1); });
-    $('#resetBtn').on('click', function() { $('#filterForm')[0].reset(); fetchData(1); });
+    $('#resetBtn').on('click', function() { 
+        $('#filterForm')[0].reset();
+        $('.select2').val(null).trigger('change');
+        fetchData(1); 
+    });
     $(document).on('click', '.pagination a', function(e) {
         e.preventDefault();
         let page = $(this).attr('href').split('page=')[1];

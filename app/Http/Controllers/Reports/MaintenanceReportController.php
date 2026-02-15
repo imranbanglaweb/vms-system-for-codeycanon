@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Models\MaintenanceRequisition;
 use App\Models\Vehicle;
 use App\Models\MaintenanceType;
+use App\Models\MaintenanceVendor;
 use PDF;
 use Excel;
 
@@ -14,12 +15,13 @@ class MaintenanceReportController extends Controller
 {
     public function index()
     {
-           $records = MaintenanceRequisition::latest()->paginate(15);
+           $records = MaintenanceRequisition::with(['vehicle','maintenanceType','vendor'])->latest()->paginate(15);
     // dd($records);
 
         return view('admin.dashboard.reports.maintenance.index', [
-            'vehicles' => Vehicle::select('id','vehicle_name')->get(),
+            'vehicles' => Vehicle::select('id','vehicle_name','vehicle_number')->get(),
             'types' => MaintenanceType::select('id','name')->get(),
+            'vendors' => MaintenanceVendor::select('id','name')->get(),
             'records' => $records
         ]);
         
@@ -30,7 +32,7 @@ class MaintenanceReportController extends Controller
 
   
     // 🔹 Start query with all necessary relationships
-    $query = MaintenanceRequisition::with(['vehicle','maintenanceType','employee']);
+    $query = MaintenanceRequisition::with(['vehicle','maintenanceType','employee','vendor']);
 
     // 🔹 Role-based filtering
     if (auth()->user()->hasRole('Manager')) {
@@ -44,6 +46,10 @@ class MaintenanceReportController extends Controller
 
     if ($request->type_id) {
         $query->where('maintenance_type_id', $request->type_id);
+    }
+
+    if ($request->vendor_id) {
+        $query->where('vendor_id', $request->vendor_id);
     }
 
     if ($request->from_date && $request->to_date) {

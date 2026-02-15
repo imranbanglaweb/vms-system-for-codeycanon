@@ -88,7 +88,7 @@
                         <form id="filterForm" class="row g-3">
                             <div class="col-md-3">
                                 <label class="form-label small fw-medium">Vehicle</label>
-                                <select name="vehicle_id" class="form-select form-select-sm">
+                                <select name="vehicle_id" class="form-select form-select-sm select2">
                                     <option value="">All Vehicles</option>
                                     @foreach($vehicles as $v)
                                         <option value="{{ $v->id }}">{{ $v->vehicle_name }} - {{ $v->vehicle_number }}</option>
@@ -97,7 +97,7 @@
                             </div>
                             <div class="col-md-3">
                                 <label class="form-label small fw-medium">Driver</label>
-                                <select name="driver_id" class="form-select form-select-sm">
+                                <select name="driver_id" class="form-select form-select-sm select2">
                                     <option value="">All Drivers</option>
                                     @foreach($drivers as $d)
                                         <option value="{{ $d->id }}">{{ $d->driver_name }}</option>
@@ -162,8 +162,12 @@
 @endsection
 
 @push('scripts')
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-beta.1/dist/css/select2.min.css" rel="stylesheet" />
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-beta.1/dist/js/select2.min.js"></script>
 <script>
 $(function() {
+    // Initialize Select2
+    $('.select2').select2({ width: '100%' });
     function fetchData(page) {
         $('#loading').show();
         $('#reportTable').hide();
@@ -196,7 +200,11 @@ $(function() {
         });
     }
     $('#filterForm').on('submit', function(e) { e.preventDefault(); fetchData(1); });
-    $('#resetBtn').on('click', function() { $('#filterForm')[0].reset(); fetchData(1); });
+    $('#resetBtn').on('click', function() { 
+        $('#filterForm')[0].reset();
+        $('.select2').val(null).trigger('change');
+        fetchData(1); 
+    });
     $(document).on('click', '.pagination a', function(e) {
         e.preventDefault();
         let page = $(this).attr('href').split('page=')[1];

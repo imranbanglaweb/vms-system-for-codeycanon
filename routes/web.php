@@ -346,11 +346,11 @@ Route::prefix('maintenance-categories')->group(function () {
 // 12. REPORTS
 // ============================================================================
 
-Route::middleware(['auth'])->prefix('admin')->group(function () {
+Route::middleware(['auth'])->prefix('admin')->name('reports.')->group(function () {
     // Requisition Reports
-    Route::get('/reports/requisitions', [RequisitionReportController::class, 'index'])->name('reports.requisitions');
-    Route::get('requisitions/excel', [RequisitionReportController::class, 'exportExcel'])->name('reports.requisitions.excel');
-    Route::get('requisitions/pdf', [RequisitionReportController::class, 'exportPdf'])->name('reports.requisitions.pdf');
+    Route::get('/reports/requisitions', [RequisitionReportController::class, 'index'])->name('requisitions');
+    Route::get('/reports/requisitions/excel', [RequisitionReportController::class, 'exportExcel'])->name('requisitions.excel');
+    Route::get('/reports/requisitions/pdf', [RequisitionReportController::class, 'exportPdf'])->name('requisitions.pdf');
 });
 
 // Trip & Fuel Consumption Report

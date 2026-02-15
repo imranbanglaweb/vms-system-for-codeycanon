@@ -16,8 +16,8 @@
             @forelse($records as $r)
             <tr>
                 <td class="text-muted">{{ $loop->iteration + ($records->currentPage() - 1) * $records->perPage() }}</td>
-                <td class="fw-medium">{{ $r->vehicle->vehicle_no ?? '-' }}</td>
-                <td>{{ $r->vehicle->vehicleType->type_name ?? '-' }}</td>
+                <td class="fw-medium">{{ $r->vehicle->vehicle_name ?? '-' }}</td>
+                <td>{{ $r->vehicle->vehicleType->name ?? '-' }}</td>
                 <td>{{ $r->total_trips }}</td>
                 <td>{{ number_format($r->total_distance, 2) }}</td>
                 <td>{{ number_format($r->total_fuel, 2) }}</td>
