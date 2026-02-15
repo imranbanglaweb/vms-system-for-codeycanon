@@ -2,6 +2,7 @@
 
 @section('main_content')
 <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-beta.1/dist/css/select2.min.css" rel="stylesheet" />
 
 <style>
     body {
@@ -17,7 +18,7 @@
     }
     label.form-label {
         font-weight: 600;
-        color: #333;
+        color: #000;
         margin-bottom: 0.4rem;
     }
     .input-group-text {
@@ -217,9 +218,12 @@
 </section>
 
 @push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-beta.1/dist/js/select2.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
 $(function(){
+    // Initialize Select2
+    $('.select2').select2();
     $.ajaxSetup({ headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}' } });
 
     // Remove errors on input/change

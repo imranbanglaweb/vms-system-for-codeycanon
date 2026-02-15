@@ -18,9 +18,9 @@
     .info-box.meter { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
 </style>
 
-<section role="main" class="content-body" style="background-color:#eef2f7;">
+<section role="main" class="content-body" style="background-color:#fff;">
 <br>
-<div class="container mt-4">
+<div class="container-fluid mt-4">
 
     <!-- Page Header -->
     <div class="d-flex justify-content-between align-items-center mb-4">

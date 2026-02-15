@@ -5,11 +5,30 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\MaintenanceVendor;
 use Illuminate\Support\Facades\Auth;
+use Yajra\DataTables\Facades\DataTables;
+
 class MaintenanceVendorController extends Controller
 {
     // ---------- List all vendors ----------
-    public function index()
+    public function index(Request $request)
     {
+        if ($request->ajax()) {
+            $data = MaintenanceVendor::latest()->get();
+            return DataTables::of($data)
+                ->addIndexColumn()
+                ->addColumn('action', function($row){
+                    return '
+                        <button class="btn btn-sm btn-info editBtn" data-id="'.$row->id.'">
+                            <i class="fa fa-edit"></i>
+                        </button>
+                        <button class="btn btn-sm btn-danger deleteBtn" data-id="'.$row->id.'">
+                            <i class="fa fa-trash"></i>
+                        </button>';
+                })
+                ->rawColumns(['action'])
+                ->make(true);
+        }
+
         $vendors = MaintenanceVendor::latest()->get();
         return view('admin.dashboard.maintenance.vendors.index', compact('vendors'));
     }

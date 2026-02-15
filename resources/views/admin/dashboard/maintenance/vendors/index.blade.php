@@ -2,68 +2,60 @@
 
 @section('main_content')
 
-
 <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
 
 <style>
-  .form-error { color: #e74a3b; font-size: 1.2rem; margin-top: .25rem; }
-  .is-invalid { border-color: #e74a3b; }
-  .modal-backdrop { background-color: rgba(0, 0, 0, 0.5); opacity: 1; }
-  .modal-content { border-radius: 12px; box-shadow: 0 8px 30px rgba(0,0,0,0.12); }
+    /* Fix for modal black background */
+    .modal-backdrop {
+        background-color: rgba(0, 0, 0, 0.5) !important;
+    }
+    .modal-backdrop.show {
+        opacity: 0.5 !important;
+    }
+    .form-error { color: #e74a3b; font-size: 1.2rem; margin-top: .25rem; }
+    .is-invalid { border-color: #e74a3b; }
+    .modal-content { border-radius: 12px; box-shadow: 0 8px 30px rgba(0,0,0,0.12); }
+    /* Loader styles */
+    .btn-loading {
+        position: relative;
+        color: transparent !important;
+        pointer-events: none;
+    }
+    .btn-loading::after {
+        content: "";
+        position: absolute;
+        width: 16px;
+        height: 16px;
+        top: 50%;
+        left: 50%;
+        margin-left: -8px;
+        margin-top: -8px;
+        border: 2px solid #fff;
+        border-radius: 50%;
+        border-top-color: transparent;
+        animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
 </style>
 
-
-<section role="main" class="content-body" style="background-color: #f8f9fc;">
-    <div class="container mt-5">
-        <h3 class="fw-bold text-primary mb-4"><i class="fa fa-building me-2"></i> Maintenance Vendors</h3>
-
-        {{-- Add / Edit Form --}}
-        <div class="card shadow-sm mb-4">
-            <div class="card-body">
-                <form id="vendorForm">
-                    @csrf
-                    <input type="hidden" name="vendor_id" id="vendor_id">
-
-                    <div class="row g-3">
-                        <div class="col-md-6">
-                            <label class="form-label fw-semibold">Vendor Name</label>
-                            <input type="text" class="form-control" name="vendor_name" id="vendor_name">
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label fw-semibold">Contact Person</label>
-                            <input type="text" class="form-control" name="contact_person" id="contact_person">
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label fw-semibold">Email</label>
-                            <input type="email" class="form-control" name="email" id="email">
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label fw-semibold">Phone</label>
-                            <input type="text" class="form-control" name="phone" id="phone">
-                        </div>
-                        <div class="col-md-12">
-                            <label class="form-label fw-semibold">Address</label>
-                            <textarea class="form-control" name="address" id="address" rows="2"></textarea>
-                        </div>
-                    </div>
-
-                    <div class="mt-3">
-                        <button type="submit" class="btn btn-primary" id="submitBtn">
-                            <i class="fa fa-save me-2"></i> Save
-                        </button>
-                        <button type="button" class="btn btn-secondary" id="resetBtn">
-                            <i class="fa fa-undo me-2"></i> Reset
-                        </button>
-                    </div>
-                </form>
-            </div>
+<section role="main" class="content-body" style="background-color: #fff;">
+    <div class="container-fluid mt-4">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h3 class="fw-bold text-primary mb-0">
+                <i class="fa fa-building me-2"></i> Maintenance Vendors
+            </h3>
+            <button class="btn btn-primary" id="addNew">
+                <i class="fa fa-plus"></i> Add New
+            </button>
         </div>
 
         {{-- Vendors Table --}}
-        <div class="card shadow-sm">
+        <div class="card shadow-sm border-0">
             <div class="card-body">
                 <table class="table table-hover" id="vendorsTable">
-                    <thead class="table-light">
+                    <thead class="table-dark">
                         <tr>
                             <th>#</th>
                             <th>Vendor Name</th>
@@ -75,24 +67,6 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach($vendors as $vendor)
-                        <tr id="row-{{ $vendor->id }}">
-                            <td>{{ $loop->iteration }}</td>
-                            <td>{{ $vendor->name }}</td>
-                            <td>{{ $vendor->contact_person }}</td>
-                            <td>{{ $vendor->email }}</td>
-                            <td>{{ $vendor->phone }}</td>
-                            <td>{{ $vendor->address }}</td>
-                            <td>
-                                <button class="btn btn-sm btn-info editBtn" data-id="{{ $vendor->id }}">
-                                    <i class="fa fa-edit"></i>
-                                </button>
-                                <button class="btn btn-sm btn-danger deleteBtn" data-id="{{ $vendor->id }}">
-                                    <i class="fa fa-minus"></i>
-                                </button>
-                            </td>
-                        </tr>
-                        @endforeach
                     </tbody>
                 </table>
             </div>
@@ -101,28 +75,50 @@
     </div>
 </section>
 
+@include('admin.dashboard.maintenance.vendors.modal')
+
 <script src="{{ asset('public/admin_resource/plugins/jquery/jquery.min.js') }}"></script>
 <script src="{{ asset('public/admin_resource/plugins/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
 <script src="{{ asset('public/admin_resource/plugins/sweetalert2/sweetalert2.min.js') }}"></script>
+<script src="{{ asset('public/admin_resource/plugins/datatables/jquery.dataTables.min.js') }}"></script>
+<script src="{{ asset('public/admin_resource/plugins/datatables-bs4/js/dataTables.bootstrap4.min.js') }}"></script>
 
 <script>
 $(document).ready(function(){
+
+    // Load DataTable
+    $('#vendorsTable').DataTable({
+        processing: true,
+        serverSide: true,
+        ajax: "{{ route('maintenance-vendors.index') }}",
+        columns: [
+            { data: 'DT_RowIndex', name: 'DT_RowIndex' },
+            { data: 'name', name: 'name' },
+            { data: 'contact_person', name: 'contact_person' },
+            { data: 'email', name: 'email' },
+            { data: 'phone', name: 'phone' },
+            { data: 'address', name: 'address' },
+            { data: 'action', name: 'action', orderable: false, searchable: false }
+        ]
+    });
 
     // ---------- Clear field errors ----------
     function clearErrors(){
         $('.form-error').remove();
         $('.form-control').removeClass('is-invalid');
+        $('#errorAlert').addClass('d-none').html('');
     }
 
-    // ---------- Reset form ----------
-    $('#resetBtn').click(function(){
+    // ---------- Add New ----------
+    $('#addNew').click(function () {
         $('#vendorForm')[0].reset();
         $('#vendor_id').val('');
         clearErrors();
+        $('#vendorModal').modal('show');
     });
 
-    // ---------- Create / Update ----------
-    $('#vendorForm').on('submit', function(e){
+    // ---------- Save Data ----------
+    $('#saveBtn').click(function (e) {
         e.preventDefault();
         clearErrors();
 
@@ -131,95 +127,65 @@ $(document).ready(function(){
             ? `{{ route('maintenance.vendors.update', ':vendor_id') }}`.replace(':vendor_id', vendor_id)
             : `{{ route('maintenance.vendors.store') }}`;
 
-        $('#submitBtn').html('<i class="fa fa-spinner fa-spin me-2"></i> Saving...')
-                       .prop('disabled', true);
+        const saveBtn = $('#saveBtn');
+        saveBtn.addClass('btn-loading');
+        saveBtn.prop('disabled', true);
 
         $.ajax({
             url: url,
             type: "POST",
             data: $('#vendorForm').serialize(),
             success: function(res){
-                // SweetAlert2 toast for success
+                saveBtn.removeClass('btn-loading');
+                saveBtn.prop('disabled', false);
+
                 Swal.fire({
                     icon: 'success',
                     title: vendor_id ? 'Vendor updated successfully!' : 'Vendor added successfully!',
-                    toast: true,
-                    position: 'top-end',
-                    showConfirmButton: false,
-                    timer: 2500,
-                    timerProgressBar: true,
-                    background: '#f8f9fc',
-                    color: '#1e1e2f'
+                    timer: 2000,
+                    showConfirmButton: false
                 });
 
-                if(vendor_id){
-                    let row = $(`#row-${vendor_id}`);
-                    row.replaceWith(`
-                        <tr id="row-${res.vendor.id}">
-                            <td>${row.find('td:first').text()}</td>
-                            <td>${res.vendor.name}</td>
-                            <td>${res.vendor.contact_person || ''}</td>
-                            <td>${res.vendor.email || ''}</td>
-                            <td>${res.vendor.phone || ''}</td>
-                            <td>${res.vendor.address || ''}</td>
-                            <td>
-                                <button class="btn btn-sm btn-info editBtn" data-id="${res.vendor.id}">
-                                    <i class="fa fa-edit"></i>
-                                </button>
-                                <button class="btn btn-sm btn-danger deleteBtn" data-id="${res.vendor.id}">
-                                    <i class="fa fa-minus"></i>
-                                </button>
-                            </td>
-                        </tr>
-                    `);
-                } else {
-                    let index = $('#vendorsTable tbody tr').length + 1;
-                    $('#vendorsTable tbody').append(`
-                        <tr id="row-${res.vendor.id}">
-                            <td>${index}</td>
-                            <td>${res.vendor.name}</td>
-                            <td>${res.vendor.contact_person || ''}</td>
-                            <td>${res.vendor.email || ''}</td>
-                            <td>${res.vendor.phone || ''}</td>
-                            <td>${res.vendor.address || ''}</td>
-                            <td>
-                                <button class="btn btn-sm btn-info editBtn" data-id="${res.vendor.id}">
-                                    <i class="fa fa-edit"></i>
-                                </button>
-                                <button class="btn btn-sm btn-danger deleteBtn" data-id="${res.vendor.id}">
-                                    <i class="fa fa-minus"></i>
-                                </button>
-                            </td>
-                        </tr>
-                    `);
-                }
-
-                $('#vendorForm')[0].reset();
-                $('#vendor_id').val('');
+                $('#vendorModal').modal('hide');
+                $('#vendorsTable').DataTable().ajax.reload();
             },
             error: function(xhr){
+                saveBtn.removeClass('btn-loading');
+                saveBtn.prop('disabled', false);
+
                 if(xhr.status === 422){
                     let errors = xhr.responseJSON.errors;
+                    let errorHtml = "<ul>";
+
                     $.each(errors, function(field, messages){
                         let input = $(`[name="${field}"]`);
                         input.addClass('is-invalid');
                         input.after(`<div class="form-error">${messages[0]}</div>`);
+                        errorHtml += "<li>" + messages[0] + "</li>";
+                    });
+
+                    errorHtml += "</ul>";
+
+                    $('#errorAlert').removeClass('d-none').html(errorHtml);
+                    $('#errorAlert').addClass('alert alert-danger');
+
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Validation Error',
+                        html: errorHtml
                     });
                 } else {
                     Swal.fire({
                         icon: 'error',
                         title: xhr.responseJSON?.message || 'Something went wrong',
-                        toast: true,
-                        position: 'top-end',
-                        showConfirmButton: false,
                         timer: 2500,
-                        timerProgressBar: true
+                        showConfirmButton: false
                     });
                 }
             },
             complete: function(){
-                $('#submitBtn').html('<i class="fa fa-save me-2"></i> Save')
-                               .prop('disabled', false);
+                saveBtn.removeClass('btn-loading');
+                saveBtn.prop('disabled', false);
             }
         });
     });
@@ -236,6 +202,8 @@ $(document).ready(function(){
             $('#email').val(data.email);
             $('#phone').val(data.phone);
             $('#address').val(data.address);
+
+            $('#vendorModal').modal('show');
         });
     });
 
@@ -259,13 +227,10 @@ $(document).ready(function(){
                         Swal.fire({
                             icon: 'success',
                             title: res.message,
-                            toast: true,
-                            position: 'top-end',
-                            showConfirmButton: false,
-                            timer: 2500,
-                            timerProgressBar: true
+                            timer: 2000,
+                            showConfirmButton: false
                         });
-                        $(`#row-${id}`).fadeOut(() => $(this).remove());
+                        $('#vendorsTable').DataTable().ajax.reload();
                     }
                 });
             }

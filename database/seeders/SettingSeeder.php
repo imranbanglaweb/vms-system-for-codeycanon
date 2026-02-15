@@ -27,7 +27,7 @@ class SettingSeeder extends Seeder
                 'status' => 1,
                 'created_by' => 1,
                 'default_language' => 'en',
-                'available_languages' => 'en',
+                'available_languages' => '["en"]',
                 'auto_translate' => 0,
                 'translation_cache_duration' => 3600,
                 // Email Settings (default values)

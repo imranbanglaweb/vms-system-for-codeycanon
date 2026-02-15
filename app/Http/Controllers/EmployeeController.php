@@ -80,7 +80,7 @@ class EmployeeController extends Controller
             return DataTables::of($query)
                 ->addIndexColumn()
                 ->addColumn('photo', function($row){
-                    if($row->photo){
+                    if($row->photo && file_exists(public_path($row->photo))){
                         return '<img src="'.asset('public/'.$row->photo).'" width="40" height="40" style="border-radius:50%; object-fit:cover;" alt="photo">';
                     }
                     return '<i class="fa fa-user-circle text-muted" style="font-size:40px;"></i>';
@@ -145,7 +145,8 @@ class EmployeeController extends Controller
     {
         $units = Unit::orderBy('unit_name')->get();
         $locations = Location::orderBy('location_name')->get();
-        return view('admin.dashboard.employee.create', compact('units', 'locations'));
+        $departments = Department::orderBy('department_name')->get();
+        return view('admin.dashboard.employee.create', compact('units', 'locations', 'departments'));
         
     }
 

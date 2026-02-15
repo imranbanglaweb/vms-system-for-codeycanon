@@ -87,6 +87,9 @@
                     <label class="form-label">Department</label><br>
                     <select class="form-select select2" name="department_id" id="department_id">
                         <option value="">Select Department</option>
+                        @foreach($departments as $department)
+                         <option value="{{ $department->id }}">{{ $department->department_name }}</option>
+                        @endforeach
                     </select>
                 </div>
                 <div class="col-md-4">
@@ -209,7 +212,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="licenseTypeModalLabel">Add License Type</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <button type="button" class="btn-close" data--dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
                 <form id="licenseTypeForm">
@@ -232,7 +235,7 @@
                 </form>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
                 <button type="button" id="licenseTypeSaveBtn" class="btn btn-primary">Save</button>
             </div>
         </div>
@@ -241,50 +244,33 @@
 
 <!-- Required Scripts -->
 <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
-<!-- Select2, jQuery and SweetAlert are provided by the master layout; avoid re-including them here to prevent duplicate initialization/conflicts -->
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-beta.1/dist/css/select2.min.css" rel="stylesheet" />
 
+<style>
+    .modal-backdrop {
+        background-color: rgba(0, 0, 0, 0.5) !important;
+    }
+    .modal-backdrop.fade {
+        opacity: 0.5 !important;
+    }
+    .modal {
+        background-color: rgba(0, 0, 0, 0.5);
+    }
+</style>
 
-@push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-beta.1/dist/js/select2.min.js"></script>
 <script>
-    // Select2 is initialized globally in the master layout to avoid duplicate initializations
-    // (do not call $('.select2').select2() here)
+    // Initialize Select2
+    $(document).ready(function() {
+        $('.select2').select2();
+    });
 
     // Setup CSRF Token
     $.ajaxSetup({
         headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')}
     });
 
-    // Unit -> Department Dropdown
-    $('#unit_id').change(function () {
-        let id = $(this).val();
-        if (id) {
-            $.getJSON("{{ route('getDepartmentsByUnit') }}", {unit_id: id}, function (data) {
-                console.log('getDepartmentsByUnit response:', data);
-                var $dept = $('#department_id');
-
-                // If select2 was initialized, destroy it first to avoid stale UI
-                if ($dept.data('select2')) {
-                    try { $dept.select2('destroy'); } catch(e) { console.warn('select2 destroy failed', e); }
-                }
-
-                // Build options from JSON
-                $dept.empty().append('<option value="">Select Department</option>');
-                $.each(data.department_list || [], function (i, d) {
-                    $dept.append('<option value="' + d.id + '">' + d.department_name + '</option>');
-                });
-                console.log('department options count:', $dept.find('option').length);
-
-                // Re-init Select2 if available
-                if ($.fn.select2) {
-                    try { $dept.select2({ width: '100%' }); } catch(e) { console.warn('select2 init failed', e); }
-                }
-
-                $dept.trigger('change');
-            }).fail(function(xhr){
-                console.error('Failed to load departments', xhr);
-            });
-        }
-    });
+  
 
     // Employee auto-fill (use the selected code value correctly)
     $('#employee_id').on('change', function () {
@@ -438,7 +424,4 @@
         });
     });
 </script>
-@endpush
-
-
 @endsection

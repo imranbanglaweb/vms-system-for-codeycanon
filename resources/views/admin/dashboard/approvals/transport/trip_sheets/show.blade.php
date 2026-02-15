@@ -26,9 +26,9 @@
         border-radius: 20px;
     }
 </style>
-<section role="main" class="content-body" style="background-color:#eef2f7;">
+<section role="main" class="content-body" style="background-color:#fff;">
 <br>
-<div class="container py-4">
+<div class="container-fluid py-4">
 
     <!-- Page Header -->
     <div class="d-flex justify-content-between align-items-center mb-4">

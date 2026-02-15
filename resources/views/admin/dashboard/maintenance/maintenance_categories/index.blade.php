@@ -2,8 +2,18 @@
 
 @section('main_content')
 
+<style>
+    /* Fix for modal black background */
+    .modal-backdrop {
+        background-color: rgba(0, 0, 0, 0.5) !important;
+    }
+    .modal-backdrop.show {
+        opacity: 0.5 !important;
+    }
+</style>
+
 <section class="content-body" style="background-color:#fff;">
-<div class="container mt-4">
+<div class="container-fluid mt-4">
 
     <h3 class="fw-bold mb-3">
         <i class="fa fa-list"></i> Maintenance Categories
@@ -34,7 +44,7 @@
 
 @include('admin.dashboard.maintenance.maintenance_categories.modal')
 
-@push('scripts')
+
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
 $(document).ready(function () {
@@ -150,5 +160,5 @@ $(document).ready(function () {
 
 });
 </script>
-@endpush
+
 @endsection

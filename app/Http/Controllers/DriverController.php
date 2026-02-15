@@ -205,7 +205,8 @@ class DriverController extends Controller
         $drivers = Driver::with([
             'unit:id,unit_name',
             'department:id,department_name',
-            'licenseType:id,type_name'
+            'licenseType:id,type_name',
+            'employee:id,employee_code,name'
         ])
         ->select([
             'id',
@@ -244,6 +245,11 @@ class DriverController extends Controller
             // Show License Type Name
             ->addColumn('license_type_name', function($row){
                 return $row->licenseType->type_name ?? '-';
+            })
+
+            // Show Employee Code
+            ->addColumn('employee_code', function($row){
+                return $row->employee->employee_code ?? '-';
             })
 
             // Show Driver Photo

@@ -125,7 +125,7 @@
   }
 </style>
 
-<section role="main" class="content-body" style="background-color: #ffffff;">
+<section role="main" class="content-body" style="background-color: #fff;">
 
 <div class="row">
 <div class="col-lg-12">
@@ -317,6 +317,7 @@ loadFilterOptions();
 var table = $('#myTable').DataTable({
     processing: true,
     serverSide: true,
+    searching: false,
      language: {
         processing: '<i class="fa fa-spinner fa-spin fa-2x fa-fw text-primary"></i><br>Loading employees...'
     },

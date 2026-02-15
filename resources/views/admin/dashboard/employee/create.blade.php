@@ -2,7 +2,7 @@
 
 
 @section('main_content')
-<section role="" class="content-body" style="background-color: #ffffff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);">
+<section role="" class="content-body" style="background-color: #ffffff">
 <div class="row">
     <div class="col-lg-12 margin-tb">
         <div class="pull-left">
@@ -48,39 +48,45 @@
 </section>
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-<script src="//cdn.ckeditor.com/4.4.7/full/ckeditor.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
 <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
- <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-beta.1/dist/css/select2.min.css" rel="stylesheet" />
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-beta.1/dist/css/select2.min.css" rel="stylesheet" />
+<!-- SweetAlert2 Premium Styles -->
+<style>
+    .swal2-popup.swal2-toast {
+        box-shadow: 0 10px 30px rgba(0,0,0,0.15) !important;
+    }
+    .swal2-popup {
+        border-radius: 16px !important;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.2) !important;
+    }
+    .swal2-title {
+        font-family: 'Segoe UI', system-ui, sans-serif !important;
+        font-weight: 600 !important;
+    }
+    .swal2-html-container {
+        font-family: 'Segoe UI', system-ui, sans-serif !important;
+    }
+    .swal2-confirm {
+        border-radius: 8px !important;
+        padding: 10px 24px !important;
+        font-weight: 500 !important;
+    }
+    .swal2-cancel {
+        border-radius: 8px !important;
+        padding: 10px 24px !important;
+        font-weight: 500 !important;
+    }
+</style>
 <!-- Script -->
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-beta.1/dist/js/select2.min.js"></script>
 <script>
 // In your Javascript (external.js resource or <script> tag)
 $(document).ready(function() {
     $('.select2').select2();
-    // Initialize CKEditor for any textarea marked as rich-editor
-    window._richEditors = [];
-    $('.rich-editor').each(function(){
-        var id = $(this).attr('id');
-        try {
-            if (CKEDITOR.instances[id]) {
-                CKEDITOR.instances[id].destroy(true);
-            }
-        } catch(e) { }
-        CKEDITOR.replace(id, {
-            // small toolbar to keep UI clean
-            toolbar: [
-                { name: 'basicstyles', items: [ 'Bold', 'Italic', 'Underline' ] },
-                { name: 'paragraph', items: [ 'NumberedList', 'BulletedList' ] },
-                { name: 'links', items: [ 'Link', 'Unlink' ] },
-                { name: 'undo', items: [ 'Undo', 'Redo' ] }
-            ],
-            height: 120
-        });
-        window._richEditors.push(id);
-    });
 });
-</script>
-<script>
+
 
     $.ajaxSetup({
         headers: {
@@ -88,49 +94,6 @@ $(document).ready(function() {
         }
     });
 
-// unit wise company (populate companies and departments when unit changes)
-$(document).ready(function() {
-    $(document).on('change', '.unit_wise_company', function () {
-        var unit_id = $(this).val();
-
-     
-
-        // populate departments
-        $.ajax({
-            type: 'GET',
-            url: "{{ route('admin.unit-wise-department')}}",
-            data: { unit_id: unit_id},
-            dataType: 'json',
-            success: function (data) {
-                console.log('admin.unit-wise-department response:', data);
-                // If department was previously initialized with Select2, destroy it to update options reliably
-                if ($('.department_name').data('select2')) {
-                    try { $('.department_name').select2('destroy'); } catch(e) { console.warn('select2 destroy failed', e); }
-                }
-
-                // preserve existing selection (useful in edit form)
-                var previous = $('.department_name').val();
-
-                $(".department_name").empty();
-                // $('.department_name').append("<option value=''>Please Select</option>");
-                $.each(data['department_list'] || [], function (key, department_list) {
-                    $('.department_name').append("<option value='" + department_list.id + "'>" + department_list.department_name +"</option>");
-                });
-
-                // restore selection if still present
-                if (previous) {
-                    $('.department_name').val(previous);
-                }
-
-                // trigger normal change so any listeners update
-                $('.department_name').trigger('change');
-            },
-            error: function (xhr, status, err) {
-                console.error('Error loading departments for unit', unit_id, status, err);
-            }
-        });
-    });
-});
 
 // photo preview
 $(document).on('change', '#photo-input', function(e){
@@ -160,47 +123,54 @@ $(document).on('change', '#photo-input', function(e){
     var unit_id  = $('#employee_add').find('[name="unit_id"]').val() || $unitByClass.val();
     var name  = $('input[name="name"]').val();
 
-    // detailed debug info (check in browser console)
-    // console.log('DEBUG unit select count (by .unit_id):', $unitByClass.length);
-    // if ($unitByClass.length) console.log('DEBUG first .unit_id outerHTML:', $unitByClass[0].outerHTML);
-    // console.log('DEBUG select count (by [name="unit_id"]):', $unitByName.length);
-    // if ($unitByName.length) console.log('DEBUG first [name="unit_id"] outerHTML:', $unitByName[0].outerHTML);
-    // console.log('DEBUG .unit_id.val():', unit_id);
-    // console.log('DEBUG option:selected val/text:', $unitByClass.find('option:selected').val(), $unitByClass.find('option:selected').text());
-    // console.log('DEBUG is disabled/hidden/select2?', $unitByClass.prop('disabled'), $unitByClass.is(':hidden'), !!$unitByClass.data('select2'));
-
-    // keep the small alert for quick visual feedback (remove after debugging)
-    // alert('unit_id (debug): ' + unit_id + '\n.check console for more details');
-
         if (unit_id  == '') {
             Swal.fire({
-                title: 'Validation Error',
-                text: 'Please select a Unit',
+                title: '<span style="color:#856404"><i class="fas fa-exclamation-triangle mr-2"></i>Validation Error</span>',
+                html: '<p style="color:#856404; font-size:14px;">Please select a Unit</p>',
                 icon: 'warning',
-                focusConfirm: true,
+                iconColor: '#f39c12',
                 confirmButtonColor: '#f39c12',
+                confirmButtonText: '<i class="fas fa-check-circle"></i> OK',
+                showClass: {
+                    popup: 'animate__animated animate__zoomIn animate__faster'
+                },
+                hideClass: {
+                    popup: 'animate__animated animate__zoomOut animate__faster'
+                },
+                allowOutsideClick: false,
+                backdrop: `
+                    rgba(0,0,0,0.4)
+                    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60' viewBox='0 0 60 60'%3E%3Cpath fill='%23f39c12' d='M30 0C13.4 0 0 13.4 0 30s13.4 30 30 30 30-13.4 30-30S46.6 0 30 0zm0 55c-13.8 0-25-11.2-25-25S16.2 5 30 5s25 11.2 25 25-11.2 25-25 25z'/%3E%3C/svg%3E")
+                    left top
+                    no-repeat
+                `
             })
             return;
         }
 
         if (name  == '') {
             Swal.fire({
-                title: 'Validation Error',
-                text: 'Please enter employee name',
+                title: '<span style="color:#856404"><i class="fas fa-exclamation-triangle mr-2"></i>Validation Error</span>',
+                html: '<p style="color:#856404; font-size:14px;">Please enter employee name</p>',
                 icon: 'warning',
-                focusConfirm: true,
+                iconColor: '#f39c12',
                 confirmButtonColor: '#f39c12',
+                confirmButtonText: '<i class="fas fa-check-circle"></i> OK',
+                showClass: {
+                    popup: 'animate__animated animate__zoomIn animate__faster'
+                },
+                hideClass: {
+                    popup: 'animate__animated animate__zoomOut animate__faster'
+                },
+                allowOutsideClick: false,
+                backdrop: `
+                    rgba(0,0,0,0.4)
+                    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60' viewBox='0 0 60 60'%3E%3Cpath fill='%23f39c12' d='M30 0C13.4 0 0 13.4 0 30s13.4 30 30 30 30-13.4 30-30S46.6 0 30 0zm0 55c-13.8 0-25-11.2-25-25S16.2 5 30 5s25 11.2 25 25-11.2 25-25 25z'/%3E%3C/svg%3E")
+                    left top
+                    no-repeat
+                `
             })
             return;
-        }
-
-        // ensure CKEditor instances update their textarea elements
-        if (window._richEditors && window._richEditors.length) {
-            window._richEditors.forEach(function(id){
-                if (CKEDITOR.instances[id]) {
-                    CKEDITOR.instances[id].updateElement();
-                }
-            });
         }
 
         // Loading state
@@ -216,11 +186,24 @@ $(document).on('change', '#photo-input', function(e){
             processData: false,
             success: (response) => {
                 Swal.fire({
-                    title: 'Success!',
-                    text: 'Employee created successfully.',
+                    title: '<span style="color:#155724"><i class="fas fa-check-circle mr-2"></i>Success!</span>',
+                    html: '<p style="color:#155724; font-size:14px;">Employee created successfully.</p>',
                     icon: 'success',
+                    iconColor: '#28a745',
                     timer: 2000,
                     showConfirmButton: false,
+                    showClass: {
+                        popup: 'animate__animated animate__zoomIn animate__faster'
+                    },
+                    hideClass: {
+                        popup: 'animate__animated animate__zoomOut animate__faster'
+                    },
+                    backdrop: `
+                        rgba(40,167,69,0.1)
+                        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60' viewBox='0 0 60 60'%3E%3Cpath fill='%2328a745' d='M30 0C13.4 0 0 13.4 0 30s13.4 30 30 30 30-13.4 30-30S46.6 0 30 0zm0 55c-13.8 0-25-11.2-25-25S16.2 5 30 5s25 11.2 25 25-11.2 25-25 25z'/%3E%3C/svg%3E")
+                        left top
+                        no-repeat
+                    `
                 }).then(() => {
                     window.location.href = "{{ route('admin.employees.index') }}";
                 });
@@ -233,10 +216,25 @@ $(document).on('change', '#photo-input', function(e){
                     // show a summary alert
                     const firstKey = Object.keys(errors)[0];
                     Swal.fire({
-                        title: 'Validation Error', 
-                        text: errors[firstKey][0], 
+                        title: '<span style="color:#721c24"><i class="fas fa-times-circle mr-2"></i>Validation Error</span>',
+                        html: '<p style="color:#721c24; font-size:14px;">' + errors[firstKey][0] + '</p>',
                         icon: 'error',
-                        confirmButtonColor: '#d33'
+                        iconColor: '#dc3545',
+                        confirmButtonColor: '#dc3545',
+                        confirmButtonText: '<i class="fas fa-check-circle"></i> OK',
+                        showClass: {
+                            popup: 'animate__animated animate__shakeX animate__faster'
+                        },
+                        hideClass: {
+                            popup: 'animate__animated animate__zoomOut animate__faster'
+                        },
+                        allowOutsideClick: false,
+                        backdrop: `
+                            rgba(220,53,69,0.1)
+                            url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60' viewBox='0 0 60 60'%3E%3Cpath fill='%23dc3545' d='M30 0C13.4 0 0 13.4 0 30s13.4 30 30 30 30-13.4 30-30S46.6 0 30 0zm0 55c-13.8 0-25-11.2-25-25S16.2 5 30 5s25 11.2 25 25-11.2 25-25 25z'/%3E%3C/svg%3E")
+                            left top
+                            no-repeat
+                        `
                     });
 
                     // mark fields and show inline messages
@@ -258,10 +256,25 @@ $(document).on('change', '#photo-input', function(e){
                     });
                 } else {
                     Swal.fire({
-                        title: 'Error!', 
-                        text: 'An unexpected error occurred. Please try again.', 
+                        title: '<span style="color:#721c24"><i class="fas fa-exclamation-circle mr-2"></i>Error!</span>',
+                        html: '<p style="color:#721c24; font-size:14px;">An unexpected error occurred. Please try again.</p>',
                         icon: 'error',
-                        confirmButtonColor: '#d33'
+                        iconColor: '#dc3545',
+                        confirmButtonColor: '#dc3545',
+                        confirmButtonText: '<i class="fas fa-check-circle"></i> OK',
+                        showClass: {
+                            popup: 'animate__animated animate__shakeX animate__faster'
+                        },
+                        hideClass: {
+                            popup: 'animate__animated animate__zoomOut animate__faster'
+                        },
+                        allowOutsideClick: false,
+                        backdrop: `
+                            rgba(220,53,69,0.1)
+                            url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60' viewBox='0 0 60 60'%3E%3Cpath fill='%23dc3545' d='M30 0C13.4 0 0 13.4 0 30s13.4 30 30 30 30-13.4 30-30S46.6 0 30 0zm0 55c-13.8 0-25-11.2-25-25S16.2 5 30 5s25 11.2 25 25-11.2 25-25 25z'/%3E%3C/svg%3E")
+                            left top
+                            no-repeat
+                        `
                     });
                 }
             }

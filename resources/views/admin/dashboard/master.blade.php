@@ -763,18 +763,24 @@
     @stack('scripts')
     
     <script>
-        // Loader
-        window.addEventListener('load', function() {
+        // Loader - with fallback for cases where load event might not fire
+        function hideLoader() {
             var loader = document.getElementById('loader');
             if (loader) {
+                loader.classList.add('fade-out');
                 setTimeout(function() {
-                    loader.classList.add('fade-out');
-                    setTimeout(function() {
-                        loader.style.display = 'none';
-                    }, 400);
-                }, 500);
+                    loader.style.display = 'none';
+                }, 400);
             }
+        }
+        
+        // Try window load event first
+        window.addEventListener('load', function() {
+            setTimeout(hideLoader, 500);
         });
+        
+        // Fallback: hide loader after a timeout even if load event doesn't fire
+        setTimeout(hideLoader, 2000);
         
         // Sidebar Toggle for Mobile
         function toggleSidebar() {

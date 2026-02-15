@@ -36,6 +36,7 @@
             <th>SL</th>
             <th>Photo</th>
 			<th>Driver Name</th>
+			<th>Employee Code</th>
 			<th>Unit</th>
 			<th>Department</th>
 			<th>License Number</th>
@@ -69,6 +70,7 @@ $(function(){
              { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable:false, searchable:false },
     { data: 'photo', name: 'photo', orderable:false, searchable:false },
     { data: 'driver_name', name: 'driver_name' },
+    { data: 'employee_code', name: 'employee_code' },
     { data: 'unit_name', name: 'unit_name' },
     { data: 'department_name', name: 'department_name' },
     { data: 'license_number', name: 'license_number' },

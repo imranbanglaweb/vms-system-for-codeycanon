@@ -1,7 +1,7 @@
 @extends('admin.dashboard.master')
 
 @section('main_content')
-<section role="main" class="content-body" style=background-color:#fff;>
+<section role="main" class="content-body" style="background-color:#fff;">
 <div class="container-fluid">
     <div class="d-flex justify-content-between align-items-center">
         <h4 class="fw-bold text-primary">

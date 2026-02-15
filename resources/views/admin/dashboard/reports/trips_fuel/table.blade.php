@@ -15,7 +15,7 @@
             @forelse($records as $r)
             <tr>
                 <td class="text-muted">{{ $loop->iteration + ($records->currentPage() - 1) * $records->perPage() }}</td>
-                <td class="fw-medium">{{ $r->vehicle->vehicle_no ?? '-' }}</td>
+                <td class="fw-medium">{{ $r->vehicle->vehicle_name ?? '-' }}</td>
                 <td>{{ $r->driver->driver_name ?? '-' }}</td>
                 <td>{{ \Carbon\Carbon::parse($r->trip_start_date)->format('d M Y') }}</td>
                 <td>{{ number_format($r->distance_km, 2) }}</td>

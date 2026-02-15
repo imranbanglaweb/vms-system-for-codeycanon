@@ -25,7 +25,7 @@
 @section('main_content')
 
 <section role="main" class="content-body" style="background:#f8f9fc;">
-<div class="container mt-5">
+<div class="container-fluid mt-5">
     <h3 class="fw-bold text-primary mb-3"><i class="fa fa-tools me-2"></i> Maintenance Types</h3>
 
     <div id="notification"></div>

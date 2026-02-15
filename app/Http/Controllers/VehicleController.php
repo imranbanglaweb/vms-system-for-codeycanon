@@ -99,24 +99,10 @@ class VehicleController extends Controller
 
     public function create()
     {
-        //   $departments = Department::pluck('department_name', 'id');
-        // $drivers = Driver::pluck('driver_name', 'id');
-        // // $vendors = Vendor::pluck('vendor_name', 'id');
-        // $vehicleTypes = VehicleType::pluck('name', 'id');
-        // // $rtaOffices = RtaOffice::pluck('name', 'id');
-        // $ownerships = ['Company' => 'Company', 'Private' => 'Private', 'Leased' => 'Leased'];
-
-        // // return view('admin.vehicles.form', compact(
-        // //     'departments', 'drivers', 'vendors', 'vehicleTypes', 'rtaOffices', 'ownerships'
-        // // ));
-        // return view('admin.dashboard.vehicles.create', compact(
-        //     'departments', 'drivers', 'vehicleTypes', 'ownerships'
-        // ));
-
-
+     
   $data = $this->dropdownData();
         // pass all dropdowns to view
-        return view('admin.dashboard.vehicles.form', $data);
+        return view('admin.dashboard.vehicles.create', $data);
         
     }
 
@@ -131,7 +117,7 @@ class VehicleController extends Controller
             'ownership' => 'required',
             'vehicle_type_id' => 'required|exists:vehicle_types,id',
             'driver_id' => 'required|exists:drivers,id',
-            'vendor_id' => 'required|exists:vendors,id',
+            'vendor_id' => 'nullable|exists:vendors,id',
             'seat_capacity' => 'required|integer|min:1',
         ]);
 
@@ -161,10 +147,6 @@ class VehicleController extends Controller
         ]);
     }
 
-    // public function edit(Vehicle $vehicle)
-    // {
-    //     return view('admin.dashboard.vehicles.edit', compact('vehicle'));
-    // }
     public function edit(Vehicle $vehicle)
     {
            $ownerships = [
@@ -195,7 +177,7 @@ class VehicleController extends Controller
                 'ownership'           => 'required',
                 'vehicle_type_id'     => 'required|exists:vehicle_types,id',
                 'driver_id'           => 'required|exists:drivers,id',
-                'vendor_id'           => 'required|exists:vendors,id',
+                'vendor_id'           => 'nullable|exists:vendors,id',
                 'seat_capacity'       => 'required|integer|min:1',
             ]);
 

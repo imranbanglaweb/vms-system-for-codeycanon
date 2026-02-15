@@ -104,13 +104,29 @@ class RequisitionReportController extends Controller
     {
         return Excel::download(
             new RequisitionReportExport($request),
-            'requisition-report.xlsx'
+            'requisition-report-'.date('Y-m-d').'.xlsx'
         );
     }
 
     public function exportPdf(Request $request)
     {
-        $data = Requisition::latest()->get();
+        $query = Requisition::with(['requestedBy', 'department', 'vehicleType']);
+
+        // Apply filters from request
+        if ($request->filled('department_id')) {
+            $query->where('department_id', $request->department_id);
+        }
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+        if ($request->filled('from_date')) {
+            $query->whereDate('travel_date', '>=', $request->from_date);
+        }
+        if ($request->filled('to_date')) {
+            $query->whereDate('travel_date', '<=', $request->to_date);
+        }
+
+        $data = $query->latest()->get();
         $pdf  = Pdf::loadView('admin.dashboard.reports.requisitions.pdf', compact('data'));
 
         return $pdf->download('requisition-report.pdf');

@@ -634,9 +634,9 @@
 
         let url = "";
         if (format === 'pdf') {
-            url = "{{ route('requisitions.export.pdf') }}";
+            url = "{{ route('reports.requisitions.pdf') }}";
         } else {
-            url = "{{ route('requisitions.export.excel') }}";
+            url = "{{ route('reports.requisitions.excel') }}";
         }
         window.location.href = url + "?" + formData;
         

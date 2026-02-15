@@ -15,7 +15,7 @@
                         <p class="text-muted mb-0 small">View and manage all requisition reports</p>
                     </div>
                     <div class="btn-group">
-                        <button type="button" class="btn btn-success btn-sm dropdown-toggle" data-bs-toggle="dropdown">
+                        <button type="button" class="btn btn-success btn-sm dropdown-toggle" data-toggle="dropdown">
                             <i class="fas fa-download me-1"></i> Export
                         </button>
                         <ul class="dropdown-menu dropdown-menu-end">
@@ -168,7 +168,7 @@
                     </div>
                     <div class="card-body p-0">
                         <!-- Loading -->
-                        <div id="loading" class="text-center py-5 d-none">
+                        <div id="loading" class="text-center py-5" style="display: none;">
                             <div class="spinner-border text-primary" role="status">
                                 <span class="visually-hidden">Loading...</span>
                             </div>
@@ -176,7 +176,7 @@
                         </div>
 
                         <!-- Table -->
-                        <div id="reportTable">
+                        <div id="reportTable" style="display: block;">
                             @include('admin.dashboard.reports.requisitions.table')
                         </div>
                     </div>
@@ -196,28 +196,44 @@
 .bg-success-subtle { background-color: rgba(56, 239, 125, 0.15); }
 .bg-danger-subtle { background-color: rgba(245, 87, 108, 0.15); }
 </style>
-@endsection
 
-@push('scripts')
+
 <script>
 $(function() {
+    var timer;
+    
     function fetchData(page) {
-        $('#loading').removeClass('d-none');
-        $('#reportTable').addClass('d-none');
+        $('#loading').show();
+        $('#reportTable').hide();
+        
+        // Safety timeout - ensure loading hides after 10 seconds regardless
+        var safetyTimeout = setTimeout(function() {
+            $('#loading').hide();
+            $('#reportTable').show();
+        }, 10000);
+        
         $.ajax({
             url: "{{ route('reports.requisitions') }}",
             type: "GET",
             data: $('#filterForm').serialize() + '&page=' + (page || 1),
             success: function(res) {
-                $('#reportTable').html(res).removeClass('d-none');
-                $('#loading').addClass('d-none');
+                clearTimeout(safetyTimeout);
+                $('#reportTable').html(res).show();
+                $('#loading').hide();
             },
-            error: function() {
-                $('#loading').addClass('d-none');
-                $('#reportTable').removeClass('d-none');
+            error: function(xhr, status, error) {
+                clearTimeout(safetyTimeout);
+                console.error('Error loading data:', error);
+                $('#loading').hide();
+                $('#reportTable').show();
+            },
+            complete: function() {
+                clearTimeout(safetyTimeout);
+                $('#loading').hide();
             }
         });
     }
+    
     $('#filterForm').on('submit', function(e) { e.preventDefault(); fetchData(1); });
     $('#resetBtn').on('click', function() { $('#filterForm')[0].reset(); fetchData(1); });
     $('input[name="keyword"]').on('keyup', function() {
@@ -231,4 +247,4 @@ $(function() {
     });
 });
 </script>
-@endpush
+@endsection

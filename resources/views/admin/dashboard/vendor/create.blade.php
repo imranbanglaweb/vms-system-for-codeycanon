@@ -1,9 +1,66 @@
 @extends('admin.dashboard.master')
 
 @section('main_content')
-<section role="main" class="content-body" style=background-color:#fff;>
-<div class="container">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
 
+<style>
+    section {
+        background-color: #fff;
+    }
+    .is-invalid {
+        border-color: #dc3545 !important;
+    }
+    .invalid-feedback {
+        color: #dc3545;
+        font-size: 0.875em;
+        display: block;
+    }
+    /* Loader styles */
+    .btn-loading {
+        position: relative;
+        color: transparent !important;
+        pointer-events: none;
+    }
+    .btn-loading::after {
+        content: "";
+        position: absolute;
+        width: 16px;
+        height: 16px;
+        top: 50%;
+        left: 50%;
+        margin-left: -8px;
+        margin-top: -8px;
+        border: 2px solid #fff;
+        border-radius: 50%;
+        border-top-color: transparent;
+        animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+    .card {
+        background-color: #fff;
+        padding: 20px;
+    }
+    .form-label {
+        color: #000;
+        font-size: 15px;
+    }
+    .form-control, .form-select {
+        font-size: 1.2em;
+    }
+    .input-group-text {
+        width: 38px;
+        justify-content: center;
+    }
+    .row > [class*="col-"] {
+        margin-bottom: 8px;
+    }
+</style>
+
+<section role="main" class="content-body" style="background-color: #fff;">
+<div class="container">
     <div class="d-flex justify-content-between align-items-center mb-3">
         <h4 class="fw-bold text-primary mb-0">
             <i class="fa fa-store"></i> Add New Vendor
@@ -15,32 +72,18 @@
 
     <div class="card shadow-sm border-0 rounded-3 mx-auto" style="max-width: 1200px;">
         <div class="card-body p-4 bg-light">
-            <form id="vendorForm" action="{{ route('vendors.store') }}" method="POST" enctype="multipart/form-data">
+            <form id="vendorForm" action="{{ route('vendors.store') }}" method="POST">
                 @csrf
 
                 <div class="row gy-3 gx-4 align-items-center">
-                    <!-- Vendor Name -->
+                    <!-- Name -->
                     <div class="col-md-4">
                         <label class="form-label fw-semibold small mb-1">Vendor Name *</label>
                         <div class="input-group input-group-sm shadow-sm rounded">
-                            <span class="input-group-text bg-white border-end-0"><i class="fa fa-user text-secondary"></i></span>
-                            <input type="text" name="vendor_name" value="{{ old('vendor_name') }}" class="form-control border-start-0 py-2" placeholder="Enter Vendor Name">
+                            <span class="input-group-text bg-white border-end-0"><i class="fa fa-store text-secondary"></i></span>
+                            <input type="text" name="name" value="{{ old('name') }}" class="form-control border-start-0 py-2" placeholder="Enter Vendor Name">
                         </div>
-                        <small class="text-danger error-text vendor_name_error"></small>
-                    </div>
-
-                    <!-- Vendor Type -->
-                    <div class="col-md-4">
-                        <label class="form-label fw-semibold small mb-1">Vendor Type *</label>
-                        <div class="input-group input-group-sm shadow-sm rounded">
-                            <span class="input-group-text bg-white border-end-0"><i class="fa fa-tags text-secondary"></i></span>
-                            <select name="vendor_type" class="form-select border-start-0 py-2">
-                                <option value="">Select Type</option>
-                                <option value="Local" {{ old('vendor_type') == 'Local' ? 'selected' : '' }}>Local</option>
-                                <option value="International" {{ old('vendor_type') == 'International' ? 'selected' : '' }}>International</option>
-                            </select>
-                        </div>
-                        <small class="text-danger error-text vendor_type_error"></small>
+                        <small class="text-danger error-text name_error"></small>
                     </div>
 
                     <!-- Contact Person -->
@@ -65,7 +108,7 @@
 
                     <!-- Email -->
                     <div class="col-md-4">
-                        <label class="form-label fw-semibold small mb-1">Email *</label>
+                        <label class="form-label fw-semibold small mb-1">Email</label>
                         <div class="input-group input-group-sm shadow-sm rounded">
                             <span class="input-group-text bg-white border-end-0"><i class="fa fa-envelope text-secondary"></i></span>
                             <input type="email" name="email" value="{{ old('email') }}" class="form-control border-start-0 py-2" placeholder="Enter Email">
@@ -75,29 +118,32 @@
 
                     <!-- Address -->
                     <div class="col-md-4">
-                        <label class="form-label fw-semibold small mb-1">Address *</label>
+                        <label class="form-label fw-semibold small mb-1">Address</label>
                         <div class="input-group input-group-sm shadow-sm rounded">
-                            <span class="input-group-text bg-white border-end-0"><i class="fa fa-map-marker text-secondary"></i></span>
+                            <span class="input-group-text bg-white border-end-0"><i class="fa fa-map-marker-alt text-secondary"></i></span>
                             <input type="text" name="address" value="{{ old('address') }}" class="form-control border-start-0 py-2" placeholder="Enter Address">
                         </div>
                         <small class="text-danger error-text address_error"></small>
                     </div>
 
-                    <!-- Linked RTA Office -->
+                    <!-- City -->
                     <div class="col-md-4">
-                        <label class="form-label fw-semibold small mb-1">Linked RTA Office</label>
+                        <label class="form-label fw-semibold small mb-1">City</label>
                         <div class="input-group input-group-sm shadow-sm rounded">
-                            <span class="input-group-text bg-white border-end-0"><i class="fa fa-building text-secondary"></i></span>
-                            <select name="rta_office_id" class="form-select border-start-0 py-2">
-                                <option value="">Select Office</option>
-                                @foreach($rtaOffices as $office)
-                                    <option value="{{ $office->id }}" {{ old('rta_office_id') == $office->id ? 'selected' : '' }}>
-                                        {{ $office->office_name }}
-                                    </option>
-                                @endforeach
-                            </select>
+                            <span class="input-group-text bg-white border-end-0"><i class="fa fa-city text-secondary"></i></span>
+                            <input type="text" name="city" value="{{ old('city') }}" class="form-control border-start-0 py-2" placeholder="Enter City">
                         </div>
-                        <small class="text-danger error-text rta_office_id_error"></small>
+                        <small class="text-danger error-text city_error"></small>
+                    </div>
+
+                    <!-- Country -->
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold small mb-1">Country</label>
+                        <div class="input-group input-group-sm shadow-sm rounded">
+                            <span class="input-group-text bg-white border-end-0"><i class="fa fa-globe text-secondary"></i></span>
+                            <input type="text" name="country" value="{{ old('country') }}" class="form-control border-start-0 py-2" placeholder="Enter Country">
+                        </div>
+                        <small class="text-danger error-text country_error"></small>
                     </div>
 
                     <!-- Status -->
@@ -115,9 +161,11 @@
                 </div>
 
                 <div class="text-center mt-4">
-                    <button type="submit" class="btn btn-primary px-4 py-1" id="submitBtn">
-                        <span class="spinner-border spinner-border-sm d-none" id="loader" role="status"></span>
-                        <i class="fa fa-save"></i> Save Vendor
+                    <a href="{{ route('vendors.index') }}" class="btn btn-outline-secondary px-4 py-2 me-2">
+                        <i class="fa fa-times"></i> Cancel
+                    </a>
+                    <button type="submit" class="btn btn-success px-4 py-2" id="submitBtn">
+                        <span id="btn_text"><i class="fa fa-save"></i> Save Vendor</span>
                     </button>
                 </div>
             </form>
@@ -125,7 +173,6 @@
     </div>
 </div>
 </section>
-@endsection
 
 @push('scripts')
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -133,6 +180,15 @@
 
 <script>
 $(function() {
+    // Clear validation errors on input change
+    $('#vendorForm input, #vendorForm select').on('input change', function() {
+        $(this).removeClass('is-invalid');
+        const errorElement = $('#' + $(this).attr('name') + '_error');
+        if (errorElement.length) {
+            errorElement.text('');
+        }
+    });
+
     $('#vendorForm').on('submit', function(e) {
         e.preventDefault();
 
@@ -142,16 +198,19 @@ $(function() {
         let formData = form.serialize();
 
         $('.error-text').text('');
-        $('#loader').removeClass('d-none');
-        $('#submitBtn').attr('disabled', true);
+        $('.is-invalid').removeClass('is-invalid');
+        
+        const submitBtn = $('#submitBtn');
+        submitBtn.addClass('btn-loading');
+        submitBtn.prop('disabled', true);
 
         $.ajax({
             url: url,
             method: method,
             data: formData,
             success: function (response) {
-                $('#loader').addClass('d-none');
-                $('#submitBtn').attr('disabled', false);
+                submitBtn.removeClass('btn-loading');
+                submitBtn.prop('disabled', false);
 
                 if (response.success) {
                     Swal.fire({
@@ -159,17 +218,23 @@ $(function() {
                         title: 'Success',
                         text: response.message,
                         timer: 2000,
-                        showConfirmButton: false
+                        showConfirmButton: false,
+                        willClose: () => {
+                            window.location.href = "{{ route('vendors.index') }}";
+                        }
                     });
-                    form[0].reset();
                 }
             },
             error: function (xhr) {
-                $('#loader').addClass('d-none');
-                $('#submitBtn').attr('disabled', false);
+                submitBtn.removeClass('btn-loading');
+                submitBtn.prop('disabled', false);
 
                 if (xhr.status === 422) {
                     $.each(xhr.responseJSON.errors, function (key, value) {
+                        const input = $('input[name="' + key + '"], select[name="' + key + '"]');
+                        if (input.length) {
+                            input.addClass('is-invalid');
+                        }
                         $('.' + key + '_error').text(value[0]);
                     });
                 } else {
@@ -179,30 +244,14 @@ $(function() {
                         text: 'Something went wrong! Please try again later.'
                     });
                 }
+            },
+            complete: function() {
+                submitBtn.removeClass('btn-loading');
+                submitBtn.prop('disabled', false);
             }
         });
     });
 });
 </script>
-
-<style>
-    .form-label {
-        color: #000;
-        font-size: 15px;
-    }
-    .card {
-        background-color: #fff;
-        padding: 20px;
-    }
-    .form-control, .form-select {
-        font-size: 1.2em;
-    }
-    .input-group-text {
-        width: 38px;
-        justify-content: center;
-    }
-    .row > [class*="col-"] {
-        margin-bottom: 8px;
-    }
-</style>
 @endpush
+@endsection

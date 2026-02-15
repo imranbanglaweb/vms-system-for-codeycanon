@@ -143,6 +143,8 @@ Route::middleware(['auth'])->group(function () {
 
 Route::middleware(['auth'])->group(function () {
     Route::resource('vehicle-type', VehicleTypeController::class);
+
+Route::get('/vehicles/{id}/details', [VehicleController::class, 'getVehicleDetails'])->name('vehicles.details');
     Route::resource('vehicles', VehicleController::class);
 
 });
@@ -184,9 +186,7 @@ Route::middleware(['prevent-back-history'])->group(function () {
     Route::post('/requisitions/validate', [RequisitionController::class, 'validateAjax'])->name('requisitions.validate');
     Route::get('/get-employee-details/{id}', [EmployeeController::class, 'getEmployeeDetails'])->name('employee.details');
     
-    // Export options
-
-Route::get('/vehicles/{id}/details', [VehicleController::class, 'getVehicleDetails'])->name('vehicles.details');
+   
 
 Route::get('/drivers/by-vehicle/{vehicle}', [DriverController::class, 'getByVehicle'])
     ->name('drivers.by.vehicle');
@@ -277,6 +277,8 @@ Route::prefix('transport')->group(function () {
     
     // Trip Sheets
     Route::get('/trip-sheets', [TripSheetController::class, 'index'])->name('trip-sheets.index');
+    Route::get('/trip-sheets/active', [TripSheetController::class, 'index'])->name('trip-sheets.active');
+    Route::get('/trip-sheets/completed', [TripSheetController::class, 'index'])->name('trip-sheets.completed');
     Route::get('/trip-sheets/data', [TripSheetController::class, 'getData'])->name('trip-sheets.data');
     Route::get('/trip-sheet/{id}', [TripSheetController::class, 'show'])->name('trip-sheets.show');
     Route::post('/trip-sheet/start/{id}', [TripSheetController::class, 'startTrip'])->name('trip-sheets.start');
@@ -346,7 +348,7 @@ Route::prefix('maintenance-categories')->group(function () {
 
 Route::middleware(['auth'])->prefix('admin')->group(function () {
     // Requisition Reports
-    Route::get('requisitions', [RequisitionReportController::class, 'index'])->name('reports.requisitions');
+    Route::get('/reports/requisitions', [RequisitionReportController::class, 'index'])->name('reports.requisitions');
     Route::get('requisitions/excel', [RequisitionReportController::class, 'exportExcel'])->name('reports.requisitions.excel');
     Route::get('requisitions/pdf', [RequisitionReportController::class, 'exportPdf'])->name('reports.requisitions.pdf');
 });

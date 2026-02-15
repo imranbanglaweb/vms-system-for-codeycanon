@@ -1,11 +1,13 @@
 
-<div class="modal" id="categoryModal" tabindex="-1">
-    <div class="modal-dialog">
+<div class="modal" id="categoryModal" tabindex="-1" role="dialog" aria-labelledby="categoryModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
 
-            <div class="modal-header bg-dark text-white">
-                <h5 class="modal-title fw-bold">Add / Edit Category</h5>
-                <button type="button" class="btn-close pull-right btn-danger" data-dismiss="modal">Close</button>
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title fw-bold" id="categoryModalLabel">Add / Edit Category</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
             </div>
 
             <div class="modal-body">
@@ -33,8 +35,8 @@
             </div>
 
             <div class="modal-footer">
-                <button class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                <button class="btn btn-dark" id="saveBtn">Save</button>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" id="saveBtn">Save</button>
             </div>
 
         </div>

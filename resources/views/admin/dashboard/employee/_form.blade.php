@@ -5,7 +5,7 @@
                 <div class="form-row">
                     <div class="form-group col-md-4">
                         <label><strong><i class="fa fa-sitemap text-primary mr-1"></i> Unit</strong></label>
-                        <select class="form-control unit_wise_company unit_id select2" name="unit_id">
+                        <select class="form-control unit_id select2" name="unit_id">
                             <option value="">Please select</option>
                             @foreach($units as $unit)
                                 <option value="{{ $unit->id}}" {{ (isset($employee_edit) && $employee_edit->unit_id == $unit->id) ? 'selected' : '' }}>{{ $unit->unit_name}}</option>
@@ -13,13 +13,7 @@
                         </select>
                         <div class="invalid-feedback d-none" data-field="unit_id"></div>
                     </div>
-                    <!-- <div class="form-group col-md-6">
-                        <label><strong><i class="fa fa-building text-primary mr-1"></i> Company</strong></label>
-                        <select class="form-control company_name select2" name="company_id">
-                            <option value="">Please select</option>
-                        </select>
-                        <div class="invalid-feedback d-none" data-field="company_id"></div>
-                    </div> -->
+
                     <div class="form-group col-md-4">
                         <label><strong><i class="fa fa-map-marker-alt text-primary mr-1"></i> Location</strong></label>
                         <select class="form-control select2" name="location_id">

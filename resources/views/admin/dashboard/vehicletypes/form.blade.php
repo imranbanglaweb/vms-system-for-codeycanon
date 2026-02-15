@@ -1,8 +1,42 @@
 @extends('admin.dashboard.master')
 
 @section('main_content')
-<br>
-<br>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
+
+<style>
+    .is-invalid {
+        border-color: #dc3545 !important;
+    }
+    .invalid-feedback {
+        color: #dc3545;
+        font-size: 0.875em;
+    }
+    /* Loader styles */
+    .btn-loading {
+        position: relative;
+        color: transparent !important;
+        pointer-events: none;
+    }
+    .btn-loading::after {
+        content: "";
+        position: absolute;
+        width: 16px;
+        height: 16px;
+        top: 50%;
+        left: 50%;
+        margin-left: -8px;
+        margin-top: -8px;
+        border: 2px solid #fff;
+        border-radius: 50%;
+        border-top-color: transparent;
+        animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+</style>
+
 <section class="content-body" style="background-color:#fff;">
 <div class="container">
 
@@ -43,9 +77,8 @@
                 <small class="text-danger error-text status_error"></small>
             </div>
 
-            <button type="submit" id="submitBtn" class="btn btn-primary w-100">
-                <span id="loader" class="spinner-border spinner-border-sm d-none"></span>
-                {{ $vehicleType ? 'Update' : 'Save' }}
+            <button type="submit" id="submitBtn" class="btn btn-success w-100">
+                <span id="btn_text">{{ $vehicleType ? 'Update Vehicle Type' : 'Save Vehicle Type' }}</span>
             </button>
         </form>
     </div>
@@ -59,6 +92,15 @@
 
 <script>
 $(function() {
+    // Clear validation errors on input change
+    $('#vehicleTypeForm input, #vehicleTypeForm select, #vehicleTypeForm textarea').on('input change', function() {
+        $(this).removeClass('is-invalid');
+        const errorElement = $('#' + $(this).attr('name') + '_error');
+        if (errorElement.length) {
+            errorElement.text('');
+        }
+    });
+
     $('#vehicleTypeForm').on('submit', function(e) {
         e.preventDefault();
 
@@ -66,38 +108,50 @@ $(function() {
         let url = form.attr('action');
         let method = form.find('input[name="_method"]').val() || 'POST';
 
-        $('#submitBtn').attr('disabled', true);
-        $('#loader').removeClass('d-none');
         $('.error-text').text('');
+        $('.is-invalid').removeClass('is-invalid');
+        
+        const submitBtn = $('#submitBtn');
+        submitBtn.addClass('btn-loading');
+        submitBtn.prop('disabled', true);
 
         $.ajax({
             url: url,
             type: method,
             data: form.serialize(),
             success: function(response) {
-                $('#submitBtn').attr('disabled', false);
-                $('#loader').addClass('d-none');
+                submitBtn.removeClass('btn-loading');
+                submitBtn.prop('disabled', false);
 
                 Swal.fire({
                     icon: 'success',
                     title: response.message,
                     timer: 1500,
-                    showConfirmButton: false
+                    showConfirmButton: false,
+                    willClose: () => {
+                        window.location.href = "{{ route('vehicle-type.index') }}";
+                    }
                 });
-
-                if (method === 'POST') form[0].reset();
             },
             error: function(xhr) {
-                $('#submitBtn').attr('disabled', false);
-                $('#loader').addClass('d-none');
+                submitBtn.removeClass('btn-loading');
+                submitBtn.prop('disabled', false);
 
                 if (xhr.status === 422) {
                     $.each(xhr.responseJSON.errors, function(key, value) {
+                        const input = $('input[name="' + key + '"], select[name="' + key + '"], textarea[name="' + key + '"]');
+                        if (input.length) {
+                            input.addClass('is-invalid');
+                        }
                         $('.' + key + '_error').text(value[0]);
                     });
                 } else {
                     Swal.fire('Error', 'Something went wrong!', 'error');
                 }
+            },
+            complete: function() {
+                submitBtn.removeClass('btn-loading');
+                submitBtn.prop('disabled', false);
             }
         });
     });

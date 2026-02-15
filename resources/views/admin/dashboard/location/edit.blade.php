@@ -9,7 +9,7 @@
             <h2> Location Edit</h2>
         </div>
         <div class="pull-right">
-            <a class="btn btn-primary" href="{{ route('locations.index') }}"><i class="fa fa-arrow-left"></i>  Back</a>
+            <a class="btn btn-primary" href="{{ route('admin.locations.index') }}"><i class="fa fa-arrow-left"></i>  Back</a>
         </div>
     </div>
 </div>
@@ -95,56 +95,6 @@ $(document).ready(function() {
     });
 
 
-// unit change: populate departments (and companies if needed) for location edit form
-$(document).ready(function(){
-  $(document).on('change', '.unit_wise_company', function () {
-    var unit_id = $(this).val();
-
-    // departments
-    $.ajax({
-      type: 'GET',
-      url: "{{ route('unit-wise-department') }}",
-      data: { unit_id: unit_id },
-      dataType: 'json',
-        success: function (data) {
-        console.log('unit-wise-department (location.edit) response:', data);
-        if ($('.department_lists').data('select2')) {
-          try { $('.department_lists').select2('destroy'); } catch(e) { console.warn('select2 destroy failed', e); }
-        }
-        if ($('.department_name').data('select2')) {
-          try { $('.department_name').select2('destroy'); } catch(e) { console.warn('select2 destroy failed', e); }
-        }
-        var prevLists = $('.department_lists').val();
-        var prevName = $('.department_name').val();
-        if ($('.department_lists').length) {
-          $(".department_lists").empty().append("<option value=''>Please Select</option>");
-          $.each(data['department_list'] || [], function (k, d) {
-            $('.department_lists').append("<option value='" + d.id + "'>" + d.department_name + "</option>");
-          });
-          if (prevLists) { $('.department_lists').val(prevLists); }
-          $('.department_lists').trigger('change');
-        }
-        if ($('.department_name').length) {
-          $(".department_name").empty().append("<option value=''>Please Select</option>");
-          $.each(data['department_list'] || [], function (k, d) {
-            $('.department_name').append("<option value='" + d.id + "'>" + d.department_name + "</option>");
-          });
-          if (prevName) { $('.department_name').val(prevName); }
-          $('.department_name').trigger('change');
-        }
-      },
-      error: function (xhr, status, err) {
-        console.error('Error loading departments for unit', unit_id, status, err);
-      }
-    });
-
-    // companies endpoint removed — not required in this project
-  });
-});
-
-
-
-
    $('#location_edit').submit(function(e) {
 
        e.preventDefault();
@@ -187,7 +137,7 @@ $(document).ready(function(){
 
        $.ajax({
           type:'POST',
-            url:"{{ route('locations.store') }}",
+            url:"{{ route('admin.locations.store') }}",
            data: formData,
            contentType: false,
            processData: false,
