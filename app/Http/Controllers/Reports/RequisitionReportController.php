@@ -17,12 +17,21 @@ class RequisitionReportController extends Controller
 {
     public function index(Request $request)
         {
+            // Check if user can only view own requisitions
+            $user = auth()->user();
+            $canViewOwnOnly = $user->hasPermissionTo('report-requisition-own') && !$user->hasPermissionTo('report-requisition');
+            
             $query = Requisition::with([
                 'requestedBy',
                 'department',
                 'unit',
                 'vehicleType'
             ]);
+
+            // If user can only view own requisitions, filter by current user
+            if ($canViewOwnOnly) {
+                $query->where('requested_by', $user->id);
+            }
 
             /* ==========================
             GLOBAL SEARCH
@@ -95,6 +104,7 @@ class RequisitionReportController extends Controller
                     'units'        => Unit::all(),
                     'employees'    => Employee::all(),
                     'vehicleTypes' => VehicleType::all(),
+                    'canViewOwnOnly' => $canViewOwnOnly,
                 ]
             );
         }

@@ -45,6 +45,8 @@ class MenuSeeder extends Seeder
 
             // Employees
             'employee-manage',
+            'employee-view-own',
+            'employee-edit-own',
             'unit-manage',
             'company-manage',
             'location-manage',
@@ -63,12 +65,14 @@ class MenuSeeder extends Seeder
             'driver-schedule-view',
             'driver-performance-view',
             'driver-access',
+            'driver-list-view',
 
             // Vehicles
             'vehicle-manage',
             'vehicle-create',
             'vehicle-view',
             'vehicle-type-manage',
+            'vehicle-list-view',
 
             // Maintenance
             'maintenance-manage',
@@ -97,10 +101,12 @@ class MenuSeeder extends Seeder
 
             // Reports
             'report-requisition',
+            'report-requisition-own',
             'report-trip-fuel',
             'report-vehicle-utilization',
             'report-driver-performance',
             'report-maintenance',
+            'report-maintenance-own',
 
             // Notifications
             'notification-manage',
@@ -176,6 +182,15 @@ class MenuSeeder extends Seeder
                 'menu_order' => 6,
                 'menu_parent' => 0,
             ],
+            [
+                'menu_name' => 'My Profile',
+                'menu_slug' => 'my-profile',
+                'menu_icon' => 'fa-user',
+                'menu_url' => 'user-profile',
+                'menu_permission' => 'employee-view-own',
+                'menu_order' => 16,
+                'menu_parent' => 0,
+            ],
             // Core operational menus
             [
                 'menu_name' => 'Driver Management',
@@ -202,6 +217,15 @@ class MenuSeeder extends Seeder
                 'menu_url' => null,
                 'menu_permission' => 'maintenance-manage',
                 'menu_order' => 9,
+                'menu_parent' => 0,
+            ],
+            [
+                'menu_name' => 'Maintenance Requisition',
+                'menu_slug' => 'maintenance-requisition',
+                'menu_icon' => 'fa-clipboard-list',
+                'menu_url' => null,
+                'menu_permission' => 'maintenance-create',
+                'menu_order' => 15,
                 'menu_parent' => 0,
             ],
             [
@@ -278,6 +302,15 @@ class MenuSeeder extends Seeder
                 'menu_url' => 'drivers.index',
                 'menu_permission' => 'driver-manage',
                 'menu_order' => 1,
+                'parent_name' => 'Driver Management',
+            ],
+            [
+                'menu_name' => 'Driver List (View Only)',
+                'menu_slug' => 'driver-list-view',
+                'menu_icon' => 'fa-users',
+                'menu_url' => 'drivers.index',
+                'menu_permission' => 'driver-list-view',
+                'menu_order' => 13,
                 'parent_name' => 'Driver Management',
             ],
             [
@@ -392,6 +425,15 @@ class MenuSeeder extends Seeder
                 'parent_name' => 'Vehicle Management',
             ],
             [
+                'menu_name' => 'Vehicle List (View Only)',
+                'menu_slug' => 'vehicle-list-view',
+                'menu_icon' => 'fa-car',
+                'menu_url' => 'vehicles.index',
+                'menu_permission' => 'vehicle-list-view',
+                'menu_order' => 7,
+                'parent_name' => 'Vehicle Management',
+            ],
+            [
                 'menu_name' => 'Add Vehicle',
                 'menu_slug' => 'add-vehicle',
                 'menu_icon' => 'fa-plus',
@@ -502,6 +544,26 @@ class MenuSeeder extends Seeder
                 'menu_permission' => 'requisition-view',
                 'menu_order' => 2,
                 'parent_name' => 'Vehicle Requisition',
+            ],
+
+            // Maintenance Requisition children (for employees)
+            [
+                'menu_name' => 'Create Maintenance Request',
+                'menu_slug' => 'maintenance-requisition-create',
+                'menu_icon' => 'fa-plus-circle',
+                'menu_url' => 'maintenance.create',
+                'menu_permission' => 'maintenance-create',
+                'menu_order' => 1,
+                'parent_name' => 'Maintenance Requisition',
+            ],
+            [
+                'menu_name' => 'My Maintenance Requests',
+                'menu_slug' => 'maintenance-requisition-list',
+                'menu_icon' => 'fa-list',
+                'menu_url' => 'maintenance.index',
+                'menu_permission' => 'maintenance-view',
+                'menu_order' => 2,
+                'parent_name' => 'Maintenance Requisition',
             ],
 
             // Approvals children
@@ -638,6 +700,15 @@ class MenuSeeder extends Seeder
                 'parent_name' => 'Reports',
             ],
             [
+                'menu_name' => 'My Requisition Report',
+                'menu_slug' => 'my-requisition-report',
+                'menu_icon' => 'fa-clipboard-user',
+                'menu_url' => 'reports.requisitions',
+                'menu_permission' => 'report-requisition-own',
+                'menu_order' => 6,
+                'parent_name' => 'Reports',
+            ],
+            [
                 'menu_name' => 'Trip & Fuel Consumption Report',
                 'menu_slug' => 'Trip-Fuel-Consumption-Report',
                 'menu_icon' => 'fa-road',
@@ -671,6 +742,15 @@ class MenuSeeder extends Seeder
                 'menu_url' => 'reports.maintenance',
                 'menu_permission' => 'report-maintenance',
                 'menu_order' => 5,
+                'parent_name' => 'Reports',
+            ],
+            [
+                'menu_name' => 'My Maintenance Report',
+                'menu_slug' => 'my-maintenance-report',
+                'menu_icon' => 'fa-wrench',
+                'menu_url' => 'reports.maintenance',
+                'menu_permission' => 'report-maintenance-own',
+                'menu_order' => 7,
                 'parent_name' => 'Reports',
             ],
 

@@ -8,9 +8,11 @@
             <br>
             <i class="fa fa-car"></i> Vehicles
         </h4>
+        @can('vehicle-manage')
         <a href="{{ route('vehicles.create') }}" class="btn btn-success btn-sm pull-right">
             <i class="fa fa-plus-circle"></i> Add Vehicle
         </a>
+        @endcan
     </div>
 <br>
 <br>

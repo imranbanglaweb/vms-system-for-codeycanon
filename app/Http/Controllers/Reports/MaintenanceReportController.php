@@ -15,14 +15,26 @@ class MaintenanceReportController extends Controller
 {
     public function index()
     {
-           $records = MaintenanceRequisition::with(['vehicle','maintenanceType','vendor'])->latest()->paginate(15);
+        // Check if user can only view own maintenance
+        $user = auth()->user();
+        $canViewOwnOnly = $user->hasPermissionTo('report-maintenance-own') && !$user->hasPermissionTo('report-maintenance');
+        
+        $query = MaintenanceRequisition::with(['vehicle','maintenanceType','vendor']);
+        
+        // Filter by current user if they can only view own
+        if ($canViewOwnOnly) {
+            $query->where('employee_id', $user->id);
+        }
+        
+        $records = $query->latest()->paginate(15);
     // dd($records);
 
         return view('admin.dashboard.reports.maintenance.index', [
             'vehicles' => Vehicle::select('id','vehicle_name','vehicle_number')->get(),
             'types' => MaintenanceType::select('id','name')->get(),
             'vendors' => MaintenanceVendor::select('id','name')->get(),
-            'records' => $records
+            'records' => $records,
+            'canViewOwnOnly' => $canViewOwnOnly
         ]);
         
     }
@@ -33,6 +45,11 @@ class MaintenanceReportController extends Controller
   
     // 🔹 Start query with all necessary relationships
     $query = MaintenanceRequisition::with(['vehicle','maintenanceType','employee','vendor']);
+
+    // Filter by current user if they can only view own
+    if ($canViewOwnOnly) {
+        $query->where('employee_id', $user->id);
+    }
 
     // 🔹 Role-based filtering
     if (auth()->user()->hasRole('Manager')) {

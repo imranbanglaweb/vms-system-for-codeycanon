@@ -77,16 +77,28 @@ class VehicleController extends Controller
             })
             ->addColumn('action', function($row){
                 $editUrl = route('vehicles.edit', $row->id);
+                $viewUrl = route('vehicles.show', $row->id);
 
-                $deleteBtn = '<button class="btn btn-danger btn-sm deleteVehicleBtn" data-id="'. $row->id .'">
+                // Check if user has vehicle-manage permission (edit/delete)
+                if (auth()->user()->can('vehicle-manage')) {
+                    $deleteBtn = '<button class="btn btn-danger btn-sm deleteVehicleBtn" data-id="'. $row->id .'">
                                 <i class="fa fa-trash"></i>
                               </button>';
 
-                $editBtn = '<a href="'. $editUrl .'" class="btn btn-primary btn-sm">
+                    $editBtn = '<a href="'. $editUrl .'" class="btn btn-primary btn-sm">
                                 <i class="fa fa-edit"></i>
                             </a>';
 
-                return $editBtn . ' ' . $deleteBtn;
+                    return $editBtn . ' ' . $deleteBtn;
+                } elseif (auth()->user()->can('vehicle-list-view')) {
+                    // User with vehicle-list-view permission can only view
+                    $viewBtn = '<a href="'. $viewUrl .'" class="btn btn-info btn-sm">
+                                <i class="fa fa-eye"></i>
+                            </a>';
+                    return $viewBtn;
+                } else {
+                    return '';
+                }
             })
             ->rawColumns(['status', 'action']) // allow HTML in status and action
             ->make(true);

@@ -10,10 +10,21 @@
                     <div>
                         <h4 class="fw-bold text-dark mb-1">
                             <i class="fas fa-clipboard-list text-primary me-2"></i>
-                            Requisition Reports
+                            @if(isset($canViewOwnOnly) && $canViewOwnOnly)
+                                My Requisition Reports
+                            @else
+                                Requisition Reports
+                            @endif
                         </h4>
-                        <p class="text-muted mb-0 small">View and manage all requisition reports</p>
+                        <p class="text-muted mb-0 small">
+                            @if(isset($canViewOwnOnly) && $canViewOwnOnly)
+                                View your own requisition reports
+                            @else
+                                View and manage all requisition reports
+                            @endif
+                        </p>
                     </div>
+                    @if(!isset($canViewOwnOnly) || !$canViewOwnOnly)
                     <div class="btn-group">
                         <button type="button" class="btn btn-success btn-sm dropdown-toggle" data-toggle="dropdown">
                             <i class="fas fa-download me-1"></i> Export
@@ -27,9 +38,11 @@
                             </a></li>
                         </ul>
                     </div>
+                    @endif
                 </div>
             </div>
 
+            @if(!isset($canViewOwnOnly) || !$canViewOwnOnly)
             <!-- Stats Cards -->
             <div class="col-md-3">
                 <div class="card card-stats-card h-100">
@@ -91,6 +104,7 @@
                     </div>
                 </div>
             </div>
+            @endif
 
             <!-- Filters Card -->
             <div class="col-12">
@@ -102,6 +116,7 @@
                     </div>
                     <div class="card-body">
                         <form id="filterForm" class="row g-3">
+                            @if(!isset($canViewOwnOnly) || !$canViewOwnOnly)
                             <div class="col-md-3">
                                 <label class="form-label small fw-medium">Department</label>
                                 <select name="department_id" class="form-select form-select-sm">
@@ -137,6 +152,7 @@
                                 <label class="form-label small fw-medium">To Date</label>
                                 <input type="date" name="to_date" class="form-control form-control-sm">
                             </div>
+                            @endif
                             <div class="col-md-4">
                                 <label class="form-label small fw-medium">Search</label>
                                 <div class="input-group input-group-sm">

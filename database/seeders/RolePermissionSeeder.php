@@ -238,6 +238,24 @@ class RolePermissionSeeder extends Seeder
             'requisition-pending-view',
             'requisition-approved-view',
 
+            // Driver - List View Only
+            'driver-list-view',
+
+            // Vehicle - List View Only
+            'vehicle-list-view',
+
+            // Maintenance - Create and View Own
+            'maintenance-create',
+            'maintenance-view',
+
+            // Reports - Own Requisitions Only
+            'report-requisition-own',
+            'report-maintenance-own',
+
+            // Employee - View and Edit Own Profile
+            'employee-view-own',
+            'employee-edit-own',
+
             // Documents
             'document-manage',
             'document-create',

@@ -4,17 +4,27 @@
 <section class="content-body" style="background-color:#fff;">
     <div class="container-fluid">
         <div class="d-flex justify-content-between align-items-center mb-4">
-            <h3 class="fw-bold text-primary"><i class="fa fa-tools me-2"></i> Maintenance Requisitions</h3>
+            <h3 class="fw-bold text-primary"><i class="fa fa-tools me-2"></i> 
+                @if(isset($canViewOwnOnly) && $canViewOwnOnly)
+                    My Maintenance Requisitions
+                @else
+                    Maintenance Requisitions
+                @endif
+            </h3>
             <div class="d-flex gap-2">
+                @if(!isset($canViewOwnOnly) || !$canViewOwnOnly)
                 <a href="{{ route('maintenance_approvals.index') }}" class="btn btn-success btn-sm">
                     <i class="fa fa-check-circle me-1"></i> Pending Approvals
                 </a>
                 <a href="{{ route('maintenance_approvals.approved') }}" class="btn btn-info btn-sm">
                     <i class="fa fa-list me-1"></i> Approved List
                 </a>
+                @endif
+                @can('maintenance-create')
                 <a href="{{ route('maintenance.create') }}" class="btn btn-primary btn-sm">
                     <i class="fa fa-plus me-1"></i> Create New
                 </a>
+                @endcan
             </div>
         </div>
 <br>

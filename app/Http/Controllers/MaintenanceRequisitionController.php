@@ -21,11 +21,19 @@ class MaintenanceRequisitionController extends Controller
     
     public function index(Request $request)
     {
+        // Check if user can only view own requisitions
+        $user = auth()->user();
+        $canViewOwnOnly = $user->hasPermissionTo('maintenance-view') && !$user->hasPermissionTo('maintenance-manage');
         
     if ($request->ajax()) {
 
         $query = MaintenanceRequisition::with(['vehicle','employee'])
             ->select('maintenance_requisitions.*'); // IMPORTANT FIX
+
+        // Filter by current user if they can only view own
+        if ($canViewOwnOnly) {
+            $query->where('employee_id', $user->id);
+        }
 
         // Filters
         if ($request->requisition_no) {
@@ -119,7 +127,7 @@ class MaintenanceRequisitionController extends Controller
             ->make(true);
     }
 
-    return view('admin.dashboard.maintenance.index');
+    return view('admin.dashboard.maintenance.index', compact('canViewOwnOnly'));
     }
 
     public function history(Request $request)

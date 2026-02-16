@@ -57,6 +57,7 @@ class PermissionSeeder extends Seeder
             'vehicle-type-manage',
             'vehicle-view',
             'vehicle-export',
+            'vehicle-list-view',
 
             // ================= DRIVER MANAGEMENT =================
             'driver-manage',
@@ -65,6 +66,7 @@ class PermissionSeeder extends Seeder
             'driver-delete',
             'driver-view',
             'driver-export',
+            'driver-list-view',
             'license-type-manage',
             
             // Driver Documents
@@ -114,6 +116,8 @@ class PermissionSeeder extends Seeder
             'employee-delete',
             'employee-import',
             'employee-export',
+            'employee-view-own',
+            'employee-edit-own',
 
             // ================= DEPARTMENT =================
             'department-manage',
@@ -164,7 +168,9 @@ class PermissionSeeder extends Seeder
 
             // ================= REPORTS =================
             'report-requisition',
+            'report-requisition-own',
             'report-maintenance',
+            'report-maintenance-own',
             'report-trip-fuel',
             'report-vehicle-utilization',
             'report-driver-performance',
@@ -341,6 +347,13 @@ class PermissionSeeder extends Seeder
             'requisition-edit',
             'requisition-pending-view',
             'requisition-approved-view',
+            // Driver - List View Only
+            'driver-list-view',
+            // Maintenance - Create and View Own
+            'maintenance-create',
+            'maintenance-view',
+            // Reports - Own Requisitions Only
+            'report-requisition-own',
             // Documents
             'document-create',
             'document-view',

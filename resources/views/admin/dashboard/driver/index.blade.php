@@ -23,7 +23,9 @@
 	<br>
     <h3>Drivers Manage</h3>
     <div>
+        @can('driver-manage')
         <a href="{{ route('drivers.create')}}" class="btn btn-primary pull-right"><i class="fa fa-plus"></i> Create Driver </a>
+        @endcan
        
     </div>
 </div>

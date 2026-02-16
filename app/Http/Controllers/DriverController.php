@@ -58,6 +58,15 @@ class DriverController extends Controller
 
     }
 
+    /**
+     * Display the specified resource.
+     */
+    public function show(string $id)
+    {
+        $driver = Driver::with(['unit', 'department', 'licenseType', 'employee'])->findOrFail($id);
+        return view('admin.dashboard.driver.show', compact('driver'));
+    }
+
     public function store(Request $request)
 {  
     
@@ -293,12 +302,22 @@ class DriverController extends Controller
             // Action buttons
             ->addColumn('action', function($row){
                 $editUrl = route('drivers.edit', $row->id);
+                $viewUrl = route('drivers.show', $row->id);
+                
+                // Check if user has driver-manage permission (edit/delete)
+                if (auth()->user()->can('driver-manage')) {
+                    $btn  = '<a href="'. e($editUrl) .'" class="btn btn-sm btn-primary me-1">';
+                    $btn .= '<i class="fa fa-edit"></i></a>';
 
-                $btn  = '<a href="'. e($editUrl) .'" class="btn btn-sm btn-primary me-1">';
-                $btn .= '<i class="fa fa-edit"></i></a>';
-
-                $btn .= '<button class="btn btn-sm btn-danger deleteUser" data-did="'. $row->id .'">';
-                $btn .= '<i class="fa fa-minus-circle"></i></button>';
+                    $btn .= '<button class="btn btn-sm btn-danger deleteUser" data-did="'. $row->id .'">';
+                    $btn .= '<i class="fa fa-minus-circle"></i></button>';
+                } elseif (auth()->user()->can('driver-list-view')) {
+                    // User with driver-list-view permission can only view
+                    $btn  = '<a href="'. e($viewUrl) .'" class="btn btn-sm btn-info me-1">';
+                    $btn .= '<i class="fa fa-eye"></i></a>';
+                } else {
+                    $btn = '';
+                }
 
                 return $btn;
             })

@@ -35,8 +35,20 @@ class MenuService
                 ->orderBy('menu_order')
                 ->get()
                 ->filter(function ($child) use ($user, $isSuperAdmin) {
-                    // Super Admin sees everything, others need permission
-                    if ($isSuperAdmin) {
+                    // Super Admin and Admin see everything, others need permission
+                    // Exclude employee-specific menus to avoid duplicates
+                    if ($isSuperAdmin || $user->hasRole('Admin')) {
+                        $employeeOnlyMenus = [
+                            'driver-list-view',
+                            'vehicle-list-view',
+                            'employee-view-own',
+                            'employee-edit-own',
+                            'report-requisition-own',
+                            'report-maintenance-own',
+                        ];
+                        if ($child->menu_permission && in_array($child->menu_permission, $employeeOnlyMenus)) {
+                            return false;
+                        }
                         return true;
                     }
                     return !$child->menu_permission || $user->can($child->menu_permission);
@@ -48,8 +60,16 @@ class MenuService
             // 2. Has visible children, OR
             // 3. No permission required, OR  
             // 4. User has permission
-            if ($isSuperAdmin) {
-                $menu->visible = true;
+            if ($isSuperAdmin || $user->hasRole('Admin')) {
+                // Exclude employee-only parent menus
+                $employeeOnlyParentMenus = [
+                    'my-profile',
+                ];
+                if ($menu->menu_slug && in_array($menu->menu_slug, $employeeOnlyParentMenus)) {
+                    $menu->visible = false;
+                } else {
+                    $menu->visible = true;
+                }
             } else {
                 $hasPermission = !$menu->menu_permission || $user->can($menu->menu_permission);
                 $menu->visible = $children->isNotEmpty() || $hasPermission;
