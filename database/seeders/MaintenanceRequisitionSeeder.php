@@ -19,7 +19,7 @@ class MaintenanceRequisitionSeeder extends Seeder
 
     private function generateDummyRequisitions($faker)
     {
-        $requisitionTypes = ['scheduled', 'emergency', 'routine', 'insurance'];
+        $requisitionTypes = ['scheduled', 'emergency', 'routine', 'insurance','maintenance','breakdown','inspection'];
         $priorities = ['Low', 'Medium', 'High', 'Urgent'];
         $statuses = ['Pending', 'Pending Approval', 'Approved', 'Completed', 'Rejected'];
         $chargeBearers = ['Company', 'Employee', 'Department'];

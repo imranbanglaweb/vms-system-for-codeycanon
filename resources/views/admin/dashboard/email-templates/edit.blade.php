@@ -4,465 +4,210 @@
 Edit Email Template
 @endsection
 
+@push('styles')
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" />
+<style>
+    .card { border-radius: 8px; }
+    .card-header { border-radius: 8px 8px 0 0; }
+    .error-message { color: #dc3545; font-size: 12px; margin-top: 4px; display: none; }
+    .form-control.is-invalid { border-color: #dc3545; }
+</style>
+@endpush
+
 @section('main_content')
-<section role="main" class="content-body" style="background-color: #fff;">
-    <div class="container">
+<section role="main" class="content-body">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header bg-primary text-white">
+                        <h4 class="mb-0"><i class="fa fa-edit"></i> Edit Email Template</h4>
+                    </div>
+                    <div class="card-body">
+                        
+                        <form id="emailTemplateForm" action="{{ route('email-templates.update', $emailTemplate->id) }}" method="POST">
+                            @csrf
+                            @method('PUT')
+                            
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Template Name <span class="text-danger">*</span></label>
+                                    <input type="text" name="name" id="name" class="form-control" value="{{ old('name', $emailTemplate->name) }}">
+                                    <small class="error-message" id="error-name" style="color: #dc3545;"></small>
+                                </div>
 
-        <div class="d-flex justify-content-between align-items-center mb-3">
-            <h4 class="fw-bold text-primary mb-0">
-                <i class="fa fa-envelope"></i> Edit Email Template
-            </h4>
-            <div>
-                <button type="button" class="btn btn-info btn-sm me-2" onclick="previewEmail()">
-                    <i class="fa fa-eye"></i> Preview Email
-                </button>
-                <a href="{{ route('email-templates.index') }}" class="btn btn-primary btn-sm pull-right">
-                    <i class="fa fa-arrow-left"></i> Back
-                </a>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Slug <span class="text-danger">*</span></label>
+                                    <input type="text" name="slug" id="slug" class="form-control" value="{{ old('slug', $emailTemplate->slug) }}">
+                                    <small class="error-message" id="error-slug" style="color: #dc3545;"></small>
+                                </div>
+
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Template Type <span class="text-danger">*</span></label>
+                                    <select name="type" id="type" class="form-control">
+                                        <option value="">Select Type</option>
+                                        @foreach($types as $key => $label)
+                                            <option value="{{ $key }}" {{ old('type', $emailTemplate->type) == $key ? 'selected' : '' }}>{{ $label }}</option>
+                                        @endforeach
+                                    </select>
+                                    <small class="error-message" id="error-type" style="color: #dc3545;"></small>
+                                </div>
+
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Status</label>
+                                    <select name="is_active" class="form-control">
+                                        <option value="1" {{ old('is_active', $emailTemplate->is_active) == '1' ? 'selected' : '' }}>Active</option>
+                                        <option value="0" {{ old('is_active', $emailTemplate->is_active) == '0' ? 'selected' : '' }}>Inactive</option>
+                                    </select>
+                                </div>
+
+                                <div class="col-12 mb-3">
+                                    <label class="form-label">Email Subject <span class="text-danger">*</span></label>
+                                    <input type="text" name="subject" id="subject" class="form-control" value="{{ old('subject', $emailTemplate->subject) }}">
+                                    <small class="error-message" id="error-subject" style="color: #dc3545;"></small>
+                                </div>
+
+                                <div class="col-12 mb-3">
+                                    <label class="form-label">Email Body <span class="text-danger">*</span></label>
+                                    <textarea name="body" id="body" class="form-control" rows="6">{{ old('body', $emailTemplate->body) }}</textarea>
+                                    <small class="text-muted" style="font-size: 11px;">Use {{ '{' }}{{ '{' }}variable{{ '}' }}{{ '}' }} for dynamic content</small>
+                                    <small class="error-message" id="error-body" style="color: #dc3545;"></small>
+                                </div>
+
+                                <div class="col-12 mb-3">
+                                    <label class="form-label">Variables (JSON)</label>
+                                    <textarea name="variables" class="form-control" rows="2">{{ old('variables', $emailTemplate->variables ? json_encode($emailTemplate->variables, JSON_PRETTY_PRINT) : '') }}</textarea>
+                                    <small class="error-message" id="error-variables" style="color: #dc3545;"></small>
+                                </div>
+                            </div>
+
+                            <div class="mt-4">
+                                <button type="submit" class="btn btn-success" id="submitBtn">
+                                    <i class="fa fa-save"></i> Update Template
+                                </button>
+                                <a href="{{ route('email-templates.index') }}" class="btn btn-secondary">Cancel</a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
             </div>
         </div>
-
-        <div class="card shadow-sm border-0 rounded-3 mx-auto" style="max-width: 1200px;">
-            <div class="card-body p-4 bg-light">
-                <form id="emailTemplateForm" action="{{ route('email-templates.update', $emailTemplate->id) }}" method="POST">
-                    @csrf
-                    @method('PUT')
-
-                    <div class="row gy-3 gx-4 align-items-center">
-                        {{-- Template Name --}}
-                        <div class="col-md-6">
-                            <label class="form-label fw-semibold small mb-1">Template Name *</label>
-                            <div class="input-group input-group-sm shadow-sm rounded">
-                                <span class="input-group-text bg-white border-end-0">
-                                    <i class="fa fa-tag text-secondary"></i>
-                                </span>
-                                <input 
-                                    type="text" 
-                                    name="name" 
-                                    id="name"
-                                    class="form-control border-start-0 py-2" 
-                                    placeholder="Template Name" 
-                                    value="{{ old('name', $emailTemplate->name) }}">
-                            </div>
-                            <small class="text-danger error-text name_error"></small>
-                        </div>
-
-                        {{-- Template Slug --}}
-                        <div class="col-md-6">
-                            <label class="form-label fw-semibold small mb-1">Slug *</label>
-                            <div class="input-group input-group-sm shadow-sm rounded">
-                                <span class="input-group-text bg-white border-end-0">
-                                    <i class="fa fa-code text-secondary"></i>
-                                </span>
-                                <input 
-                                    type="text" 
-                                    name="slug" 
-                                    id="slug"
-                                    class="form-control border-start-0 py-2" 
-                                    placeholder="template-slug" 
-                                    value="{{ old('slug', $emailTemplate->slug) }}">
-                            </div>
-                            <small class="text-danger error-text slug_error"></small>
-                        </div>
-
-                        {{-- Template Type --}}
-                        <div class="col-md-6">
-                            <label class="form-label fw-semibold small mb-1">Template Type *</label>
-                            <div class="input-group input-group-sm shadow-sm rounded">
-                                <span class="input-group-text bg-white border-end-0">
-                                    <i class="fa fa-list text-secondary"></i>
-                                </span>
-                                <select name="type" id="type" class="form-select border-start-0 py-2">
-                                    <option value="">Select Type</option>
-                                    @foreach($templateTypes as $key => $label)
-                                        <option value="{{ $key }}" {{ old('type', $emailTemplate->type) == $key ? 'selected' : '' }}>
-                                            {{ $label }}
-                                        </option>
-                                    @endforeach
-                                </select>
-                            </div>
-                            <small class="text-danger error-text type_error"></small>
-                        </div>
-
-                        {{-- Active Status --}}
-                        <div class="col-md-6">
-                            <label class="form-label fw-semibold small mb-1">Status</label>
-                            <div class="input-group input-group-sm shadow-sm rounded">
-                                <span class="input-group-text bg-white border-end-0">
-                                    <i class="fa fa-power-off text-secondary"></i>
-                                </span>
-                                <select name="is_active" class="form-select border-start-0 py-2">
-                                    <option value="1" {{ old('is_active', $emailTemplate->is_active) == '1' ? 'selected' : '' }}>Active</option>
-                                    <option value="0" {{ old('is_active', $emailTemplate->is_active) == '0' ? 'selected' : '' }}>Inactive</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        {{-- Email Subject --}}
-                        <div class="col-12">
-                            <label class="form-label fw-semibold small mb-1">Email Subject *</label>
-                            <div class="input-group input-group-sm shadow-sm rounded">
-                                <span class="input-group-text bg-white border-end-0">
-                                    <i class="fa fa-heading text-secondary"></i>
-                                </span>
-                                <input 
-                                    type="text" 
-                                    name="subject" 
-                                    id="subject"
-                                    class="form-control border-start-0 py-2" 
-                                    placeholder="Email Subject" 
-                                    value="{{ old('subject', $emailTemplate->subject) }}">
-                            </div>
-                            <small class="text-danger error-text subject_error"></small>
-                        </div>
-
-                        {{-- Email Body --}}
-                        <div class="col-12">
-                            <label class="form-label fw-semibold small mb-1">Email Body *</label>
-                            <textarea 
-                                name="body" 
-                                id="body"
-                                class="form-control border-start-0" 
-                                rows="10" 
-                                placeholder="Email body content (HTML supported)..."><?php echo old('body', $escapedBody ?? ''); ?></textarea>
-                            <small class="text-danger error-text body_error"></small>
-                            <div class="mt-2">
-                                <span class="badge bg-info">Use @@&#123;&#123;variable_name&#125;&#125; for dynamic content</span>
-                            </div>
-                        </div>
-
-                        {{-- Variables (JSON) --}}
-                        <div class="col-12">
-                            <label class="form-label fw-semibold small mb-1">Available Variables (JSON)</label>
-                            <div class="input-group input-group-sm shadow-sm rounded">
-                                <span class="input-group-text bg-white border-end-0">
-                                    <i class="fa fa-code-branch text-secondary"></i>
-                                </span>
-                                <textarea 
-                                    name="variables" 
-                                    id="variables"
-                                    class="form-control border-start-0 py-2" 
-                                    rows="3" 
-                                    placeholder='{"variable_name": "description", ...}'>{{ old('variables', $emailTemplate->variables ? json_encode($emailTemplate->variables, JSON_PRETTY_PRINT) : '') }}</textarea>
-                            </div>
-                            <small class="text-muted">Define available variables in JSON format for documentation purposes.</small>
-                            <small class="text-danger error-text variables_error"></small>
-                        </div>
-                    </div>
-
-                    <div class="text-center mt-4">
-                        <button type="submit" class="btn btn-primary px-4 py-2" id="submitBtn">
-                            <span class="spinner-border spinner-border-sm d-none" id="loader" role="status"></span>
-                            <i class="fa fa-save"></i> Update Template
-                        </button>
-                    </div>
-
-                </form>
-            </div>
-        </div>
-
     </div>
 </section>
-
-<!-- Preview Modal -->
-<div class="modal" id="previewModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-xl modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header bg-info text-white">
-                <h5 class="modal-title"><i class="fa fa-envelope-open me-2"></i>Email Preview</h5>
-                <button type="button" class="btn-close btn-close-white" data-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body p-0">
-                <iframe id="previewFrame" style="width: 100%; height: 600px; border: none;"></iframe>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-            </div>
-        </div>
-    </div>
-</div>
 @endsection
-
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
-<link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
-<style>
-.form-label {
-    color: #000;
-    font-size: 15px;
-}
-.card {
-    background-color: #fff;
-    padding: 20px;
-}
-.form-control, .form-select {
-    font-size: 1.2em;
-}
-.input-group-text {
-    width: 38px;
-    justify-content: center;
-}
-.row > [class*="col-"] {
-    margin-bottom: 8px;
-}
-textarea.form-control {
-    resize: vertical;
-    font-family: 'Courier New', Courier, monospace;
-}
-/* Modal styles fix */
-.modal-backdrop {
-    background-color: rgba(0, 0, 0, 0.5) !important;
-    opacity: 1 !important;
-    z-index: 1040;
-}
-.modal-content {
-    border: none;
-    border-radius: 12px;
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-    overflow: hidden;
-}
-#previewModal {
-    z-index: 1050;
-}
-#previewModal .modal-dialog {
-    max-width: 900px;
-}
-#previewModal .modal-body {
-    background-color: #fff;
-    padding: 0;
-}
-#previewFrame {
-    background-color: #ffffff;
-    min-height: 600px;
-}
-</style>
-
 
 @push('scripts')
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-$(function() {
-    // Auto-generate slug from name (only if slug is empty or user wants to regenerate)
+document.addEventListener('DOMContentLoaded', function() {
     let originalSlug = '{{ $emailTemplate->slug }}';
     
-    $('#name').on('input', function() {
-        let name = $(this).val();
-        // Only auto-generate if the slug hasn't been manually changed from original
-        let currentSlug = $('#slug').val();
+    // Auto-generate slug from name (only if not manually changed)
+    document.getElementById('name').addEventListener('input', function() {
+        let currentSlug = document.getElementById('slug').value;
         if (currentSlug === originalSlug || currentSlug === '') {
-            let slug = name.toLowerCase()
-                .replace(/[^a-z0-9]+/g, '-')
-                .replace(/(^-|-$)/g, '');
-            $('#slug').val(slug);
+            let slug = this.value.toLowerCase()
+                .replace(/[^a-z0-9\s-]/g, '')
+                .replace(/\s+/g, '-')
+                .replace(/-+/g, '-')
+                .trim();
+            document.getElementById('slug').value = slug;
         }
     });
 
-    // Form validation and submission
-    $('#emailTemplateForm').on('submit', function(e) {
+    // Clear errors on input
+    document.querySelectorAll('.form-control').forEach(input => {
+        input.addEventListener('input', function() {
+            this.classList.remove('is-invalid');
+            let errorEl = document.getElementById('error-' + this.name);
+            if (errorEl) errorEl.style.display = 'none';
+        });
+    });
+
+    // Form submission
+    document.getElementById('emailTemplateForm').addEventListener('submit', function(e) {
         e.preventDefault();
-
-        let form = $(this);
-        let url = form.attr('action');
-        let method = 'PUT';
-        let formData = form.serialize();
-
-        $('.error-text').text('');
-        $('#loader').removeClass('d-none');
-        $('#submitBtn').attr('disabled', true);
-
-        $.ajax({
-            url: url,
-            method: method,
-            data: formData,
-            success: function(response) {
-                $('#loader').addClass('d-none');
-                $('#submitBtn').attr('disabled', false);
-
-                if (response.success) {
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Success',
-                        text: response.message,
-                        timer: 2000,
-                        showConfirmButton: false
-                    }).then(() => {
-                        if (response.redirect) {
-                            window.location.href = response.redirect;
+        
+        let form = this;
+        let formData = new FormData(form);
+        let submitBtn = document.getElementById('submitBtn');
+        
+        // Clear all previous errors
+        document.querySelectorAll('.form-control').forEach(input => {
+            input.classList.remove('is-invalid');
+        });
+        document.querySelectorAll('.error-message').forEach(el => {
+            el.style.display = 'none';
+            el.textContent = '';
+        });
+        
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Saving...';
+        
+        fetch(form.action, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'Accept': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '<i class="fa fa-save"></i> Update Template';
+            
+            if (data.success) {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Success!',
+                    text: data.message || 'Email template updated successfully!',
+                    timer: 2000,
+                    showConfirmButton: false
+                }).then(() => {
+                    window.location.href = data.redirect || '{{ route("email-templates.index") }}';
+                });
+            } else {
+                // Show inline errors
+                if (data.errors) {
+                    for (let key in data.errors) {
+                        let input = document.querySelector('[name="' + key + '"]');
+                        if (input) {
+                            input.classList.add('is-invalid');
+                            let errorEl = document.getElementById('error-' + key);
+                            if (errorEl) {
+                                errorEl.textContent = data.errors[key][0];
+                                errorEl.style.display = 'block';
+                                errorEl.style.color = '#dc3545';
+                            }
                         }
-                    });
-                }
-            },
-            error: function(xhr) {
-                $('#loader').addClass('d-none');
-                $('#submitBtn').attr('disabled', false);
-
-                if (xhr.status === 422) {
-                    $.each(xhr.responseJSON.errors, function(key, value) {
-                        $('.' + key + '_error').text(value[0]);
-                    });
+                    }
+                    
+                    let errorCount = Object.keys(data.errors).length;
                     Swal.fire({
                         icon: 'error',
                         title: 'Validation Error',
-                        text: 'Please check the form for errors.'
+                        text: 'Please check the form and fix ' + errorCount + ' error(s)'
                     });
                 } else {
                     Swal.fire({
                         icon: 'error',
-                        title: 'Oops...',
-                        text: 'Something went wrong! Please try again later.'
+                        title: 'Error',
+                        text: data.message || 'Something went wrong!'
                     });
                 }
             }
+        })
+        .catch(error => {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '<i class="fa fa-save"></i> Update Template';
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'Network error: ' + error.message
+            });
         });
     });
 });
-
-// Preview Email Function
-function previewEmail() {
-    const subject = $('#subject').val() || 'Email Subject';
-    let logoUrl = $('#admin_logo_url').val() || '';
-
-    // Get body content from textarea
-    let body = $('#body').val() || 'Email body content...';
-
-    // Get logo and admin title from settings
-    $.ajax({
-        url: '{{ route("admin.settings.get-logo") }}',
-        method: 'GET',
-        success: function(logoData) {
-            let logoUrl = logoData.logo_url || '';
-            let adminTitle = logoData.admin_title || 'InayaFleet360';
-            
-            // Check if logo URL contains template variables
-            if (logoUrl && (logoUrl.includes('{') || logoUrl.includes('}'))) {
-                logoUrl = '';
-            }
-            
-            // ================== PREVIEW VARIABLE REPLACEMENT ==================
-            body = body
-                .replaceAll('@@adminlogo_url', logoUrl || '')
-                .replaceAll('@@admin_logo_url', logoUrl || '')
-                .replaceAll('@@company_name', adminTitle)
-                .replaceAll('@@year', new Date().getFullYear());
-
-            // Blade-safe cleanup of unresolved variables
-            body = body
-                .replace(new RegExp('\\{\\{.*?\\}\\}', 'g'), '')
-                .replace(new RegExp('@@\\w+', 'g'), '');
-            // ================== END ==================
-            
-            // Create preview HTML
-            const previewHtml = `<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>${subject}</title>
-    <style>
-        body { margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #fff; }
-        .email-wrapper { padding: 40px 15px; }
-        .email-container { max-width: 700px; margin: 0 auto; background: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 10px 40px rgba(0,0,0,0.1); }
-        .email-header { background: linear-gradient(135deg, #1e3a5f 0%, #2d5a87 100%); padding: 35px 40px; text-align: center; color: #ffffff; }
-        .email-header img { max-width: 200px; height: auto; margin-bottom: 10px; }
-        .email-header h1 { margin: 0 0 8px 0; font-size: 28px; font-weight: 700; }
-        .email-header p { margin: 0; color: rgba(255,255,255,0.85); font-size: 14px; text-transform: uppercase; letter-spacing: 1px; }
-        .email-content { padding: 40px; color: #64748b; font-size: 16px; line-height: 1.8; }
-        .email-footer { background: linear-gradient(135deg, #1e3a5f 0%, #2d5a87 100%); padding: 30px 40px; color: rgba(255,255,255,0.8); text-align: center; }
-        .email-footer p { margin: 0 0 5px 0; font-size: 13px; }
-        .email-footer small { color: rgba(255,255,255,0.6); font-size: 12px; }
-    </style>
-</head>
-<body>
-    <div class="email-wrapper">
-        <div class="email-container">
-            <div class="email-header">
-                ${logoUrl ? `<img src="${logoUrl}" alt="${adminTitle}">` : `<h1>${adminTitle}</h1>`}
-                <p>Vehicle Management System</p>
-            </div>
-            <div class="email-content">
-                <h2 style="color: #1e293b; margin: 0 0 25px 0;">Hello,</h2>
-                <div>${body}</div>
-                <div style="margin-top: 30px; padding-top: 25px; border-top: 1px dashed #e2e8f0;">
-                    <p style="margin: 0 0 8px 0; color: #1e293b; font-weight: 600;">Best regards,</p>
-                    <p style="margin: 0; color: #64748b;">The ${adminTitle} Team</p>
-                </div>
-            </div>
-            <div class="email-footer">
-                <p>&copy; ${new Date().getFullYear()} ${adminTitle}. All rights reserved.</p>
-                <small>This is an automated message. Please do not reply directly to this email.</small>
-            </div>
-        </div>
-    </div>
-</body>
-</html>`;
-
-            // Show modal and load preview
-            $('#previewModal').modal('show');
-            $('#previewFrame').contents().find('html').html(previewHtml);
-        },
-        error: function() {
-            // Fallback without logo - use default title
-            const adminTitle = 'InayaFleet360';
-            
-            // ================== PREVIEW VARIABLE REPLACEMENT ==================
-            body = body
-                .replaceAll('@@adminlogo_url', '')
-                .replaceAll('@@admin_logo_url', '')
-                .replaceAll('@@company_name', adminTitle)
-                .replaceAll('@@year', new Date().getFullYear());
-
-            // Blade-safe cleanup of unresolved variables
-            body = body
-                .replace(new RegExp('\\{\\{.*?\\}\\}', 'g'), '')
-                .replace(new RegExp('@@\\w+', 'g'), '');
-            // ================== END ==================
-            
-            const previewHtml = `<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>${subject}</title>
-    <style>
-        body { margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f1f5f9; }
-        .email-wrapper { padding: 40px 15px; }
-        .email-container { max-width: 700px; margin: 0 auto; background: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 10px 40px rgba(0,0,0,0.1); }
-        .email-header { background: linear-gradient(135deg, #1e3a5f 0%, #2d5a87 100%); padding: 35px 40px; text-align: center; color: #ffffff; }
-        .email-header h1 { margin: 0; font-size: 28px; font-weight: 700; }
-        .email-header p { margin: 0; color: rgba(255,255,255,0.85); font-size: 14px; text-transform: uppercase; letter-spacing: 1px; }
-        .email-content { padding: 40px; color: #64748b; font-size: 16px; line-height: 1.8; }
-        .email-footer { background: linear-gradient(135deg, #1e3a5f 0%, #2d5a87 100%); padding: 30px 40px; color: rgba(255,255,255,0.8); text-align: center; }
-        .email-footer p { margin: 0 0 5px 0; font-size: 13px; }
-        .email-footer small { color: rgba(255,255,255,0.6); font-size: 12px; }
-    </style>
-</head>
-<body>
-    <div class="email-wrapper">
-        <div class="email-container">
-            <div class="email-header">
-                <h1>${adminTitle}</h1>
-                <p>Vehicle Management System</p>
-            </div>
-            <div class="email-content">
-                <h2 style="color: #1e293b; margin: 0 0 25px 0;">Hello,</h2>
-                <div>${body}</div>
-                <div style="margin-top: 30px; padding-top: 25px; border-top: 1px dashed #e2e8f0;">
-                    <p style="margin: 0 0 8px 0; color: #1e293b; font-weight: 600;">Best regards,</p>
-                    <p style="margin: 0; color: #64748b;">The ${adminTitle} Team</p>
-                </div>
-            </div>
-            <div class="email-footer">
-                <p>&copy; ${new Date().getFullYear()} ${adminTitle}. All rights reserved.</p>
-                <small>This is an automated message. Please do not reply directly to this email.</small>
-            </div>
-        </div>
-    </div>
-</body>
-</html>`;
-
-            $('#previewModal').modal('show');
-            $('#previewFrame').contents().find('html').html(previewHtml);
-        }
-    });
-}
 </script>
 @endpush

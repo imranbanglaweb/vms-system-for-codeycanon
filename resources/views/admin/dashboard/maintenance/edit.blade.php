@@ -100,6 +100,7 @@
                             <option value="Company" {{ $requisition->charge_bear_by=='Company' ? 'selected':'' }}>Company</option>
                             <option value="Vendor" {{ $requisition->charge_bear_by=='Vendor' ? 'selected':'' }}>Vendor</option>
                             <option value="Employee" {{ $requisition->charge_bear_by=='Employee' ? 'selected':'' }}>Employee</option>
+                            <option value="Department" {{ $requisition->charge_bear_by=='Department' ? 'selected':'' }}>Department</option>
                         </select>
                     </div>
 

@@ -15,6 +15,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Yajra\DataTables\DataTables;
 use App\Models\InventoryItem; // 👈 ADD THIS MODEL
+use App\Notifications\MaintenanceRequisitionCreated;
 class MaintenanceRequisitionController extends Controller
 {
     
@@ -27,6 +28,10 @@ class MaintenanceRequisitionController extends Controller
             ->select('maintenance_requisitions.*'); // IMPORTANT FIX
 
         // Filters
+        if ($request->requisition_no) {
+            $query->where('requisition_no', 'like', "%{$request->requisition_no}%");
+        }
+
         if ($request->vehicle) {
             $query->whereHas('vehicle', function ($q) use ($request) {
                 $q->where('vehicle_no', 'like', "%{$request->vehicle}%");
@@ -259,6 +264,9 @@ class MaintenanceRequisitionController extends Controller
                 'total_parts_cost' => $total_parts_cost,
                 'total_cost' => $total_parts_cost + $request->charge_amount
             ]);
+
+            // Send notification and email to Transport Admin
+            $this->sendNotificationToTransportAdmin($req);
         });
 
         return response()->json([
@@ -267,6 +275,25 @@ class MaintenanceRequisitionController extends Controller
             'redirect_url' => route('maintenance.index')
         ]);
     }
+
+    /**
+     * Send notification and email to Transport Admin
+     */
+    private function sendNotificationToTransportAdmin($requisition)
+    {
+        // Find transport admin users (role: transport_admin or admin)
+        $transportAdmins = \App\Models\User::whereHas('roles', function ($query) {
+            $query->whereIn('name', ['Super Admin', 'admin', 'Transport']);
+        })->whereNotNull('email')->get();
+
+        if ($transportAdmins->isNotEmpty()) {
+            foreach ($transportAdmins as $admin) {
+                // Send notification
+                $admin->notify(new MaintenanceRequisitionCreated($requisition));
+            }
+        }
+    }
+
     // edit function
     public function edit($id)
     {

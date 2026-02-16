@@ -18,7 +18,7 @@ class CreateMaintenanceRequisitionsTable extends Migration
 
             $table->string('requisition_no')->unique();
 
-            $table->enum('requisition_type', ['scheduled', 'emergency', 'routine','insurance'])->default('scheduled');
+            $table->enum('requisition_type', ['scheduled', 'emergency', 'routine','insurance','maintenance','breakdown','inspection'])->default('scheduled');
             $table->enum('priority', ['Low', 'Medium', 'High', 'Urgent'])->default('Low');
 
             // You already have tables:
@@ -29,7 +29,7 @@ class CreateMaintenanceRequisitionsTable extends Migration
             $table->date('maintenance_date');
 
             $table->string('service_title');
-            $table->enum('charge_bear_by', ['Company', 'Employee', 'Department'])->default('Company');
+            $table->enum('charge_bear_by', ['Company', 'Employee', 'Vendor', 'Department'])->default('Company');
 
             $table->decimal('charge_amount', 10, 2)->default(0);
             $table->text('remarks')->nullable();

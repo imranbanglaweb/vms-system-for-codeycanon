@@ -12,8 +12,27 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\View;
 use Yajra\DataTables\Facades\DataTables;
+use Illuminate\Support\Facades\Auth;
+
 class DriverController extends Controller
 {
+    public function __construct()
+    {
+        // Check if user is employee - restrict create, edit, delete operations
+        $this->middleware(function ($request, $next) {
+            if (Auth::check() && Auth::user()->hasRole('employee')) {
+                // Allow only index and show for employees
+                $allowedRoutes = ['driver.index', 'driver.show', 'driver-list'];
+                $currentRoute = $request->route()->getName();
+                
+                if (!in_array($currentRoute, $allowedRoutes) && !str_contains($currentRoute, 'show') && !str_contains($currentRoute, 'view')) {
+                    return redirect()->back()->with('error', 'You do not have permission to perform this action.');
+                }
+            }
+            return $next($request);
+        })->only(['create', 'store', 'edit', 'update', 'destroy']);
+    }
+
     public function index()
     {
         $departments = Department::all();

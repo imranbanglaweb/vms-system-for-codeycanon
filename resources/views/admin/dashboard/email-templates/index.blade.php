@@ -91,6 +91,14 @@ Email Templates
         </div>
     </div>
 </div>
+<style>
+    .modal-backdrop.show {
+        opacity: 0.5 !important;
+    }
+    #previewModal .modal-content {
+        background: #fff;
+    }
+</style>
 @endsection
 
 @push('scripts')

@@ -21,21 +21,24 @@
 <br>
         {{-- Filters --}}
         <div class="row mb-3">
-            <div class="col-md-3">
+            <div class="col-md-2">
+                <input type="text" id="searchRequisitionNo" class="form-control" placeholder="Requisition No">
+            </div>
+            <div class="col-md-2">
                 <input type="text" id="searchVehicle" class="form-control" placeholder="Search Vehicle">
             </div>
-            <div class="col-md-3">
+            <div class="col-md-2">
                 <input type="text" id="searchEmployee" class="form-control" placeholder="Search Employee">
             </div>
-            <div class="col-md-3">
+            <div class="col-md-2">
                 <select id="searchType" class="form-select form-control">
                     <option value="">All Types</option>
-                    <option value="Maintenance">Maintenance</option>
-                    <option value="Breakdown">Breakdown</option>
-                    <option value="Inspection">Inspection</option>
+                    <option value="maintenance">Maintenance</option>
+                    <option value="breakdown">Breakdown</option>
+                    <option value="inspection">Inspection</option>
                 </select>
             </div>
-            <div class="col-md-3">
+            <div class="col-md-2">
                 <select id="searchPriority" class="form-select form-control">
                     <option value="">All Priorities</option>
                     <option value="Low">Low</option>
@@ -43,6 +46,9 @@
                     <option value="High">High</option>
                     <option value="Urgent">Urgent</option>
                 </select>
+            </div>
+            <div class="col-md-2">
+                <button type="button" id="resetFilters" class="btn btn-secondary w-100">Reset</button>
             </div>
         </div>
 <hr>
@@ -104,6 +110,7 @@ $(document).ready(function() {
         ajax: {
             url: '{{ route("maintenance.index") }}',
             data: function(d) {
+                d.requisition_no = $('#searchRequisitionNo').val();
                 d.vehicle = $('#searchVehicle').val();
                 d.employee = $('#searchEmployee').val();
                 d.type = $('#searchType').val();
@@ -135,11 +142,18 @@ $(document).ready(function() {
     });
 
     // Filter events
-    $('#searchVehicle, #searchEmployee').on('keyup', function() {
+    $('#searchRequisitionNo, #searchVehicle, #searchEmployee').on('keyup', function() {
         table.draw();
     });
 
     $('#searchType, #searchPriority').on('change', function() {
+        table.draw();
+    });
+
+    // Reset filters
+    $('#resetFilters').on('click', function() {
+        $('#searchRequisitionNo, #searchVehicle, #searchEmployee').val('');
+        $('#searchType, #searchPriority').val('');
         table.draw();
     });
 

@@ -55,9 +55,9 @@
                             <label class="form-label">Requisition Type <span class="text-danger">*</span></label>
                             <select name="requisition_type" class="form-select select2" required>
                                 <option value="">Select Type</option>
-                                <option value="Maintenance">Maintenance</option>
-                                <option value="Breakdown">Breakdown</option>
-                                <option value="Inspection">Inspection</option>
+                                <option value="maintenance">Maintenance</option>
+                                <option value="breakdown">Breakdown</option>
+                                <option value="inspection">Inspection</option>
                             </select>
                         </div>
                         <div class="col-md-3">
@@ -174,6 +174,10 @@
                                         <label class="form-label">Charge Bear By</label>
                                         <select name="charge_bear_by" class="form-select">
                                             <option value="Company">Company</option>
+                                            <option value="Vendor">Vendor</option>
+                                            <option value="Employee">Employee</option>
+                                            <option value="Department">Department</option>
+                                        </select>
                                             <option value="Vendor">Vendor</option>
                                             <option value="Employee">Employee</option>
                                         </select>

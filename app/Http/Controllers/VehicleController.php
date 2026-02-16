@@ -33,6 +33,23 @@ use App\Models\RtaOffice;
 
 class VehicleController extends Controller
 {
+    public function __construct()
+    {
+        // Check if user is employee - restrict create, edit, delete operations
+        $this->middleware(function ($request, $next) {
+            if (Auth::check() && Auth::user()->hasRole('employee')) {
+                // Allow only index and show for employees
+                $allowedRoutes = ['vehicle.index', 'vehicle.show', 'vehicle-list', 'vehicles.show'];
+                $currentRoute = $request->route()->getName();
+                
+                if (!in_array($currentRoute, $allowedRoutes) && !str_contains($currentRoute, 'show') && !str_contains($currentRoute, 'view')) {
+                    return redirect()->back()->with('error', 'You do not have permission to perform this action.');
+                }
+            }
+            return $next($request);
+        })->only(['create', 'store', 'edit', 'update', 'destroy']);
+    }
+
  public function index(Request $request)
 {
     // Check if it's an AJAX request for DataTables
