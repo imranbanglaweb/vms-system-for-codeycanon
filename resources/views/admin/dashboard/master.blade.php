@@ -475,7 +475,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: linear-gradient(135deg, #0f0f23 0%, #1a1a3e 50%, #2d1b4e 100%);
+            background: transparent;
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -509,12 +509,16 @@
         }
         
         .animate_loader {
-            width: 50px;
-            height: 50px;
-            border: 3px solid rgba(255,255,255,0.2);
-            border-top-color: var(--primary-color);
+            width: 70px;
+            height: 70px;
+            border: 3px solid transparent;
+            border-top-color: #6366f1;
+            border-right-color: #a855f7;
+            border-bottom-color: #ec4899;
+            border-left-color: #f43f5e;
             border-radius: 50%;
-            animation: spin 1s linear infinite;
+            animation: spin 1s linear infinite, borderGlow 2s linear infinite;
+            box-shadow: 0 0 30px rgba(99, 102, 241, 0.4), 0 0 60px rgba(168, 85, 247, 0.2), inset 0 0 20px rgba(255, 255, 255, 0.1);
         }
         
         .loader-title {
@@ -585,6 +589,13 @@
         
         @keyframes spin {
             to { transform: rotate(360deg); }
+        }
+        
+        @keyframes borderGlow {
+            0% { box-shadow: 0 0 30px rgba(99, 102, 241, 0.4), 0 0 60px rgba(168, 85, 247, 0.2), inset 0 0 20px rgba(255, 255, 255, 0.1); }
+            33% { box-shadow: 0 0 30px rgba(168, 85, 247, 0.4), 0 0 60px rgba(236, 72, 153, 0.2), inset 0 0 20px rgba(255, 255, 255, 0.1); }
+            66% { box-shadow: 0 0 30px rgba(236, 72, 153, 0.4), 0 0 60px rgba(244, 63, 94, 0.2), inset 0 0 20px rgba(255, 255, 255, 0.1); }
+            100% { box-shadow: 0 0 30px rgba(99, 102, 241, 0.4), 0 0 60px rgba(168, 85, 247, 0.2), inset 0 0 20px rgba(255, 255, 255, 0.1); }
         }
         
         /* Dropdown Menu */
