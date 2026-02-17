@@ -349,6 +349,16 @@
                     @endif
                 </div>
 
+                <label>Favicon:</label>
+                <div class="d-flex align-items-center gap-3 mb-3">
+                    <input type="file" name="favicon" accept="image/png,image/x-icon,image/vnd.microsoft.icon">
+                    @if(!empty($settings->favicon))
+                        <img src="{{ asset('public/admin_resource/assets/images/'.$settings->favicon) }}" width="40" style="padding:5px;background:#f0f0f0;border-radius:4px;">
+                    @else
+                        <img src="{{ asset('favicon.ico') }}" width="40" style="padding:5px;background:#f0f0f0;border-radius:4px;">
+                    @endif
+                </div>
+
             </div>
 
             {{-- LANGUAGE SETTINGS CARD --}}
@@ -494,7 +504,12 @@
                     <div class="col-md-6">
                         <div class="form-group mb-3">
                             <label>Mail Password:</label>
-                            {!! Form::password('mail_password', ['class'=>'form-control', 'placeholder'=>'App Password']) !!}
+                            <div class="input-group">
+                                <input type="text" name="mail_password" class="form-control" placeholder="App Password" id="mail_password" value="{{ $settings->mail_password ?? '' }}">
+                                <button type="button" class="btn btn-outline-secondary" onclick="togglePassword('mail_password', 'mail_password_toggle')">
+                                    <i class="fa fa-eye" id="mail_password_toggle"></i>
+                                </button>
+                            </div>
                             <small class="text-muted">For Gmail, use an App Password, not your login password</small>
                         </div>
                     </div>
@@ -543,6 +558,23 @@
 <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
+    // Toggle Password Visibility Function
+    function togglePassword(inputId, toggleIconId) {
+        const passwordInput = document.getElementById(inputId);
+        const toggleIcon = document.getElementById(toggleIconId);
+        // alert(passwordInput);
+        
+        if (passwordInput.type === 'password') {
+            passwordInput.type = 'text';
+            toggleIcon.classList.remove('fa-eye');
+            toggleIcon.classList.add('fa-eye-slash');
+        } else {
+            passwordInput.type = 'password';
+            toggleIcon.classList.remove('fa-eye-slash');
+            toggleIcon.classList.add('fa-eye');
+        }
+    }
+    
     // Premium Toast Notification Function
     function showPremiumToast(type, title, message, duration = 5000) {
         const container = document.getElementById('toastContainer');

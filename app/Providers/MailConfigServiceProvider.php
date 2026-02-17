@@ -42,17 +42,17 @@ class MailConfigServiceProvider extends ServiceProvider
             try {
                 $settings = DB::table('settings')->where('id', 1)->first();
 
-                if ($settings && !empty($settings->mail_host)) {
+                if ($settings && !empty($settings->mail_host) && !empty($settings->mail_username)) {
                     $mailConfig = [
                         'default' => $settings->mail_mailer ?? 'smtp',
                         'mailers' => [
                             'smtp' => [
                                 'transport' => 'smtp',
                                 'host' => $settings->mail_host,
-                                'port' => $settings->mail_port,
-                                'encryption' => $settings->mail_encryption,
+                                'port' => $settings->mail_port ?? 587,
+                                'encryption' => $settings->mail_encryption ?? 'tls',
                                 'username' => $settings->mail_username,
-                                'password' => $settings->mail_password,
+                                'password' => $settings->mail_password ?? '',
                                 'timeout' => null,
                                 'auth_mode' => null,
                             ],
@@ -62,8 +62,8 @@ class MailConfigServiceProvider extends ServiceProvider
                             ],
                         ],
                         'from' => [
-                            'address' => $settings->mail_from_address,
-                            'name' => $settings->mail_from_name,
+                            'address' => $settings->mail_from_address ?? 'noreply@example.com',
+                            'name' => $settings->mail_from_name ?? 'System',
                         ],
                     ];
 

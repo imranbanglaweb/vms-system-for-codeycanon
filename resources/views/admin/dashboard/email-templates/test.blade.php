@@ -1,285 +1,238 @@
 @extends('admin.dashboard.master')
 
 @section('title')
-Test Email - Transport Management System
+Test Email - Email Templates
 @endsection
 
 @section('main_content')
 <section role="main" class="content-body" style="background-color: #fff;">
-    <div class="container">
-
-        <div class="d-flex justify-content-between align-items-center mb-3">
-            <h4 class="fw-bold text-primary mb-0">
-                <i class="fa fa-paper-plane"></i> Test Email
+    <div class="container-fluid">
+        <div class="d-flex justify-content-between align-items-center">
+            <h4 class="fw-bold text-primary">
+                <br>
+                <i class="fa fa-paper-plane"></i> Test Email Template
             </h4>
-            <a href="{{ route('email-templates.index') }}" class="btn btn-primary btn-sm pull-right">
-                <i class="fa fa-arrow-left"></i> Back to Templates
-            </a>
-        </div>
-
-        <div class="card shadow-sm border-0 rounded-3 mx-auto" style="max-width: 800px;">
-            <div class="card-body p-4 bg-light">
-                <form id="testEmailForm">
-                    @csrf
-
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold small mb-1">Recipient Email *</label>
-                        <input 
-                            type="email" 
-                            name="email" 
-                            id="email"
-                            class="form-control" 
-                            placeholder="Enter recipient email address"
-                            required>
-                        <small class="text-danger error-text email_error"></small>
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold small mb-1">Select Template (Optional)</label>
-                        <select name="template_id" id="template_id" class="form-select">
-                            <option value="">-- No Template (Simple Test) --</option>
-                            @foreach($templates as $id => $name)
-                                <option value="{{ $id }}">{{ $name }}</option>
-                            @endforeach
-                        </select>
-                        <small class="text-muted">Leave empty for a simple test email</small>
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold small mb-1">Subject</label>
-                        <input 
-                            type="text" 
-                            name="subject" 
-                            id="subject"
-                            class="form-control" 
-                            placeholder="Email Subject">
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold small mb-1">Body (HTML)</label>
-                        <textarea 
-                            name="body" 
-                            id="body"
-                            class="form-control" 
-                            rows="5" 
-                            placeholder="<h2>Hello!</h2>"></textarea>
-                    </div>
-
-                    <div class="d-flex gap-2 justify-content-center mt-4">
-                        <button type="button" class="btn btn-info px-4 py-2" id="previewBtn">
-                            <i class="fa fa-eye"></i> Preview
-                        </button>
-                        <button type="submit" class="btn btn-primary px-4 py-2" id="submitBtn">
-                            <span class="spinner-border spinner-border-sm d-none" id="loader"></span>
-                            <i class="fa fa-paper-plane"></i> Send Test Email
-                        </button>
-                    </div>
-                </form>
+            <div class="btn-group pull-right">
+                <a href="{{ route('email-templates.index') }}" class="btn btn-secondary btn-sm">
+                    <i class="fa fa-arrow-left"></i> Back to Templates
+                </a>
             </div>
         </div>
+        <br>
+        <br>
 
-        <div class="card shadow-sm border-0 rounded-3 mx-auto mt-4" style="max-width: 800px;">
-            <div class="card-body p-4">
-                <h5 class="fw-bold text-info mb-3">
-                    <i class="fa fa-info-circle"></i> Email Configuration
-                </h5>
-                <table class="table table-sm table-bordered">
-                    <tr>
-                        <th style="width: 200px;">Mailer</th>
-                        <td><code>{{ config('mail.default') }}</code></td>
-                    </tr>
-                    <tr>
-                        <th>Host</th>
-                        <td><code>{{ config('mail.mailers.smtp.host') }}</code></td>
-                    </tr>
-                    <tr>
-                        <th>Port</th>
-                        <td><code>{{ config('mail.mailers.smtp.port') }}</code></td>
-                    </tr>
-                    <tr>
-                        <th>Encryption</th>
-                        <td><code>{{ config('mail.mailers.smtp.encryption') }}</code></td>
-                    </tr>
-                    <tr>
-                        <th>From Address</th>
-                        <td><code>{{ config('mail.from.address') }}</code></td>
-                    </tr>
-                    <tr>
-                        <th>From Name</th>
-                        <td><code>{{ config('mail.from.name') }}</code></td>
-                    </tr>
-                </table>
-                <div class="alert alert-info mt-3">
-                    <i class="fa fa-lightbulb-o"></i>
-                    <strong>Tip:</strong> If emails are not being delivered, check your Gmail app password and ensure 2-factor authentication is enabled on your Google account.
+        @if(session('success'))
+            <div class="alert alert-success">{{ session('success') }}</div>
+        @endif
+
+        @if(session('error'))
+            <div class="alert alert-danger small">{{ session('error') }}</div>
+        @endif
+
+        <div class="row">
+            <div class="col-md-4">
+                <div class="card shadow-sm border-0 rounded-3">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0"><i class="fa fa-cog"></i> Email Settings</h5>
+                    </div>
+                    <div class="card-body">
+                        <form id="testEmailForm" method="POST" action="{{ route('admin.email.test.send') }}">
+                            @csrf
+                            
+                            <div class="form-group mb-3">
+                                <label>Select Template:</label>
+                                <select name="template_id" id="templateSelect" class="form-control">
+                                    <option value="">-- Select a Template --</option>
+                                    @foreach($templates as $id => $name)
+                                        <option value="{{ $id }}">{{ $name }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+
+                            <div class="form-group mb-3">
+                                <label>Recipient Email:</label>
+                                <input type="email" name="recipient_email" id="recipientEmail" class="form-control" placeholder="Enter email address" required>
+                            </div>
+
+                            <div class="form-group mb-3">
+                                <label>Subject:</label>
+                                <input type="text" name="subject" id="emailSubject" class="form-control" placeholder="Email Subject" value="Test Email">
+                            </div>
+
+                            <div class="form-group mb-3">
+                                <label>Custom Body (Optional):</label>
+                                <textarea name="body" id="emailBody" class="form-control" rows="5" placeholder="Leave empty to use template content"></textarea>
+                            </div>
+
+                            <div class="form-group mb-3">
+                                <button type="button" class="btn btn-info btn-block" id="previewBtn">
+                                    <i class="fa fa-eye"></i> Preview
+                                </button>
+                            </div>
+
+                            <div class="form-group mb-3">
+                                <button type="submit" class="btn btn-primary btn-block" id="sendBtn">
+                                    <i class="fa fa-paper-plane"></i> Send Test Email
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-8">
+                <div class="card shadow-sm border-0 rounded-3">
+                    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0"><i class="fa fa-envelope-open"></i> Email Preview</h5>
+                        <button type="button" class="btn btn-sm btn-light" id="refreshPreview">
+                            <i class="fa fa-sync"></i> Refresh
+                        </button>
+                    </div>
+                    <div class="card-body email-preview-container">
+                        <div id="previewFrame" class="preview-frame p-3">
+                            <div class="text-center text-muted py-5">
+                                <i class="fa fa-envelope-open fa-4x mb-3"></i>
+                                <p>Select a template and click Preview to see the email content</p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
-
     </div>
 </section>
-
-<!-- Preview Modal -->
-<div class="modal fade" id="previewModal" tabindex="-1" role="dialog" aria-labelledby="previewModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg" role="document">
-        <div class="modal-content">
-            <div class="modal-header bg-info text-white">
-                <h5 class="modal-title" id="previewModalLabel">
-                    <i class="fa fa-eye"></i> Email Preview
-                </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body p-0" style="background-color: #f1f5f9;">
-                <iframe id="previewFrame" style="width: 100%; height: 500px; border: none;"></iframe>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-            </div>
-        </div>
-    </div>
-</div>
 @endsection
 
-@push('scripts')
+@push('styles')
+<link rel="stylesheet" href="{{ asset('public/admin_resource/plugins/datatables-bs4/css/dataTables.bootstrap4.min.css') }}">
+<link rel="stylesheet" href="{{ asset('public/admin_resource/plugins/sweetalert2/sweetalert2.min.css') }}">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
+<style>
+    .table th, .table td {
+        vertical-align: middle !important;
+        font-size: 15px;
+    }
+    .badge {
+        font-size: 15px;
+    }
+    .preview-frame {
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        min-height: 400px;
+        background: #fff;
+    }
+    .email-preview-container {
+        max-height: 500px;
+        overflow-y: auto;
+    }
+</style>
+@endpush
+
+@push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
 $(function() {
-    // Preview button click handler
-    $('#previewBtn').on('click', function() {
-        let form = $('#testEmailForm');
-        let subject = $('#subject').val() || 'Test Email Preview';
-        let body = $('#body').val() || '<p>This is a test email preview.</p>';
-        let templateId = $('#template_id').val();
+    // Preview Button Click
+    $('#previewBtn').click(function() {
+        let templateId = $('#templateSelect').val();
+        let subject = $('#emailSubject').val();
+        let body = $('#emailBody').val();
 
-        $('#previewBtn').attr('disabled', true);
-        $('#previewBtn').html('<span class="spinner-border spinner-border-sm"></span> Loading...');
+        if (!templateId && !body) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Missing Data',
+                text: 'Please select a template or enter custom body content'
+            });
+            return;
+        }
+
+        $('#previewFrame').html('<div class="text-center py-5"><i class="fa fa-spinner fa-spin fa-2x"></i><p class="mt-2">Loading preview...</p></div>');
 
         $.ajax({
             url: "{{ route('admin.email.test.preview') }}",
-            method: 'POST',
+            type: 'POST',
             data: {
-                _token: $('input[name="_token"]').val(),
                 template_id: templateId,
                 subject: subject,
-                body: body
+                body: body,
+                _token: '{{ csrf_token() }}'
             },
             success: function(response) {
-                $('#previewBtn').attr('disabled', false);
-                $('#previewBtn').html('<i class="fa fa-eye"></i> Preview');
-
-                if (response.success) {
-                    $('#previewModal').modal('show');
-                    $('#previewFrame').contents().find('html').html(response.html);
-                } else {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Preview Failed',
-                        text: response.message
-                    });
-                }
+                $('#previewFrame').html(response);
             },
             error: function(xhr) {
-                $('#previewBtn').attr('disabled', false);
-                $('#previewBtn').html('<i class="fa fa-eye"></i> Preview');
-
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error',
-                    text: xhr.responseJSON?.message || 'Failed to generate preview'
-                });
+                let errorMsg = 'Failed to load preview';
+                if (xhr.responseJSON && xhr.responseJSON.message) {
+                    errorMsg = xhr.responseJSON.message;
+                }
+                $('#previewFrame').html('<div class="alert alert-danger">' + errorMsg + '</div>');
             }
         });
     });
 
-    // Send email form handler
-    $('#testEmailForm').on('submit', function(e) {
-        e.preventDefault();
+    // Refresh Preview Button
+    $('#refreshPreview').click(function() {
+        $('#previewBtn').click();
+    });
 
-        let form = $(this);
-        let url = "{{ route('admin.email.test.send') }}";
+    // Template Selection Change
+    $('#templateSelect').change(function() {
+        let templateId = $(this).val();
+        if (templateId) {
+            // Auto-preview when template is selected
+            $('#previewBtn').click();
+        }
+    });
+
+    // Form Submit
+    $('#testEmailForm').submit(function(e) {
+        e.preventDefault();
         
-        $('.error-text').text('');
-        $('#loader').removeClass('d-none');
-        $('#submitBtn').attr('disabled', true);
+        let recipientEmail = $('#recipientEmail').val();
+        if (!recipientEmail) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Missing Email',
+                text: 'Please enter a recipient email address'
+            });
+            return;
+        }
+
+        let formData = $(this).serialize();
+        $('#sendBtn').prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i> Sending...');
 
         $.ajax({
-            url: url,
-            method: 'POST',
-            data: form.serialize(),
+            url: $(this).attr('action'),
+            type: 'POST',
+            data: formData,
             success: function(response) {
-                $('#loader').addClass('d-none');
-                $('#submitBtn').attr('disabled', false);
-
-                if (response.success) {
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Success',
-                        text: response.message,
-                        timer: 3000,
-                        showConfirmButton: false
-                    });
-                } else {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Failed',
-                        text: response.message
-                    });
-                }
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Success!',
+                    text: response.message || 'Test email sent successfully!',
+                    timer: 3000,
+                    showConfirmButton: false
+                });
+                $('#sendBtn').prop('disabled', false).html('<i class="fa fa-paper-plane"></i> Send Test Email');
             },
             error: function(xhr) {
-                $('#loader').addClass('d-none');
-                $('#submitBtn').attr('disabled', false);
-
-                if (xhr.status === 422) {
-                    $.each(xhr.responseJSON.errors, function(key, value) {
-                        $('.' + key + '_error').text(value[0]);
-                    });
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Validation Error',
-                        text: 'Please check the form for errors.'
-                    });
-                } else {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Error',
-                        text: xhr.responseJSON?.message || 'Something went wrong!'
-                    });
+                let errorMsg = 'Failed to send test email';
+                if (xhr.responseJSON && xhr.responseJSON.message) {
+                    errorMsg = xhr.responseJSON.message;
+                } else if (xhr.responseJSON && xhr.responseJSON.errors) {
+                    errorMsg = Object.values(xhr.responseJSON.errors).flat().join('<br>');
                 }
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error!',
+                    html: errorMsg
+                });
+                $('#sendBtn').prop('disabled', false).html('<i class="fa fa-paper-plane"></i> Send Test Email');
             }
         });
-    });
-
-    // Pre-fill subject and body when template is selected
-    $('#template_id').on('change', function() {
-        if ($(this).val()) {
-            // Could load template content here if needed
-            $('#subject').val('');
-            $('#body').val('');
-        }
     });
 });
 </script>
-
-<style>
-.form-label {
-    color: #000;
-    font-size: 15px;
-}
-.card {
-    background-color: #fff;
-    padding: 20px;
-}
-.form-control, .form-select {
-    font-size: 1em;
-}
-.modal-lg {
-    max-width: 800px;
-}
-#previewFrame {
-    background-color: #fff;
-}
-</style>
 @endpush

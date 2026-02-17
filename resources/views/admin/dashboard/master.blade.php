@@ -475,7 +475,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: transparent;
+            background: linear-gradient(135deg, #1e3a5f 0%, #2d5a87 50%, #1e3a5f 100%);
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -569,6 +569,16 @@
             animation: logoFloat 3s ease-in-out infinite, logoGlow 2s ease-in-out infinite;
             position: relative;
             z-index: 1;
+            overflow: hidden;
+        }
+        
+        .loader-logo img {
+            width: 80px;
+            height: 80px;
+            object-fit: contain;
+            border-radius: 16px;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 8px;
         }
         
         .loader-logo i {
@@ -745,9 +755,11 @@
 <body>
     <div class="wrapper">
         <div id="loader">
+            @if(!empty($settings->admin_logo))
             <div class="loader-logo">
-                <i class="fas fa-layer-group"></i>
+                <img src="{{ asset('public/admin_resource/assets/images/'.$settings->admin_logo) }}" alt="Logo">
             </div>
+            @endif
             <div class="animate_loader"></div>
             <div class="loader-title">{{ $settings->admin_title ?? 'Transport Management System' }}</div>
             <div class="loader-description">{{ $settings->admin_description ?? 'Fleet Management Solution' }}</div>

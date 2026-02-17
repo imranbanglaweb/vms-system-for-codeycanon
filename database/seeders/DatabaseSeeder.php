@@ -35,7 +35,7 @@ class DatabaseSeeder extends Seeder
             LanguageSeeder::class,
             SubscriptionPlanSeeder::class,
             EmailTemplateSeeder::class,
-            SettingSeeder::class,
+            EmailSettingSeeder::class,
         ]);
     }
 }

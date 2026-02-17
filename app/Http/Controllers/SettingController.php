@@ -70,6 +70,15 @@ class SettingController extends Controller
   $request->admin_logo->move(public_path('admin_resource\assets\images'), $admin_logo);
         }
 
+        if ($request->file('favicon')) {
+            $faviconPath = $request->file('favicon');
+            $request->validate([
+                'favicon' => 'required|image|mimes:png,ico|max:5048',
+            ]);
+            $favicon = time().'.'.$request->favicon->extension();
+            $request->favicon->move(public_path('admin_resource\assets\images'), $favicon);
+        }
+
         $setting->admin_title = $request->admin_title;
         $setting->admin_description = $request->admin_description;
 
@@ -92,6 +101,10 @@ class SettingController extends Controller
         if (!empty($admin_logo)) {
             
              $setting->admin_logo = $admin_logo;
+        }
+
+        if (!empty($favicon)) {
+            $setting->favicon = $favicon;
         }
 
         $setting->created_by = Auth::id();

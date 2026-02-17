@@ -2,8 +2,13 @@
 		<meta charset="UTF-8">
 
 		<title>Dashboard | {{ $settings->admin_title ?? 'InayaFleet360 – Fleet & Transport Management System' }}</title>
+	@if(!empty($settings->favicon))
+		<link rel="shortcut icon" type="image/png" href="{{ asset('public/admin_resource/assets/images/'.$settings->favicon) }}">
+		<link rel="shortcut icon" type="image/x-icon" href="{{ asset('public/admin_resource/assets/images/'.$settings->favicon) }}">
+	@else
 		<link rel="shortcut icon" type="image/png" href="{{ asset('favicon.ico') }}">
 		<link rel="shortcut icon" type="image/x-icon" href="{{ asset('favicon.ico') }}">
+	@endif
 		<meta name="keywords" content="HTML5 Admin Template" />
 		<meta name="description" content="@if(!empty($settings->admin_description)) @endif">
 		<meta name="author" content="Imran Rahman">

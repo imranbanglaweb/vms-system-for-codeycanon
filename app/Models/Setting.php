@@ -21,6 +21,7 @@ class Setting extends Model
         'site_logo',
         'site_copyright_text',
         'admin_logo',
+        'favicon',
         'status',
         'created_by',
         'default_language',

@@ -178,7 +178,7 @@ HTML;
     public function send(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'email' => 'required|email',
+            'recipient_email' => 'required|email',
             'template_id' => 'nullable|exists:email_templates,id',
             'subject' => 'nullable|string|max:255',
             'body' => 'nullable|string',
@@ -193,7 +193,7 @@ HTML;
         }
 
         try {
-            $email = $request->email;
+            $email = $request->recipient_email;
             $subject = $request->subject ?? 'Test Email';
             $body = $request->body ?? 'This is a test email sent from the Transport Management System.';
 
