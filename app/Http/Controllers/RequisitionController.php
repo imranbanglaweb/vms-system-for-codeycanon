@@ -277,7 +277,9 @@ public function validateAjax(Request $request)
  
  
      
-    // Get employee record to auto-populate department and unit if not provided`n      `$employee = Employee::find(`$request->employee_id);`n      `n      DB::beginTransaction();
+    // Get employee record to auto-populate department and unit if not provided
+    $employee = Employee::find($request->employee_id);
+    DB::beginTransaction();
     try {
         $requisition = Requisition::create([
             'requested_by' => $request->employee_id,

@@ -227,6 +227,18 @@ class VehicleController extends Controller
         return redirect()->route('vehicles.index')->with('success', 'Vehicle deleted successfully!');
     }
 
+    /**
+     * Display the specified vehicle
+     */
+    public function show(Vehicle $vehicle)
+    {
+        $vehicle->load(['department', 'driver', 'vehicleType', 'vendor']);
+        
+        return view('admin.dashboard.vehicles.show', [
+            'vehicle' => $vehicle
+        ]);
+    }
+
     public function byCapacity(Request $request)
 {
     $count = $request->passenger_count;

@@ -4,9 +4,11 @@
 if (PHP_OS === 'WINNT') {
     // Try multiple possible paths
     $possiblePaths = [
-        'F:/xampp php8/apache/conf/openssl.cnf',
-        'F:/xampp/php/extras/ssl/openssl.cnf',
-        'F:/xampp/php/extras/openssl/openssl.cnf',
+        'D:/MYProject/apache/conf/openssl.cnf',
+        'D:/MYProject/php/extras/ssl/openssl.cnf',
+        'D:/MYProject/php/extras/openssl/openssl.cnf',
+        __DIR__ . '/../openssl.cnf',
+        __DIR__ . '/../openssl2.cnf',
     ];
     
     foreach ($possiblePaths as $path) {

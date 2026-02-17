@@ -23,6 +23,11 @@ if (!function_exists('admin_title')) {
      * Get admin title from settings
      */
     function admin_title() {
+        // Try to get from config first (cached)
+        if (config('admin_settings.admin_title')) {
+            return config('admin_settings.admin_title');
+        }
+        // Fallback to database query
         $settings = DB::table('settings')->where('id', 1)->first();
         return $settings->admin_title ?? 'Transport Management System';
     }
@@ -33,6 +38,11 @@ if (!function_exists('admin_description')) {
      * Get admin description from settings
      */
     function admin_description() {
+        // Try to get from config first (cached)
+        if (config('admin_settings.admin_description')) {
+            return config('admin_settings.admin_description');
+        }
+        // Fallback to database query
         $settings = DB::table('settings')->where('id', 1)->first();
         return $settings->admin_description ?? 'Fleet Management Solution';
     }
@@ -43,6 +53,11 @@ if (!function_exists('admin_logo_url')) {
      * Get admin logo URL from settings
      */
     function admin_logo_url() {
+        // Try to get from config first (cached)
+        if (config('admin_settings.admin_logo_url')) {
+            return config('admin_settings.admin_logo_url');
+        }
+        // Fallback to database query
         $settings = DB::table('settings')->where('id', 1)->first();
         if (!empty($settings->admin_logo)) {
             return asset('public/admin_resource/assets/images/' . $settings->admin_logo);
@@ -61,6 +76,9 @@ class AppServiceProvider extends ServiceProvider
 
     public function boot()
     {
+        // Load admin settings into config
+        $this->loadAdminSettings();
+
         // Force HTTPS in production
         if (config('app.env') === 'production') {
             \URL::forceScheme('https');
@@ -72,6 +90,11 @@ class AppServiceProvider extends ServiceProvider
         $this->app->extend('translation.loader', function ($loader, $app) {
             return new CustomTranslationLoader($app['files'], $app['path.lang']);
         });
+
+        /**
+         * Load admin settings into config for caching
+         */
+        $this->loadAdminSettings();
 
         /**
          * Register Requisition Observer
@@ -102,6 +125,14 @@ class AppServiceProvider extends ServiceProvider
                     $isTransport = $user->hasRole('Transport');
                     $isEmployee = $user->hasRole('Employee');
                     
+                    // Get employee data if user has an employee profile
+                    $employee = null;
+                    if ($user->employee_id) {
+                        $employee = \App\Models\Employee::with(['department', 'unit', 'location', 'company'])
+                            ->where('id', $user->employee_id)
+                            ->first();
+                    }
+                    
                     $view->with([
                         'sidebar_menus' => MenuService::sidebar(),
                         'isSuperAdmin' => $isSuperAdmin,
@@ -109,6 +140,7 @@ class AppServiceProvider extends ServiceProvider
                         'isManager' => $isManager,
                         'isTransport' => $isTransport,
                         'isEmployee' => $isEmployee,
+                        'employee' => $employee,
                     ]);
                 }
             );
@@ -161,6 +193,14 @@ class AppServiceProvider extends ServiceProvider
                 $isTransport = $user->hasRole('Transport');
                 $isEmployee = $user->hasRole('Employee');
                 
+                // Get employee data if user has an employee profile
+                $employee = null;
+                if ($user->employee_id) {
+                    $employee = \App\Models\Employee::with(['department', 'unit', 'location', 'company'])
+                        ->where('id', $user->employee_id)
+                        ->first();
+                }
+                
                 $view->with([
                     'settings' => $settings,
                     'isSuperAdmin' => $isSuperAdmin,
@@ -168,6 +208,7 @@ class AppServiceProvider extends ServiceProvider
                     'isManager' => $isManager,
                     'isTransport' => $isTransport,
                     'isEmployee' => $isEmployee,
+                    'employee' => $employee,
                 ]);
             }
         );
@@ -188,5 +229,44 @@ class AppServiceProvider extends ServiceProvider
         Blade::if('ltr', function () {
             return session('direction', 'ltr') === 'rtl';
         });
+    }
+
+    /**
+     * Load admin settings into config for caching/performance
+     */
+    private function loadAdminSettings()
+    {
+        try {
+            $settings = DB::table('settings')->where('id', 1)->first();
+            
+            if ($settings) {
+                // Set admin title
+                $adminTitle = !empty($settings->admin_title) 
+                    ? $settings->admin_title 
+                    : 'Transport Management System';
+                
+                // Set admin description
+                $adminDescription = !empty($settings->admin_description) 
+                    ? $settings->admin_description 
+                    : 'Fleet Management Solution';
+                
+                // Set admin logo URL
+                $adminLogoUrl = !empty($settings->admin_logo)
+                    ? asset('public/admin_resource/assets/images/' . $settings->admin_logo)
+                    : asset('public/admin_resource/assets/images/default.png');
+                
+                // Merge into config
+                Config::set('admin_settings', [
+                    'admin_title' => $adminTitle,
+                    'admin_description' => $adminDescription,
+                    'admin_logo_url' => $adminLogoUrl,
+                    'admin_logo' => $settings->admin_logo ?? 'default.png',
+                    'site_name' => $settings->site_name ?? $adminTitle,
+                    'site_description' => $settings->site_description ?? $adminDescription,
+                ]);
+            }
+        } catch (\Exception $e) {
+            // Silently fail if settings table doesn't exist or has issues
+        }
     }
 }

@@ -4,6 +4,57 @@
     }
     
     /* Sidebar Menu Styling */
+        color: rgba(255,255,255,0.7);
+        font-size: 12px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    
+    .sidebar-profile-section .profile-details {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        margin-top: 10px;
+        padding-top: 10px;
+        border-top: 1px solid rgba(255,255,255,0.1);
+    }
+    
+    .sidebar-profile-section .profile-detail-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        color: rgba(255,255,255,0.8);
+        font-size: 12px;
+    }
+    
+    .sidebar-profile-section .profile-detail-item i {
+        width: 14px;
+        text-align: center;
+        color: rgba(255,255,255,0.6);
+    }
+    
+    .sidebar-profile-section .profile-link {
+        display: block;
+        margin-top: 12px;
+        padding: 8px 12px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        text-align: center;
+        border-radius: 6px;
+        text-decoration: none;
+        font-size: 13px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+    }
+    
+    .sidebar-profile-section .profile-link:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        color: white;
+    }
+    
+    /* Sidebar Menu Styling */
     .sidebar-left .nav-main {
         list-style: none;
         padding: 0;

@@ -475,8 +475,9 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: linear-gradient(135deg, var(--sidebar-dark) 0%, var(--sidebar-bg) 50%, var(--primary-light) 100%);
+            background: rgba(22, 30, 121, 0.5);
             display: flex;
+            flex-direction: column;
             justify-content: center;
             align-items: center;
             z-index: 99999;
@@ -492,9 +493,62 @@
             width: 50px;
             height: 50px;
             border: 3px solid rgba(255,255,255,0.2);
-            border-top-color: #fff;
+            border-top-color: var(--primary-color);
             border-radius: 50%;
             animation: spin 1s linear infinite;
+        }
+        
+        .loader-title {
+            font-size: 28px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #6366f1 0%, #a855f7 50%, #ec4899 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-top: 30px;
+            text-align: center;
+            animation: fadeInUp 0.5s ease-out;
+        }
+        
+        .loader-description {
+            font-size: 16px;
+            color: #6b7280;
+            margin-top: 12px;
+            text-align: center;
+            animation: fadeInUp 0.5s ease-out 0.2s both;
+        }
+        
+        .loader-logo {
+            width: 80px;
+            height: 80px;
+            border-radius: 20px;
+            background: linear-gradient(135deg, #6366f1, #a855f7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 10px 40px rgba(99, 102, 241, 0.4);
+            animation: pulse 2s ease-in-out infinite;
+        }
+        
+        .loader-logo i {
+            font-size: 36px;
+            color: white;
+        }
+        
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
         }
         
         @keyframes spin {
@@ -647,7 +701,14 @@
 </head>
 <body>
     <div class="wrapper">
-        <div id="loader"><span class="animate_loader"></span></div>
+        <div id="loader">
+            <div class="loader-logo">
+                <i class="fas fa-truck-loading"></i>
+            </div>
+            <span class="animate_loader"></span>
+            <div class="loader-title">{{ $settings->admin_title ?? 'Transport Management System' }}</div>
+            <div class="loader-description">{{ $settings->admin_description ?? 'Fleet Management Solution' }}</div>
+        </div>
         
         <!-- Sidebar -->
         @include('admin.dashboard.common.sidebar')
@@ -704,9 +765,18 @@
                     <!-- User Menu -->
                     <div class="dropdown" id="userDropdown">
                         <a class="user-dropdown" href="#" onclick="toggleDropdown('userDropdown'); return false;">
-                            <div class="user-avatar">
-                                {{ substr(Auth::user()->name, 0, 2) }}
-                            </div>
+                            @php
+                                $userImage = Auth::user()->user_image;
+                                $userImagePath = public_path('admin_resource/assets/images/user_image/' . $userImage);
+                                $hasUserImage = !empty($userImage) && file_exists($userImagePath);
+                            @endphp
+                            @if($hasUserImage)
+                                <img src="{{ asset('public/admin_resource/assets/images/user_image/'.Auth::user()->user_image) }}" class="user-avatar" style="width:36px;height:36px;border-radius:50%;object-fit:cover;">
+                            @else
+                                <div class="user-avatar">
+                                    {{ substr(Auth::user()->name, 0, 2) }}
+                                </div>
+                            @endif
                             <div class="user-info">
                                 <span class="user-name">{{ Auth::user()->name }}</span>
                                 <span class="user-role">{{ Auth::user()->role ?? 'User' }}</span>

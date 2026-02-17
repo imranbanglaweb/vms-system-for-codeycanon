@@ -530,7 +530,7 @@ class MenuSeeder extends Seeder
             [
                 'menu_name' => 'Add Requisition',
                 'menu_slug' => 'requisition-create',
-                'menu_icon' => 'fa-file-o',
+                'menu_icon' => 'fa-plus',
                 'menu_url' => 'requisitions.create',
                 'menu_permission' => 'requisition-create',
                 'menu_order' => 1,

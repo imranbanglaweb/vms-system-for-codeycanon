@@ -100,7 +100,7 @@ class UserController extends Controller
                     $imageUrl = asset('public/admin_resource/assets/images/user_image/default.jpg');
 
                     if (!empty($row->user_image) && file_exists($imagePath)) {
-                        $imageUrl = asset('admin_resource/assets/images/user_image/' . $row->user_image);
+                        $imageUrl = asset('public/admin_resource/assets/images/user_image/' . $row->user_image);
                     }
 
                     return '<img src="'.$imageUrl.'" width="45" height="45"
@@ -241,12 +241,6 @@ class UserController extends Controller
                 'created_by'    => Auth::id(),
             ];
 
-            // if ($request->hasFile('user_image')) {
-            //     $file = $request->file('user_image');
-            //     $fileName = time().'_'.$file->getClientOriginalName();
-            //     $file->storeAs('users', $fileName);
-            //     $userData['user_image'] = $fileName;
-            // }
 
             if ($request->hasFile('user_image')) {
                 $file = $request->file('user_image');
@@ -417,22 +411,30 @@ class UserController extends Controller
             $userRole = $user->roles->pluck('name','name')->all();
             $employees = Employee::orderBy('employee_order','ASC')->get();
 
+            // Get employee data if user has an employee profile
+            $employee = null;
+            if ($user->employee_id) {
+                $employee = Employee::with(['department', 'unit', 'location', 'company'])
+                    ->where('id', $user->employee_id)
+                    ->first();
+            }
+
             return view(
                 'admin.dashboard.users.user-profile',
-                compact('user','roles','userRole','employees')
+                compact('user','roles','userRole','employees','employee')
             );
         }
         public function updateProfile(Request $request)
             {
                 $user = Auth::user();
 
-                // VALIDATION
+                // VALIDATION - Make user_image optional and lenient
                 $request->validate([
                     'user_name'  => 'required|string|max:255',
                     'email'      => 'required|email|unique:users,email,' . $user->id,
                     'phone'      => 'nullable|string|max:20',
                     'password'   => 'nullable|min:6|same:confirm-password',
-                    'user_image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:4096',
+                    'user_image' => 'nullable|image',
                 ]);
 
                 // BASIC UPDATE
@@ -447,6 +449,12 @@ class UserController extends Controller
 
                 // IMAGE UPDATE
                 if ($request->hasFile('user_image')) {
+
+                    // CREATE DIRECTORY IF NOT EXISTS
+                    $uploadPath = public_path('admin_resource/assets/images/user_image');
+                    if (!file_exists($uploadPath)) {
+                        mkdir($uploadPath, 0755, true);
+                    }
 
                     // DELETE OLD IMAGE
                     if (!empty($user->user_image)) {
@@ -472,6 +480,57 @@ class UserController extends Controller
                 }
 
                 $user->save();
+
+                // UPDATE EMPLOYEE DATA
+                if ($user->employee_id) {
+                    $employee = \App\Models\Employee::find($user->employee_id);
+                    if ($employee) {
+                        // Update employee fields
+                        if ($request->has('designation')) {
+                            $employee->designation = $request->designation;
+                        }
+                        if ($request->has('phone')) {
+                            $employee->phone = $request->phone;
+                        }
+                        if ($request->has('blood_group')) {
+                            $employee->blood_group = $request->blood_group;
+                        }
+                        if ($request->has('nid')) {
+                            $employee->nid = $request->nid;
+                        }
+                        if ($request->has('present_address')) {
+                            $employee->present_address = $request->present_address;
+                        }
+                        if ($request->has('permanent_address')) {
+                            $employee->permanent_address = $request->permanent_address;
+                        }
+                        
+                        // Handle employee photo upload
+                        if ($request->hasFile('employee_photo')) {
+                            // Create directory if not exists
+                            $uploadPath = public_path('uploads/employee');
+                            if (!file_exists($uploadPath)) {
+                                mkdir($uploadPath, 0755, true);
+                            }
+                            
+                            // Delete old photo
+                            if (!empty($employee->photo)) {
+                                $oldPhotoPath = public_path('uploads/employee/' . $employee->photo);
+                                if (file_exists($oldPhotoPath)) {
+                                    unlink($oldPhotoPath);
+                                }
+                            }
+                            
+                            // Save new photo
+                            $photoFile = $request->file('employee_photo');
+                            $photoFileName = time() . '_' . uniqid() . '.' . $photoFile->getClientOriginalExtension();
+                            $photoFile->move(public_path('uploads/employee'), $photoFileName);
+                            $employee->photo = $photoFileName;
+                        }
+                        
+                        $employee->save();
+                    }
+                }
 
                 return response()->json([
                     'status'  => 'success',

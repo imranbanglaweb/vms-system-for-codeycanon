@@ -120,6 +120,16 @@ class HomeController extends Controller
             $isEmployee = true;
         }
         
+        // Debug: Log final role detection
+        \Log::info('Final Role Detection', [
+            'isAdmin' => $isAdmin,
+            'isManager' => $isManager,
+            'isTransport' => $isTransport,
+            'isEmployee' => $isEmployee,
+            'isDriver' => $isDriver,
+            'user_roles' => $user->getRoleNames()->toArray(),
+        ]);
+        
         // Build base query based on role
         $baseQuery = Requisition::query();
         
@@ -435,7 +445,20 @@ class HomeController extends Controller
             'topVehicles' => $topVehicles,
         ];
 
-        return view('admin.dashboard.dashboard', $payload);
+        // Route to appropriate dashboard based on role
+        if ($isAdmin) {
+            return view('admin.dashboard.admin.dashboard', $payload);
+        } elseif ($isTransport) {
+            return view('admin.dashboard.transport_head.dashboard', $payload);
+        } elseif ($isManager) {
+            return view('admin.dashboard.department_head.dashboard', $payload);
+        } elseif ($isDriver) {
+            // Driver uses separate driver dashboard
+            return view('admin.dashboard.driver.dashboard', $payload);
+        } else {
+            // Default to employee dashboard
+            return view('admin.dashboard.employee.dashboard', $payload);
+        }
     } 
 
      /**
