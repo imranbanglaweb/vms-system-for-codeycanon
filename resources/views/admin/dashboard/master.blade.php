@@ -475,13 +475,32 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(22, 30, 121, 0.5);
+            background: linear-gradient(135deg, #0f0f23 0%, #1a1a3e 50%, #2d1b4e 100%);
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
             z-index: 99999;
             transition: opacity 0.4s ease, visibility 0.4s ease;
+        }
+        
+        #loader::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(circle at 20% 80%, rgba(99, 102, 241, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(168, 85, 247, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(236, 72, 153, 0.1) 0%, transparent 40%);
+            animation: ambientGlow 8s ease-in-out infinite;
+        }
+        
+        @keyframes ambientGlow {
+            0%, 100% { opacity: 0.6; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.02); }
         }
         
         #loader.fade-out {
@@ -499,56 +518,69 @@
         }
         
         .loader-title {
-            font-size: 28px;
-            font-weight: 700;
-            background: linear-gradient(135deg, #6366f1 0%, #a855f7 50%, #ec4899 100%);
+            font-size: 32px;
+            font-weight: 800;
+            background: linear-gradient(135deg, #818cf8 0%, #c084fc 50%, #f472b6 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
-            margin-top: 30px;
+            margin-top: 40px;
             text-align: center;
-            animation: fadeInUp 0.5s ease-out;
+            animation: fadeInUp 0.6s ease-out, textShimmer 3s ease-in-out infinite;
+            text-shadow: 0 0 40px rgba(129, 140, 248, 0.3);
+            letter-spacing: -0.5px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        @keyframes textShimmer {
+            0%, 100% { filter: brightness(1); }
+            50% { filter: brightness(1.2); }
         }
         
         .loader-description {
             font-size: 16px;
-            color: #6b7280;
+            color: rgba(255, 255, 255, 0.7);
             margin-top: 12px;
             text-align: center;
-            animation: fadeInUp 0.5s ease-out 0.2s both;
+            animation: fadeInUp 0.6s ease-out 0.2s both;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+            position: relative;
+            z-index: 1;
         }
         
         .loader-logo {
-            width: 80px;
-            height: 80px;
-            border-radius: 20px;
-            background: linear-gradient(135deg, #6366f1, #a855f7);
+            width: 100px;
+            height: 100px;
+            border-radius: 24px;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6, #d946ef);
             display: flex;
             align-items: center;
             justify-content: center;
-            box-shadow: 0 10px 40px rgba(99, 102, 241, 0.4);
-            animation: pulse 2s ease-in-out infinite;
+            box-shadow: 
+                0 20px 60px rgba(99, 102, 241, 0.4),
+                0 0 0 4px rgba(99, 102, 241, 0.1),
+                inset 0 2px 10px rgba(255, 255, 255, 0.2);
+            animation: logoFloat 3s ease-in-out infinite, logoGlow 2s ease-in-out infinite;
+            position: relative;
+            z-index: 1;
         }
         
         .loader-logo i {
-            font-size: 36px;
+            font-size: 48px;
             color: white;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
         }
         
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+        @keyframes logoFloat {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
         }
         
-        @keyframes pulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.05); }
+        @keyframes logoGlow {
+            0%, 100% { box-shadow: 0 20px 60px rgba(99, 102, 241, 0.4), 0 0 0 4px rgba(99, 102, 241, 0.1), inset 0 2px 10px rgba(255, 255, 255, 0.2); }
+            50% { box-shadow: 0 20px 60px rgba(168, 85, 247, 0.5), 0 0 0 4px rgba(168, 85, 247, 0.1), inset 0 2px 10px rgba(255, 255, 255, 0.2); }
         }
         
         @keyframes spin {
@@ -703,9 +735,9 @@
     <div class="wrapper">
         <div id="loader">
             <div class="loader-logo">
-                <i class="fas fa-truck-loading"></i>
+                <i class="fas fa-layer-group"></i>
             </div>
-            <span class="animate_loader"></span>
+            <div class="animate_loader"></div>
             <div class="loader-title">{{ $settings->admin_title ?? 'Transport Management System' }}</div>
             <div class="loader-description">{{ $settings->admin_description ?? 'Fleet Management Solution' }}</div>
         </div>
