@@ -59,6 +59,9 @@
                             <i class="fa fa-paper-plane me-1"></i> Resend
                         </button>
                     @endif
+                    <button type="button" class="btn btn-danger btn-sm" onclick="deleteEmailLog({{ $emaillog->id }})">
+                        <i class="fa fa-trash me-1"></i> Delete
+                    </button>
                 </div>
             </div>
 
@@ -195,6 +198,57 @@ function resendEmail(id) {
                 },
                 error: function(xhr) {
                     Swal.fire('Error', 'Something went wrong!', 'error');
+                }
+            });
+        }
+    });
+}
+
+function deleteEmailLog(id) {
+    Swal.fire({
+        title: 'Are you sure?',
+        text: "You won't be able to revert this!",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#eb3349',
+        cancelButtonColor: '#6c757d',
+        confirmButtonText: 'Yes, delete it!',
+        cancelButtonText: 'Cancel'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            Swal.fire({
+                title: 'Deleting...',
+                text: 'Please wait',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+            
+            $.ajax({
+                url: '{{ url("/emaillogs/") }}/' + id,
+                type: 'POST',
+                data: {
+                    _token: '{{ csrf_token() }}',
+                    _method: 'DELETE'
+                },
+                success: function(response) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Deleted!',
+                        text: 'Email log has been deleted.',
+                        timer: 2000,
+                        showConfirmButton: false
+                    }).then(() => {
+                        window.location.href = '{{ route('emaillogs.index') }}';
+                    });
+                },
+                error: function(xhr) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error!',
+                        text: 'Something went wrong. Please try again.'
+                    });
                 }
             });
         }

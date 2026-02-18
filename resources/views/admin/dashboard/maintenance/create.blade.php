@@ -22,6 +22,11 @@
     .status-pending { background-color: #ffc107; }
     .status-approved { background-color: #28a745; }
     .status-rejected { background-color: #dc3545; }
+    /* Readonly select styling */
+    select[disabled] {
+        background-color: #e9ecef;
+        cursor: not-allowed;
+    }
 </style>
 @endpush
 
@@ -72,12 +77,15 @@
                         </div>
                         <div class="col-md-3">
                             <label class="form-label">Requested By <span class="text-danger">*</span></label>
-                            <select name="employee_id" class="form-select select2" required>
+                            <select name="employee_id" id="employee_id" class="form-select select2" required @if($loggedInEmployeeId) disabled @endif>
                                 <option value="">Select Employee</option>
                                 @foreach($employees as $emp)
-                                    <option value="{{ $emp->id }}">{{ $emp->name }}</option>
+                                    <option value="{{ $emp->id }}" @if($loggedInEmployeeId && $loggedInEmployeeId == $emp->id) selected @endif>{{ $emp->name }}</option>
                                 @endforeach
                             </select>
+                            @if($loggedInEmployeeId)
+                            <input type="hidden" name="employee_id" value="{{ $loggedInEmployeeId }}">
+                            @endif
                         </div>
                         <div class="col-md-3">
                             <label class="form-label">Vehicle <span class="text-danger">*</span></label>
@@ -178,9 +186,6 @@
                                             <option value="Employee">Employee</option>
                                             <option value="Department">Department</option>
                                         </select>
-                                            <option value="Vendor">Vendor</option>
-                                            <option value="Employee">Employee</option>
-                                        </select>
                                     </div>
                                     <div class="col-md-6">
                                         <label class="form-label">Service Charge</label>
@@ -196,6 +201,30 @@
                                     <div class="total-display">$<span id="grandTotalDisplay">0.00</span></div>
                                 </div>
                             </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Email Notification Card -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Notification Settings</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-4">
+                        <div class="col-md-6">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="sendEmailToHead" name="send_email_to_head" value="1" checked>
+                                <label class="form-check-label" for="sendEmailToHead">
+                                    Send email notification to Department Head
+                                </label>
+                            </div>
+                        </div>
+                        <div class="col-md-6" id="departmentHeadEmailSection">
+                            <label class="form-label">Department Head Email</label>
+                            <input type="email" name="department_head_email" class="form-control" placeholder="department.head@company.com" readonly>
+                            <small class="text-muted">Leave empty to send to default department head</small>
                         </div>
                     </div>
                 </div>
@@ -257,11 +286,18 @@
     </div>
 </div>
 
-@push('scripts')
 <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
 $(document).ready(function(){
     $('.select2').select2({ width: '100%' });
+    
+    // Disable select2 when it's pre-selected with logged in user
+    @if($loggedInEmployeeId)
+    $('select[name="employee_id"]').on('select2:open', function(e) {
+        e.preventDefault();
+    });
+    @endif
+    
     let rowIndex = 0;
 
     // Category options
@@ -425,7 +461,82 @@ $(document).ready(function(){
             }
         });
     });
+
+    /* ================= EMAIL TO DEPARTMENT HEAD TOGGLE ================= */
+    $('#sendEmailToHead').on('change', function() {
+        if ($(this).is(':checked')) {
+            $('#departmentHeadEmailSection').slideDown();
+            fetchDepartmentHeadFromEmployee();
+        } else {
+            $('#departmentHeadEmailSection').slideUp();
+            $('#departmentHeadEmailSection input').val('');
+        }
+    });
+
+    // Fetch department head info when employee changes
+    $('#employee_id').on('change', function() {
+        if ($('#sendEmailToHead').is(':checked')) {
+            fetchDepartmentHeadFromEmployee();
+        }
+    });
+
+    function fetchDepartmentHeadFromEmployee() {
+        var employeeId = $('#employee_id').val();
+        console.log('Fetching for employee ID:', employeeId);
+        
+        if (employeeId) {
+            // Use Laravel route helper
+            var url = '{{ url("/admin/employees") }}/' + employeeId;
+            console.log('Calling URL:', url);
+            
+            $.ajax({
+                url: url,
+                type: 'GET',
+                dataType: 'json',
+                success: function(res) {
+                    console.log('Employee response:', res);
+                    if (res.department_id) {
+                        fetchDepartmentHeadInfo(res.department_id);
+                    } else {
+                        console.log('No department_id in response');
+                    }
+                },
+                error: function(xhr) {
+                    console.log('Error:', xhr.status, xhr.statusText);
+                }
+            });
+        }
+    }
+
+    function fetchDepartmentHeadInfo(departmentId) {
+        var url = '{{ url("/admin/departments") }}/' + departmentId + '/head-info';
+        console.log('Calling department URL:', url);
+        
+        $.ajax({
+            url: url,
+            type: 'GET',
+            dataType: 'json',
+            success: function(res) {
+                console.log('Department head response:', res);
+                // Try multiple ways to set the value
+                if (res.head_email) {
+                    $('input[name="department_head_email"]').val(res.head_email);
+                    console.log('Set email to:', res.head_email);
+                }
+            },
+            error: function(xhr) {
+                console.log('Error:', xhr.status, xhr.statusText);
+            }
+        });
+    }
+
+    // Initialize on page load
+    if ($('#sendEmailToHead').is(':checked')) {
+        $('#departmentHeadEmailSection').show();
+        fetchDepartmentHeadFromEmployee();
+    } else {
+        $('#departmentHeadEmailSection').hide();
+    }
 });
 </script>
-@endpush
 @endsection

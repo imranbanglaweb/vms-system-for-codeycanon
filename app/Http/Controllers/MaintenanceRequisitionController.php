@@ -16,8 +16,17 @@ use Illuminate\Support\Facades\DB;
 use Yajra\DataTables\DataTables;
 use App\Models\InventoryItem; // 👈 ADD THIS MODEL
 use App\Notifications\MaintenanceRequisitionCreated;
+use App\Services\EmailService;
+
 class MaintenanceRequisitionController extends Controller
 {
+    
+    protected $emailService;
+    
+    public function __construct(EmailService $emailService)
+    {
+        $this->emailService = $emailService;
+    }
     
     public function index(Request $request)
     {
@@ -193,6 +202,13 @@ class MaintenanceRequisitionController extends Controller
         // dd($vendors);
         $schedules = MaintenanceSchedule::all();
          $inventoryItems = InventoryItem::where('stock_qty', '>', 0)->get(); // 👈 ADD THIS
+
+        // Get logged in user's employee ID
+        $loggedInEmployeeId = null;
+        if (Auth::check() && Auth::user()->employee_id) {
+            $loggedInEmployeeId = Auth::user()->employee_id;
+        }
+
     return view('admin.dashboard.maintenance.create', compact(
         'vehicles',
         'types',
@@ -200,7 +216,8 @@ class MaintenanceRequisitionController extends Controller
         'schedules',
         'employees',
         'categories',
-        'inventoryItems' // 👈 ADD THIS
+        'inventoryItems',
+        'loggedInEmployeeId'
     ));
     }
 
@@ -245,6 +262,9 @@ class MaintenanceRequisitionController extends Controller
                 'charge_bear_by' => $request->charge_bear_by,
                 'charge_amount' => $request->charge_amount,
                 'remarks' => $request->remarks,
+                'status' => 'Pending',
+                'department_status' => 'Pending',
+                'transport_status' => 'Pending',
                 'created_by' => Auth::id(),
             ]);
 
@@ -273,8 +293,8 @@ class MaintenanceRequisitionController extends Controller
                 'total_cost' => $total_parts_cost + $request->charge_amount
             ]);
 
-            // Send notification and email to Transport Admin
-            $this->sendNotificationToTransportAdmin($req);
+            // Send notification and email to Department Head (same workflow as vehicle requisition)
+            $this->sendNotificationToDepartmentHead($req, $request);
         });
 
         return response()->json([
@@ -285,20 +305,64 @@ class MaintenanceRequisitionController extends Controller
     }
 
     /**
-     * Send notification and email to Transport Admin
+     * Send notification and email to Department Head (on creation - same as vehicle requisition)
      */
-    private function sendNotificationToTransportAdmin($requisition)
+    private function sendNotificationToDepartmentHead($requisition, Request $request = null)
     {
-        // Find transport admin users (role: transport_admin or admin)
-        $transportAdmins = \App\Models\User::whereHas('roles', function ($query) {
-            $query->whereIn('name', ['Super Admin', 'admin', 'Transport']);
+        // Check if toggle is checked to send email
+        $sendEmail = $request && $request->send_email_to_head == 1;
+        
+        if (!$sendEmail) {
+            \Log::info('Email notification toggle is off for maintenance requisition: ' . $requisition->requisition_no);
+            return;
+        }
+
+        // Send to custom department head email if provided (from form)
+        if (!empty($request->department_head_email)) {
+            try {
+                $this->emailService->sendMaintenanceRequisitionCreated($requisition, $request->department_head_email);
+                \Log::info('Maintenance requisition email sent to department head: ' . $request->department_head_email);
+            } catch (\Exception $e) {
+                \Log::error('Failed to send maintenance requisition email to department head: ' . $e->getMessage());
+            }
+        } else {
+            // Find Department Head users and send notifications
+            $departmentHeads = \App\Models\User::whereHas('roles', function ($query) {
+                $query->whereIn('name', ['Department Head', 'Manager', 'Super Admin', 'Admin']);
+            })->whereNotNull('email')->get();
+
+            \Log::info('Department Heads found for maintenance requisition notification: ' . $departmentHeads->count());
+
+            if ($departmentHeads->isNotEmpty()) {
+                foreach ($departmentHeads as $head) {
+                    \Log::info('Sending maintenance requisition notification to department head: ' . $head->email);
+                    $head->notify(new MaintenanceRequisitionCreated($requisition));
+                }
+            } else {
+                \Log::warning('No department head users found for maintenance requisition notification');
+            }
+        }
+    }
+
+    /**
+     * Send notification to Transport Head (after department approval)
+     */
+    public function sendNotificationToTransportHead($requisition)
+    {
+        // Find Transport Head users
+        $transportHeads = \App\Models\User::whereHas('roles', function ($query) {
+            $query->whereIn('name', ['Transport', 'Super Admin', 'Admin']);
         })->whereNotNull('email')->get();
 
-        if ($transportAdmins->isNotEmpty()) {
-            foreach ($transportAdmins as $admin) {
-                // Send notification
-                $admin->notify(new MaintenanceRequisitionCreated($requisition));
+        \Log::info('Transport heads found for maintenance requisition notification: ' . $transportHeads->count());
+
+        if ($transportHeads->isNotEmpty()) {
+            foreach ($transportHeads as $head) {
+                \Log::info('Sending maintenance requisition notification to transport head: ' . $head->email);
+                $head->notify(new MaintenanceRequisitionCreated($requisition));
             }
+        } else {
+            \Log::warning('No transport head users found for maintenance requisition notification');
         }
     }
 

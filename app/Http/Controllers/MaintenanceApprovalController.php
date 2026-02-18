@@ -118,7 +118,7 @@ class MaintenanceApprovalController extends Controller
     }
 
     /**
-     * Approve maintenance requisition.
+     * Approve maintenance requisition (Department Head approval)
      */
     public function approve(Request $request, $id)
     {
@@ -136,24 +136,25 @@ class MaintenanceApprovalController extends Controller
             return response()->json(['status' => 'error', 'message' => 'This requisition is not pending approval.'], 422);
         }
 
-        $requisition->status = 'Approved';
-        $requisition->approved_by = Auth::id();
-        $requisition->approved_at = now();
-        $requisition->approval_remarks = $request->remarks ?? null;
+        // Update department approval status
+        $requisition->department_status = 'Approved';
+        $requisition->department_approved_by = Auth::id();
+        $requisition->department_approved_at = now();
+        $requisition->department_remarks = $request->remarks ?? null;
+        
+        // Set status to pending transport approval
+        $requisition->status = 'Pending Transport Approval';
         $requisition->save();
 
-        // Send email notification
+        // Send email notification to Transport Head
         try {
-            // Notify the requester
-            if ($requisition->employee && $requisition->employee->user) {
-                $this->emailService->sendMaintenanceApproved($requisition);
-            }
-            Log::info('Maintenance approval email sent for requisition: ' . $requisition->requisition_no);
+            $this->emailService->sendMaintenanceDepartmentApproved($requisition);
+            Log::info('Maintenance department approval email sent to transport head for requisition: ' . $requisition->requisition_no);
         } catch (\Exception $e) {
-            Log::error('Failed to send maintenance approval email: ' . $e->getMessage());
+            Log::error('Failed to send maintenance department approval email: ' . $e->getMessage());
         }
 
-        // Send push notification to requester and maintenance managers
+        // Send push notification to requester and transport heads
         $notificationUsers = collect();
 
         // Get requester if they have a user account
@@ -161,24 +162,24 @@ class MaintenanceApprovalController extends Controller
             $notificationUsers = $notificationUsers->push($requisition->employee->user);
         }
 
-        // Also notify Maintenance Head, Super Admin, Admin
-        $maintenanceUsers = User::whereHas('roles', function ($query) {
-                $query->whereIn('name', ['Maintenance_Head', 'Maintenance', 'Super Admin', 'Admin']);
+        // Also notify Transport Head, Super Admin, Admin
+        $transportUsers = User::whereHas('roles', function ($query) {
+                $query->whereIn('name', ['Transport', 'Super Admin', 'Admin']);
             })
             ->where('id', '!=', Auth::id())
             ->get();
 
-        $notificationUsers = $notificationUsers->merge($maintenanceUsers);
+        $notificationUsers = $notificationUsers->merge($transportUsers);
 
         // Send notifications
         if ($notificationUsers->isNotEmpty()) {
             Notification::send($notificationUsers, new MaintenanceApproved($requisition));
-            Log::info('Maintenance approval push notification sent');
+            Log::info('Maintenance department approval push notification sent');
         }
 
         return response()->json([
             'status' => 'success',
-            'message' => 'Maintenance requisition approved successfully!'
+            'message' => 'Maintenance requisition approved and sent to Transport Head!'
         ]);
     }
 

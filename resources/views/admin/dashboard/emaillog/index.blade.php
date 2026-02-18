@@ -173,6 +173,22 @@
         color: #fff;
     }
 
+    .btn-delete {
+        background: var(--danger-gradient);
+        color: #fff;
+        border: none;
+        border-radius: 8px;
+        padding: 8px 15px;
+        font-size: 1.3rem;
+        transition: all 0.3s ease;
+    }
+
+    .btn-delete:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(235, 51, 73, 0.4);
+        color: #fff;
+    }
+
     /* Preloader Styles */
     .preloader-overlay {
         position: fixed;
@@ -410,6 +426,11 @@
                                            class="btn btn-view" title="View Details">
                                             <i class="fa fa-eye"></i>
                                         </a>
+                                        <button type="button" class="btn btn-danger btn-delete"
+                                                data-id="{{ $log->id }}"
+                                                title="Delete">
+                                            <i class="fa fa-trash"></i>
+                                        </button>
                                     </td>
                                 </tr>
                             @empty
@@ -471,6 +492,64 @@ $(function () {
     setTimeout(function() {
         $('#tableLoader').removeClass('active');
     }, 2000);
+
+    // Delete email log with confirmation
+    $(document).on('click', '.btn-delete', function(e) {
+        e.preventDefault();
+        var id = $(this).data('id');
+        var row = $(this).closest('tr');
+        
+        Swal.fire({
+            title: 'Are you sure?',
+            text: 'You won\'t be able to revert this!',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#eb3349',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: 'Yes, delete it!',
+            cancelButtonText: 'Cancel'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Show loading
+                Swal.fire({
+                    title: 'Deleting...',
+                    text: 'Please wait',
+                    allowOutsideClick: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
+                
+                $.ajax({
+                    url: '{{ url("/emaillogs/") }}/' + id,
+                    type: 'POST',
+                    data: {
+                        _token: '{{ csrf_token() }}',
+                        _method: 'DELETE'
+                    },
+                    success: function(response) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Deleted!',
+                            text: 'Email log has been deleted.',
+                            timer: 2000,
+                            showConfirmButton: false
+                        }).then(() => {
+                            // Reload the page to refresh the table
+                            location.reload();
+                        });
+                    },
+                    error: function(xhr) {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error!',
+                            text: 'Something went wrong. Please try again.'
+                        });
+                    }
+                });
+            }
+        });
+    });
 });
 </script>
 @endsection

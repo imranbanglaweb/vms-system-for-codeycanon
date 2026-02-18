@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\EmailLog;
 use App\Models\EmailTemplate;
 use App\Models\Requisition;
+use App\Models\MaintenanceRequisition;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -140,6 +141,257 @@ class EmailService
             $recipients,
             $data
         );
+    }
+
+    /**
+     * Send email when maintenance requisition is created (to Department Head)
+     *
+     * @param MaintenanceRequisition $requisition
+     * @param string|null $customEmail Optional custom email recipient
+     * @return bool
+     */
+    public function sendMaintenanceRequisitionCreated(MaintenanceRequisition $requisition, ?string $customEmail = null): bool
+    {
+        $recipients = [];
+        
+        // If custom email is provided, use it
+        if (!empty($customEmail)) {
+            $recipients = [$customEmail];
+        } else {
+            // Get Department Head emails
+            $recipients = $this->getMaintenanceDepartmentHeadEmails($requisition);
+        }
+        
+        if (empty($recipients)) {
+            Log::warning('EmailService: No recipients found for maintenance requisition created notification', [
+                'maintenance_requisition_id' => $requisition->id,
+                'custom_email' => $customEmail
+            ]);
+            return false;
+        }
+
+        $data = $this->prepareMaintenanceTemplateData($requisition);
+        $data['status'] = 'Pending';
+
+        return $this->sendTemplatedEmail(
+            'maintenance_created',
+            $recipients,
+            $data
+        );
+    }
+
+    /**
+     * Send email when maintenance is approved by department (to Transport Head)
+     *
+     * @param MaintenanceRequisition $requisition
+     * @return bool
+     */
+    public function sendMaintenanceDepartmentApproved(MaintenanceRequisition $requisition): bool
+    {
+        $recipients = $this->getMaintenanceTransportHeadEmails($requisition);
+        
+        if (empty($recipients)) {
+            Log::warning('EmailService: No recipients found for maintenance department approved notification', [
+                'maintenance_requisition_id' => $requisition->id
+            ]);
+            return false;
+        }
+
+        $data = $this->prepareMaintenanceTemplateData($requisition);
+        $data['status'] = 'Department Approved';
+
+        return $this->sendTemplatedEmail(
+            'maintenance_dept_approved',
+            $recipients,
+            $data
+        );
+    }
+
+    /**
+     * Send email when maintenance is approved by transport (to Department Head and Requester)
+     *
+     * @param MaintenanceRequisition $requisition
+     * @return bool
+     */
+    public function sendMaintenanceTransportApproved(MaintenanceRequisition $requisition): bool
+    {
+        $recipients = array_merge(
+            $this->getMaintenanceRequesterEmails($requisition),
+            $this->getMaintenanceDepartmentHeadEmails($requisition)
+        );
+        
+        if (empty($recipients)) {
+            Log::warning('EmailService: No recipients found for maintenance transport approved notification', [
+                'maintenance_requisition_id' => $requisition->id
+            ]);
+            return false;
+        }
+
+        $data = $this->prepareMaintenanceTemplateData($requisition);
+        $data['status'] = 'Transport Approved';
+
+        return $this->sendTemplatedEmail(
+            'maintenance_transport_approved',
+            $recipients,
+            $data
+        );
+    }
+
+    /**
+     * Send email when maintenance is fully approved (to Requester)
+     *
+     * @param MaintenanceRequisition $requisition
+     * @return bool
+     */
+    public function sendMaintenanceApproved(MaintenanceRequisition $requisition): bool
+    {
+        $recipients = $this->getMaintenanceRequesterEmails($requisition);
+        
+        if (empty($recipients)) {
+            Log::warning('EmailService: No recipients found for maintenance approved notification', [
+                'maintenance_requisition_id' => $requisition->id
+            ]);
+            return false;
+        }
+
+        $data = $this->prepareMaintenanceTemplateData($requisition);
+        $data['status'] = 'Approved';
+
+        return $this->sendTemplatedEmail(
+            'maintenance_approved',
+            $recipients,
+            $data
+        );
+    }
+
+    /**
+     * Get Department Head emails for maintenance requisition
+     *
+     * @param MaintenanceRequisition $requisition
+     * @return array
+     */
+    protected function getMaintenanceDepartmentHeadEmails(MaintenanceRequisition $requisition): array
+    {
+        $emails = [];
+
+        // Get users with Department Head, Manager, Super Admin, Admin roles
+        $users = User::whereHas('roles', function ($query) {
+            $query->whereIn('name', ['Department Head', 'Manager', 'Super Admin', 'Admin']);
+        })->where('email', '!=', '')->whereNotNull('email')->pluck('email')->toArray();
+
+        return array_merge($emails, $users);
+    }
+
+    /**
+     * Get Transport Head emails for maintenance requisition
+     *
+     * @param MaintenanceRequisition $requisition
+     * @return array
+     */
+    protected function getMaintenanceTransportHeadEmails(MaintenanceRequisition $requisition): array
+    {
+        $emails = [];
+
+        // Get users with Transport role
+        $transportUsers = User::whereHas('roles', function ($query) {
+            $query->whereIn('name', ['Transport', 'Super Admin', 'Admin']);
+        })->where('email', '!=', '')->whereNotNull('email')->pluck('email')->toArray();
+
+        return array_merge($emails, $transportUsers);
+    }
+
+    /**
+     * Get requester emails for maintenance requisition
+     *
+     * @param MaintenanceRequisition $requisition
+     * @return array
+     */
+    protected function getMaintenanceRequesterEmails(MaintenanceRequisition $requisition): array
+    {
+        $emails = [];
+
+        $employee = $requisition->employee;
+        if ($employee && !empty($employee->email)) {
+            $emails[] = $employee->email;
+        }
+
+        return $emails;
+    }
+
+    /**
+     * Get department head user by department ID
+     *
+     * @param int $departmentId
+     * @return User|null
+     */
+    protected function getDepartmentHeadUser(int $departmentId): ?User
+    {
+        return User::whereHas('roles', function ($query) {
+            $query->whereIn('name', ['Department Head', 'Manager']);
+        })->where('department_id', $departmentId)
+          ->where('email', '!=', '')
+          ->whereNotNull('email')
+          ->first();
+    }
+
+    /**
+     * Prepare template data from maintenance requisition
+     *
+     * @param MaintenanceRequisition $requisition
+     * @return array
+     */
+    protected function prepareMaintenanceTemplateData(MaintenanceRequisition $requisition): array
+    {
+        $employee = $requisition->employee;
+        $vehicle = $requisition->vehicle;
+        $vendor = $requisition->vendor;
+        
+        // Get admin settings
+        $adminSettings = DB::table('settings')->where('id', 1)->first();
+        $adminTitle = $adminSettings->admin_title ?? 'Transport Management System';
+        $adminLogo = $adminSettings->admin_logo ?? 'default.png';
+        $baseUrl = config('app.url', 'http://localhost');
+        $adminLogoUrl = !empty($adminSettings->admin_logo) 
+            ? $baseUrl . '/public/admin_resource/assets/images/' . $adminSettings->admin_logo
+            : $baseUrl . '/public/admin_resource/assets/images/default.png';
+
+        // Get department name from employee
+        $departmentName = 'N/A';
+        if ($employee && $employee->department_id) {
+            $department = DB::table('departments')->where('id', $employee->department_id)->first();
+            $departmentName = $department ? ($department->name ?? 'N/A') : 'N/A';
+        }
+
+        // Get department head name
+        $headName = 'Department Head';
+        if ($employee && $employee->department_id) {
+            $headUser = $this->getDepartmentHeadUser($employee->department_id);
+            $headName = $headUser ? ($headUser->name ?? 'Department Head') : 'Department Head';
+        }
+
+        return [
+            'requisition_number' => $requisition->requisition_no ?? 'N/A',
+            'requester_name' => $employee ? ($employee->name ?? 'N/A') : 'N/A',
+            'requester_email' => $employee ? ($employee->email ?? 'N/A') : 'N/A',
+            'department_name' => $departmentName,
+            'head_name' => $headName,
+            'vehicle_name' => $vehicle ? ($vehicle->vehicle_name ?? 'N/A') : 'N/A',
+            'vehicle_number' => $vehicle ? ($vehicle->vehicle_number ?? 'N/A') : 'N/A',
+            'maintenance_type' => $requisition->maintenanceType ? ($requisition->maintenanceType->name ?? 'N/A') : 'N/A',
+            'service_title' => $requisition->service_title ?? 'N/A',
+            'maintenance_date' => $requisition->maintenance_date ? $requisition->maintenance_date->format('d M, Y') : 'N/A',
+            'scheduled_date' => $requisition->maintenance_date ? $requisition->maintenance_date->format('d M, Y') : 'N/A',
+            'description' => $requisition->description ?? $requisition->service_title ?? 'N/A',
+            'priority' => $requisition->priority ?? 'N/A',
+            'estimated_cost' => number_format($requisition->total_cost ?? 0, 2),
+            'status' => $requisition->status ?? 'N/A',
+            'approval_url' => route('maintenance.show', $requisition->id),
+            'company_name' => config('app.name', 'Transport Management System'),
+            'year' => date('Y'),
+            'admin_title' => $adminTitle,
+            'admin_logo_url' => $adminLogoUrl,
+            'admin_description' => $adminSettings->admin_description ?? 'Vehicle Management System',
+        ];
     }
 
     /**

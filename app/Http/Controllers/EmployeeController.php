@@ -223,7 +223,14 @@ class EmployeeController extends Controller
      */
     public function show(Employee $employee)
     {
-        //
+        // Return employee with department info
+        return response()->json([
+            'id' => $employee->id,
+            'name' => $employee->name,
+            'email' => $employee->email,
+            'department_id' => $employee->department_id,
+            'department' => $employee->department ? $employee->department->department_name : null,
+        ]);
     }
 
     /**

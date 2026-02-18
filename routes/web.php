@@ -37,6 +37,7 @@ use App\Http\Controllers\MaintenanceVendorController;
 use App\Http\Controllers\MaintenanceScheduleController;
 use App\Http\Controllers\MaintenanceRequisitionController;
 use App\Http\Controllers\MaintenanceApprovalController;
+use App\Http\Controllers\MaintenanceTransportApprovalController;
 use App\Http\Controllers\MaintenanceCategoryController;
 
 // Reports
@@ -85,8 +86,9 @@ use App\Notifications\TestPushNotification;
 // EMAIL LOGS ROUTES
 // ============================================================================
 Route::middleware(['auth'])->group(function () {
-    Route::resource('emaillogs', EmailLogController::class);
     Route::post('emaillogs/{id}/resend', [EmailLogController::class, 'resend'])->name('emaillogs.resend');
+    Route::delete('emaillogs/{id}', [EmailLogController::class, 'destroy'])->name('emaillogs.destroy');
+    Route::resource('emaillogs', EmailLogController::class);
 });
 
 // ============================================================================
@@ -308,6 +310,13 @@ Route::middleware(['auth'])->prefix('admin')->group(function () {
         
         Route::get('/ajax', [MaintenanceApprovalController::class, 'ajax'])->name('ajax');
         Route::get('/{id}', [MaintenanceApprovalController::class, 'show'])->name('show');
+    });
+
+    // Transport Approval for Maintenance Requisitions
+    Route::prefix('approvals/maintenance-transport')->name('maintenance_transport_approvals.')->group(function () {
+        Route::get('/', [MaintenanceTransportApprovalController::class, 'index'])->name('index');
+        Route::get('/ajax', [MaintenanceTransportApprovalController::class, 'ajax'])->name('ajax');
+        Route::get('/{id}', [MaintenanceTransportApprovalController::class, 'show'])->name('show');
     });
 });
 
