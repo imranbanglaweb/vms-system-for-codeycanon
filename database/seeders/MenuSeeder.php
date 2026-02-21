@@ -47,6 +47,10 @@ class MenuSeeder extends Seeder
             'employee-manage',
             'employee-view-own',
             'employee-edit-own',
+            'i',
+            'employee-create-department',
+            'employee-edit-department',
+            'employee-delete-department',
             'unit-manage',
             'company-manage',
             'location-manage',
@@ -63,9 +67,16 @@ class MenuSeeder extends Seeder
             'driver-document-upload',
             'driver-document-view',
             'driver-schedule-view',
+            'driver-schedule-own',
             'driver-performance-view',
             'driver-access',
+            'driver-access',
             'driver-list-view',
+            'driver-list-department',
+            'driver-vehicle',
+            'driver-availability-view',
+            'driver-availability-update',
+            'driver-availability-manage',
 
             // Vehicles
             'vehicle-manage',
@@ -73,13 +84,17 @@ class MenuSeeder extends Seeder
             'vehicle-view',
             'vehicle-type-manage',
             'vehicle-list-view',
+            'vehicle-list-department',
 
             // Maintenance
             'maintenance-manage',
+            'maintenance-view',
+            'maintenance-create',
             'maintenance-type-manage',
             'maintenance-vendor-manage',
             'maintenance-category-manage',
             'maintenance-approval-view',
+            'maintenance-approval-department',
 
             // Requisitions
             'requisition-create',
@@ -87,6 +102,7 @@ class MenuSeeder extends Seeder
 
             // Department Approval
             'department-approval-view',
+            'requisition-approval-department',
 
             // Transport Approval
             'transport-approval-view',
@@ -94,6 +110,16 @@ class MenuSeeder extends Seeder
             // Trip Sheets
             'trip-manage',
             'trip-sheet-view',
+            'trip-sheet-own',
+            'trip-start',
+            'trip-finish',
+            'trip-end',
+            'trip-fuel-log',
+            'trip-fuel-own',
+
+            // Profile & Employee
+            'profile-view',
+            'profile-edit',
 
             // Payments
             'payment-approve',
@@ -102,11 +128,13 @@ class MenuSeeder extends Seeder
             // Reports
             'report-requisition',
             'report-requisition-own',
+            'report-requisition-department',
             'report-trip-fuel',
             'report-vehicle-utilization',
             'report-driver-performance',
             'report-maintenance',
             'report-maintenance-own',
+            'report-maintenance-department',
 
             // Notifications
             'notification-manage',
@@ -191,6 +219,24 @@ class MenuSeeder extends Seeder
                 'menu_order' => 16,
                 'menu_parent' => 0,
             ],
+            [
+                'menu_name' => 'My Team',
+                'menu_slug' => 'my-team',
+                'menu_icon' => 'fa-users',
+                'menu_url' => 'admin.employees.department.index',
+                'menu_permission' => 'employee-list-department',
+                'menu_order' => 17,
+                'menu_parent' => 0,
+            ],
+            [
+                'menu_name' => 'My Approvals',
+                'menu_slug' => 'my-approvals',
+                'menu_icon' => 'fa-check-circle',
+                'menu_url' => null,
+                'menu_permission' => 'requisition-approval-department',
+                'menu_order' => 18,
+                'menu_parent' => 0,
+            ],
             // Core operational menus
             [
                 'menu_name' => 'Driver Management',
@@ -224,7 +270,7 @@ class MenuSeeder extends Seeder
                 'menu_slug' => 'maintenance-requisition',
                 'menu_icon' => 'fa-clipboard-list',
                 'menu_url' => null,
-                'menu_permission' => 'maintenance-create',
+                'menu_permission' => null,
                 'menu_order' => 15,
                 'menu_parent' => 0,
             ],
@@ -233,7 +279,7 @@ class MenuSeeder extends Seeder
                 'menu_slug' => 'vehicle-requisition',
                 'menu_icon' => 'fa-file-lines',
                 'menu_url' => null,
-                'menu_permission' => 'requisition-view',
+                'menu_permission' => null,
                 'menu_order' => 10,
                 'menu_parent' => 0,
             ],
@@ -530,9 +576,9 @@ class MenuSeeder extends Seeder
             [
                 'menu_name' => 'Add Requisition',
                 'menu_slug' => 'requisition-create',
-                'menu_icon' => 'fa-plus',
+                'menu_icon' => 'fa-plus-circle',
                 'menu_url' => 'requisitions.create',
-                'menu_permission' => 'requisition-create',
+                'menu_permission' => null,
                 'menu_order' => 1,
                 'parent_name' => 'Vehicle Requisition',
             ],
@@ -548,16 +594,16 @@ class MenuSeeder extends Seeder
 
             // Maintenance Requisition children (for employees)
             [
-                'menu_name' => 'Create Maintenance Request',
+                'menu_name' => 'Add Maintenance',
                 'menu_slug' => 'maintenance-requisition-create',
                 'menu_icon' => 'fa-plus-circle',
                 'menu_url' => 'maintenance.create',
-                'menu_permission' => 'maintenance-create',
+                'menu_permission' => null,
                 'menu_order' => 1,
                 'parent_name' => 'Maintenance Requisition',
             ],
             [
-                'menu_name' => 'My Maintenance Requests',
+                'menu_name' => 'My Maintenance',
                 'menu_slug' => 'maintenance-requisition-list',
                 'menu_icon' => 'fa-list',
                 'menu_url' => 'maintenance.index',
@@ -566,7 +612,25 @@ class MenuSeeder extends Seeder
                 'parent_name' => 'Maintenance Requisition',
             ],
 
-            // Approvals children
+            // My Approvals - Department Head single approval list
+            [
+                'menu_name' => 'Pending Approvals',
+                'menu_slug' => 'pending-approvals',
+                'menu_icon' => 'fa-list-check',
+                'menu_url' => 'department.approvals.index',
+                'menu_permission' => 'requisition-approval-department',
+                'menu_order' => 1,
+                'parent_name' => 'My Approvals',
+            ],
+            [
+                'menu_name' => 'Maintenance Requisition',
+                'menu_slug' => 'maintenance-requisition-approval',
+                'menu_icon' => 'fa-wrench',
+                'menu_url' => 'maintenance_approvals.index',
+                'menu_permission' => 'maintenance-approval-department',
+                'menu_order' => 2,
+                'parent_name' => 'My Approvals',
+            ],
             [
                 'menu_name' => 'Pending Department Approvals',
                 'menu_slug' => 'department-approvals',
@@ -688,6 +752,24 @@ class MenuSeeder extends Seeder
                 'menu_order' => 6,
                 'parent_name' => 'Employee Manage',
             ],
+            [
+                'menu_name' => 'My Department Employees',
+                'menu_slug' => 'department-employees',
+                'menu_icon' => 'fa-users',
+                'menu_url' => 'admin.employees.department.index',
+                'menu_permission' => 'employee-list-department',
+                'menu_order' => 7,
+                'parent_name' => 'Employee Manage',
+            ],
+            [
+                'menu_name' => 'Add Department Employee',
+                'menu_slug' => 'add-department-employee',
+                'menu_icon' => 'fa-user-plus',
+                'menu_url' => 'admin.employees.department.create',
+                'menu_permission' => 'employee-create-department',
+                'menu_order' => 8,
+                'parent_name' => 'Employee Manage',
+            ],
 
             // Reports children
             [
@@ -793,6 +875,8 @@ class MenuSeeder extends Seeder
                 'menu_order' => 2,
                 'parent_name' => 'Menu Manage',
             ],
+
+
 
             // Email & Notification Settings children
             [

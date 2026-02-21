@@ -382,6 +382,32 @@ $(document).ready(function(){
     // Initialize Select2 on page load
     initSelect2();
     
+    // Ensure pre-selected values are displayed properly
+    setTimeout(function() {
+        // Get assigned values from requisition
+        var assignedVehicleId = '{{ $requisition->assigned_vehicle_id ?? "" }}';
+        var assignedDriverId = '{{ $requisition->assigned_driver_id ?? "" }}';
+        
+        // If vehicle select doesn't have a value but we have an assigned vehicle, set it
+        if ((!$('#vehicleSelect').val() || $('#vehicleSelect').val() === '') && assignedVehicleId) {
+            $('#vehicleSelect').val(assignedVehicleId).trigger('change');
+        }
+        
+        // If driver select doesn't have a value but we have an assigned driver, set it
+        if ((!$('#driverSelect').val() || $('#driverSelect').val() === '') && assignedDriverId) {
+            $('#driverSelect').val(assignedDriverId).trigger('change');
+        }
+        
+        // Trigger change to ensure select2 displays the selected values
+        $('#vehicleSelect').trigger('change.select2');
+        $('#driverSelect').trigger('change.select2');
+        $('#transportTypeSelect').trigger('change.select2');
+        
+        // Update displays for pre-selected values
+        updateStatusDisplays();
+        updateSummary();
+    }, 100);
+    
     // Hide page loading after Select2 is initialized
     setTimeout(hidePageLoading, 500);
     

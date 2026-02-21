@@ -5,6 +5,9 @@ namespace App\Services;
 use App\Models\Menu;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
+use Spatie\Permission\Models\Permission;
+use Spatie\Permission\Exceptions\PermissionDoesNotExist;
 
 class MenuService
 {
@@ -22,22 +25,37 @@ class MenuService
 
         // Check if user is Super Admin
         $isSuperAdmin = $user->hasRole('Super Admin');
+        $isAdmin = $user->hasRole('Admin');
+        $isManager = $user->hasRole('Department Head') || $user->hasRole('Manager');
+        $isTransport = $user->hasRole('Transport');
+        $isEmployee = $user->hasRole('Employee');
+        $isDriver = $user->hasRole('Driver');
+
+        // Fallback to 'role' column if no Spatie role is assigned
+        if (!$isAdmin && !$isManager && !$isTransport && !$isEmployee && !$isDriver) {
+            $userRole = $user->role ?? 'employee';
+            $isAdmin = ($userRole === 'admin');
+            $isManager = ($userRole === 'manager');
+            $isTransport = ($userRole === 'transport');
+            $isEmployee = ($userRole === 'employee');
+            $isDriver = ($userRole === 'driver');
+        }
 
         // Load all parent menus ordered by menu_order
         $menus = Menu::where('menu_parent', 0)
             ->orderBy('menu_order', 'ASC')
             ->get();
         
-        $filtered = $menus->map(function ($menu) use ($user, $isSuperAdmin) {
+        $filtered = $menus->map(function ($menu) use ($user, $isSuperAdmin, $isAdmin, $isManager, $isDriver) {
 
             // Load children
             $children = Menu::where('menu_parent', $menu->id)
                 ->orderBy('menu_order')
                 ->get()
-                ->filter(function ($child) use ($user, $isSuperAdmin) {
+                ->filter(function ($child) use ($user, $isSuperAdmin, $isAdmin, $isManager, $isDriver) {
                     // Super Admin and Admin see everything, others need permission
                     // Exclude employee-specific menus to avoid duplicates
-                    if ($isSuperAdmin || $user->hasRole('Admin')) {
+                    if ($isSuperAdmin || $isAdmin) {
                         $employeeOnlyMenus = [
                             'driver-list-view',
                             'vehicle-list-view',
@@ -51,7 +69,107 @@ class MenuService
                         }
                         return true;
                     }
-                    return !$child->menu_permission || $user->can($child->menu_permission);
+                    
+                    // For Driver role - show only driver-specific menus
+                    if ($isDriver) {
+                        $driverAllowedMenus = [
+                            'driver-access',
+                            'driver-schedule-view',
+                            'driver-schedule-own',
+                            'driver-availability-view',
+                            'driver-availability-update',
+                            'trip-sheet-view',
+                            'trip-sheet-own',
+                            'trip-start',
+                            'trip-finish',
+                            'trip-end',
+                            'trip-fuel-log',
+                            'trip-fuel-own',
+                            'driver-document-view',
+                            'driver-vehicle',
+                            'notification-view',
+                            'profile-view',
+                            'profile-edit',
+                            'employee-view-own',
+                            'employee-edit-own',
+                            'menu-dashboard',
+                            'my-profile',
+                        ];
+                        
+                        // Exclude vehicle requisition and maintenance requisition for drivers
+                        $driverExcludedMenus = [
+                            'vehicle-requisition',
+                            'maintenance-requisition',
+                            'vehicle-requisition-create',
+                            'maintenance-requisition-create',
+                            'vehicle-requisition-list',
+                            'maintenance-requisition-list',
+                            'vehicle-requisition-approval',
+                            'maintenance-requisition-approval',
+                            'requisition-create',
+                            'requisition-manage',
+                            'vehicle-manage',
+                            'vehicle-create',
+                            'vehicle-edit',
+                            'vehicle-delete',
+                            'driver-manage',
+                            'driver-create',
+                            'driver-edit',
+                            'driver-delete',
+                            'settings',
+                        ];
+                        
+                        // Check if menu is in excluded list
+                        if ($child->menu_permission && in_array($child->menu_permission, $driverExcludedMenus)) {
+                            return false;
+                        }
+                        
+                        // Check if menu requires driver permission
+                        if ($child->menu_permission && in_array($child->menu_permission, $driverAllowedMenus)) {
+                            return self::userHasPermission($user, $child->menu_permission);
+                        }
+                        
+                        // For menus without permission requirement, hide for drivers (they shouldn't see generic menus)
+                        return false;
+                    }
+                    
+                    // For Department Head, include department-specific menus
+                    if ($isManager) {
+                        $deptHeadMenus = [
+                            'employee-list-department',
+                            'employee-create-department',
+                            'employee-edit-department',
+                            'employee-delete-department',
+                            'vehicle-list-department',
+                            'driver-list-department',
+                            'requisition-approval-department',
+                            'maintenance-approval-department',
+                            'report-requisition-department',
+                            'report-maintenance-department',
+                        ];
+                        
+                        // Allow department head specific menus
+                        if ($child->menu_permission && in_array($child->menu_permission, $deptHeadMenus)) {
+                            // Check if permission exists before checking access
+                            return self::userHasPermission($user, $child->menu_permission);
+                        }
+                        
+                        // Exclude admin-only menus for department heads
+                        $adminOnlyMenus = [
+                            'employee-create',
+                            'employee-delete',
+                            'vehicle-create',
+                            'vehicle-delete',
+                            'driver-create',
+                            'driver-delete',
+                            'settings',
+                        ];
+                        if ($child->menu_permission && in_array($child->menu_permission, $adminOnlyMenus)) {
+                            return false;
+                        }
+                    }
+                    
+                    return !$child->menu_permission || (self::userHasPermission($user, $child->menu_permission));
                 })
                 ->values();
 
@@ -60,7 +178,7 @@ class MenuService
             // 2. Has visible children, OR
             // 3. No permission required, OR  
             // 4. User has permission
-            if ($isSuperAdmin || $user->hasRole('Admin')) {
+            if ($isSuperAdmin || $isAdmin) {
                 // Exclude employee-only parent menus
                 $employeeOnlyParentMenus = [
                     'my-profile',
@@ -70,8 +188,66 @@ class MenuService
                 } else {
                     $menu->visible = true;
                 }
+            } elseif ($isManager) {
+                // For Department Head, show relevant parent menus
+                // Exclude generic 'approvals' menu - use 'my-approvals' instead
+                $deptHeadParentMenus = [
+                    'my-approvals',
+                    'my-team',
+                    'my-vehicles',
+                    'my-drivers',
+                    'requisitions',
+                    'maintenance',
+                    'reports',
+                ];
+                
+                // Hide these generic menus for Department Head - use department-specific ones instead
+                $excludeForDeptHead = [
+                    'approvals', // Use 'my-approvals' instead
+                ];
+                
+                // Show parent if it has visible children or is in allowed list
+                $hasVisibleChildren = $children->isNotEmpty();
+                $isExcluded = $menu->menu_slug && in_array($menu->menu_slug, $excludeForDeptHead);
+                $isAllowedParent = $menu->menu_slug && in_array($menu->menu_slug, $deptHeadParentMenus);
+                $hasPermission = !$menu->menu_permission || (Permission::where('name', $menu->menu_permission)->exists() && $user->can($menu->menu_permission));
+                
+                // For dept head, hide excluded menus, otherwise show if allowed or has permission
+                if ($isExcluded) {
+                    $menu->visible = false;
+                } elseif ($isAllowedParent) {
+                    $menu->visible = true;
+                } elseif ($hasPermission) {
+                    $menu->visible = true;
+                } else {
+                    $menu->visible = false;
+                }
+            } elseif ($isDriver) {
+                // For Driver role - only show driver-specific parent menus
+                $driverAllowedParentMenus = [
+                    'menu.dashboard',
+                    'my-profile',
+                    'driver-portal',
+                ];
+                
+                // Exclude vehicle requisition and maintenance requisition parent menus for drivers
+                $driverExcludedParentMenus = [
+                    'vehicle-requisition',
+                    'maintenance-requisition',
+                    'requisitions',
+                    'vehicles',
+                    'maintenance',
+                    'settings',
+                ];
+                
+                $hasVisibleChildren = $children->isNotEmpty();
+                $isExcludedParent = $menu->menu_slug && in_array($menu->menu_slug, $driverExcludedParentMenus);
+                $isAllowedParent = $menu->menu_slug && in_array($menu->menu_slug, $driverAllowedParentMenus);
+                
+                // For drivers: show if allowed parent OR (has visible children AND not excluded)
+                $menu->visible = $isAllowedParent || ($hasVisibleChildren && !$isExcludedParent);
             } else {
-                $hasPermission = !$menu->menu_permission || $user->can($menu->menu_permission);
+                $hasPermission = !$menu->menu_permission || (Permission::where('name', $menu->menu_permission)->exists() && $user->can($menu->menu_permission));
                 $menu->visible = $children->isNotEmpty() || $hasPermission;
             }
 
@@ -82,6 +258,15 @@ class MenuService
         ->filter(fn ($menu) => $menu->visible)
         ->values();
 
+        // Add dynamic department-specific menus for Department Head
+        if ($isManager) {
+            // Menus for department head are now loaded from database via MenuSeeder
+            // Dynamic menus removed to avoid conflicts
+        }
+
+        // Clear menu cache after getting menus to ensure fresh data
+        // Note: Cache is cleared when roles/permissions change, not on every request
+
         return $filtered;
     }
 
@@ -91,5 +276,22 @@ class MenuService
     public static function clear()
     {
         Cache::flush();
+    }
+
+    /**
+     * Check if user has permission safely
+     */
+    private static function userHasPermission($user, $permission)
+    {
+        try {
+            // First check if permission exists in database
+            if (!Permission::where('name', $permission)->exists()) {
+                return false;
+            }
+            // Then check if user has the permission
+            return $user->can($permission);
+        } catch (PermissionDoesNotExist $e) {
+            return false;
+        }
     }
 }

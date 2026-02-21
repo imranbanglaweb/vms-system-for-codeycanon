@@ -589,6 +589,143 @@ $employee = $user->employee;
     </div>
 </div>
 
+{{-- Maintenance Requisition Stats Cards --}}
+@if(isset($maintenanceStats) && ($maintenanceStats['total'] > 0 || $isAdmin))
+<div class="stats-grid" style="margin-top: 30px;">
+    <div class="stat-card total">
+        <div class="stat-card-header">
+            <div class="stat-icon" style="background: #fce7f3; color: #db2777;">
+                <i class="fa fa-wrench"></i>
+            </div>
+            <span class="stat-trend neutral"><i class="fa fa-layer-group"></i> All Time</span>
+        </div>
+        <div class="stat-value">{{ $maintenanceStats['total'] ?? 0 }}</div>
+        <div class="stat-label">Total Maintenance</div>
+    </div>
+    
+    <div class="stat-card pending">
+        <div class="stat-card-header">
+            <div class="stat-icon" style="background: #fef3c7; color: #d97706;">
+                <i class="fa fa-clock"></i>
+            </div>
+            <span class="stat-trend neutral"><i class="fa fa-hourglass-half"></i> Awaiting</span>
+        </div>
+        <div class="stat-value">{{ ($maintenanceStats['pending'] ?? 0) + ($maintenanceStats['pending_approval'] ?? 0) }}</div>
+        <div class="stat-label">Pending Maintenance</div>
+    </div>
+    
+    <div class="stat-card approved">
+        <div class="stat-card-header">
+            <div class="stat-icon" style="background: #d1fae5; color: #059669;">
+                <i class="fa fa-check-circle"></i>
+            </div>
+            <span class="stat-trend up"><i class="fa fa-arrow-up"></i> Approved</span>
+        </div>
+        <div class="stat-value">{{ $maintenanceStats['approved'] ?? 0 }}</div>
+        <div class="stat-label">Approved Maintenance</div>
+    </div>
+    
+    <div class="stat-card completed">
+        <div class="stat-card-header">
+            <div class="stat-icon" style="background: #cffafe; color: #0891b2;">
+                <i class="fa fa-flag-checkered"></i>
+            </div>
+            <span class="stat-trend up"><i class="fa fa-arrow-up"></i> Completed</span>
+        </div>
+        <div class="stat-value">{{ $maintenanceStats['completed'] ?? 0 }}</div>
+        <div class="stat-label">Completed Maintenance</div>
+    </div>
+</div>
+
+{{-- Quick Actions for Maintenance --}}
+<div class="quick-actions" style="margin-top: 30px;">
+    <h4 class="section-title"><i class="fa fa-wrench" style="color: #db2777;"></i> Maintenance Quick Actions</h4>
+    <div class="quick-actions-grid">
+        <a href="{{ route('maintenance.create') }}" class="quick-action-item">
+            <div class="quick-action-icon" style="background: #db2777;">
+                <i class="fa fa-plus"></i>
+            </div>
+            <div class="quick-action-text">
+                <h5>New Maintenance</h5>
+                <p>Submit maintenance request</p>
+            </div>
+        </a>
+        
+        <a href="{{ route('maintenance.index') }}" class="quick-action-item">
+            <div class="quick-action-icon" style="background: #059669;">
+                <i class="fa fa-list"></i>
+            </div>
+            <div class="quick-action-text">
+                <h5>My Maintenance</h5>
+                <p>View all maintenance requests</p>
+            </div>
+        </a>
+    </div>
+</div>
+
+{{-- Recent Maintenance Requisitions --}}
+<div class="table-card" style="margin-top: 30px;">
+    <div class="table-header">
+        <h4><i class="fa fa-wrench" style="color: #db2777;"></i> My Recent Maintenance Requests</h4>
+        <a href="{{ route('maintenance.index') }}" class="btn-view">View All <i class="fa fa-arrow-right"></i></a>
+    </div>
+    
+    @if($latestMaintenance && $latestMaintenance->count() > 0)
+    <table class="table-premium">
+        <thead>
+            <tr>
+                <th>Request ID</th>
+                <th>Vehicle</th>
+                <th>Service</th>
+                <th>Maintenance Date</th>
+                <th>Status</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach($latestMaintenance as $maintenance)
+            <tr>
+                <td><strong>{{ $maintenance->requisition_no }}</strong></td>
+                <td>{{ $maintenance->vehicle->vehicle_name ?? '-' }} ({{ $maintenance->vehicle->vehicle_no ?? '-' }})</td>
+                <td>{{ Str::limit($maintenance->service_title, 30) }}</td>
+                <td>{{ \Carbon\Carbon::parse($maintenance->maintenance_date)->format('M d, Y') }}</td>
+                <td>
+                    @if($maintenance->status == 'Completed')
+                        <span class="badge-status badge-completed"><i class="fa fa-check"></i> Completed</span>
+                    @elseif($maintenance->status == 'Approved')
+                        <span class="badge-status badge-approved"><i class="fa fa-check"></i> Approved</span>
+                    @elseif($maintenance->status == 'Rejected')
+                        <span class="badge-status badge-rejected"><i class="fa fa-times"></i> Rejected</span>
+                    @elseif($maintenance->status == 'Pending Approval')
+                        <span class="badge-status badge-in-progress"><i class="fa fa-clock"></i> Pending Approval</span>
+                    @else
+                        <span class="badge-status badge-pending"><i class="fa fa-clock"></i> Pending</span>
+                    @endif
+                </td>
+                <td>
+                    <a href="{{ route('maintenance.show', $maintenance->id) }}" class="btn-view">
+                        <i class="fa fa-eye"></i> View
+                    </a>
+                </td>
+            </tr>
+            @endforeach
+        </tbody>
+    </table>
+    @else
+    <div class="empty-state">
+        <div class="empty-state-icon">
+            <i class="fa fa-wrench"></i>
+        </div>
+        <h4>No Maintenance Requests</h4>
+        <p>You haven't submitted any maintenance requests yet.</p>
+        <a href="{{ route('maintenance.create') }}" class="btn-view" style="margin-top: 15px;">
+            <i class="fa fa-plus"></i> Create Your First Request
+        </a>
+    </div>
+    @endif
+</div>
+@endif
+
 {{-- Recent Requisitions --}}
 <div class="table-card">
     <div class="table-header">
@@ -614,7 +751,7 @@ $employee = $user->employee;
                 <td><strong>#REQ-{{ str_pad($requisition->id, 5, '0', STR_PAD_LEFT) }}</strong></td>
                 <td>{{ \Carbon\Carbon::parse($requisition->travel_date)->format('M d, Y') }}</td>
                 <td>{{ Str::limit($requisition->purpose, 30) }}</td>
-                <td>{{ $requisition->destination }}</td>
+                <td>{{ $requisition->to_location }}</td>
                 <td>
                     @if($requisition->status == 'Completed')
                         <span class="badge-status badge-completed"><i class="fa fa-check"></i> Completed</span>

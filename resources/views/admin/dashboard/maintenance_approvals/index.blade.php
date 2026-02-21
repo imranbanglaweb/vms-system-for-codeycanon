@@ -85,7 +85,6 @@ table.dataTable tbody tr:hover { filter: brightness(0.97); }
                             <th>Priority</th>
                             <th>Total Cost</th>
                             <th>Status</th>
-                            <th>Created At</th>
                             <th class="text-center">Actions</th>
                         </tr>
                     </thead>
@@ -127,7 +126,7 @@ $(function(){
             { data: 'priority', name: 'priority', orderable: false },
             { data: 'total_cost', name: 'total_cost' },
             { data: 'status_badge', name: 'status', orderable: false, searchable: false },
-            { data: 'created_at', render: function(d) { return d ? moment(d).format('DD MMM Y, hh:mm A') : ''; }},
+            // { data: 'created_at', render: function(d) { return d ? moment(d).format('DD MMM Y, hh:mm A') : ''; }},
             { data: 'action', orderable: false, searchable: false, className: 'text-center' }
         ],
 

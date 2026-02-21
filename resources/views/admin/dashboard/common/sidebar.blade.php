@@ -4,6 +4,7 @@
     }
     
     /* Sidebar Menu Styling */
+    {
         color: rgba(255,255,255,0.7);
         font-size: 12px;
         white-space: nowrap;

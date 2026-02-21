@@ -41,6 +41,7 @@ class PermissionSeeder extends Seeder
             'department-approval-view',
             'department-approval-approve',
             'department-approval-reject',
+            'requisition-approval-department',
 
             // ================= TRANSPORT APPROVAL WORKFLOW =================
             'transport-approve',
@@ -58,6 +59,7 @@ class PermissionSeeder extends Seeder
             'vehicle-view',
             'vehicle-export',
             'vehicle-list-view',
+            'vehicle-list-department',
 
             // ================= DRIVER MANAGEMENT =================
             'driver-manage',
@@ -66,7 +68,10 @@ class PermissionSeeder extends Seeder
             'driver-delete',
             'driver-view',
             'driver-export',
+            'driver-access',
+            'driver-vehicle',
             'driver-list-view',
+            'driver-list-department',
             'license-type-manage',
             
             // Driver Documents
@@ -118,12 +123,17 @@ class PermissionSeeder extends Seeder
             'employee-export',
             'employee-view-own',
             'employee-edit-own',
+            'employee-list-department',
+            'employee-create-department',
+            'employee-edit-department',
+            'employee-delete-department',
 
             // ================= DEPARTMENT =================
             'department-manage',
             'department-create',
             'department-edit',
             'department-delete',
+            'department-head-manage',
 
             // ================= UNIT / LOCATION =================
             'unit-manage',
@@ -150,6 +160,7 @@ class PermissionSeeder extends Seeder
             'maintenance-delete',
             'maintenance-approve',
             'maintenance-approval-view',
+            'maintenance-approval-department',
             'maintenance-history',
 
             'maintenance-type-manage',
@@ -169,8 +180,10 @@ class PermissionSeeder extends Seeder
             // ================= REPORTS =================
             'report-requisition',
             'report-requisition-own',
+            'report-requisition-department',
             'report-maintenance',
             'report-maintenance-own',
+            'report-maintenance-department',
             'report-trip-fuel',
             'report-vehicle-utilization',
             'report-driver-performance',

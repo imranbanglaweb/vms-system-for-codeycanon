@@ -654,8 +654,26 @@ class EmailService
         $emails = [];
 
         $driver = $requisition->assignedDriver ?? $requisition->driver;
+        
+        // First check if driver has direct email
         if ($driver && !empty($driver->email)) {
             $emails[] = $driver->email;
+        }
+        
+        // If driver has employee_id, try to get email from employee
+        if (empty($emails) && $driver && $driver->employee_id) {
+            $employee = \App\Models\Employee::find($driver->employee_id);
+            if ($employee && !empty($employee->email)) {
+                $emails[] = $employee->email;
+            }
+        }
+        
+        // Also check for user account linked to driver via employee
+        if (empty($emails) && $driver && $driver->employee_id) {
+            $user = \App\Models\User::where('employee_id', $driver->employee_id)->first();
+            if ($user && !empty($user->email)) {
+                $emails[] = $user->email;
+            }
         }
 
         return $emails;
@@ -673,6 +691,19 @@ class EmailService
         $department = $requisition->department;
         $driver = $requisition->assignedDriver ?? $requisition->driver;
         $vehicle = $requisition->assignedVehicle ?? $requisition->vehicle;
+        
+        // Get driver contact info - try employee first, then driver fields
+        $driverPhone = '';
+        $driverEmail = '';
+        if ($driver) {
+            if ($driver->employee) {
+                $driverPhone = $driver->employee->phone ?? '';
+                $driverEmail = $driver->employee->email ?? '';
+            }
+            if (empty($driverPhone)) {
+                $driverPhone = $driver->phone ?? $driver->mobile ?? '';
+            }
+        }
         
         // Get department head info for department approval emails
         $headName = 'Department Head';

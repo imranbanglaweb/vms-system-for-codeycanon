@@ -554,6 +554,17 @@ $pendingCount = $stats['pending'] ?? 0;
 
 {{-- Stats Cards --}}
 <div class="stats-grid">
+    <div class="stat-card team">
+        <div class="stat-card-header">
+            <div class="stat-icon" style="background: #e0e7ff; color: var(--info-color);">
+                <i class="fa fa-users"></i>
+            </div>
+            <span class="stat-trend neutral"><i class="fa fa-building"></i> Team</span>
+        </div>
+        <div class="stat-value">{{ $departmentEmployeeCount ?? 0 }}</div>
+        <div class="stat-label">Team Members</div>
+    </div>
+    
     <div class="stat-card total">
         <div class="stat-card-header">
             <div class="stat-icon">
@@ -598,6 +609,154 @@ $pendingCount = $stats['pending'] ?? 0;
         <div class="stat-label">Rejected</div>
     </div>
 </div>
+
+{{-- Department Maintenance Stats Cards --}}
+@if(isset($departmentMaintenanceStats) && ($departmentMaintenanceStats['total'] > 0 || $isManager))
+<div class="stats-grid" style="margin-top: 30px;">
+    <div class="stat-card total">
+        <div class="stat-card-header">
+            <div class="stat-icon" style="background: #fce7f3; color: #db2777;">
+                <i class="fa fa-wrench"></i>
+            </div>
+            <span class="stat-trend neutral"><i class="fa fa-wrench"></i> Maintenance</span>
+        </div>
+        <div class="stat-value">{{ $departmentMaintenanceStats['total'] ?? 0 }}</div>
+        <div class="stat-label">Total Maintenance</div>
+    </div>
+    
+    <div class="stat-card pending">
+        <div class="stat-card-header">
+            <div class="stat-icon" style="background: #fef3c7; color: #d97706;">
+                <i class="fa fa-clock"></i>
+            </div>
+            <span class="stat-trend neutral"><i class="fa fa-hourglass-half"></i> Awaiting</span>
+        </div>
+        <div class="stat-value">{{ ($departmentMaintenanceStats['pending'] ?? 0) + ($departmentMaintenanceStats['pending_approval'] ?? 0) }}</div>
+        <div class="stat-label">Pending Maintenance</div>
+    </div>
+    
+    <div class="stat-card approved">
+        <div class="stat-card-header">
+            <div class="stat-icon" style="background: #d1fae5; color: #059669;">
+                <i class="fa fa-check-circle"></i>
+            </div>
+            <span class="stat-trend up"><i class="fa fa-arrow-up"></i> Approved</span>
+        </div>
+        <div class="stat-value">{{ $departmentMaintenanceStats['approved'] ?? 0 }}</div>
+        <div class="stat-label">Approved Maintenance</div>
+    </div>
+    
+    <div class="stat-card completed">
+        <div class="stat-card-header">
+            <div class="stat-icon" style="background: #cffafe; color: #0891b2;">
+                <i class="fa fa-flag-checkered"></i>
+            </div>
+            <span class="stat-trend up"><i class="fa fa-arrow-up"></i> Completed</span>
+        </div>
+        <div class="stat-value">{{ $departmentMaintenanceStats['completed'] ?? 0 }}</div>
+        <div class="stat-label">Completed Maintenance</div>
+    </div>
+</div>
+
+{{-- Quick Actions for Maintenance --}}
+<div class="quick-actions" style="margin-top: 30px;">
+    <h4 class="section-title"><i class="fa fa-wrench" style="color: #db2777;"></i> Maintenance Quick Actions</h4>
+    <div class="quick-actions-grid">
+        <a href="{{ route('maintenance.create') }}" class="quick-action-item">
+            <div class="quick-action-icon" style="background: #db2777;">
+                <i class="fa fa-plus"></i>
+            </div>
+            <div class="quick-action-text">
+                <h5>New Maintenance</h5>
+                <p>Submit maintenance request</p>
+            </div>
+        </a>
+        
+        <a href="{{ route('maintenance.index') }}" class="quick-action-item">
+            <div class="quick-action-icon" style="background: #059669;">
+                <i class="fa fa-list"></i>
+            </div>
+            <div class="quick-action-text">
+                <h5>All Maintenance</h5>
+                <p>View all maintenance requests</p>
+            </div>
+        </a>
+        
+        <a href="{{ route('maintenance_approvals.index') }}" class="quick-action-item">
+            <div class="quick-action-icon" style="background: #d97706;">
+                <i class="fa fa-check-double"></i>
+            </div>
+            <div class="quick-action-text">
+                <h5>Maintenance Approvals</h5>
+                <p>Review pending approvals</p>
+            </div>
+        </a>
+    </div>
+</div>
+
+{{-- Pending Maintenance Approvals Table --}}
+@if($latestDepartmentMaintenance && $latestDepartmentMaintenance->count() > 0)
+<div class="table-card" style="margin-top: 30px;">
+    <div class="table-header">
+        <h4><i class="fa fa-wrench" style="color: #db2777;"></i> Pending Maintenance Approvals</h4>
+        <a href="{{ route('maintenance_approvals.index') }}" class="btn-view">View All <i class="fa fa-arrow-right"></i></a>
+    </div>
+    
+    <table class="table-premium">
+        <thead>
+            <tr>
+                <th>Employee</th>
+                <th>Request ID</th>
+                <th>Vehicle</th>
+                <th>Service</th>
+                <th>Date</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach($latestDepartmentMaintenance as $maintenance)
+            <tr>
+                <td>
+                    <div class="employee-info">
+                        <div class="employee-avatar" style="background: #db2777;">
+                            {{ strtoupper(substr($maintenance->employee->first_name ?? 'U', 0, 1)) }}
+                        </div>
+                        <div class="employee-details">
+                            <h5>{{ $maintenance->employee->first_name ?? 'User' }} {{ $maintenance->employee->last_name ?? '' }}</h5>
+                            <p>{{ $maintenance->employee->designation ?? 'Employee' }}</p>
+                        </div>
+                    </div>
+                </td>
+                <td><strong>{{ $maintenance->requisition_no }}</strong></td>
+                <td>{{ $maintenance->vehicle->vehicle_name ?? '-' }}</td>
+                <td>{{ Str::limit($maintenance->service_title, 25) }}</td>
+                <td>{{ \Carbon\Carbon::parse($maintenance->maintenance_date)->format('M d, Y') }}</td>
+                <td>
+                    @if($maintenance->status == 'Pending')
+                        <span class="badge-status badge-pending"><i class="fa fa-clock"></i> Pending</span>
+                    @elseif($maintenance->status == 'Pending Approval')
+                        <span class="badge-status badge-pending" style="background: #e0e7ff; color: #4338ca;"><i class="fa fa-clock"></i> Pending Approval</span>
+                    @elseif($maintenance->status == 'Approved')
+                        <span class="badge-status badge-approved"><i class="fa fa-check"></i> Approved</span>
+                    @elseif($maintenance->status == 'Rejected')
+                        <span class="badge-status badge-rejected"><i class="fa fa-times"></i> Rejected</span>
+                    @else
+                        <span class="badge-status badge-pending"><i class="fa fa-clock"></i> {{ $maintenance->status }}</span>
+                    @endif
+                </td>
+                <td>
+                    <a href="{{ route('maintenance.show', $maintenance->id) }}" class="btn-view">
+                        <i class="fa fa-eye"></i> Review
+                    </a>
+                </td>
+            </tr>
+            @endforeach
+        </tbody>
+    </table>
+</div>
+@endif
+@endif
 
 {{-- Quick Actions --}}
 <div class="quick-actions">

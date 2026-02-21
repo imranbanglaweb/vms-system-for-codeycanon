@@ -322,7 +322,7 @@
 </section>
 
 <!-- Reject Modal -->
-<div class="modal fade" id="rejectModal" tabindex="-1" aria-labelledby="rejectModalLabel" aria-hidden="true">
+<div class="modal" id="rejectModal" tabindex="-1" aria-labelledby="rejectModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content border-0 shadow">
             <div class="modal-header bg-danger text-white">
@@ -385,6 +385,7 @@
 
 <script src="{{ asset('public/admin_resource/plugins/sweetalert2/sweetalert2.min.js') }}"></script>
 <script>
+var maintenanceApprovalBaseUrl = '{{ route('maintenance_approvals.index') }}';
 $(document).ready(function() {
     // Setup CSRF token for all AJAX requests
     $.ajaxSetup({
@@ -499,7 +500,7 @@ function approveRequisition(id) {
     }).then((result) => {
         if (result.isConfirmed) {
             $.ajax({
-                url: '/admin/approvals/maintenance/' + id + '/approve',
+                url: maintenanceApprovalBaseUrl + '/' + id + '/approve',
                 method: 'POST',
                 success: function(response) {
                     if (response.status === 'success') {
@@ -551,7 +552,7 @@ function rejectRequisition(id) {
     }).then((result) => {
         if (result.isConfirmed) {
             $.ajax({
-                url: '/admin/approvals/maintenance/' + id + '/reject',
+                url: maintenanceApprovalBaseUrl + '/' + id + '/reject',
                 method: 'POST',
                 data: { remarks: result.value },
                 success: function(response) {

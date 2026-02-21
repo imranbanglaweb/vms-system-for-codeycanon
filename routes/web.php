@@ -68,6 +68,7 @@ use App\Http\Controllers\DepartmentHeadController;
 use App\Http\Controllers\UnitController;
 use App\Http\Controllers\LocationController;
 use App\Http\Controllers\EmployeeController;
+use App\Http\Controllers\DepartmentEmployeeController;
 use App\Http\Controllers\UserController;
 
 
@@ -213,6 +214,7 @@ Route::middleware(['auth'])->prefix('driver')->name('driver.')->group(function (
     Route::post('/trip/{id}/start', [DriverController::class, 'startTrip'])->name('trip.start');
     Route::post('/trip/{id}/finish', [DriverController::class, 'finishTrip'])->name('trip.finish');
     Route::post('/trip/{id}/end', [DriverController::class, 'endTrip'])->name('trip.end');
+    Route::patch('/trip/{id}/complete', [DriverController::class, 'endTrip'])->name('trip.complete');
     
     // Fuel Log
     Route::get('/fuel-log', [DriverController::class, 'driverFuelLog'])->name('fuel.log');
@@ -310,6 +312,8 @@ Route::middleware(['auth'])->prefix('admin')->group(function () {
         
         Route::get('/ajax', [MaintenanceApprovalController::class, 'ajax'])->name('ajax');
         Route::get('/{id}', [MaintenanceApprovalController::class, 'show'])->name('show');
+        Route::post('/{id}/approve', [MaintenanceApprovalController::class, 'approve'])->name('approve');
+        Route::post('/{id}/reject', [MaintenanceApprovalController::class, 'reject'])->name('reject');
     });
 
     // Transport Approval for Maintenance Requisitions
@@ -478,6 +482,15 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     // Employees
     Route::get('employees/data', [EmployeeController::class, 'data'])->name('employees.data');
     Route::resource('employees', EmployeeController::class);
+    
+    // Department Employees (for Department Head)
+    Route::get('admin/employees/department', [DepartmentEmployeeController::class, 'index'])->name('employees.department.index');
+    Route::get('employees/department/create', [DepartmentEmployeeController::class, 'create'])->name('employees.department.create');
+    Route::post('employees/department', [DepartmentEmployeeController::class, 'store'])->name('employees.department.store');
+    Route::get('employees/department/{employee}', [DepartmentEmployeeController::class, 'show'])->name('employees.department.show');
+    Route::get('employees/department/{employee}/edit', [DepartmentEmployeeController::class, 'edit'])->name('employees.department.edit');
+    Route::put('employees/department/{employee}', [DepartmentEmployeeController::class, 'update'])->name('employees.department.update');
+    Route::delete('employees/department/{employee}', [DepartmentEmployeeController::class, 'destroy'])->name('employees.department.destroy');
     
     // Units
     Route::get('units/data', [UnitController::class, 'data'])->name('units.data');

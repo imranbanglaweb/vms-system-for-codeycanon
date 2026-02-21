@@ -325,7 +325,7 @@
                 <div class="stat-card pending">
                     <div class="stat-icon"><i class="fa fa-clock"></i></div>
                     <div class="stat-title">My Trips (Pending)</div>
-                    <div class="stat-value">{{ isset($todayTrips) ? $todayTrips->where('transport_status', 'Pending')->count() : 0 }}</div>
+                    <div class="stat-value">{{ isset($pendingTrips) && $pendingTrips ? $pendingTrips->where('transport_status', 'Pending')->count() : (isset($todayTrips) ? $todayTrips->where('transport_status', 'Pending')->count() : 0) }}</div>
                 </div>
             </div>
             <div class="col-md-4">
@@ -356,9 +356,11 @@
                             <table class="table">
                                 <thead>
                                     <tr>
-                                        <th>Trip ID</th>
+                                        <th>Requisition No.</th>
                                         <th>Date</th>
+                                        <th>Vehicle</th>
                                         <th>Route</th>
+                                        <th>Passengers</th>
                                         <th>Status</th>
                                         <th>Actions</th>
                                     </tr>
@@ -366,11 +368,22 @@
                                 <tbody>
                                     @foreach($assignedTrips as $trip)
                                     <tr>
-                                        <td>#{{ $trip->id }}</td>
+                                        <td>#{{ $trip->requisition_number ?? $trip->id }}</td>
                                         <td>{{ $trip->travel_date }}</td>
-                                        <td>{{ $trip->from_location ?? 'N/A' }} to {{ $trip->to_location ?? 'N/A' }}</td>
                                         <td>
-                                            <span class="badge badge-{{ $trip->transport_status == 'Pending' ? 'warning' : ($trip->transport_status == 'In Transit' ? 'info' : 'success') }}">
+                                            @if($trip->assignedVehicle)
+                                                {{ $trip->assignedVehicle->vehicle_name ?? 'N/A' }}
+                                                @if($trip->assignedVehicle->number_plate)
+                                                    <br><small class="text-muted">{{ $trip->assignedVehicle->number_plate }}</small>
+                                                @endif
+                                            @else
+                                                N/A
+                                            @endif
+                                        </td>
+                                        <td>{{ $trip->from_location ?? 'N/A' }} to {{ $trip->to_location ?? 'N/A' }}</td>
+                                        <td>{{ $trip->number_of_passenger ?? ($trip->passengers ? $trip->passengers->count() : 0) }}</td>
+                                        <td>
+                                            <span class="badge badge-{{ $trip->transport_status == 'Pending' ? 'warning' : ($trip->transport_status == 'In Transit' ? 'info' : ($trip->transport_status == 'Approved' ? 'primary' : 'success')) }}">
                                                 {{ ucfirst($trip->transport_status) }}
                                             </span>
                                         </td>
@@ -390,6 +403,7 @@
                                 </tbody>
                             </table>
                         @else
+                        <hr>
                             <div class="alert alert-info">
                                 <i class="fa fa-info-circle mr-2"></i>
                                 No active trips assigned. Check your schedule for upcoming trips.

@@ -4,8 +4,10 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Requisition;
+use App\Models\MaintenanceRequisition;
 use App\Models\Menu;
 use App\Models\Contact;
+use App\Models\Employee;
 use App\Models\Document;
 use App\Models\Notification;
 use App\Models\Vehicle;
@@ -77,6 +79,17 @@ class HomeController extends Controller
     public function index()
     {
         $user = Auth::user();
+        
+        // Check if user has Driver role - redirect to driver dashboard
+        $isDriver = $user->hasRole('Driver');
+        if (!$isDriver) {
+            $userRole = $user->role ?? '';
+            $isDriver = ($userRole === 'driver');
+        }
+        
+        if ($isDriver) {
+            return redirect()->route('driver.dashboard');
+        }
         
         // Debug: Log user info
         \Log::info('Dashboard Access', [
@@ -368,6 +381,97 @@ class HomeController extends Controller
             $topVehicles = collect();
         }
 
+        // =============================================
+        // MAINTENANCE REQUISITION DATA FOR EMPLOYEES
+        // =============================================
+        $maintenanceStats = [];
+        $latestMaintenance = collect();
+        $departmentEmployeeCount = 0;
+        $departmentMaintenanceStats = [];
+        $latestDepartmentMaintenance = collect();
+        
+        if ($isManager && $user->department_id) {
+            // Department Head: Get department employees and their maintenance requisitions
+            $departmentEmployeeCount = Employee::where('department_id', $user->department_id)->count();
+            
+            // Get employee IDs in this department
+            $departmentEmployeeIds = Employee::where('department_id', $user->department_id)->pluck('id');
+            
+            // Department maintenance requisitions (from employees in this department)
+            $deptMaintenanceQuery = MaintenanceRequisition::whereIn('employee_id', $departmentEmployeeIds);
+            
+            $departmentMaintenanceStats['total'] = (clone $deptMaintenanceQuery)->count();
+            $departmentMaintenanceStats['pending'] = (clone $deptMaintenanceQuery)->where('status', 'Pending')->count();
+            $departmentMaintenanceStats['pending_approval'] = (clone $deptMaintenanceQuery)->where('status', 'Pending Approval')->count();
+            $departmentMaintenanceStats['approved'] = (clone $deptMaintenanceQuery)->where('status', 'Approved')->count();
+            $departmentMaintenanceStats['rejected'] = (clone $deptMaintenanceQuery)->where('status', 'Rejected')->count();
+            $departmentMaintenanceStats['completed'] = (clone $deptMaintenanceQuery)->where('status', 'Completed')->count();
+            
+            // Get latest department maintenance requisitions pending approval
+            $latestDepartmentMaintenance = MaintenanceRequisition::with(['vehicle', 'maintenanceType', 'employee'])
+                ->whereIn('employee_id', $departmentEmployeeIds)
+                ->whereIn('status', ['Pending', 'Pending Approval'])
+                ->orderBy('created_at', 'desc')
+                ->limit(5)
+                ->get();
+            
+            // Also get personal maintenance stats
+            $employeeId = $user->employee_id ?? null;
+            if ($employeeId) {
+                $maintenanceQuery = MaintenanceRequisition::where('employee_id', $employeeId);
+                
+                $maintenanceStats['total'] = (clone $maintenanceQuery)->count();
+                $maintenanceStats['pending'] = (clone $maintenanceQuery)->where('status', 'Pending')->count();
+                $maintenanceStats['pending_approval'] = (clone $maintenanceQuery)->where('status', 'Pending Approval')->count();
+                $maintenanceStats['approved'] = (clone $maintenanceQuery)->where('status', 'Approved')->count();
+                $maintenanceStats['rejected'] = (clone $maintenanceQuery)->where('status', 'Rejected')->count();
+                $maintenanceStats['completed'] = (clone $maintenanceQuery)->where('status', 'Completed')->count();
+                
+                $latestMaintenance = MaintenanceRequisition::with(['vehicle', 'maintenanceType'])
+                    ->where('employee_id', $employeeId)
+                    ->orderBy('created_at', 'desc')
+                    ->limit(5)
+                    ->get();
+            }
+        } elseif ($isEmployee || (!$isAdmin && !$isManager)) {
+            // Get employee's maintenance requisitions
+            $employeeId = $user->employee_id ?? null;
+            
+            if ($employeeId) {
+                $maintenanceQuery = MaintenanceRequisition::where('employee_id', $employeeId);
+                
+                $maintenanceStats['total'] = (clone $maintenanceQuery)->count();
+                $maintenanceStats['pending'] = (clone $maintenanceQuery)->where('status', 'Pending')->count();
+                $maintenanceStats['pending_approval'] = (clone $maintenanceQuery)->where('status', 'Pending Approval')->count();
+                $maintenanceStats['approved'] = (clone $maintenanceQuery)->where('status', 'Approved')->count();
+                $maintenanceStats['rejected'] = (clone $maintenanceQuery)->where('status', 'Rejected')->count();
+                $maintenanceStats['completed'] = (clone $maintenanceQuery)->where('status', 'Completed')->count();
+                
+                // Get latest maintenance requisitions
+                $latestMaintenance = MaintenanceRequisition::with(['vehicle', 'maintenanceType'])
+                    ->where('employee_id', $employeeId)
+                    ->orderBy('created_at', 'desc')
+                    ->limit(5)
+                    ->get();
+            }
+        } elseif ($isAdmin) {
+            // Admin sees all maintenance requisitions
+            $maintenanceQuery = MaintenanceRequisition::query();
+            
+            $maintenanceStats['total'] = (clone $maintenanceQuery)->count();
+            $maintenanceStats['pending'] = (clone $maintenanceQuery)->where('status', 'Pending')->count();
+            $maintenanceStats['pending_approval'] = (clone $maintenanceQuery)->where('status', 'Pending Approval')->count();
+            $maintenanceStats['approved'] = (clone $maintenanceQuery)->where('status', 'Approved')->count();
+            $maintenanceStats['rejected'] = (clone $maintenanceQuery)->where('status', 'Rejected')->count();
+            $maintenanceStats['completed'] = (clone $maintenanceQuery)->where('status', 'Completed')->count();
+            
+            // Get latest maintenance requisitions
+            $latestMaintenance = MaintenanceRequisition::with(['vehicle', 'maintenanceType'])
+                ->orderBy('created_at', 'desc')
+                ->limit(5)
+                ->get();
+        }
+
         // Build payload for view
         $cards = [
             ['key' => 'total', 'label' => $this->translationService->get('total', 'backend'), 'value' => $total, 'color' => '#0d6efd', 'icon' => 'fa-layer-group'],
@@ -443,6 +547,11 @@ class HomeController extends Controller
             'user' => $user,
             'notifications' => $notifications,
             'topVehicles' => $topVehicles,
+            'maintenanceStats' => $maintenanceStats,
+            'latestMaintenance' => $latestMaintenance,
+            'departmentEmployeeCount' => $departmentEmployeeCount,
+            'departmentMaintenanceStats' => $departmentMaintenanceStats,
+            'latestDepartmentMaintenance' => $latestDepartmentMaintenance,
         ];
 
         // Route to appropriate dashboard based on role

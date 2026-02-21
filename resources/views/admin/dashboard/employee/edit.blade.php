@@ -47,7 +47,6 @@
 </section>
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-<script src="//cdn.ckeditor.com/4.4.7/full/ckeditor.js"></script>
 <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
  <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-beta.1/dist/css/select2.min.css" rel="stylesheet" />
 <!-- Script -->
@@ -56,28 +55,6 @@
 // In your Javascript (external.js resource or <script> tag)
 $(document).ready(function() {
     $('.select2').select2();
-    // Initialize CKEditor for any textarea marked as rich-editor
-    window._richEditors = [];
-    $('.rich-editor').each(function(){
-        var id = $(this).attr('id');
-        try {
-            if (CKEDITOR.instances[id]) {
-                CKEDITOR.instances[id].destroy(true);
-            }
-        } catch(e) { }
-        CKEDITOR.replace(id, {
-            // small toolbar to keep UI clean
-            toolbar: [
-                { name: 'basicstyles', items: [ 'Bold', 'Italic', 'Underline' ] },
-                { name: 'paragraph', items: [ 'NumberedList', 'BulletedList' ] },
-                { name: 'links', items: [ 'Link', 'Unlink' ] },
-                { name: 'undo', items: [ 'Undo', 'Redo' ] }
-            ],
-            height: 120
-        });
-        window._richEditors.push(id);
-    });
-
 
     // Show existing photo if available
     var photoPath = "{{ $employee_edit->photo }}";
@@ -181,15 +158,6 @@ $(document).on('change', '#photo-input', function(e){
                 confirmButtonColor: '#f39c12',
             })
             return;
-        }
-
-        // ensure CKEditor instances update their textarea elements
-        if (window._richEditors && window._richEditors.length) {
-            window._richEditors.forEach(function(id){
-                if (CKEDITOR.instances[id]) {
-                    CKEDITOR.instances[id].updateElement();
-                }
-            });
         }
 
         // Loading state

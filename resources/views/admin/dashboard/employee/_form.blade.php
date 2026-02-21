@@ -104,13 +104,13 @@
 
                         <div class="form-group">
                             <label><strong><i class="fa fa-home text-primary mr-1"></i> Present Address</strong></label>
-                            {!! Form::textarea('present_address', null, ['rows'=>3,'placeholder' => 'Present address','class' => 'form-control rich-editor', 'id' => 'present_address']) !!}
+                            {!! Form::textarea('present_address', null, ['rows'=>3,'placeholder' => 'Present address','class' => 'form-control', 'id' => 'present_address']) !!}
                             <div class="invalid-feedback d-none" data-field="present_address"></div>
                         </div>
 
                         <div class="form-group">
                             <label><strong><i class="fa fa-map-marker-alt text-primary mr-1"></i> Permanent Address</strong></label>
-                            {!! Form::textarea('permanent_address', null, ['rows'=>3,'placeholder' => 'Permanent address','class' => 'form-control rich-editor', 'id' => 'permanent_address']) !!}
+                            {!! Form::textarea('permanent_address', null, ['rows'=>3,'placeholder' => 'Permanent address','class' => 'form-control', 'id' => 'permanent_address']) !!}
                             <div class="invalid-feedback d-none" data-field="permanent_address"></div>
                         </div>
 

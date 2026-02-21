@@ -416,43 +416,64 @@ class DriverController extends Controller
         $upcomingTrips = collect();
         $recentTrips = collect();
         $assignedTrips = collect();
+        $activeTrip = null;
         
         if (!$driver) {
-            return view('admin.dashboard.driver.dashboard', compact('driver', 'todayTrips', 'upcomingTrips', 'recentTrips', 'assignedTrips'));
+            return view('admin.dashboard.driver.dashboard', compact('driver', 'todayTrips', 'upcomingTrips', 'recentTrips', 'assignedTrips', 'activeTrip'));
         }
         
-        // Get assigned trips for today
-        $todayTrips = \App\Models\Requisition::where('driver_id', $driver->id)
+        // Get all pending trips for the driver (for the stats - all pending, not just today)
+        $pendingTrips = \App\Models\Requisition::where('assigned_driver_id', $driver->id)
+            ->whereIn('transport_status', ['Pending', 'Approved'])
+            ->whereDate('travel_date', '>=', today())
+            ->with(['vehicle', 'requestedBy', 'assignedVehicle', 'passengers'])
+            ->get();
+        
+        // Get active/In Transit trip for the driver
+        $activeTrip = \App\Models\Requisition::where('assigned_driver_id', $driver->id)
+            ->where('transport_status', 'In Transit')
+            ->with(['vehicle', 'requestedBy', 'assignedVehicle', 'passengers'])
+            ->first();
+        
+        // Get today's trips (all statuses including In Transit)
+        $todayTrips = \App\Models\Requisition::where('assigned_driver_id', $driver->id)
             ->whereDate('travel_date', today())
-            ->whereIn('transport_status', ['Approved', 'Pending'])
-            ->with(['vehicle', 'employee'])
+            ->whereIn('transport_status', ['Approved', 'Pending', 'In Transit'])
+            ->with(['vehicle', 'requestedBy', 'assignedVehicle', 'passengers'])
             ->get();
         
         // Upcoming trips
-        $upcomingTrips = \App\Models\Requisition::where('driver_id', $driver->id)
+        $upcomingTrips = \App\Models\Requisition::where('assigned_driver_id', $driver->id)
             ->whereDate('travel_date', '>', today())
             ->where('transport_status', 'Approved')
-            ->with(['vehicle', 'employee'])
+            ->with(['vehicle', 'requestedBy', 'assignedVehicle', 'passengers'])
             ->orderBy('travel_date', 'asc')
             ->take(5)
             ->get();
         
         // Recent completed trips
-        $recentTrips = \App\Models\Requisition::where('driver_id', $driver->id)
+        $recentTrips = \App\Models\Requisition::where('assigned_driver_id', $driver->id)
             ->where('status', 'Completed')
-            ->with(['vehicle', 'employee'])
+            ->with(['vehicle', 'requestedBy', 'assignedVehicle', 'passengers'])
             ->orderBy('travel_date', 'desc')
             ->take(5)
             ->get();
         
-        // Get all assigned trips (for dashboard display)
-        $assignedTrips = \App\Models\Requisition::where('driver_id', $driver->id)
-            ->whereDate('travel_date', today())
-            ->whereIn('transport_status', ['Approved', 'Pending'])
-            ->with(['vehicle', 'employee'])
+        // Get all assigned trips - active (In Transit) OR today's pending/approved
+        $assignedTrips = \App\Models\Requisition::where('assigned_driver_id', $driver->id)
+            ->where(function($query) {
+                $query->where(function($q) {
+                    $q->whereDate('travel_date', today())
+                      ->whereIn('transport_status', ['Approved', 'Pending', 'In Transit']);
+                })->orWhere(function($q) {
+                    $q->where('transport_status', 'In Transit');
+                });
+            })
+            ->with(['vehicle', 'requestedBy', 'assignedVehicle', 'passengers'])
+            ->orderBy('travel_date', 'asc')
             ->get();
         
-        return view('admin.dashboard.driver.dashboard', compact('driver', 'todayTrips', 'upcomingTrips', 'recentTrips', 'assignedTrips'));
+        return view('admin.dashboard.driver.dashboard', compact('driver', 'todayTrips', 'upcomingTrips', 'recentTrips', 'assignedTrips', 'activeTrip', 'pendingTrips'));
     }
 
     /**
@@ -468,10 +489,10 @@ class DriverController extends Controller
         }
         
         // Get all assigned trips
-        $schedules = \App\Models\Requisition::where('driver_id', $driver->id)
+        $schedules = \App\Models\Requisition::where('assigned_driver_id', $driver->id)
             ->whereDate('travel_date', '>=', today())
             ->whereIn('transport_status', ['Approved', 'Pending'])
-            ->with(['vehicle', 'employee'])
+            ->with(['vehicle', 'requestedBy', 'assignedVehicle', 'passengers'])
             ->orderBy('travel_date', 'asc')
             ->get();
         
@@ -485,16 +506,19 @@ class DriverController extends Controller
     {
         $driver = $this->getDriverByUser();
         $trips = collect();
+       
+    //   dd($trips);
         
         if (!$driver) {
             return view('admin.dashboard.driver.trips', compact('driver', 'trips'));
+             
         }
         
-        $trips = \App\Models\Requisition::where('driver_id', $driver->id)
-            ->with(['vehicle', 'employee'])
+        $trips = \App\Models\Requisition::where('assigned_driver_id', $driver->id)
+            ->with(['vehicle', 'employee', 'requestedBy', 'assignedVehicle', 'passengers'])
             ->orderBy('travel_date', 'desc')
             ->paginate(10);
-        
+        //   dd($trips);
         return view('admin.dashboard.driver.trips', compact('driver', 'trips'));
     }
 
@@ -513,7 +537,10 @@ class DriverController extends Controller
         
         if ($id) {
             $trip = \App\Models\Requisition::where('id', $id)
-                ->where('driver_id', $driver->id)
+                ->where(function($query) use ($driver) {
+                    $query->where('driver_id', $driver->id)
+                          ->orWhere('assigned_driver_id', $driver->id);
+                })
                 ->with(['vehicle', 'employee'])
                 ->first();
             
@@ -524,11 +551,16 @@ class DriverController extends Controller
             return view('admin.dashboard.driver.trip-status', compact('driver', 'trip'));
         }
         
-        // Get pending trips for status update (trips that haven't been started/completed yet)
-        $activeTrips = \App\Models\Requisition::where('driver_id', $driver->id)
-            ->whereIn('transport_status', ['Approved', 'Pending'])
+        // Get pending/in-progress trips for status update (trips that haven't been completed yet)
+        // Include both driver_id and assigned_driver_id for compatibility
+        $activeTrips = \App\Models\Requisition::where(function($query) use ($driver) {
+                $query->where('driver_id', $driver->id)
+                      ->orWhere('assigned_driver_id', $driver->id);
+            })
+            ->whereIn('transport_status', ['Approved', 'Pending', 'In Transit'])
             ->whereNotIn('status', ['Completed'])
-            ->with(['vehicle', 'employee'])
+            ->with(['vehicle', 'employee', 'assignedVehicle'])
+            ->orderBy('travel_date', 'desc')
             ->get();
         
         return view('admin.dashboard.driver.trip-status', compact('driver', 'activeTrips'));
@@ -542,7 +574,10 @@ class DriverController extends Controller
         $driver = $this->getDriverByUser();
         
         $trip = \App\Models\Requisition::where('id', $id)
-            ->where('driver_id', $driver->id)
+            ->where(function($query) use ($driver) {
+                $query->where('driver_id', $driver->id)
+                      ->orWhere('assigned_driver_id', $driver->id);
+            })
             ->first();
         
         if (!$trip) {
@@ -563,7 +598,10 @@ class DriverController extends Controller
         $driver = $this->getDriverByUser();
         
         $trip = \App\Models\Requisition::where('id', $id)
-            ->where('driver_id', $driver->id)
+            ->where(function($query) use ($driver) {
+                $query->where('driver_id', $driver->id)
+                      ->orWhere('assigned_driver_id', $driver->id);
+            })
             ->first();
         
         if (!$trip) {
@@ -584,17 +622,21 @@ class DriverController extends Controller
         $driver = $this->getDriverByUser();
         
         $trip = \App\Models\Requisition::where('id', $id)
-            ->where('driver_id', $driver->id)
+            ->where(function($query) use ($driver) {
+                $query->where('driver_id', $driver->id)
+                      ->orWhere('assigned_driver_id', $driver->id);
+            })
             ->first();
         
         if (!$trip) {
             return response()->json(['error' => 'Trip not found.'], 404);
         }
         
+        $trip->transport_status = 'Completed';
         $trip->status = 'Completed';
         $trip->save();
         
-        return response()->json(['success' => true, 'message' => 'Trip ended successfully.']);
+        return response()->json(['success' => true, 'message' => 'Trip completed successfully!']);
     }
 
     /**

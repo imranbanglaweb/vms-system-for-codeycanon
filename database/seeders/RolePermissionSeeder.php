@@ -283,11 +283,49 @@ class RolePermissionSeeder extends Seeder
         // ================= DEPARTMENT HEAD =================
         $deptHeadPermissions = [
             'dashboard',
+            
+            // Requisitions
             'requisition-view',
             'requisition-create',
+            
+            // Department Approval
             'department-approval-view',
             'department-approval-approve',
             'department-approval-reject',
+            'requisition-approval-department',
+            
+            // Transport Approval
+            'transport-approval-view',
+            
+            // Employee Management (Department specific)
+            'employee-list-department',
+            'employee-create-department',
+            'employee-edit-department',
+            'employee-delete-department',
+            'employee-view-own',
+            'employee-edit-own',
+            
+            // Vehicle (View for department)
+            'vehicle-list-department',
+            'vehicle-view',
+            
+            // Driver (View for department)
+            'driver-list-department',
+            'driver-view',
+            
+            // Maintenance
+            'maintenance-view',
+            'maintenance-create',
+            'maintenance-approval-view',
+            'maintenance-approval-department',
+            
+            // Reports (Department specific)
+            'report-requisition-department',
+            'report-maintenance-department',
+            
+            // Profile
+            'profile-view',
+            'profile-edit',
         ];
 
         $deptHead?->syncPermissions($deptHeadPermissions);
@@ -337,6 +375,9 @@ class RolePermissionSeeder extends Seeder
         $driverPermissions = [
             'dashboard',
             
+            // Driver Access - Required for driver personal module menus
+            'driver-access',
+            
             // Driver Schedule
             'driver-schedule-view',
             'driver-schedule-own',
@@ -354,12 +395,20 @@ class RolePermissionSeeder extends Seeder
             'trip-fuel-log',
             'trip-fuel-own',
             
+            // Driver Documents - View own documents
+            'driver-document-view',
+            
+            // Driver Vehicle - View assigned vehicle
+            'driver-vehicle',
+            
             // Notifications
             'notification-view',
             
-            // Profile
+            // Profile & Employee - View and edit own profile
             'profile-view',
             'profile-edit',
+            'employee-view-own',
+            'employee-edit-own',
         ];
 
         $driver?->syncPermissions($driverPermissions);

@@ -121,8 +121,8 @@
                         <strong>Vehicle Information</strong>
                     </div>
                     <div class="card-body">
-                        <p><strong>Vehicle No:</strong> {{ $data->vehicle->vehicle_name ?? 'N/A' }}</p>
-                        <p><strong>Model:</strong> {{ $data->vehicle->model ?? 'N/A' }}</p>
+                        <p><strong>Vehicle No:</strong> {{ $data->vehicle->vehicle_number ?? 'N/A' }}</p>
+                        <p><strong>Vehicle Name:</strong> {{ $data->vehicle->vehicle_name ?? 'N/A' }}</p>
                         <p><strong>Type:</strong> {{ $data->vehicle->vehicleType->name ?? 'N/A' }}</p>
                     </div>
                 </div>
@@ -137,7 +137,7 @@
                     <div class="card-body">
                         <p><strong>Name:</strong> {{ $data->employee->name ?? 'N/A' }}</p>
                         <p><strong>Phone:</strong> {{ $data->employee->phone ?? 'N/A' }}</p>
-                        <p><strong>Department:</strong> {{ $data->employee->department_name ?? 'N/A' }}</p>
+                        <p><strong>Department:</strong> {{ $data->employee->department->department_name ?? 'N/A' }}</p>
                     </div>
                 </div>
             </div>

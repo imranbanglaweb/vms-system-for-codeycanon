@@ -230,24 +230,24 @@
                                     <td>{{ $trip->from_location ?? 'N/A' }} to {{ $trip->to_location ?? 'N/A' }}</td>
                                     <td>{{ $trip->purpose ?? 'N/A' }}</td>
                                     <td>
-                                        <span class="badge badge-{{ $trip->status == 'started' ? 'info' : ($trip->status == 'in_progress' ? 'warning' : 'success') }}">
-                                            {{ ucfirst(str_replace('_', ' ', $trip->status)) }}
+                                        <span class="badge badge-{{ $trip->transport_status == 'In Transit' ? 'warning' : ($trip->transport_status == 'Pending' ? 'info' : 'success') }}">
+                                            {{ ucfirst(str_replace('_', ' ', $trip->transport_status)) }}
                                         </span>
                                     </td>
                                     <td>
-                                        @if($trip->status == 'started')
-                                        <form action="{{ route('driver.trip.start', $trip->id) }}" method="POST" style="display: inline;">
+                                        @if($trip->transport_status == 'Pending' || $trip->transport_status == 'Approved')
+                                        <form action="{{ route('driver.trip.start', $trip->id) }}" method="POST" style="display: inline;" class="trip-form">
                                             @csrf
                                             @method('PATCH')
-                                            <button type="submit" class="btn-update">
+                                            <button type="submit" class="btn-update" onclick="return confirm('Are you sure you want to start this trip?')">
                                                 <i class="fa fa-play mr-1"></i>Start Trip
                                             </button>
                                         </form>
-                                        @elseif($trip->status == 'in_progress')
-                                        <form action="{{ route('driver.trip.complete', $trip->id) }}" method="POST" style="display: inline;">
+                                        @elseif($trip->transport_status == 'In Transit')
+                                        <form action="{{ route('driver.trip.complete', $trip->id) }}" method="POST" style="display: inline;" class="trip-form">
                                             @csrf
                                             @method('PATCH')
-                                            <button type="submit" class="btn-update">
+                                            <button type="submit" class="btn-update" onclick="return confirm('Are you sure you want to complete this trip?')">
                                                 <i class="fa fa-check mr-1"></i>Complete Trip
                                             </button>
                                         </form>
@@ -273,4 +273,49 @@
         </div>
     </div>
 </section>
+
+<script>
+$(document).ready(function() {
+    // Handle form submission via AJAX
+    $('.trip-form').on('submit', function(e) {
+        e.preventDefault();
+        
+        var form = $(this);
+        var url = form.attr('action');
+        var button = form.find('button');
+        var originalText = button.html();
+        
+        $.ajax({
+            url: url,
+            type: 'POST',
+            data: form.serialize(),
+            beforeSend: function() {
+                button.prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i> Processing...');
+            },
+            success: function(response) {
+                if (response.success) {
+                    // Show success notification
+                    toastr.success(response.message || 'Trip updated successfully!', 'Success');
+                    
+                    // Reload the page after a short delay
+                    setTimeout(function() {
+                        location.reload();
+                    }, 1500);
+                } else {
+                    toastr.error(response.message || 'An error occurred.', 'Error');
+                    button.prop('disabled', false).html(originalText);
+                }
+            },
+            error: function(xhr) {
+                var message = 'An error occurred. Please try again.';
+                if (xhr.responseJSON && xhr.responseJSON.message) {
+                    message = xhr.responseJSON.message;
+                }
+                toastr.error(message, 'Error');
+                button.prop('disabled', false).html(originalText);
+            }
+        });
+    });
+});
+</script>
 @endsection

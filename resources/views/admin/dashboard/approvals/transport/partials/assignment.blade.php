@@ -17,7 +17,7 @@
                     $selectedVehicleType = $requisition->vehicle_type ?? null;
                     @endphp
                     @foreach($transportTypes as $type)
-                        <option value="{{ $type->id }}" {{ $selectedVehicleType = $type->id ? 'selected' : '' }}>{{ $type->name }}</option>
+                        <option value="{{ $type->id }}" {{ $selectedVehicleType == $type->id ? 'selected' : '' }}>{{ $type->name }}</option>
                     @endforeach
                 </select>
                 <div id="transportTypeStatus" class="mt-2 fw-semibold"></div>
