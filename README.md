@@ -20,6 +20,8 @@ InayaFleet360 is a powerful, feature-rich fleet and transport automation system 
 - Real-time vehicle availability tracking
 - Vehicle document management (insurance, registration, etc.)
 - Vehicle maintenance history and records
+- Vehicle meter reading tracking (opening/closing meter)
+- Vehicle assignment status management
 
 ### Driver Management
 - Comprehensive driver profiles and documentation
@@ -27,6 +29,7 @@ InayaFleet360 is a powerful, feature-rich fleet and transport automation system 
 - Driver availability status management
 - Performance tracking and evaluation
 - Driver-document management
+- Driver assignment tracking
 
 ### Transport Requisition System
 - Online requisition submission with approval workflow
@@ -35,6 +38,8 @@ InayaFleet360 is a powerful, feature-rich fleet and transport automation system 
 - Vehicle and driver assignment
 - Passenger management for transport requisitions
 - Real-time status tracking
+- Requisition history and audit trail
+- Pending Transport Approval status for better workflow
 
 ### Maintenance Management
 - Scheduled maintenance planning
@@ -42,6 +47,9 @@ InayaFleet360 is a powerful, feature-rich fleet and transport automation system 
 - Maintenance vendor management
 - Complete maintenance history
 - Cost tracking and reporting
+- Maintenance categories
+- Maintenance approval workflow (Department Head & Transport Admin)
+- Charge bear by selection
 
 ### Organization Management
 - Department and unit management
@@ -49,6 +57,8 @@ InayaFleet360 is a powerful, feature-rich fleet and transport automation system 
 - Role-based access control (RBAC)
 - Multi-company support
 - Location tracking
+- Department Head assignment for approval workflows
+- Employee-Transport linking for requisition system
 
 ### HR Module - Employee Management
 - Comprehensive employee management with detailed profiles
@@ -58,8 +68,39 @@ InayaFleet360 is a powerful, feature-rich fleet and transport automation system 
 - Employee-Transport linking for requisition system
 - Employee self-service portal
 
+### Subscription & Payment System
+- Subscription plan management
+- Subscription tracking and history
+- Manual payment processing
+- Payment history and records
+- Plan-based access control
+
+### Reports & Analytics
+- **Requisition Reports**: Comprehensive requisition analytics
+- **Maintenance Reports**: Maintenance cost and frequency analysis
+- **Trip Fuel Reports**: Fuel consumption tracking and reporting
+- **Vehicle Utilization Reports**: Vehicle usage analytics
+- **Driver Performance Reports**: Driver efficiency metrics
+- PDF and Excel export for all reports
+
+### Multi-Language & Translation System
+- Multi-language support with complete translation management
+- Customizable language settings
+- Dynamic content translation
+- User language preference selection
+- Admin-configurable language options
+
+### Email System
+- Customizable email templates management
+- Email logging and history tracking
+- Email resend functionality
+- Error message tracking for failed emails
+- SMTP configuration support
+
 ### Notification System
 - **Push Notifications**: Real-time alerts for requisition status, approvals, trip assignments
+- **Email Notifications**: Configurable email alerts
+- **In-App Notifications**: System notifications dashboard
 - **Email Templates**: Customizable templates for requisitions, approvals, driver assignments
 - **Email Log History**: Complete audit trail of all sent emails
 - **Notification Settings**: Configure channels, recipients, and preferences
@@ -71,6 +112,8 @@ InayaFleet360 is a powerful, feature-rich fleet and transport automation system 
 - **Department Head Login**: Approve/reject department requisitions (first approval level)
 - **Transport Admin Login**: Final approval authority, vehicle/driver assignment
 - Complete audit trail and approval history
+- Department-level approval workflow
+- Transport-level final approval
 
 ### Additional Features
 - 📋 Multi-language support (translation system)
@@ -81,6 +124,9 @@ InayaFleet360 is a powerful, feature-rich fleet and transport automation system 
 - 📝 Activity logging and audit trail
 - 📄 Document approval workflow
 - 📈 Reporting and analytics
+- 🚗 Fuel logging for trips
+- 🔧 Dynamic menu configuration
+- 🎨 Custom favicon support
 
 ## 👥 User Roles & Access Levels
 
@@ -102,7 +148,7 @@ InayaFleet360 is a powerful, feature-rich fleet and transport automation system 
 - **PDF Generation:** DomPDF
 - **Excel Export:** Maatwebsite Excel
 - **QR Codes:** Simple QRCode
-- **Translation:** Google Translate PHP
+- **Translation:** Google Translate PHP / Laravel Translation Manager
 
 ## 📋 Requirements
 
@@ -255,13 +301,39 @@ Key tables include:
 - `users` - User authentication and profiles
 - `vehicles` - Vehicle fleet management
 - `drivers` - Driver records
+- `driver_documents` - Driver documentation management
 - `requisitions` - Transport requisitions
-- `trip_sheets` - Trip documentation
+- `requisition_passengers` - Passenger management for requisitions
+- `requisition_approvals` - Approval workflow records
+- `requisition_loghistories` - Requisition status history
+- `trip_sheets` - Trip documentation with meter readings
 - `maintenance_records` - Vehicle maintenance
+- `maintenance_requisitions` - Maintenance request system
+- `maintenance_requisition_items` - Items for maintenance requisitions
+- `maintenance_categories` - Maintenance categorization
+- `maintenance_vendors` - Maintenance vendor management
+- `maintenance_schedules` - Scheduled maintenance planning
 - `departments` - Organization structure
+- `units` - Organizational units
+- `companies` - Multi-company support
 - `employees` - HR module employee records
+- `locations` - Location tracking
+- `vendors` - Vendor management
+- `fuel_logs` - Fuel consumption tracking
 - `email_logs` - Email notification history
+- `email_templates` - Customizable email templates
+- `notifications` - System notifications
+- `push_subscriptions` - Push notification subscriptions
+- `languages` - Multi-language support
+- `translations` - Translation management
+- `translation_values` - Translation values
+- `subscription_plans` - Subscription plan management
+- `subscriptions` - Subscription records
+- `payments` - Payment history
 - `settings` - System configuration
+- `menus` - Dynamic menu configuration
+- `permissions` - Role-based access control
+- `workflow_logs` - Workflow audit trail
 
 ## 🔌 API Endpoints
 
@@ -273,6 +345,11 @@ The system provides RESTful APIs for:
 - Maintenance tracking
 - Employee management
 - Notification management
+- Subscription management
+- Payment processing
+- Report generation
+- Language & translation management
+- Email template management
 
 ## 🎨 Customization
 
@@ -341,6 +418,28 @@ Built with:
 
 ## 📄 Changelog
 
+### Version 1.1.0 (February 2026)
+- **Subscription & Payment System**: Complete subscription plan management, manual payment processing, and payment history tracking
+- **Reports Module**: Added comprehensive reporting system with:
+  - Requisition Reports
+  - Maintenance Reports
+  - Trip Fuel Reports
+  - Vehicle Utilization Reports
+  - Driver Performance Reports
+- **Multi-Language System**: Full translation management system with dynamic content translation
+- **Email Templates**: Customizable email templates with toggle functionality
+- **Enhanced Email System**: Email resend capability, error message tracking
+- **Fuel Logging**: Trip fuel consumption tracking and reporting
+- **Employee Menus**: Dynamic menu configuration per user role
+- **Custom Favicon**: Admin can set custom favicon from settings
+- **Enhanced Notifications**: Improved notification system with user-specific settings
+- **Driver & Vehicle Availability**: Real-time availability status for assignment
+- **Department Head Management**: Dedicated department head assignment feature
+- **Maintenance Enhancements**: 
+  - Vendor management for maintenance
+  - Charge bear by selection
+  - Department and Transport approval workflow
+
 ### Version 1.0.0
 - Initial release
 - Core fleet management features
@@ -361,4 +460,4 @@ Built with:
 
 Smart Logistics. Better Operations.
 
-© 2025 InayaFleet360. All rights reserved.
+© 2026 InayaFleet360. All rights reserved.
