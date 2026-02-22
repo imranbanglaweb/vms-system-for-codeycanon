@@ -18,8 +18,8 @@ class EmployeeSeeder extends Seeder
         $employees = [
             [
                 'name' => 'Demo Employee',
-                'employee_code' => 'EMP001',
-                'email' => 'employee@demo.com',
+                'employee_code' => 'EMP101',
+                'email' => 'employee.extra@codeaycanon.com',
                 'department_id' => 1,
                 'unit_id' => 1,
                 'location_id' => $firstLocation ? $firstLocation->id : 1,
@@ -30,8 +30,8 @@ class EmployeeSeeder extends Seeder
             ],
             [
                 'name' => 'John Doe',
-                'employee_code' => 'EMP002',
-                'email' => 'john.doe@demo.com',
+                'employee_code' => 'EMP102',
+                'email' => 'john.doe@codeaycanon.com',
                 'department_id' => 2,
                 'unit_id' => 1,
                 'location_id' => $firstLocation ? $firstLocation->id : 1,
@@ -42,8 +42,8 @@ class EmployeeSeeder extends Seeder
             ],
             [
                 'name' => 'Jane Smith',
-                'employee_code' => 'EMP003',
-                'email' => 'jane.smith@demo.com',
+                'employee_code' => 'EMP103',
+                'email' => 'jane.smith@codeaycanon.com',
                 'department_id' => 3,
                 'unit_id' => 1,
                 'location_id' => $firstLocation ? $firstLocation->id : 1,
@@ -54,8 +54,8 @@ class EmployeeSeeder extends Seeder
             ],
             [
                 'name' => 'Mike Johnson',
-                'employee_code' => 'EMP004',
-                'email' => 'mike.johnson@demo.com',
+                'employee_code' => 'EMP104',
+                'email' => 'mike.johnson@codeaycanon.com',
                 'department_id' => 4,
                 'unit_id' => 1,
                 'location_id' => $firstLocation ? $firstLocation->id : 1,
@@ -66,8 +66,8 @@ class EmployeeSeeder extends Seeder
             ],
             [
                 'name' => 'Sarah Williams',
-                'employee_code' => 'EMP005',
-                'email' => 'sarah.williams@demo.com',
+                'employee_code' => 'EMP105',
+                'email' => 'sarah.williams@codeaycanon.com',
                 'department_id' => 1,
                 'unit_id' => 1,
                 'location_id' => $firstLocation ? $firstLocation->id : 1,
@@ -79,7 +79,7 @@ class EmployeeSeeder extends Seeder
             [
                 'name' => 'Alex Brown',
                 'employee_code' => 'EMP200',
-                'email' => 'alex.brown@demo.com',
+                'email' => 'alex.brown@codeaycanon.com',
                 'department_id' => 2,
                 'unit_id' => 1,
                 'location_id' => $firstLocation ? $firstLocation->id : 1,
@@ -109,10 +109,11 @@ class EmployeeSeeder extends Seeder
 
         // Generate 100 dummy employees
         for ($i = 0; $i < 100; $i++) {
-            Employee::create([
-                'employee_code' => 'EMP' . str_pad($i + 6, 4, '0', STR_PAD_LEFT),
-                'name' => $faker->name,
-                'email' => $faker->unique()->safeEmail,
+            Employee::updateOrCreate(
+                ['employee_code' => 'EMP' . str_pad($i + 200, 4, '0', STR_PAD_LEFT)],
+                [
+                    'name' => $faker->name,
+                    'email' => $faker->unique()->safeEmail,
                 'department_id' => $faker->numberBetween(1, 10),
                 'unit_id' => $faker->numberBetween(1, 6),
                 'location_id' => $faker->numberBetween(1, 5),

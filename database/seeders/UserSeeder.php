@@ -35,7 +35,7 @@ class UserSeeder extends Seeder
         // ================= SUPER ADMIN EMPLOYEE =================
         $superAdminEmpData = [
             'name' => 'Super Admin User',
-            'email' => 'superadmin@demo.com',
+            'email' => 'superadmin@codeaycanon.com',
             'employee_code' => 'SA001',
             'mobile' => '01700000001',
             'designation' => 'Super Administrator',
@@ -64,7 +64,7 @@ class UserSeeder extends Seeder
 
         // ================= SUPER ADMIN =================
         $superAdmin = User::firstOrCreate(
-            ['email' => 'superadmin@demo.com'],
+            ['email' => 'superadmin@codeaycanon.com'],
             [
                 'name' => $superAdminEmpData['name'],
                 'user_name' => $superAdminEmpData['employee_code'],
@@ -81,12 +81,12 @@ class UserSeeder extends Seeder
             ]
         );
         $superAdmin->assignRole($superAdminRole);
-        $this->command->info("Created Super Admin: superadmin@demo.com / password");
+        $this->command->info("Created Super Admin: superadmin@codeaycanon.com / password");
 
         // ================= ADMIN EMPLOYEE =================
         $adminEmpData = [
             'name' => 'System Admin User',
-            'email' => 'admin@demo.com',
+            'email' => 'admin@codeaycanon.com',
             'employee_code' => 'AD001',
             'mobile' => '01700000002',
             'designation' => 'System Administrator',
@@ -115,7 +115,7 @@ class UserSeeder extends Seeder
 
         // ================= ADMIN =================
         $admin = User::firstOrCreate(
-            ['email' => 'admin@demo.com'],
+            ['email' => 'admin@codeaycanon.com'],
             [
                 'name' => $adminEmpData['name'],
                 'user_name' => $adminEmpData['employee_code'],
@@ -132,12 +132,12 @@ class UserSeeder extends Seeder
             ]
         );
         $admin->assignRole($adminRole);
-        $this->command->info("Created Admin: admin@demo.com / password");
+        $this->command->info("Created Admin: admin@codeaycanon.com / password");
 
         // ================= TRANSPORT ADMIN EMPLOYEE =================
         $transportEmpData = [
             'name' => 'Transport Admin User',
-            'email' => 'transport@demo.com',
+            'email' => 'transport@codeaycanon.com',
             'employee_code' => 'TA001',
             'mobile' => '01700000003',
             'designation' => 'Transport Manager',
@@ -166,7 +166,7 @@ class UserSeeder extends Seeder
 
         // ================= TRANSPORT ADMIN =================
         $transport = User::firstOrCreate(
-            ['email' => 'transport@demo.com'],
+            ['email' => 'transport@codeaycanon.com'],
             [
                 'name' => $transportEmpData['name'],
                 'user_name' => $transportEmpData['employee_code'],
@@ -183,12 +183,12 @@ class UserSeeder extends Seeder
             ]
         );
         $transport->assignRole($transportRole);
-        $this->command->info("Created Transport Admin: transport@demo.com / password");
+        $this->command->info("Created Transport Admin: transport@codeaycanon.com / password");
 
         // ================= DEPARTMENT HEAD EMPLOYEE =================
         $deptHeadEmpData = [
             'name' => 'Department Head User',
-            'email' => 'department.head@demo.com',
+            'email' => 'depthead@codeaycanon.com',
             'employee_code' => 'DH001',
             'mobile' => '01700000004',
             'designation' => 'Department Head',
@@ -217,7 +217,7 @@ class UserSeeder extends Seeder
 
         // ================= DEPARTMENT HEAD =================
         $deptHead = User::firstOrCreate(
-            ['email' => 'department.head@demo.com'],
+            ['email' => 'depthead@codeaycanon.com'],
             [
                 'name' => $deptHeadEmpData['name'],
                 'user_name' => $deptHeadEmpData['employee_code'],
@@ -234,13 +234,13 @@ class UserSeeder extends Seeder
             ]
         );
         $deptHead->assignRole($deptHeadRole);
-        $this->command->info("Created Department Head: department.head@demo.com / password");
+        $this->command->info("Created Department Head: depthead@codeaycanon.com / password");
 
         // ================= EMPLOYEE USER =================
         // Create employee record first, then user
         $employeeData = [
             'name' => 'John Doe',
-            'email' => 'employee@demo.com',
+            'email' => 'employee@codeaycanon.com',
             'employee_code' => 'EMP001',
             'mobile' => '01700000005',
             'designation' => 'Officer',
@@ -286,13 +286,13 @@ class UserSeeder extends Seeder
             ]
         );
         $employeeUser->assignRole($employeeRole);
-        $this->command->info("Created Employee User: employee@demo.com / password");
+        $this->command->info("Created Employee User: employee@codeaycanon.com / password");
 
         // ================= ADDITIONAL EMPLOYEE USER =================
         // Create additional employee record first, then user
         $employeeData2 = [
             'name' => 'Jane Smith',
-            'email' => 'employee2@demo.com',
+            'email' => 'employee2@codeaycanon.com',
             'employee_code' => 'EMP500',
             'mobile' => '01700000006',
             'designation' => 'Senior Officer',
@@ -338,14 +338,14 @@ class UserSeeder extends Seeder
             ]
         );
         $employeeUser2->assignRole($employeeRole);
-        $this->command->info("Created Employee User: employee2@demo.com / password");
+        $this->command->info("Created Employee User: employee2@codeaycanon.com / password");
 
         // ================= DRIVER USER (ONLY ONE) =================
         // Create only one driver with employee record
         $driverData = [
             'license_number' => 'DL-001-2024',
             'name' => 'Mohammad Karim Ahmed',
-            'email' => 'driver@demo.com',
+            'email' => 'driver@codeaycanon.com',
             'username' => 'DR001',
             'mobile' => '01711000001',
             'designation' => 'Driver',
@@ -401,7 +401,7 @@ class UserSeeder extends Seeder
         
         // Assign driver role
         $driverUser->syncRoles([$driverRole]);
-        $this->command->info("Created Driver User: driver@demo.com / password");
+        $this->command->info("Created Driver User: driver@codeaycanon.com / password");
 
         // ================= SUMMARY =================
         $this->command->info('');
@@ -409,13 +409,13 @@ class UserSeeder extends Seeder
         $this->command->info('User seeding completed!');
         $this->command->info('========================================');
         $this->command->info('Users with Employee Records:');
-        $this->command->info('  1. superadmin@demo.com / password (Super Admin | SA001)');
-        $this->command->info('  2. admin@demo.com / password (Admin | AD001)');
-        $this->command->info('  3. transport@demo.com / password (Transport Admin | TA001)');
-        $this->command->info('  4. department.head@demo.com / password (Department Head | DH001)');
-        $this->command->info('  5. employee@demo.com / password (Employee | EMP001)');
-        $this->command->info('  6. employee2@demo.com / password (Employee | EMP500)');
-        $this->command->info('  7. driver@demo.com / password (Driver | DR001)');
+        $this->command->info('  1. superadmin@codeaycanon.com / password (Super Admin | SA001)');
+        $this->command->info('  2. admin@codeaycanon.com / password (Admin | AD001)');
+        $this->command->info('  3. transport@codeaycanon.com / password (Transport Admin | TA001)');
+        $this->command->info('  4. depthead@codeaycanon.com / password (Department Head | DH001)');
+        $this->command->info('  5. employee@codeaycanon.com / password (Employee | EMP001)');
+        $this->command->info('  6. employee2@codeaycanon.com / password (Employee | EMP500)');
+        $this->command->info('  7. driver@codeaycanon.com / password (Driver | DR001)');
         $this->command->info('========================================');
     }
 }
