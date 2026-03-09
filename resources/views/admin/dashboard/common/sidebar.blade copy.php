@@ -219,7 +219,7 @@
                 @if(!empty($settings->logo))
                     <img src="{{ asset('public/uploads/logo/'.$settings->logo) }}" alt="Logo" class="logo-image">
                 @else
-                    <span class="logo-text">InayaFleet360</span>
+                    <span class="logo-text">গাড়িবন্ধু ৩৬০</span>
                 @endif
             </a>
         </div>

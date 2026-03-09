@@ -26,7 +26,7 @@ class RequisitionStatusMail extends Mailable implements ShouldQueue
         
         // Get admin title from settings
         $settings = \App\Models\Setting::first();
-        $this->adminTitle = $settings && $settings->admin_title ? $settings->admin_title : 'InayaFleet360';
+        $this->adminTitle = $settings && $settings->admin_title ? $settings->admin_title : 'গাড়িবন্ধু ৩৬০';
     }
 
     public function build()

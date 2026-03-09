@@ -19,7 +19,7 @@ self.addEventListener('push', function(event) {
     console.log('Push event received!', event);
 
     let notificationData = {
-        title: 'InayaFleet360',
+        title: 'গাড়িবন্ধু ৩৬০',
         body: 'You have a new notification!',
         icon: '/admin_resource/assets/images/icons.png',
         badge: '/admin_resource/assets/images/icons.png',

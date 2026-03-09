@@ -51,7 +51,7 @@ class TestEmailController extends Controller
 
             // Get settings for dynamic branding
             $settings = Setting::first();
-            $adminTitle = $settings && $settings->admin_title ? $settings->admin_title : 'InayaFleet360';
+            $adminTitle = $settings && $settings->admin_title ? $settings->admin_title : 'গাড়িবন্ধু ৩৬০';
             $adminDescription = $settings && $settings->admin_description ? $settings->admin_description : 'All-in-One Fleet & Transport Automation System';
             // Generate absolute URL for logo - needed for emails
             $baseUrl = config('app.url', 'http://localhost');
@@ -203,7 +203,7 @@ HTML;
                 if ($template) {
                     // Get settings for dynamic branding
                     $settings = Setting::first();
-                    $adminTitle = $settings && $settings->admin_title ? $settings->admin_title : 'InayaFleet360';
+                    $adminTitle = $settings && $settings->admin_title ? $settings->admin_title : 'গাড়িবন্ধু ৩৬০';
                     $adminDescription = $settings && $settings->admin_description ? $settings->admin_description : 'All-in-One Fleet & Transport Automation System';
                     $logoUrl = $settings && $settings->admin_logo 
                         ? asset('public/admin_resource/assets/images/' . $settings->admin_logo) 
@@ -269,7 +269,7 @@ HTML;
         try {
             $email = $request->email;
             $settings = Setting::first();
-            $companyName = $settings && $settings->admin_title ? $settings->admin_title : 'InayaFleet360';
+            $companyName = $settings && $settings->admin_title ? $settings->admin_title : 'InayaFleet - 360';
             $subject = 'Test Email - ' . $companyName;
             $body = '
                 <h2>Test Email</h2>

@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{{ $companyName ?? 'InayaFleet360' }}</title>
+    <title>{{ $companyName ?? 'গাড়িবন্ধু ৩৬০' }}</title>
     <style>
         /* Reset styles */
         body, table, td, a { -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }
@@ -44,7 +44,7 @@
         $logoUrl = $settings && $settings->admin_logo 
             ? asset('public/admin_resource/assets/images/' . $settings->admin_logo) 
             : null;
-        $companyName = $companyName ?? ($settings && $settings->admin_title ? $settings->admin_title : 'InayaFleet360');
+        $companyName = $companyName ?? ($settings && $settings->admin_title ? $settings->admin_title : 'গাড়িবন্ধু ৩৬০');
     @endphp
     
     <!-- Preheader -->

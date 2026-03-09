@@ -1,7 +1,7 @@
 		<!-- Basic -->
 		<meta charset="UTF-8">
 
-		<title>Dashboard | {{ $settings->admin_title ?? 'InayaFleet360 – Fleet & Transport Management System' }}</title>
+		<title>Dashboard | {{ $settings->admin_title ?? 'গাড়িবন্ধু ৩৬০ – Fleet & Transport Management System' }}</title>
 	@if(!empty($settings->favicon))
 		<link rel="shortcut icon" type="image/png" href="{{ asset('public/admin_resource/assets/images/'.$settings->favicon) }}">
 		<link rel="shortcut icon" type="image/x-icon" href="{{ asset('public/admin_resource/assets/images/'.$settings->favicon) }}">

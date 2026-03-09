@@ -239,7 +239,7 @@
                         $logoUrl = $settings && $settings->admin_logo 
                             ? asset('public/admin_resource/assets/images/' . $settings->admin_logo) 
                             : null;
-                        $companyName = $companyName ?? ($settings && $settings->admin_title ? $settings->admin_title : 'InayaFleet360');
+                        $companyName = $companyName ?? ($settings && $settings->admin_title ? $settings->admin_title : 'গাড়িবন্ধু ৩৬০');
                     @endphp
                     
                     @if($logoUrl)

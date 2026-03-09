@@ -4,7 +4,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>InayaFleet360 – Fleet & Transport Management System (Laravel)</title>
+    <title>গাড়িবন্ধু ৩৬০ – Fleet & Transport Management System (Laravel)</title>
     <link rel="shortcut icon" type="image/png" href="{{ asset('favicon.ico') }}">
     <link rel="shortcut icon" type="image/x-icon" href="{{ asset('favicon.ico') }}">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -569,7 +569,7 @@ if ($settings && $settings->site_logo) {
                         <i class="fas fa-truck"></i>
                     </div>
                 @endif
-                <!-- <h1 class="brand-title">InayaFleet360 – Fleet & Transport Management System</h1>
+                <!-- <h1 class="brand-title">গাড়িবন্ধু ৩৬০ – Fleet & Transport Management System</h1>
                 <p class="brand-tagline">Fleet & Transport Management System (Laravel)</p> -->
             </div>
             <h5>Login to your account</h5>
@@ -647,7 +647,7 @@ if ($settings && $settings->site_logo) {
 
         <!-- COMPANY TEXT -->
         <div class="system-text">
-            <h1>InayaFleet - 360</h1>
+            <h1>গাড়িবন্ধু ৩৬০</h1>
             <p>All-in-One Fleet & Transport Automation System</p>
             
         </div>

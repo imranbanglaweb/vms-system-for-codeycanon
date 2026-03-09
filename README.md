@@ -1,4 +1,4 @@
-# InayaFleet360 – Fleet & Transport Management System (Laravel)
+# গাড়িবন্ধু ৩৬০ – Fleet & Transport Management System (Laravel)
 
 ## Smart Logistics. Better Operations.
 
@@ -8,9 +8,9 @@ A comprehensive Laravel-based transport management system designed to streamline
 ![Laravel](https://img.shields.io/badge/Laravel-9.x%20|%2010.x-orange)
 ![PHP](https://img.shields.io/badge/PHP-8.0%2B-blue)
 
-## 🚗 About InayaFleet360
+## 🚗 About গাড়িবন্ধু ৩৬০
 
-InayaFleet360 is a powerful, feature-rich fleet and transport automation system built with Laravel framework. It provides complete control over your fleet operations, from vehicle tracking to driver management, requisition workflows to maintenance scheduling.
+গাড়িবন্ধু ৩৬০ is a powerful, feature-rich fleet and transport automation system built with Laravel framework. It provides complete control over your fleet operations, from vehicle tracking to driver management, requisition workflows to maintenance scheduling.
 
 ## ✨ Key Features
 
@@ -186,7 +186,7 @@ php artisan key:generate
 
 Update your `.env` file with database credentials:
 ```env
-APP_NAME="InayaFleet360 – Fleet & Transport Management System"
+APP_NAME="গাড়িবন্ধু ৩৬০ – Fleet & Transport Management System"
 APP_URL=http://localhost
 
 DB_CONNECTION=mysql
@@ -456,8 +456,8 @@ Built with:
 
 ---
 
-**InayaFleet360** – Fleet & Transport Management System (Laravel)
+**গাড়িবন্ধু ৩৬০** – Fleet & Transport Management System (Laravel)
 
 Smart Logistics. Better Operations.
 
-© 2026 InayaFleet360. All rights reserved.
+© 2026 গাড়িবন্ধু ৩৬০. All rights reserved.

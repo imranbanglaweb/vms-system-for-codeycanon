@@ -83,7 +83,7 @@ class GenericMailable extends Mailable
         $logoUrl = $settings && $settings->admin_logo 
             ? $baseUrl . '/public/admin_resource/assets/images/' . $settings->admin_logo
             : null;
-        $companyName = $settings && $settings->admin_title ? $settings->admin_title : 'InayaFleet360';
+        $companyName = $settings && $settings->admin_title ? $settings->admin_title : 'গাড়িবন্ধু ৩৬০';
         
         // Get admin description for tagline
         $adminDescription = '';

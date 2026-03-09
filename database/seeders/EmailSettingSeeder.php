@@ -39,9 +39,9 @@ class EmailSettingSeeder extends Seeder
         Setting::updateOrCreate(
             ['id' => 1],
             array_merge([
-                'site_title' => 'InayaFleet360',
-                'site_description' => 'InayaFleet360',
-                'admin_title' => 'InayaFleet360',
+                'site_title' => 'গাড়িবন্ধু ৩৬০',
+                'site_description' => 'গাড়িবন্ধু ৩৬০',
+                'admin_title' => 'গাড়িবন্ধু ৩৬০',
                 'admin_description' => 'All-in-One Fleet & Transport Automation System',
                 'site_logo' => null,
                 'site_copyright_text' => '© 2026 Transport Management System. All rights reserved.',

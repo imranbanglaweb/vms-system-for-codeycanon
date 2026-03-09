@@ -84,7 +84,7 @@ class PushTestController extends Controller
 
                     $payload = json_encode([
                         'title' => 'Test Notification',
-                        'body'  => 'This is a test push notification from InayaFleet360 🔔',
+                        'body'  => 'This is a test push notification from গাড়িবন্ধু ৩৬০ 🔔',
                         'icon'  => '/admin_resource/assets/images/icons.png',
                         'data' => ['url' => '/admin/dashboard']
                     ]);

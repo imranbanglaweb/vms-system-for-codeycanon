@@ -29,7 +29,7 @@ class DepartmentHeadAssignedMail extends Mailable
         
         // Get admin title from settings
         $settings = Setting::first();
-        $this->adminTitle = $settings && $settings->admin_title ? $settings->admin_title : 'InayaFleet360';
+        $this->adminTitle = $settings && $settings->admin_title ? $settings->admin_title : 'গাড়িবন্ধু ৩৬০';
     }
 
     /**

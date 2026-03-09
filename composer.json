@@ -1,8 +1,8 @@
 {
     "name": "inayafleet360/tms-transport-management-system",
     "type": "project",
-    "description": "InayaFleet360 - All-in-One Fleet & Transport Automation System. A comprehensive Laravel-based transport and fleet management system.",
-    "keywords": ["laravel", "transport-management", "fleet-management", "vehicle-management", "tms", "vms", "driver-management", "logistics", "inayafleet360"],
+    "description": "গাড়িবন্ধু ৩৬০ - All-in-One Fleet & Transport Automation System. A comprehensive Laravel-based transport and fleet management system.",
+    "keywords": ["laravel", "transport-management", "fleet-management", "vehicle-management", "tms", "vms", "driver-management", "logistics", "গাড়িবন্ধু-৩৬০"],
     "license": "proprietary",
     "require": {
         "php": "^8.0",

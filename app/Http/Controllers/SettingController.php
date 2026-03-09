@@ -234,7 +234,7 @@ class SettingController extends Controller
             // dd($logoUrl);
         }
         
-        $adminTitle = $settings && $settings->admin_title ? $settings->admin_title : 'InayaFleet360';
+        $adminTitle = $settings && $settings->admin_title ? $settings->admin_title : 'গাড়িবন্ধু ৩৬০';
         
         return response()->json([
             'logo_url' => $logoUrl,

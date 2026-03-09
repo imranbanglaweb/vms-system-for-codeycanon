@@ -77,7 +77,7 @@ body {
                     $logoUrl = $settings && $settings->admin_logo 
                         ? asset('public/admin_resource/assets/images/' . $settings->admin_logo) 
                         : null;
-                    $adminTitle = $settings && $settings->admin_title ? $settings->admin_title : 'InayaFleet360';
+                    $adminTitle = $settings && $settings->admin_title ? $settings->admin_title : 'গাড়িবন্ধু ৩৬০';
                 @endphp
                 
                 @if($logoUrl)
@@ -114,7 +114,7 @@ body {
             <td align="center">
                 @php
                     $settings = \App\Models\Setting::first();
-                    $adminTitle = $settings && $settings->admin_title ? $settings->admin_title : 'InayaFleet360';
+                    $adminTitle = $settings && $settings->admin_title ? $settings->admin_title : 'গাড়িবন্ধু ৩৬০';
                     $year = date('Y');
                 @endphp
                 <p style="margin: 0 0 5px 0; font-size: 13px; color: rgba(255,255,255,0.8);">&copy; {{ $year }} {{ $adminTitle }}. All rights reserved.</p>
