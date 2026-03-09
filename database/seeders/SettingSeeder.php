@@ -23,7 +23,7 @@ class SettingSeeder extends Seeder
                 'admin_description' => 'All-in-One Fleet & Transport Automation System',
                 'site_logo' => null,
                 'site_copyright_text' => '© 2026 Transport Management System. All rights reserved.',
-                'admin_logo' => null,
+                'admin_logo' => 'logo.png',
                 'status' => 1,
                 'created_by' => 1,
                 'default_language' => 'en',
