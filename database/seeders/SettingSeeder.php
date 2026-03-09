@@ -21,7 +21,7 @@ class SettingSeeder extends Seeder
                 'site_description' => 'গাড়িবন্ধু ৩৬০',
                 'admin_title' => 'গাড়িবন্ধু ৩৬০',
                 'admin_description' => 'All-in-One Fleet & Transport Automation System',
-                'site_logo' => null,
+                'site_logo' => 'logo.png',
                 'site_copyright_text' => '© 2026 Transport Management System. All rights reserved.',
                 'admin_logo' => 'logo.png',
                 'status' => 1,
