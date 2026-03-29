@@ -53,12 +53,20 @@ class SettingController extends Controller
             $setting->id = 1; // Explicitly set ID for the first record
         }
 
+        // Define the image directory path
+        $imageDirectory = public_path('admin_resource/assets/images');
+        
+        // Create directory if it doesn't exist
+        if (!file_exists($imageDirectory)) {
+            mkdir($imageDirectory, 0755, true);
+        }
+
         if ($request->file('admin_logo')) {
             
             $imagePath = $request->file('admin_logo');
        $request->validate([
-          'admin_logo' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:5048',
-        ]);
+           'admin_logo' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:5048',
+       ]);
             $imageName = $imagePath->getClientOriginalName();
 
             // $path = $request->file('site_logo')->storeAs('admin_resource\assets\images', $imageName, 'public');
@@ -66,8 +74,8 @@ class SettingController extends Controller
             //   $imagePath->move($path, $imageName);
 
  $admin_logo = time().'.'.$request->admin_logo->extension();  
-     
-  $request->admin_logo->move(public_path('admin_resource\assets\images'), $admin_logo);
+      
+   $request->admin_logo->move($imageDirectory, $admin_logo);
         }
 
         if ($request->file('favicon')) {
@@ -76,7 +84,7 @@ class SettingController extends Controller
                 'favicon' => 'required|image|mimes:png,ico|max:5048',
             ]);
             $favicon = time().'.'.$request->favicon->extension();
-            $request->favicon->move(public_path('admin_resource\assets\images'), $favicon);
+            $request->favicon->move($imageDirectory, $favicon);
         }
 
         $setting->admin_title = $request->admin_title;
