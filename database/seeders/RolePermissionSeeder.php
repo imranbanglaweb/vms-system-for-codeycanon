@@ -138,6 +138,11 @@ class RolePermissionSeeder extends Seeder
             'report-driver-performance',
             'report-export',
 
+            // Fuel Management
+            'fuel-manage',
+            'fuel-log-entry',
+            'fuel-history-view',
+
             // Settings & Notifications
             'settings-notification',
             'settings-manage',
@@ -367,6 +372,10 @@ class RolePermissionSeeder extends Seeder
             'report-trip-fuel',
             'report-vehicle-utilization',
             'report-driver-performance',
+
+            // Fuel Management
+            'fuel-manage',
+            'fuel-history-view',
         ];
 
         $manager?->syncPermissions($managerPermissions);

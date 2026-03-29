@@ -693,6 +693,63 @@ class DriverController extends Controller
     }
 
     /**
+     * Fuel History - Admin view all fuel logs
+     */
+    public function fuelHistory()
+    {
+        $fuelLogs = \App\Models\FuelLog::with(['driver', 'vehicle'])
+            ->orderBy('created_at', 'desc')
+            ->paginate(20);
+        
+        $drivers = \App\Models\Driver::where('status', 1)->orderBy('name')->get();
+        $vehicles = Vehicle::where('status', 1)->orderBy('name')->get();
+        
+        return view('admin.dashboard.driver.fuel-history', compact('fuelLogs', 'drivers', 'vehicles'));
+    }
+
+    /**
+     * Fuel Purchase Log - Admin view all fuel purchases
+     */
+    public function fuelPurchaseLog()
+    {
+        $fuelLogs = \App\Models\FuelLog::with(['driver', 'vehicle'])
+            ->orderBy('fuel_date', 'desc')
+            ->paginate(20);
+        
+        $totalCost = \App\Models\FuelLog::sum('cost');
+        $totalLiters = \App\Models\FuelLog::sum('quantity');
+        
+        return view('admin.dashboard.driver.fuel-purchase-log', compact('fuelLogs', 'totalCost', 'totalLiters'));
+    }
+
+    /**
+     * Monthly Fuel Summary
+     */
+    public function fuelMonthlySummary()
+    {
+        $monthlyData = \App\Models\FuelLog::select(
+            DB::raw('MONTH(fuel_date) as month'),
+            DB::raw('SUM(quantity) as total_liters'),
+            DB::raw('SUM(cost) as total_cost')
+        )
+        ->groupBy('month')
+        ->orderBy('month', 'DESC')
+        ->get();
+        
+        return view('admin.dashboard.driver.fuel-monthly-summary', compact('monthlyData'));
+    }
+
+    /**
+     * Vehicle Fuel Efficiency
+     */
+    public function fuelEfficiency()
+    {
+        $vehicles = Vehicle::where('status', 1)->orderBy('vehicle_name')->get();
+        
+        return view('admin.dashboard.driver.fuel-efficiency', compact('vehicles'));
+    }
+
+    /**
      * Driver Availability - update availability status
      */
     public function driverAvailability()

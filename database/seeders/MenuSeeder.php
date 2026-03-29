@@ -301,6 +301,16 @@ class MenuSeeder extends Seeder
                 'menu_order' => 12,
                 'menu_parent' => 0,
             ],
+            // Fuel Management
+            [
+                'menu_name' => 'Fuel Management',
+                'menu_slug' => 'fuel-management',
+                'menu_icon' => 'fa-gas-pump',
+                'menu_url' => null,
+                'menu_permission' => 'fuel-manage',
+                'menu_order' => 13,
+                'menu_parent' => 0,
+            ],
             // Reports at the bottom
             [
                 'menu_name' => 'Reports',
@@ -308,7 +318,7 @@ class MenuSeeder extends Seeder
                 'menu_icon' => 'fa-chart-simple',
                 'menu_url' => null,
                 'menu_permission' => 'report-requisition',
-                'menu_order' => 13,
+                'menu_order' => 14,
                 'menu_parent' => 0,
             ],
             // Additional settings menus
@@ -695,6 +705,53 @@ class MenuSeeder extends Seeder
                 'menu_permission' => 'trip-manage',
                 'menu_order' => 3,
                 'parent_name' => 'Trip Sheets',
+            ],
+
+            // Fuel Management children
+            [
+                'menu_name' => 'Fuel Log Entry',
+                'menu_slug' => 'fuel-log-entry',
+                'menu_icon' => 'fa-fuel-pump',
+                 'menu_url' => 'driver.fuel.log',
+                'menu_permission' => 'fuel-log-entry',
+                'menu_order' => 1,
+                'parent_name' => 'Fuel Management',
+            ],
+            [
+                'menu_name' => 'Fuel History',
+                'menu_slug' => 'fuel-history',
+                'menu_icon' => 'fa-history',
+                'menu_url' => 'driver.fuel.history',
+                'menu_permission' => 'fuel-history-view',
+                'menu_order' => 2,
+                'parent_name' => 'Fuel Management',
+            ],
+            [
+                'menu_name' => 'Fuel Purchase Log',
+                'menu_slug' => 'fuel-purchase-log',
+                'menu_icon' => 'fa-shopping-cart',
+                'menu_url' => 'driver.fuel.purchase.log',
+                'menu_permission' => 'fuel-purchase-manage',
+                'menu_order' => 3,
+                'parent_name' => 'Fuel Management',
+            ],
+            [
+                'menu_name' => 'Monthly Fuel Summary',
+                'menu_slug' => 'fuel-monthly-summary',
+                'menu_icon' => 'fa-calendar-alt',
+                'menu_url' => 'driver.fuel.monthly.summary',
+                'menu_permission' => 'fuel-summary-view',
+                'menu_order' => 4,
+                'parent_name' => 'Fuel Management',
+            ],
+            [
+                'menu_name' => 'Vehicle Fuel Efficiency',
+                'menu_slug' => 'fuel-efficiency',
+                'menu_icon' => 'fa-tachometer-alt',
+                'menu_url' => 'driver.fuel.efficiency',
+                'menu_permission' => 'fuel-efficiency-view',
+                'menu_order' => 5,
+                'parent_name' => 'Fuel Management',
             ],
 
             // Employee Manage children

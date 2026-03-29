@@ -216,9 +216,21 @@ Route::middleware(['auth'])->prefix('driver')->name('driver.')->group(function (
     Route::post('/trip/{id}/end', [DriverController::class, 'endTrip'])->name('trip.end');
     Route::patch('/trip/{id}/complete', [DriverController::class, 'endTrip'])->name('trip.complete');
     
-    // Fuel Log
+    // Fuel Log (Driver)
     Route::get('/fuel-log', [DriverController::class, 'driverFuelLog'])->name('fuel.log');
     Route::post('/fuel-log/store', [DriverController::class, 'storeFuelLog'])->name('fuel.store');
+    
+    // Fuel History (Admin)
+    Route::get('/fuel-history', [DriverController::class, 'fuelHistory'])->name('fuel.history');
+    
+    // Fuel Purchase Log (Admin)
+    Route::get('/fuel-purchase-log', [DriverController::class, 'fuelPurchaseLog'])->name('fuel.purchase.log');
+    
+    // Monthly Fuel Summary (Admin)
+    Route::get('/fuel-monthly-summary', [DriverController::class, 'fuelMonthlySummary'])->name('fuel.monthly.summary');
+    
+    // Vehicle Fuel Efficiency (Admin)
+    Route::get('/fuel-efficiency', [DriverController::class, 'fuelEfficiency'])->name('fuel.efficiency');
     
     // Availability
     Route::get('/availability', [DriverController::class, 'driverAvailability'])->name('availability');
