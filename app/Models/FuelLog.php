@@ -20,8 +20,10 @@ class FuelLog extends Model
         'location',
         'odometer_reading',
         'receipt_number',
+        'receipt_image',
         'notes',
         'created_by',
+        'updated_by',
     ];
 
     protected $casts = [

@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\View;
 use Yajra\DataTables\Facades\DataTables;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class DriverController extends Controller
 {
@@ -664,6 +665,52 @@ class DriverController extends Controller
     }
 
     /**
+     * Get previous fuel data for a vehicle (for auto-calculation)
+     */
+    public function getVehicleFuelData(Request $request)
+    {
+        $driver = $this->getDriverByUser();
+        $vehicleId = $request->get('vehicle_id');
+        
+        if (!$driver || !$vehicleId) {
+            return response()->json(['data' => null]);
+        }
+        
+        // Get last fuel entry for this vehicle
+        $lastEntry = \App\Models\FuelLog::where('vehicle_id', $vehicleId)
+            ->orderBy('fuel_date', 'desc')
+            ->orderBy('created_at', 'desc')
+            ->first();
+        
+        // Get entry before last (for mileage calculation)
+        $previousEntry = null;
+        if ($lastEntry) {
+            $previousEntry = \App\Models\FuelLog::where('vehicle_id', $vehicleId)
+                ->where('id', '!=', $lastEntry->id)
+                ->orderBy('fuel_date', 'desc')
+                ->first();
+        }
+        
+        $data = [
+            'last_odometer' => $lastEntry ? floatval($lastEntry->odometer_reading) : null,
+            'last_fuel_date' => $lastEntry ? $lastEntry->fuel_date->format('Y-m-d') : null,
+            'last_quantity' => $lastEntry ? floatval($lastEntry->quantity) : null,
+            'last_cost' => $lastEntry ? floatval($lastEntry->cost) : null,
+            'last_cost_per_liter' => ($lastEntry && $lastEntry->quantity > 0) 
+                ? round($lastEntry->cost / $lastEntry->quantity, 2) 
+                : null,
+            'distance_traveled' => ($lastEntry && $previousEntry) 
+                ? round($lastEntry->odometer_reading - $previousEntry->odometer_reading, 2) 
+                : null,
+            'mileage' => ($lastEntry && $previousEntry && $lastEntry->quantity > 0)
+                ? round(($lastEntry->odometer_reading - $previousEntry->odometer_reading) / $lastEntry->quantity, 2)
+                : null,
+        ];
+        
+        return response()->json(['data' => $data]);
+    }
+
+    /**
      * Store fuel log entry
      */
     public function storeFuelLog(Request $request)
@@ -677,19 +724,128 @@ class DriverController extends Controller
         $validated = $request->validate([
             'vehicle_id' => 'required|exists:vehicles,id',
             'fuel_date' => 'required|date',
-            'fuel_quantity' => 'required|numeric|min:0',
+            'fuel_quantity' => 'required|numeric|min:0|max:500',
             'fuel_cost' => 'required|numeric|min:0',
-            'fuel_station' => 'nullable|string|max:255',
-            'odometer_reading' => 'required|numeric|min:0',
+            'fuel_type' => 'required|string|max:50',
+            'fuel_station' => 'required|string|max:255',
+            'receipt_image' => 'nullable|image|mimes:jpeg,jpg,png|max:2048',
+            'odometer_reading' => 'required|numeric|min:0|max:9999999',
             'notes' => 'nullable|string|max:500',
         ]);
         
-        $validated['driver_id'] = $driver->id;
-        $validated['created_by'] = auth()->id();
+        // === SMART VALIDATION ===
         
-        \App\Models\FuelLog::create($validated);
+        // 1. Check odometer (allow if clearly wrong data or new entry)
+        $lastEntry = \App\Models\FuelLog::where('vehicle_id', $validated['vehicle_id'])
+            ->orderBy('fuel_date', 'desc')
+            ->orderBy('created_at', 'desc')
+            ->first();
         
-        return response()->json(['success' => true, 'message' => 'Fuel log added successfully.']);
+        // Skip strict odometer check if previous value is unrealistic (> 500k km)
+        if ($lastEntry && floatval($lastEntry->odometer_reading) > 500000) {
+            // Previous entry has unrealistic odometer, warn but allow
+            $warnings[] = 'Note: Previous odometer (' . $lastEntry->odometer_reading . ' km) seems very high. Verify if correct.';
+        } elseif ($lastEntry && floatval($validated['odometer_reading']) < floatval($lastEntry->odometer_reading)) {
+            // Allow lower if within 1000km (might be data correction)
+            $diff = floatval($lastEntry->odometer_reading) - floatval($validated['odometer_reading']);
+            if ($diff > 1000) {
+                return response()->json([
+                    'error' => 'Odometer reading must be greater than previous entry (' . $lastEntry->odometer_reading . ' km)',
+                    'field' => 'odometer_reading'
+                ], 422);
+            } else {
+                $warnings[] = 'Note: Odometer is lower than previous entry by ' . $diff . ' km.';
+            }
+        }
+
+        // 2. Check for duplicate entry (same date + vehicle)
+        $duplicateCheck = \App\Models\FuelLog::where('vehicle_id', $validated['vehicle_id'])
+            ->where('fuel_date', $validated['fuel_date'])
+            ->first();
+        
+        if ($duplicateCheck) {
+            return response()->json([
+                'error' => 'Fuel entry already exists for this vehicle on the selected date',
+                'field' => 'fuel_date'
+            ], 422);
+        }
+
+        // 3. Calculate mileage and warn if unrealistic
+        $previousEntry = null;
+        $warnings = [];
+        if ($lastEntry) {
+            $previousEntry = \App\Models\FuelLog::where('vehicle_id', $validated['vehicle_id'])
+                ->where('id', '!=', $lastEntry->id)
+                ->orderBy('fuel_date', 'desc')
+                ->first();
+            
+            if ($previousEntry && $validated['fuel_quantity'] > 0) {
+                $distance = floatval($lastEntry->odometer_reading) - floatval($previousEntry->odometer_reading);
+                $mileage = round($distance / $validated['fuel_quantity'], 2);
+                
+                // Warn if mileage is too low (< 5 km/L) or too high (> 25 km/L)
+                if ($mileage < 5) {
+                    $warnings[] = 'Warning: Mileage (' . $mileage . ' km/L) is very low. This may indicate fuel theft or leakage.';
+                } elseif ($mileage > 25) {
+                    $warnings[] = 'Warning: Mileage (' . $mileage . ' km/L) is unusually high. Please verify odometer reading.';
+                }
+            }
+        }
+        
+        // === FUEL THEFT DETECTION ===
+        
+        // 4. Too frequent fueling alert (within 24 hours of last entry)
+        if ($lastEntry) {
+            $hoursSinceLastEntry = now()->diffInHours($lastEntry->created_at);
+            if ($hoursSinceLastEntry < 24) {
+                $warnings[] = 'Alert: Very recent fueling (' . $hoursSinceLastEntry . ' hours ago). Why refueling so soon?';
+            }
+        }
+        
+        // 5. Overfueling alert (more than 100L - unusual for normal driving)
+        if (floatval($validated['fuel_quantity']) > 100) {
+            $warnings[] = 'Alert: Large fuel quantity (' . $validated['fuel_quantity'] . 'L). Please verify.';
+        }
+        
+        // 6. Odometer anomaly (large jump > 500km since last entry - possible tampering)
+        if ($lastEntry) {
+            $odometerJump = floatval($validated['odometer_reading']) - floatval($lastEntry->odometer_reading);
+            if ($odometerJump > 500) {
+                $warnings[] = 'Alert: Large odometer jump (' . $odometerJump . ' km). Please verify the reading.';
+            }
+        }
+        
+        // Handle receipt image upload
+        $receiptPath = null;
+        if ($request->hasFile('receipt_image')) {
+            $file = $request->file('receipt_image');
+            $filename = time() . '_' . $file->getClientOriginalName();
+            $file->move(public_path('uploads/fuel-receipts'), $filename);
+            $receiptPath = 'uploads/fuel-receipts/' . $filename;
+        }
+        
+        // Map field names to match database columns
+        $fuelLogData = [
+            'driver_id' => $driver->id,
+            'vehicle_id' => $validated['vehicle_id'],
+            'fuel_date' => $validated['fuel_date'],
+            'fuel_type' => $validated['fuel_type'] ?? 'Petrol',
+            'quantity' => $validated['fuel_quantity'],
+            'cost' => $validated['fuel_cost'],
+            'location' => $validated['fuel_station'] ?? null,
+            'receipt_image' => $receiptPath,
+            'odometer_reading' => $validated['odometer_reading'],
+            'notes' => $validated['notes'] ?? null,
+            'created_by' => auth()->id(),
+        ];
+        
+        \App\Models\FuelLog::create($fuelLogData);
+        
+        return response()->json([
+            'success' => true, 
+            'message' => 'Fuel log added successfully.',
+            'warnings' => $warnings ?? []
+        ]);
     }
 
     /**
@@ -701,8 +857,8 @@ class DriverController extends Controller
             ->orderBy('created_at', 'desc')
             ->paginate(20);
         
-        $drivers = \App\Models\Driver::where('status', 1)->orderBy('name')->get();
-        $vehicles = Vehicle::where('status', 1)->orderBy('name')->get();
+        $drivers = \App\Models\Driver::where('status', 1)->orderBy('driver_name')->get();
+        $vehicles = Vehicle::where('status', 1)->orderBy('vehicle_name')->get();
         
         return view('admin.dashboard.driver.fuel-history', compact('fuelLogs', 'drivers', 'vehicles'));
     }

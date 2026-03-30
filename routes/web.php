@@ -219,6 +219,7 @@ Route::middleware(['auth'])->prefix('driver')->name('driver.')->group(function (
     // Fuel Log (Driver)
     Route::get('/fuel-log', [DriverController::class, 'driverFuelLog'])->name('fuel.log');
     Route::post('/fuel-log/store', [DriverController::class, 'storeFuelLog'])->name('fuel.store');
+    Route::get('/fuel-log/vehicle-data', [DriverController::class, 'getVehicleFuelData'])->name('fuel.vehicle.data');
     
     // Fuel History (Admin)
     Route::get('/fuel-history', [DriverController::class, 'fuelHistory'])->name('fuel.history');
