@@ -518,7 +518,8 @@
                                 <div class="col-md-4">
                                     <div class="form-group">
                                         <label>Select Vehicle <span class="text-danger">*</span></label>
-                                        <select name="vehicle_id" id="vehicle_id" class="form-control">
+                                        <select name="vehicle_id" id="vehicle_id" class="form-control" required>
+                                            <option value="">-- Select Vehicle --</option>
                                             <option value="">-- Select Vehicle --</option>
                                             @foreach($vehicles as $vehicle)
                                             <option value="{{ $vehicle->id }}">{{ $vehicle->vehicle_name }} ({{ $vehicle->vehicle_number }})</option>
