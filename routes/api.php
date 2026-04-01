@@ -2,9 +2,45 @@
 
 // routes/api.php
 use App\Http\Controllers\DepartmentHeadController;
+use App\Http\Controllers\GpsTrackingController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Request;
 use NotificationChannels\WebPush\PushSubscription;
+
+// ============================================================================
+// GPS TRACKING API ROUTES (For Mobile App)
+// ============================================================================
+
+// Test route to verify API is working
+Route::get('/test', function() {
+    return response()->json(['status' => 'ok', 'message' => 'API is working']);
+});
+
+Route::prefix('gps')->group(function () {
+    // Device registration
+    Route::post('/device/register', 'GpsTrackingController@registerDevice');
+    
+    // Single GPS point upload
+    Route::post('/track', 'GpsTrackingController@storeGpsData');
+    
+    // Batch GPS data upload
+    Route::post('/batch', 'GpsTrackingController@storeBatchGpsData');
+    
+    // Get live tracking for all vehicles
+    Route::get('/live', 'GpsTrackingController@getLiveTracking');
+    
+    // Get single vehicle tracking
+    Route::get('/vehicle/{id}', 'GpsTrackingController@getVehicleTracking');
+    
+    // Get tracking history
+    Route::get('/history/{vehicleId}', 'GpsTrackingController@getTrackingHistory');
+    
+    // Get active trips with live tracking
+    Route::get('/active-trips', 'GpsTrackingController@getActiveTrips');
+    
+    // Get GPS status
+    Route::get('/status', 'GpsTrackingController@getStatus');
+});
 
 Route::middleware('web')->group(function () {
     Route::post('/switch-language', function (Request $request) {

@@ -66,6 +66,10 @@ class RolePermissionSeeder extends Seeder
             'vehicle-export',
             'vehicle-type-manage',
 
+            // GPS Tracking
+            'gps-tracking',
+            'gps-tracking-view',
+
             // Drivers
             'driver-manage',
             'driver-create',
@@ -208,6 +212,10 @@ class RolePermissionSeeder extends Seeder
             'vehicle-view',
             'driver-manage',
             'driver-view',
+
+            // GPS Tracking
+            'gps-tracking',
+            'gps-tracking-view',
             
             // Driver Schedule
             'driver-schedule-manage',

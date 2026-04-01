@@ -17,6 +17,9 @@ use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\PushSubscriptionController;
 
+use App\Http\Controllers\GpsTrackingController;
+use App\Http\Controllers\GpsDeviceController;
+
 // Vehicle & Transport
 use App\Http\Controllers\VehicleController;
 use App\Http\Controllers\VehicleTypeController;
@@ -150,6 +153,28 @@ Route::middleware(['auth'])->group(function () {
 Route::get('/vehicles/{id}/details', [VehicleController::class, 'getVehicleDetails'])->name('vehicles.details');
     Route::resource('vehicles', VehicleController::class);
 
+});
+
+// ============================================================================
+// 3A. GPS TRACKING (Mobile GPS + Live Tracking)
+// ============================================================================
+
+Route::middleware(['auth'])->group(function () {
+    // GPS Tracking pages
+    Route::get('/gps-tracking', [GpsTrackingController::class, 'index'])->name('admin.gps-tracking.index');
+    Route::get('/gps-tracking/vehicle/{id}', [GpsTrackingController::class, 'showVehicle'])->name('admin.gps-tracking.vehicle');
+    Route::get('/gps-tracking/trip/{tripId}', [GpsTrackingController::class, 'showTrip'])->name('admin.gps-tracking.trip');
+
+    // GPS Device Management
+    Route::get('/gps-devices', [GpsDeviceController::class, 'index'])->name('admin.gps-devices.index');
+    Route::get('/gps-devices/data', [GpsDeviceController::class, 'data'])->name('admin.gps-devices.data');
+    Route::get('/gps-devices/create', [GpsDeviceController::class, 'create'])->name('admin.gps-devices.create');
+    Route::post('/gps-devices', [GpsDeviceController::class, 'store'])->name('admin.gps-devices.store');
+    Route::get('/gps-devices/{gpsDevice}', [GpsDeviceController::class, 'show'])->name('admin.gps-devices.show');
+    Route::get('/gps-devices/{gpsDevice}/edit', [GpsDeviceController::class, 'edit'])->name('admin.gps-devices.edit');
+    Route::put('/gps-devices/{gpsDevice}', [GpsDeviceController::class, 'update'])->name('admin.gps-devices.update');
+    Route::delete('/gps-devices/{gpsDevice}', [GpsDeviceController::class, 'destroy'])->name('admin.gps-devices.destroy');
+    Route::get('/gps-devices/vehicle/{vehicleId}', [GpsDeviceController::class, 'getByVehicle'])->name('admin.gps-devices.by-vehicle');
 });
 
 // ============================================================================

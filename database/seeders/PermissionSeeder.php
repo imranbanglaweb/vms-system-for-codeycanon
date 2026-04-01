@@ -61,6 +61,10 @@ class PermissionSeeder extends Seeder
             'vehicle-list-view',
             'vehicle-list-department',
 
+            // ================= GPS TRACKING =================
+            'gps-tracking',
+            'gps-tracking-view',
+
             // ================= DRIVER MANAGEMENT =================
             'driver-manage',
             'driver-create',

@@ -244,10 +244,20 @@
         $getUrl = function($url) {
             if (!$url) return '#';
             $cleanUrl = str_replace('admin.', '', $url);
-            if (Route::has($url)) {
-                return route($url);
-            } elseif (Route::has($cleanUrl)) {
-                return route($cleanUrl);
+            
+            // Check if the URL contains route parameters (like {id} or {tripId})
+            if (preg_match('/\{[a-zA-Z_]+\}/', $url)) {
+                return '#';
+            }
+            
+            try {
+                if (Route::has($url)) {
+                    return route($url);
+                } elseif (Route::has($cleanUrl)) {
+                    return route($cleanUrl);
+                }
+            } catch (\Exception $e) {
+                return '#';
             }
             return '#';
         };
@@ -271,7 +281,9 @@
             </a>
             <ul class="nav nav-children {{ $isActiveParent ? 'show' : '' }}">
                 @foreach($children as $child)
-                    @php $childUrl = $getUrl($child->menu_url); @endphp
+                    @php 
+                    $childUrl = $getUrl($child->menu_url);
+                    @endphp
                     @if($childUrl !== '#')
                     <li class="{{ request()->routeIs($child->menu_url . '*') ? 'nav-active' : '' }}">
                         <a href="{{ $childUrl }}" class="menu-link">

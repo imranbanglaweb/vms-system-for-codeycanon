@@ -35,7 +35,7 @@ class UserSeeder extends Seeder
         // ================= SUPER ADMIN EMPLOYEE =================
         $superAdminEmpData = [
             'name' => 'Super Admin User',
-            'email' => 'superadmin@codeaycanon.com',
+            'email' => 'superadmin@vms.com',
             'employee_code' => 'SA001',
             'mobile' => '01700000001',
             'designation' => 'Super Administrator',
@@ -64,7 +64,7 @@ class UserSeeder extends Seeder
 
         // ================= SUPER ADMIN =================
         $superAdmin = User::firstOrCreate(
-            ['email' => 'superadmin@codeaycanon.com'],
+            ['email' => 'superadmin@vms.com'],
             [
                 'name' => $superAdminEmpData['name'],
                 'user_name' => $superAdminEmpData['employee_code'],
@@ -81,7 +81,7 @@ class UserSeeder extends Seeder
             ]
         );
         $superAdmin->assignRole($superAdminRole);
-        $this->command->info("Created Super Admin: superadmin@codeaycanon.com / password");
+        $this->command->info("Created Super Admin: superadmin@vms.com / password");
 
         // ================= ADMIN EMPLOYEE =================
         $adminEmpData = [
@@ -409,7 +409,7 @@ class UserSeeder extends Seeder
         $this->command->info('User seeding completed!');
         $this->command->info('========================================');
         $this->command->info('Users with Employee Records:');
-        $this->command->info('  1. superadmin@codeaycanon.com / password (Super Admin | SA001)');
+        $this->command->info('  1. superadmin@vms.com / password (Super Admin | SA001)');
         $this->command->info('  2. admin@codeaycanon.com / password (Admin | AD001)');
         $this->command->info('  3. transport@codeaycanon.com / password (Transport Admin | TA001)');
         $this->command->info('  4. depthead@codeaycanon.com / password (Department Head | DH001)');
