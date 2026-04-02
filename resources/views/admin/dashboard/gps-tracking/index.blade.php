@@ -35,10 +35,16 @@
 </style>
 
 <section role="main" class="content-body" style="background-color: #fff;">
-    <div class="row">
-        <div class="col-lg-12">
-            <div class="pull-left"><br>
-                <h2><i class="fas fa-map-marker-alt"></i> Live GPS Tracking</h2>
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="page-header shadow-sm bg-white rounded-3 px-3 py-3 mb-4">
+                <div class="d-flex flex-wrap align-items-center gap-3">
+                    <span class="d-inline-flex align-items-center justify-content-center bg-primary bg-gradient text-white rounded-circle flex-shrink-0" style="width:44px;height:44px;font-size:1.6rem;"><i class="fas fa-map-marker-alt"></i></span>
+                    <div class="min-width-0">
+                        <h2 class="fw-bold mb-1 text-truncate" style="font-size:1.6rem;letter-spacing:-0.5px;">Live GPS Tracking</h2>
+                        <div class="text-muted small text-truncate" style="max-width:350px;">Monitor all vehicles in real time on the map</div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>

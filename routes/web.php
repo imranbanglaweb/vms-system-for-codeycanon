@@ -51,6 +51,10 @@ use App\Http\Controllers\Reports\TripFuelReportController;
 use App\Http\Controllers\Reports\VehicleUtilizationReportController;
 use App\Http\Controllers\Reports\DriverPerformanceReportController;
 
+// AI Features
+use App\Http\Controllers\AIMaintenanceAlertController;
+use App\Http\Controllers\AIReportController;
+
 // Admin & Settings
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\PermissionController;
@@ -686,6 +690,40 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('menus', MenuController::class);
     Route::post('menus/reorder', [MenuController::class, 'menuoder'])->name('menus.reorder');
     
+});
+
+// ============================================================================
+// 23. AI FEATURES ROUTES (Maintenance Alerts & Reporting)
+// ============================================================================
+
+Route::middleware(['auth'])->group(function () {
+
+    // AI Maintenance Alerts
+    Route::prefix('ai-maintenance-alerts')->name('ai-maintenance-alerts.')->group(function () {
+        Route::get('/', [AIMaintenanceAlertController::class, 'index'])->name('index');
+        Route::get('/dashboard', [AIMaintenanceAlertController::class, 'dashboard'])->name('dashboard');
+        Route::post('/generate', [AIMaintenanceAlertController::class, 'generate'])->name('generate');
+        Route::get('/{alert}', [AIMaintenanceAlertController::class, 'show'])->name('show');
+        Route::get('/{alert}/edit', [AIMaintenanceAlertController::class, 'edit'])->name('edit');
+        Route::put('/{alert}', [AIMaintenanceAlertController::class, 'update'])->name('update');
+        Route::post('/{alert}/mark-completed', [AIMaintenanceAlertController::class, 'markAsCompleted'])->name('mark-completed');
+        Route::delete('/{alert}', [AIMaintenanceAlertController::class, 'destroy'])->name('destroy');
+    });
+
+    // AI Reports
+    Route::prefix('ai-reports')->name('ai-reports.')->group(function () {
+        Route::get('/', [AIReportController::class, 'index'])->name('index');
+        Route::get('/dashboard', [AIReportController::class, 'dashboard'])->name('dashboard');
+        Route::get('/create', [AIReportController::class, 'create'])->name('create');
+        Route::post('/', [AIReportController::class, 'store'])->name('store');
+        Route::get('/{report}', [AIReportController::class, 'show'])->name('show');
+        Route::get('/{report}/download', [AIReportController::class, 'download'])->name('download');
+        Route::delete('/{report}', [AIReportController::class, 'destroy'])->name('destroy');
+    });
+
+    // API endpoints for stats
+    Route::get('/api/ai-maintenance-alerts/stats', [AIMaintenanceAlertController::class, 'stats'])->name('ai-maintenance-alerts.stats');
+    Route::get('/api/ai-reports/stats', [AIReportController::class, 'stats'])->name('ai-reports.stats');
    
 });
 

@@ -237,8 +237,17 @@
 
     @php
         $children = $menu->children ?? collect();
-        $isActiveParent = $children->contains(function ($child) {
-            return $child->menu_url && request()->routeIs($child->menu_url . '*');
+        $currentRouteName = optional(request()->route())->getName();
+
+        $isExactActive = function ($routeName) use ($currentRouteName) {
+            if (!$routeName || !$currentRouteName) {
+                return false;
+            }
+            return request()->routeIs($routeName);
+        };
+
+        $isActiveParent = $children->contains(function ($child) use ($currentRouteName) {
+            return $child->menu_url && $currentRouteName && routeBase($child->menu_url) === routeBase($currentRouteName);
         });
         
         $getUrl = function($url) {
@@ -266,7 +275,7 @@
     @if($children->isEmpty())
         @php $menuUrl = $getUrl($menu->menu_url); @endphp
         @if($menuUrl !== '#')
-        <li class="{{ request()->routeIs($menu->menu_url . '*') ? 'nav-active' : '' }}">
+        <li class="{{ $isExactActive($menu->menu_url) ? 'nav-active' : '' }}">
             <a href="{{ $menuUrl }}" class="menu-link">
                 <i class="fa {{ $menu->menu_icon }}"></i>
                 <span>{{ trans(ensure_menu_translation($menu->menu_name)) }}</span>
@@ -285,7 +294,7 @@
                     $childUrl = $getUrl($child->menu_url);
                     @endphp
                     @if($childUrl !== '#')
-                    <li class="{{ request()->routeIs($child->menu_url . '*') ? 'nav-active' : '' }}">
+                    <li class="{{ $isExactActive($child->menu_url) ? 'nav-active' : '' }}">
                         <a href="{{ $childUrl }}" class="menu-link">
                             <i class="fa {{ $child->menu_icon }}"></i>
                             <span>{{ trans(ensure_menu_translation($child->menu_name)) }}</span>

@@ -142,6 +142,10 @@ class MenuSeeder extends Seeder
             // Email Templates
             'email-template-manage',
             'emaillog-manage',
+
+            // GPS Tracking
+            'gps-tracking',
+            'gps-tracking-view',
         ];
 
         // Create permissions if they don't exist
@@ -338,6 +342,15 @@ class MenuSeeder extends Seeder
                 'menu_url' => null,
                 'menu_permission' => 'settings-notification',
                 'menu_order' => 14,
+                'menu_parent' => 0,
+            ],
+            [
+                'menu_name' => 'AI Features',
+                'menu_slug' => 'ai-features',
+                'menu_icon' => 'fa-brain',
+                'menu_url' => null,
+                'menu_permission' => null,
+                'menu_order' => 15,
                 'menu_parent' => 0,
             ],
         ];
@@ -982,6 +995,26 @@ class MenuSeeder extends Seeder
             ],
 
 
+
+            // AI Features children
+            [
+                'menu_name' => 'Maintenance Alerts (AI)',
+                'menu_slug' => 'ai-maintenance-alerts',
+                'menu_icon' => 'fa-bell',
+                'menu_url' => 'ai-maintenance-alerts.index',
+                'menu_permission' => null,
+                'menu_order' => 1,
+                'parent_name' => 'AI Features',
+            ],
+            [
+                'menu_name' => 'AI Reports',
+                'menu_slug' => 'ai-reports',
+                'menu_icon' => 'fa-chart-bar',
+                'menu_url' => 'ai-reports.index',
+                'menu_permission' => null,
+                'menu_order' => 2,
+                'parent_name' => 'AI Features',
+            ],
 
             // Email & Notification Settings children
             [

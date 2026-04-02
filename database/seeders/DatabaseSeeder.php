@@ -25,6 +25,8 @@ class DatabaseSeeder extends Seeder
             VendorSeeder::class,
             DriverSeeder::class,
             VehicleSeeder::class,
+            GpsDeviceSeeder::class,
+            GpsTrackSeeder::class,
             RequisitionSeeder::class,
             RequisitionPassengerSeeder::class,
             TripSheetSeeder::class,

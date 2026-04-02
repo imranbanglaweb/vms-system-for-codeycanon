@@ -20,6 +20,10 @@ class GpsDeviceController extends Controller
             $query->where('vehicle_id', $request->vehicle_id);
         }
 
+        if ($request->has('device_type') && $request->device_type) {
+            $query->where('device_type', $request->device_type);
+        }
+
         if ($request->has('is_active')) {
             $query->where('is_active', $request->is_active);
         }
@@ -34,8 +38,9 @@ class GpsDeviceController extends Controller
         }
 
         $devices = $query->orderBy('id', 'desc')->paginate(15);
+        $deviceTypes = $this->getDeviceTypes();
 
-        return view('admin.dashboard.gps-device.index', compact('devices'));
+        return view('admin.dashboard.gps-device.index', compact('devices', 'deviceTypes'));
     }
 
     /**

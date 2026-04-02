@@ -6,7 +6,12 @@ use Illuminate\Support\Facades\DB;
 if (!function_exists('routeBase')) {
     function routeBase($route)
     {
-        return explode('.', $route)[0] ?? '';
+        $segments = explode('.', $route);
+        if (count($segments) > 1) {
+            array_pop($segments);
+            return implode('.', $segments);
+        }
+        return $route;
     }
 }
 
@@ -15,9 +20,7 @@ if (!function_exists('isActiveUrl')) {
     {
         if (!$routeName) return '';
 
-        $current = Route::currentRouteName();
-
-        return routeBase($current) === routeBase($routeName)
+        return request()->routeIs($routeName)
             ? 'nav-active active'
             : '';
     }

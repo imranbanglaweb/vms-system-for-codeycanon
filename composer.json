@@ -10,7 +10,7 @@
         "beyondcode/laravel-websockets": "^2.0@beta",
         "doctrine/dbal": "^3.6",
         "fruitcake/laravel-cors": "^2.0",
-        "guzzlehttp/guzzle": "^7.0",
+        "guzzlehttp/guzzle": "^7.10",
         "laravel-notification-channels/webpush": "9.0",
         "laravel/framework": "^9.0|^10.0",
         "laravel/sanctum": "^3.0",
