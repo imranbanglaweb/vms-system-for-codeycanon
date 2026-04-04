@@ -38,8 +38,8 @@ class CheckQuota
                 ], 429);
             }
 
-            // For web requests, redirect to upgrade page
-            return redirect()->route('subscription.upgrade')
+            // For web requests, redirect to home with error
+            return redirect()->route('home')
                 ->with('error', "You have reached your {$action} limit. Please upgrade your plan to continue.");
         }
 

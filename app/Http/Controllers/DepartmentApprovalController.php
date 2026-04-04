@@ -40,6 +40,19 @@ class DepartmentApprovalController extends Controller
     }
 
     /**
+     * Display the current user's pending approvals.
+     */
+    public function myApprovals()
+    {
+        $departments = Department::all();
+        $units = Unit::all();
+        $users = User::all();
+
+        // Assuming the view exists at this path
+        return view('admin.dashboard.approvals.department.index', compact('departments', 'units', 'users'));
+    }
+
+    /**
      * Display the specified requisition for approval.
      */
     public function show($id)

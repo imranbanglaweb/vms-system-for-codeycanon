@@ -247,12 +247,13 @@
         };
 
         $isActiveParent = $children->contains(function ($child) use ($currentRouteName) {
-            return $child->menu_url && $currentRouteName && routeBase($child->menu_url) === routeBase($currentRouteName);
+            return $child->menu_url && $currentRouteName && request()->routeIs($child->menu_url);
         });
         
         $getUrl = function($url) {
             if (!$url) return '#';
             $cleanUrl = str_replace('admin.', '', $url);
+            $cleanUrl = str_replace('dashboard.', '', $cleanUrl);
             
             // Check if the URL contains route parameters (like {id} or {tripId})
             if (preg_match('/\{[a-zA-Z_]+\}/', $url)) {
@@ -264,6 +265,11 @@
                     return route($url);
                 } elseif (Route::has($cleanUrl)) {
                     return route($cleanUrl);
+                } else {
+                    // Try with admin prefix for routes that need it
+                    if (Route::has('admin.' . $url)) {
+                        return route('admin.' . $url);
+                    }
                 }
             } catch (\Exception $e) {
                 return '#';
@@ -275,7 +281,7 @@
     @if($children->isEmpty())
         @php $menuUrl = $getUrl($menu->menu_url); @endphp
         @if($menuUrl !== '#')
-        <li class="{{ $isExactActive($menu->menu_url) ? 'nav-active' : '' }}">
+        <li class="{{ request()->routeIs($menu->menu_url) ? 'nav-active' : '' }}">
             <a href="{{ $menuUrl }}" class="menu-link">
                 <i class="fa {{ $menu->menu_icon }}"></i>
                 <span>{{ trans(ensure_menu_translation($menu->menu_name)) }}</span>
@@ -294,7 +300,7 @@
                     $childUrl = $getUrl($child->menu_url);
                     @endphp
                     @if($childUrl !== '#')
-                    <li class="{{ $isExactActive($child->menu_url) ? 'nav-active' : '' }}">
+                    <li class="{{ request()->routeIs($child->menu_url) ? 'nav-active' : '' }}">
                         <a href="{{ $childUrl }}" class="menu-link">
                             <i class="fa {{ $child->menu_icon }}"></i>
                             <span>{{ trans(ensure_menu_translation($child->menu_name)) }}</span>

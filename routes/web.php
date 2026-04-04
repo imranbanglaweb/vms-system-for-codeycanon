@@ -313,6 +313,9 @@ Route::prefix('department')->group(function () {
     
     // Department Head Approvals
     Route::get('/approvals', [DepartmentApprovalController::class, 'index'])->name('department.approvals.index');
+    Route::get('/approvals/approved', [DepartmentApprovalController::class, 'index'])->name('department.approvals.approved');
+    Route::get('/approvals/rejected', [DepartmentApprovalController::class, 'index'])->name('department.approvals.rejected');
+    Route::get('/approvals/my', [DepartmentApprovalController::class, 'myApprovals'])->name('department.approvals.my');
     Route::get('/approvals/{id}', [DepartmentApprovalController::class, 'show'])->name('department.approvals.show');
     Route::post('/approvals/{id}/approve', [DepartmentApprovalController::class, 'approve'])->name('department.approvals.approve');
     Route::post('/approvals/{id}/reject', [DepartmentApprovalController::class, 'reject'])->name('department.approvals.reject');
@@ -369,7 +372,7 @@ Route::middleware(['auth'])->prefix('admin')->group(function () {
         Route::get('/ajax', [MaintenanceApprovalController::class, 'ajax'])->name('ajax');
         Route::get('/{id}', [MaintenanceApprovalController::class, 'show'])->name('show');
         Route::post('/{id}/approve', [MaintenanceApprovalController::class, 'approve'])->name('approve');
-        Route::post('/{id}/reject', [MaintenanceApprovalController::class, 'reject'])->name('reject');
+        Route::post('/{id}/reject', [MaintenanceTransportApprovalController::class, 'reject'])->name('reject');
     });
 
     // Transport Approval for Maintenance Requisitions
@@ -377,6 +380,8 @@ Route::middleware(['auth'])->prefix('admin')->group(function () {
         Route::get('/', [MaintenanceTransportApprovalController::class, 'index'])->name('index');
         Route::get('/ajax', [MaintenanceTransportApprovalController::class, 'ajax'])->name('ajax');
         Route::get('/{id}', [MaintenanceTransportApprovalController::class, 'show'])->name('show');
+        Route::post('/{id}/approve', [MaintenanceTransportApprovalController::class, 'approve'])->name('approve');
+        Route::post('/{id}/reject', [MaintenanceTransportApprovalController::class, 'reject'])->name('reject');
     });
 });
 

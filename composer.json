@@ -25,7 +25,7 @@
         "simplesoftwareio/simple-qrcode": "^4.2",
         "spatie/laravel-permission": "^5.10",
         "stichoza/google-translate-php": "^5.3",
-        "stripe/stripe-php": "*",
+        "stripe/stripe-php": "^20.0",
         "thecodingmachine/safe": "^3.3",
         "yajra/laravel-datatables-oracle": "^10.0"
     },
