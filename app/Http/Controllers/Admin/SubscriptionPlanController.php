@@ -37,7 +37,7 @@ class SubscriptionPlanController extends Controller
 
         return response()->json([
             'success' => true,
-            'redirect' => route('admin.plans.index')
+            'redirect' => route('admin.dashboard.plans.index')
         ]);
     }
 

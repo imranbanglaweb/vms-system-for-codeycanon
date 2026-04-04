@@ -6,12 +6,14 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use App\Models\Licnese_type;
+use App\Models\Scopes\CompanyScope;
 
 class Driver extends Model
 {
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
+        'company_id',
         'driver_code',
         'name',
         'phone',
@@ -42,6 +44,11 @@ class Driver extends Model
         'created_by',
         'updated_by'
     ];
+
+    protected static function booted()
+    {
+        static::addGlobalScope(new CompanyScope);
+    }
 
     // ✅ Relationships
     public function company()

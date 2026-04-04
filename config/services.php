@@ -36,4 +36,14 @@ return [
         'enabled' => env('AI_FEATURES_ENABLED', false),
     ],
 
+    'stripe' => [
+        'model' => env('STRIPE_MODEL', 'App\\Models\\User'),
+        'key' => env('STRIPE_KEY'),
+        'secret' => env('STRIPE_SECRET'),
+        'webhook' => [
+            'secret' => env('STRIPE_WEBHOOK_SECRET'),
+            'tolerance' => env('STRIPE_WEBHOOK_TOLERANCE', 300),
+        ],
+    ],
+
 ];

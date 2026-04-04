@@ -112,15 +112,15 @@
                 <div class="card-body">
                     <div class="mb-3">
                         <div class="info-label">Requisition Number</div>
-                        <div class="info-value">{{ $trip->requisition->requisition_number }}</div>
+                        <div class="info-value">{{ $trip->requisition->requisition_number ?? 'N/A' }}</div>
                     </div>
                     <div class="mb-3">
                         <div class="info-label">Requested By</div>
-                        <div class="info-value">{{ $trip->requisition->requestedBy->name ?? 'N/A' }}</div>
+                        <div class="info-value">{{ optional($trip->requisition)->requestedBy->name ?? 'N/A' }}</div>
                     </div>
                     <div class="mb-3">
                         <div class="info-label">Department</div>
-                        <div class="info-value">{{ $trip->requisition->department->department_name ?? 'N/A' }}</div>
+                        <div class="info-value">{{ optional($trip->requisition)->department->department_name ?? 'N/A' }}</div>
                     </div>
                     <div class="mb-3">
                         <div class="info-label">From Location</div>
@@ -215,7 +215,7 @@
     @endif
 
     <!-- Passenger List -->
-    @if($trip->requisition->passengers && $trip->requisition->passengers->count() > 0)
+    @if($trip->requisition && $trip->requisition->passengers && $trip->requisition->passengers->count() > 0)
     <div class="card trip-card mt-4">
         <div class="card-header bg-dark text-white rounded-top-4">
             <h5 class="mb-0 fw-bold">

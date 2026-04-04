@@ -120,6 +120,18 @@ Route::middleware(['auth'])->group(function () {
 
 Auth::routes();
 
+
+
+
+
+
+
+
+
+
+
+
+
 // ============================================================================
 // 2. DASHBOARD & HOME
 // ============================================================================
@@ -155,7 +167,7 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('vehicle-type', VehicleTypeController::class);
 
 Route::get('/vehicles/{id}/details', [VehicleController::class, 'getVehicleDetails'])->name('vehicles.details');
-    Route::resource('vehicles', VehicleController::class);
+    Route::resource('vehicles', VehicleController::class)->middleware('quota:vehicles');
 
 });
 
@@ -323,6 +335,8 @@ Route::prefix('transport')->group(function () {
     
     // Trip Sheets
     Route::get('/trip-sheets', [TripSheetController::class, 'index'])->name('trip-sheets.index');
+    Route::get('/trip-sheets/create', [TripSheetController::class, 'create'])->name('trip-sheets.create');
+    Route::post('/trip-sheets', [TripSheetController::class, 'store'])->name('trip-sheets.store');
     Route::get('/trip-sheets/active', [TripSheetController::class, 'index'])->name('trip-sheets.active');
     Route::get('/trip-sheets/completed', [TripSheetController::class, 'index'])->name('trip-sheets.completed');
     Route::get('/trip-sheets/data', [TripSheetController::class, 'getData'])->name('trip-sheets.data');
@@ -496,7 +510,70 @@ Route::middleware(['auth'])->group(function () {
 });
 
 // ============================================================================
-// 15. ADMIN CONTROLS & PAYMENTS
+// 15. TENANT MANAGEMENT (SaaS)
+// ============================================================================
+
+Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () {
+    Route::resource('tenants', \App\Http\Controllers\Admin\TenantController::class);
+    Route::post('tenants/{tenant}/upgrade-subscription', [\App\Http\Controllers\Admin\TenantController::class, 'upgradeSubscription'])->name('tenants.upgrade-subscription');
+    Route::post('tenants/{tenant}/deactivate', [\App\Http\Controllers\Admin\TenantController::class, 'deactivate'])->name('tenants.deactivate');
+    Route::post('tenants/{tenant}/reactivate', [\App\Http\Controllers\Admin\TenantController::class, 'reactivate'])->name('tenants.reactivate');
+    Route::get('tenants/{tenant}/export-data', [\App\Http\Controllers\Admin\TenantController::class, 'exportData'])->name('tenants.export-data');
+    Route::get('tenants/{tenant}/statistics', [\App\Http\Controllers\Admin\TenantController::class, 'statistics'])->name('tenants.statistics');
+});
+
+// ============================================================================
+// 15. TENANT MANAGEMENT (SaaS)
+// ============================================================================
+
+Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () {
+    Route::resource('tenants', \App\Http\Controllers\Admin\TenantController::class);
+    Route::post('tenants/{tenant}/upgrade-subscription', [\App\Http\Controllers\Admin\TenantController::class, 'upgradeSubscription'])->name('tenants.upgrade-subscription');
+    Route::post('tenants/{tenant}/deactivate', [\App\Http\Controllers\Admin\TenantController::class, 'deactivate'])->name('tenants.deactivate');
+    Route::post('tenants/{tenant}/reactivate', [\App\Http\Controllers\Admin\TenantController::class, 'reactivate'])->name('tenants.reactivate');
+    Route::get('tenants/{tenant}/export-data', [\App\Http\Controllers\Admin\TenantController::class, 'exportData'])->name('tenants.export-data');
+    Route::get('tenants/{tenant}/statistics', [\App\Http\Controllers\Admin\TenantController::class, 'statistics'])->name('tenants.statistics');
+});
+
+// ============================================================================
+// 16. SUBSCRIPTION PLANS MANAGEMENT
+// ============================================================================
+
+Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () {
+    Route::get('dashboard/plans', [\App\Http\Controllers\Admin\SubscriptionPlanController::class, 'index'])->name('dashboard.plans.index');
+    Route::get('dashboard/plans/create', [\App\Http\Controllers\Admin\SubscriptionPlanController::class, 'create'])->name('dashboard.plans.create');
+    Route::post('dashboard/plans', [\App\Http\Controllers\Admin\SubscriptionPlanController::class, 'store'])->name('dashboard.plans.store');
+    Route::get('dashboard/plans/{plan}/edit', [\App\Http\Controllers\Admin\SubscriptionPlanController::class, 'edit'])->name('dashboard.plans.edit');
+    Route::put('dashboard/plans/{plan}', [\App\Http\Controllers\Admin\SubscriptionPlanController::class, 'update'])->name('dashboard.plans.update');
+});
+
+// ============================================================================
+// 16. SUBSCRIPTION PLANS MANAGEMENT
+// ============================================================================
+
+Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () {
+    Route::get('dashboard/plans', [\App\Http\Controllers\Admin\SubscriptionPlanController::class, 'index'])->name('dashboard.plans.index');
+    Route::get('dashboard/plans/create', [\App\Http\Controllers\Admin\SubscriptionPlanController::class, 'create'])->name('dashboard.plans.create');
+    Route::post('dashboard/plans', [\App\Http\Controllers\Admin\SubscriptionPlanController::class, 'store'])->name('dashboard.plans.store');
+    Route::get('dashboard/plans/{plan}/edit', [\App\Http\Controllers\Admin\SubscriptionPlanController::class, 'edit'])->name('dashboard.plans.edit');
+    Route::put('dashboard/plans/{plan}', [\App\Http\Controllers\Admin\SubscriptionPlanController::class, 'update'])->name('dashboard.plans.update');
+});
+
+// ============================================================================
+// 17. TENANT MANAGEMENT (SaaS)
+// ============================================================================
+
+Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () {
+    Route::resource('tenants', \App\Http\Controllers\Admin\TenantController::class);
+    Route::post('tenants/{tenant}/upgrade-subscription', [\App\Http\Controllers\Admin\TenantController::class, 'upgradeSubscription'])->name('tenants.upgrade-subscription');
+    Route::post('tenants/{tenant}/deactivate', [\App\Http\Controllers\Admin\TenantController::class, 'deactivate'])->name('tenants.deactivate');
+    Route::post('tenants/{tenant}/reactivate', [\App\Http\Controllers\Admin\TenantController::class, 'reactivate'])->name('tenants.reactivate');
+    Route::get('tenants/{tenant}/export-data', [\App\Http\Controllers\Admin\TenantController::class, 'exportData'])->name('tenants.export-data');
+    Route::get('tenants/{tenant}/statistics', [\App\Http\Controllers\Admin\TenantController::class, 'statistics'])->name('tenants.statistics');
+});
+
+// ============================================================================
+// 18. ADMIN CONTROLS & PAYMENTS
 // ============================================================================
 
 Route::middleware(['auth'])->prefix('admin')->name('admin')->group(function () {
@@ -520,9 +597,17 @@ Route::middleware(['auth', 'role:Admin'])->prefix('admin')->group(function () {
 // 16. ORGANIZATION SETUP
 // ============================================================================
 
+// Company routes (both direct and admin prefixed)
+Route::middleware(['auth'])->group(function () {
+    Route::resource('company', CompanyController::class);
+    Route::resource('departments', DepartmentController::class);
+});
+
 Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () {
     // Employees
     Route::get('employees/data', [EmployeeController::class, 'data'])->name('employees.data');
+    Route::get('employees/profiles', [EmployeeController::class, 'profiles'])->name('employees.profiles');
+    Route::get('employees/approvals', [EmployeeController::class, 'approvals'])->name('employees.approvals');
     Route::resource('employees', EmployeeController::class);
     
     // Department Employees (for Department Head)
@@ -538,11 +623,20 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     Route::get('units/data', [UnitController::class, 'data'])->name('units.data');
     Route::get('units/list', [UnitController::class, 'list'])->name('units.list');
     Route::resource('units', UnitController::class);
-    
+
     // Companies
     Route::get('company/data', [CompanyController::class, 'data'])->name('company.data');
     Route::resource('company', CompanyController::class);
-    
+
+    // SaaS-specific company routes
+    Route::get('company/{company}/tenant-details', [CompanyController::class, 'tenantDetails'])->name('company.tenant-details');
+    Route::post('company/{company}/upgrade-subscription', [CompanyController::class, 'upgradeSubscription'])->name('company.upgrade-subscription');
+    Route::post('company/{company}/deactivate', [CompanyController::class, 'deactivate'])->name('company.deactivate');
+    Route::post('company/{company}/reactivate', [CompanyController::class, 'reactivate'])->name('company.reactivate');
+    Route::get('company/{company}/export-data', [CompanyController::class, 'exportData'])->name('company.export-data');
+    Route::get('company/{company}/statistics', [CompanyController::class, 'statistics'])->name('company.statistics');
+    Route::post('company/provision', [CompanyController::class, 'provisionCompany'])->name('company.provision');
+
     // Departments
     Route::get('departments/data', [DepartmentController::class, 'data'])->name('departments.data');
     Route::get('departments/list', [DepartmentController::class, 'list'])->name('departments.list');
@@ -589,7 +683,19 @@ Route::middleware(['auth'])->group(function () {
 });
 
 // ============================================================================
-// 18. PERMISSIONS & ROLES
+// 16. SUBSCRIPTION PLANS MANAGEMENT
+// ============================================================================
+
+Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () {
+    Route::get('dashboard/plans', [\App\Http\Controllers\Admin\SubscriptionPlanController::class, 'index'])->name('dashboard.plans.index');
+    Route::get('dashboard/plans/create', [\App\Http\Controllers\Admin\SubscriptionPlanController::class, 'create'])->name('dashboard.plans.create');
+    Route::post('dashboard/plans', [\App\Http\Controllers\Admin\SubscriptionPlanController::class, 'store'])->name('dashboard.plans.store');
+    Route::get('dashboard/plans/{plan}/edit', [\App\Http\Controllers\Admin\SubscriptionPlanController::class, 'edit'])->name('dashboard.plans.edit');
+    Route::put('dashboard/plans/{plan}', [\App\Http\Controllers\Admin\SubscriptionPlanController::class, 'update'])->name('dashboard.plans.update');
+});
+
+// ============================================================================
+// 17. PERMISSIONS & ROLES
 // ============================================================================
 
 Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () {
@@ -691,6 +797,13 @@ Route::middleware(['auth'])->group(function () {
     Route::post('menus/reorder', [MenuController::class, 'menuoder'])->name('menus.reorder');
     
 });
+
+// ============================================================================
+// STRIPE WEBHOOKS
+// ============================================================================
+
+Route::post('/stripe/webhook', [\App\Http\Controllers\Api\StripeWebhookController::class, 'handleWebhook'])
+    ->name('stripe.webhook');
 
 // ============================================================================
 // 23. AI FEATURES ROUTES (Maintenance Alerts & Reporting)

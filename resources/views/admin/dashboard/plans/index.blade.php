@@ -7,7 +7,7 @@
 
 <h4 class="fw-bold mb-3">Subscription Plans</h4>
 
-<a href="{{ route('admin.plans.create') }}" class="btn btn-primary mb-3">
+<a href="{{ route('admin.dashboard.plans.create') }}" class="btn btn-primary mb-3">
     + Add New Plan
 </a>
 
@@ -41,7 +41,7 @@
         </span>
     </td>
     <td>
-        <a href="{{ route('admin.plans.edit',$plan) }}" class="btn btn-sm btn-warning">Edit</a>
+        <a href="{{ route('admin.dashboard.plans.edit',$plan) }}" class="btn btn-sm btn-warning">Edit</a>
     </td>
 </tr>
 @endforeach

@@ -7,12 +7,19 @@ use Illuminate\Database\Eloquent\Model;
 use App\Models\Department;
 use App\Models\Unit;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use App\Models\Scopes\CompanyScope;
 class Employee extends Model
 {
     use HasFactory;
     protected $fillable = [
         'location_id','company_id', 'unit_id', 'department_id', 'employee_code', 'name', 'email', 'phone', 'employee_type', 'designation', 'blood_group', 'nid', 'photo', 'present_address', 'permanent_address', 'join_date', 'status'
     ];
+
+    protected static function booted()
+    {
+        static::addGlobalScope(new CompanyScope);
+    }
 
 
 

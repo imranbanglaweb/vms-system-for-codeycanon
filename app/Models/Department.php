@@ -4,6 +4,8 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use App\Models\Scopes\CompanyScope;
 
 class Department extends Model
 {
@@ -11,6 +13,7 @@ class Department extends Model
 
     protected $fillable = [
         'id',
+        'company_id',
         'unit_id',
         'department_name',
         'department_code',
@@ -24,6 +27,11 @@ class Department extends Model
         'created_by',
         'updated_by'
     ];
+
+    protected static function booted()
+    {
+        static::addGlobalScope(new CompanyScope);
+    }
 
     public function unit()
     {

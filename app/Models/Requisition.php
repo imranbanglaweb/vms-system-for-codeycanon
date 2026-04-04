@@ -2,6 +2,7 @@
 namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use App\Models\Scopes\CompanyScope;
 
 class Requisition extends Model
 {
@@ -36,11 +37,16 @@ class Requisition extends Model
       'assigned_vehicle_id',
       'assigned_driver_id',
       'transport_remarks',
-      'transport_admin_id',
-      'transport_approved_at',
-    ];
+       'transport_admin_id',
+       'transport_approved_at',
+     ];
 
-    
+     protected static function booted()
+     {
+         static::addGlobalScope(new CompanyScope);
+     }
+
+
 public const STATUS_PENDING = 'Pending';
 public const STATUS_DEPT_APPROVED = 'Dept_Approved';
 public const STATUS_TRANSPORT_APPROVED = 'Transport_Approved';

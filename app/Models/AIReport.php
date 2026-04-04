@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use App\Models\Scopes\CompanyScope;
 
 class AIReport extends Model
 {
@@ -31,6 +32,11 @@ class AIReport extends Model
         'total_records',
         'company_id',
     ];
+
+    protected static function booted()
+    {
+        static::addGlobalScope(new CompanyScope);
+    }
 
     protected $casts = [
         'filter_criteria' => 'array',

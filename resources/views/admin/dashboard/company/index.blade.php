@@ -62,14 +62,18 @@
   <div class="card">
       <div class="card-body">
           <table class="table table-striped table-hover" id="companies-table" width="100%">
-              <thead>
-                  <tr>
-                      <th>#</th>
-                      <th>Company Name</th>
-                      <th>Company Code</th>
-                      <th>Action</th>
-                  </tr>
-              </thead>
+               <thead>
+                   <tr>
+                       <th>#</th>
+                       <th>Company</th>
+                       <th>Subscription</th>
+                       <th>Status</th>
+                       <th>Users</th>
+                       <th>Vehicles</th>
+                       <th>Created</th>
+                       <th>Action</th>
+                   </tr>
+               </thead>
               <tbody></tbody>
           </table>
       </div>

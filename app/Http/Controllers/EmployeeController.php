@@ -355,6 +355,24 @@ class EmployeeController extends Controller
             ]);
         }
 
+        public function profiles()
+        {
+            $employees = Employee::with(['department', 'unit', 'location'])
+                ->orderBy('id', 'DESC')
+                ->get();
+
+            return view('admin.dashboard.employee.profiles', compact('employees'));
+        }
+
+        public function approvals()
+        {
+            $employees = Employee::with(['department', 'unit', 'location'])
+                ->orderBy('id', 'DESC')
+                ->get();
+
+            return view('admin.dashboard.employee.approvals', compact('employees'));
+        }
+
             public function details($id)
             {
                 $emp = Employee::with(['department','unit'])->findOrFail($id);

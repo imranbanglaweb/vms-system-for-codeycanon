@@ -180,6 +180,10 @@ class RolePermissionSeeder extends Seeder
             'translation-create',
             'translation-update',
             'translation-auto',
+
+            // SaaS / Company Management
+            'company-manage',
+            'subscription-plan-manage',
         ];
 
         $admin?->syncPermissions($adminPermissions);

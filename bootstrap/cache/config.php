@@ -687,6 +687,17 @@
       'model' => 'gpt-3.5-turbo',
       'enabled' => false,
     ),
+    'stripe' => 
+    array (
+      'model' => 'App\\Models\\User',
+      'key' => NULL,
+      'secret' => NULL,
+      'webhook' => 
+      array (
+        'secret' => NULL,
+        'tolerance' => 300,
+      ),
+    ),
   ),
   'session' => 
   array (

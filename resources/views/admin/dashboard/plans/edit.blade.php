@@ -6,11 +6,11 @@
 
 <h4>Edit Plan – {{ $plan->name }}</h4>
 
-<form method="POST" action="{{ route('plans.update',$plan) }}">
+<form method="POST" action="{{ route('admin.plans.update',$plan) }}">
 @csrf
 @method('PUT')
 
-@include('admin.plans.create', ['plan' => $plan])
+@include('admin.dashboard.plans.create', ['plan' => $plan])
 
 </form>
 

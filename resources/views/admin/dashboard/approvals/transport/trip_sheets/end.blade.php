@@ -43,8 +43,8 @@
                     <i class="fa fa-car fa-2x me-3"></i>
                     <div>
                         <small class="opacity-75">Vehicle</small>
-                        <div class="fw-bold fs-5">{{ $trip->vehicle->vehicle_name }}</div>
-                        <small>{{ $trip->vehicle->number_plate }}</small>
+                        <div class="fw-bold fs-5">{{ $trip->vehicle->vehicle_name ?? 'N/A' }}</div>
+                        <small>{{ $trip->vehicle->number_plate ?? '-' }}</small>
                     </div>
                 </div>
             </div>
@@ -55,8 +55,8 @@
                     <i class="fa fa-user fa-2x me-3"></i>
                     <div>
                         <small class="opacity-75">Driver</small>
-                        <div class="fw-bold fs-5">{{ $trip->driver->driver_name }}</div>
-                        <small>{{ $trip->driver->phone }}</small>
+                        <div class="fw-bold fs-5">{{ $trip->driver->driver_name ?? 'N/A' }}</div>
+                        <small>{{ $trip->driver->phone ?? '-' }}</small>
                     </div>
                 </div>
             </div>
@@ -189,7 +189,7 @@ $(document).ready(function(){
 
     function calculateDistance() {
         var closing = parseFloat($(this).val()) || 0;
-        var startMeter = {{ $trip->start_meter }};
+        var startMeter = {{ $trip->start_meter ?? 0 }};
         var total = closing - startMeter;
         
         $('#previewClosingMeter').text(closing > 0 ? closing.toLocaleString() + ' KM' : '-');
@@ -211,7 +211,7 @@ $(document).ready(function(){
 });
 
 function submitEndTrip() {
-    var startMeter = {{ $trip->start_meter }};
+    var startMeter = {{ $trip->start_meter ?? 0 }};
     var closingMeter = parseFloat($('#closing_meter').val()) || 0;
     var endDate = $('#end_date').val();
     var endTime = $('#end_time').val();

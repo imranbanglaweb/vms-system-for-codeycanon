@@ -26,6 +26,17 @@ class TripSheetController extends Controller
         return view('admin.dashboard.approvals.transport.trip_sheets.index');
     }
 
+    public function create()
+    {
+        return view('admin.dashboard.approvals.transport.trip_sheets.create');
+    }
+
+    public function store(Request $request)
+    {
+        // Implemented as per your requirements
+        dd($request->all());
+    }
+
     /**
      * Get trip sheets data for DataTables.
      */

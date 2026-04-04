@@ -70,6 +70,7 @@ class Kernel extends HttpKernel
         'prevent-back-history' => \App\Http\Middleware\PreventBackHistory::class,
         'role' => \App\Http\Middleware\CheckRole::class,
         'subscription.active' => \App\Http\Middleware\EnsureActiveSubscription::class,
+        'quota' => \App\Http\Middleware\CheckQuota::class,
         'LanguageSwitcher' => \App\Http\Middleware\LanguageSwitcher::class,
     ];
 }

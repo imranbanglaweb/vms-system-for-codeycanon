@@ -13,13 +13,13 @@
         Create Subscription Plan
     </h2>
 
-    <a href="{{ route('admin.plans.index') }}"
+    <a href="{{ route('admin.dashboard.plans.index') }}"
        class="btn btn-outline-secondary btn-lg">
         <i class="bi bi-arrow-left"></i> Back
     </a>
 </div>
 
-<form id="planForm" method="POST" action="{{ route('admin.plans.store') }}">
+<form id="planForm" method="POST" action="{{ route('admin.dashboard.plans.store') }}">
 @csrf
 
 <div class="card border-0 shadow-sm rounded-4">
@@ -235,7 +235,7 @@ document.getElementById('planForm').addEventListener('submit', function (e) {
     })
     .then(data => {
         // SUCCESS
-        window.location.href = data.redirect ?? "{{ route('admin.plans.index') }}";
+        window.location.href = data.redirect ?? "{{ route('admin.dashboard.plans.index') }}";
     })
     .catch(err => {
         btnLoader.classList.add('d-none');

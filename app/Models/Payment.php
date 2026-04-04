@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Scopes\CompanyScope;
 
 class Payment extends Model
 {
@@ -24,6 +25,11 @@ class Payment extends Model
         'status',
         'created_by',
     ];
+
+    protected static function booted()
+    {
+        static::addGlobalScope(new CompanyScope);
+    }
 
     public function subscription()
     {
