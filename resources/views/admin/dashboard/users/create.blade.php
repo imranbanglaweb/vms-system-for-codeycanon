@@ -92,6 +92,22 @@
                         <div class="invalid-feedback"></div>
                     </div>
 
+                    {{-- Subscription Plan --}}
+                    <div class="col-md-6">
+                        <label for="subscription_plan_id" class="form-label"><strong>Select Subscription Plan</strong></label>
+                        <select name="subscription_plan_id" id="subscription_plan_id" class="form-control select2">
+                            <option value="">No Plan</option>
+                            @forelse($plans as $plan)
+                                <option value="{{ $plan->id }}">
+                                    {{ $plan->name }} (৳{{ number_format($plan->price) }}/{{ $plan->billing_cycle }})
+                                </option>
+                            @empty
+                                <option value="">No plans available</option>
+                            @endforelse
+                        </select>
+                        <div class="invalid-feedback"></div>
+                    </div>
+
                     {{-- User Type --}}
                     <div class="col-md-6">
                         <label for="user_type" class="form-label"><strong>Select User Type <span class="text-danger">*</span></strong></label>

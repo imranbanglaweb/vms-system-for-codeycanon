@@ -31,6 +31,9 @@ class SaaSSubscriptionPlansSeeder extends Seeder
                 'trial_days' => 0,
                 'is_popular' => false,
                 'is_active' => true,
+                'recommended_for' => 'Small fleets with up to 10 vehicles',
+                'display_order' => 1,
+                'last_updated_at' => now(),
             ],
             [
                 'name' => 'Professional',
@@ -54,17 +57,20 @@ class SaaSSubscriptionPlansSeeder extends Seeder
                 'trial_days' => 0,
                 'is_popular' => true,
                 'is_active' => true,
+                'recommended_for' => 'Growing businesses with 10-50 vehicles',
+                'display_order' => 2,
+                'last_updated_at' => now(),
             ],
             [
                 'name' => 'Enterprise',
                 'slug' => 'enterprise',
                 'price' => 199,
                 'billing_cycle' => 'monthly',
-                'vehicle_limit' => 0, // Unlimited
-                'user_limit' => 0, // Unlimited
-                'driver_limit' => 0, // Unlimited
-                'monthly_reports' => 0, // Unlimited
-                'monthly_alerts' => 0, // Unlimited
+                'vehicle_limit' => 0,
+                'user_limit' => 0,
+                'driver_limit' => 0,
+                'monthly_reports' => 0,
+                'monthly_alerts' => 0,
                 'features' => [
                     'Everything in Professional',
                     'AI-powered maintenance alerts',
@@ -78,6 +84,9 @@ class SaaSSubscriptionPlansSeeder extends Seeder
                 'trial_days' => 0,
                 'is_popular' => false,
                 'is_active' => true,
+                'recommended_for' => 'Large organizations with 50+ vehicles',
+                'display_order' => 3,
+                'last_updated_at' => now(),
             ],
             [
                 'name' => 'Free Trial',
@@ -98,6 +107,9 @@ class SaaSSubscriptionPlansSeeder extends Seeder
                 'trial_days' => 30,
                 'is_popular' => false,
                 'is_active' => true,
+                'recommended_for' => 'New users testing the platform',
+                'display_order' => 0,
+                'last_updated_at' => now(),
             ],
         ];
 

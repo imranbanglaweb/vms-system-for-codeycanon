@@ -601,6 +601,13 @@ if ($settings && $settings->site_logo) {
                     <i class="fas fa-sign-in-alt mr-2"></i> Login
                 </button>
             </form>
+
+            <!-- Pricing Link -->
+            <div class="text-center mt-4 pt-3" style="border-top: 1px solid #ddd;">
+                <a href="{{ route('pricing') }}" class="btn btn-outline-primary w-100">
+                    <i class="fas fa-tags mr-2"></i> View Pricing Plans
+                </a>
+            </div>
         </div>
     </div>
 

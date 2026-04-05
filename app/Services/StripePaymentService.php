@@ -7,8 +7,6 @@ use App\Models\Payment;
 use App\Models\Subscription;
 use App\Models\SubscriptionPlan;
 use Illuminate\Support\Facades\Log;
-use Stripe\StripeClient;
-use Stripe\Exception\ApiErrorException;
 
 class StripePaymentService
 {
@@ -16,7 +14,17 @@ class StripePaymentService
 
     public function __construct()
     {
-        $this->stripe = new \Stripe\StripeClient(config('services.stripe.secret'));
+        // Stripe is currently disabled - manual payment only
+        // To enable Stripe, run: composer require stripe/stripe-php
+        $this->stripe = null;
+    }
+
+    /**
+     * Check if Stripe is available
+     */
+    public function isAvailable(): bool
+    {
+        return false; // Currently disabled
     }
 
     /**

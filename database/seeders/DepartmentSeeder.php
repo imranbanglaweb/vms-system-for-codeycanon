@@ -22,6 +22,8 @@ class DepartmentSeeder extends Seeder
             ['department_name' => 'Logistics', 'department_code' => 'LOG'],
         ];
 
+        $companyId = 1; // Default company ID
+        
         foreach ($departments as $dept) {
             Department::updateOrCreate(
                 ['department_name' => $dept['department_name']],
@@ -29,6 +31,7 @@ class DepartmentSeeder extends Seeder
                     'department_code' => $dept['department_code'],
                     'status' => 1,
                     'unit_id' => 1,
+                    'company_id' => $companyId,
                     'created_by' => 1,
                 ]
             );

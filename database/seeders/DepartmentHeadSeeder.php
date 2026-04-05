@@ -17,7 +17,7 @@ class DepartmentHeadSeeder extends Seeder
 
         // Department head assignments - ONLY HR
         $departmentHeads = [
-            'HR' => ['name' => 'Department Head User', 'email' => 'depthead@codeaycanon.com'],
+            'HR' => ['name' => 'Department Head User', 'email' => 'depthead@garibondhu360.com'],
         ];
 
         foreach ($departmentHeads as $deptName => $headInfo) {

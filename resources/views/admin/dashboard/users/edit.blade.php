@@ -73,6 +73,7 @@
                                 <option value="{{ $department->id }}" {{ $user->department_id == $department->id ? 'selected' : '' }}>
                                     {{ $department->department_name }}
                                 </option>
+                            
                             @endforeach
                         </select>
                         <div class="invalid-feedback"></div>
@@ -106,15 +107,31 @@
                         <div class="invalid-feedback"></div>
                     </div>
 
+                    {{-- Subscription Plan --}}
+                    <div class="col-md-6">
+                        <label for="subscription_plan_id" class="form-label"><strong>Select Subscription Plan</strong></label>
+                        <select name="subscription_plan_id" id="subscription_plan_id" class="form-control select2">
+                            <option value="">No Plan</option>
+                            @forelse($plans as $plan)
+                                <option value="{{ $plan->id }}" {{ $user->subscription_plan_id == $plan->id ? 'selected' : '' }}>
+                                    {{ $plan->name }} (৳{{ number_format($plan->price) }}/{{ $plan->billing_cycle }})
+                                </option>
+                            @empty
+                                <option value="">No plans available</option>
+                            @endforelse
+                        </select>
+                        <div class="invalid-feedback"></div>
+                    </div>
+
                     {{-- User Type --}}
                     <div class="col-md-6">
                         <label for="user_type" class="form-label"><strong>Select User Type <span class="text-danger">*</span></strong></label>
                         <select name="user_type" class="form-control select2 user_type">
                             <option value="">Please Select</option>
-                            <option value="normal_user"     {{ $user->user_type == 'normal_user' ? 'selected' : '' }}>Normal User</option>
-                            <option value="super_user"      {{ $user->user_type == 'super_user' ? 'selected' : '' }}>Super User</option>
-                            <option value="admin"           {{ $user->user_type == 'admin' ? 'selected' : '' }}>Admin</option>
-                            <option value="department_head" {{ $user->user_type == 'department_head' ? 'selected' : '' }}>Department Head</option>
+                            <option value="normal_user"     {{ $user->user_type = 'normal_user' ? 'selected' : '' }}>Normal User</option>
+                            <option value="super_user"      {{ $user->user_type = 'super_user' ? 'selected' : '' }}>Super User</option>
+                            <option value="admin"           {{ $user->user_type = 'admin' ? 'selected' : '' }}>Admin</option>
+                            <option value="department_head" {{ $user->user_type = 'department_head' ? 'selected' : '' }}>Department Head</option>
                         </select>
                         <div class="invalid-feedback"></div>
                     </div>
@@ -129,7 +146,7 @@
                         <select name="head_department_id" id="head_department_id" class="form-control select2">
                             <option value="">Please Select Department</option>
                             @foreach($departments as $department)
-                                <option value="{{ $department->id }}" {{ $headDepartments->contains('id', $department->id) ? 'selected' : '' }}>
+                                <option value="{{ $department->id }}" {{ $headDepartments->contains($department->id) ? 'selected' : '' }}>
                                     {{ $department->department_name }}
                                 </option>
                             @endforeach
@@ -173,21 +190,22 @@
 
                     {{-- Password --}}
                     <div class="col-md-6 position-relative">
-                        <label for="user_password" class="form-label"><strong>Password <small>(Leave blank if not changing)</small></strong></label>
+                        <label for="user_password" class="form-label"><strong>New Password <small>(Optional)</small></strong></label>
                         <div class="input-group">
-                            <input type="password" class="form-control" id="user_password" name="password" placeholder="Enter Password" autocomplete="new-password">
+                            <input type="text" class="form-control" id="user_password" name="password" placeholder="Enter new password to change, leave empty to keep current" autocomplete="new-password">
                             <span class="input-group-text toggle-password" data-target="#user_password" style="cursor: pointer;">
                                 <i class="fa fa-eye"></i>
                             </span>
                         </div>
+                        <small class="text-muted">Leave blank to keep current password unchanged</small>
                         <div class="invalid-feedback"></div>
                     </div>
 
                     {{-- Confirm Password --}}
                     <div class="col-md-6 position-relative">
-                        <label for="user_cpassword" class="form-label"><strong>Confirm Password</strong></label>
+                        <label for="user_cpassword" class="form-label"><strong>Confirm New Password</strong></label>
                         <div class="input-group">
-                            <input type="password" class="form-control" id="user_cpassword" name="confirm-password" placeholder="Confirm Password" autocomplete="new-password">
+                            <input type="text" class="form-control" id="user_cpassword" name="confirm-password" placeholder="Re-enter new password" autocomplete="new-password">
                             <span class="input-group-text toggle-password" data-target="#user_cpassword" style="cursor: pointer;">
                                 <i class="fa fa-eye"></i>
                             </span>
@@ -239,15 +257,14 @@ window.addEventListener('load', function() {
     // Style invalid feedback in red
     $('head').append('<style>.invalid-feedback { display: block !important; color: #dc3545 !important; font-size: 13px; margin-top: 5px; }</style>');
 
-    // Initialize Select2 (Check if not already initialized by theme)
-    if (!$('.select2').hasClass("select2-offscreen")) {
-        $('.select2').select2({ width: '100%' });
+    // Initialize Select2
+    if ($('.select2').length) {
+        $('.select2').select2({ 
+            width: '100%',
+            allowClear: true,
+            placeholder: 'Please Select'
+        });
     }
-
-    // Trigger validation on Select2 change
-    $('.select2').on('change', function () {
-        $(this).valid();
-    });
 
     // Custom server-side message map (fieldName -> custom message)
     const customServerMessages = {

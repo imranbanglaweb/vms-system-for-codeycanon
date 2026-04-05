@@ -3,9 +3,15 @@
 namespace App\Http\Controllers\Admin;
 use App\Models\Payment;
 use App\Models\Subscription;
+use App\Models\Company;
+use App\Mail\PaymentConfirmedMail;
+use App\Mail\AdminPaymentNotificationMail;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Log;
 use Yajra\DataTables\Facades\DataTables;
+
 class AdminPaymentController extends Controller
 {
     
@@ -118,8 +124,13 @@ class AdminPaymentController extends Controller
     public function approve(Payment $payment)
     {
         if ($payment->status !== 'pending') {
-            return back()->with('error','Payment already processed');
+            return response()->json([
+                'success' => false,
+                'message' => 'Payment already processed'
+            ], 422);
         }
+
+        $payment->load(['company', 'plan']);
 
         // Mark payment as paid
         $payment->update([
@@ -133,17 +144,39 @@ class AdminPaymentController extends Controller
             [
                 'plan_id'   => $payment->plan_id,
                 'starts_at' => now(),
-                'ends_at'   => now()->addDays($payment->plan->duration_days),
+                'ends_at'   => now()->addDays($payment->plan->duration_days ?? 30),
                 'status'    => 'active',
             ]
         );
 
-        // return back()->with('success','Payment approved & subscription activated');
-            return response()->json([
+        // Send email to customer
+        try {
+            $company = $payment->company;
+            if ($company && $company->email) {
+                Mail::to($company->email)->send(new PaymentConfirmedMail(
+                    $company,
+                    $payment->plan,
+                    $payment
+                ));
+            }
+
+            // Send notification to admin
+            $adminEmail = config('mail.mailers.smtp.username');
+            if ($adminEmail) {
+                Mail::to($adminEmail)->send(new AdminPaymentNotificationMail(
+                    $company,
+                    $payment->plan,
+                    $payment
+                ));
+            }
+        } catch (\Exception $e) {
+            \Log::error('Payment approval email error: ' . $e->getMessage());
+        }
+
+        return response()->json([
             'success' => true,
             'message' => 'Payment approved successfully'
         ]);
-
     }
 
         public function reject(Payment $payment)

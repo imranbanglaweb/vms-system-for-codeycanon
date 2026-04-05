@@ -50,15 +50,15 @@
                         <i class="fas fa-edit"></i> Edit Company
                     </a>
                     @if($company->status)
-                        <button class="btn btn-warning btn-sm" onclick="deactivateCompany({{ $company->id }})">
+                        <button class="btn btn-warning btn-sm" id="deactivateBtn">
                             <i class="fas fa-ban"></i> Deactivate
                         </button>
                     @else
-                        <button class="btn btn-success btn-sm" onclick="reactivateCompany({{ $company->id }})">
+                        <button class="btn btn-success btn-sm" id="reactivateBtn">
                             <i class="fas fa-check"></i> Reactivate
                         </button>
                     @endif
-                    <button class="btn btn-info btn-sm" onclick="exportCompanyData({{ $company->id }})">
+                    <button class="btn btn-info btn-sm" id="exportBtn">
                         <i class="fas fa-download"></i> Export Data
                     </button>
                 </div>
@@ -169,8 +169,8 @@
                                             {{ $data['current'] }} / {{ $data['limit'] ?: '∞' }}
                                         </div>
                                         <div class="progress mt-2" style="height: 6px;">
-                                            <div class="progress-bar bg-{{ $data['status'] === 'exceeded' ? 'danger' : ($data['status'] === 'warning' ? 'warning' : 'success') }}"
-                                                 style="width: {{ min(100, $data['percentage']) }}%"></div>
+                                            @php $progWidth = min(100, $data['percentage']); @endphp
+                                            <div class="progress-bar" role="progressbar" style="width: {{ $progWidth }}%"></div>
                                         </div>
                                         @if($data['status'] === 'exceeded')
                                             <small class="text-danger">Limit exceeded!</small>
@@ -227,8 +227,20 @@
                                 </p>
                             </div>
                             <div class="col-md-4">
-                                <p><strong>Started:</strong> {{ $company->subscription->start_date->format('M d, Y') }}</p>
-                                <p><strong>Ends:</strong> {{ $company->subscription->end_date->format('M d, Y') }}</p>
+                                <p><strong>Started:</strong> 
+                                    @if($company->subscription->starts_at)
+                                        {{ \Carbon\Carbon::parse($company->subscription->starts_at)->format('M d, Y') }}
+                                    @else
+                                        N/A
+                                    @endif
+                                </p>
+                                <p><strong>Ends:</strong> 
+                                    @if($company->subscription->ends_at)
+                                        {{ \Carbon\Carbon::parse($company->subscription->ends_at)->format('M d, Y') }}
+                                    @else
+                                        N/A
+                                    @endif
+                                </p>
                             </div>
                             <div class="col-md-4">
                                 @if($company->subscription->trial_ends_at)

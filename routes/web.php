@@ -63,6 +63,7 @@ use App\Http\Controllers\MenuController;
 use App\Http\Controllers\NotificationController;
 // Subscriptions & Payments
 use App\Http\Controllers\Admin\SubscriptionPlanController;
+use App\Http\Controllers\Admin\QuotaManagementController;
 use App\Http\Controllers\Admin\SubscriptionController;
 use App\Http\Controllers\Admin\AdminPaymentController;
 use App\Http\Controllers\Payment\ManualPaymentController;
@@ -166,8 +167,16 @@ Route::middleware(['auth'])->group(function () {
 Route::middleware(['auth'])->group(function () {
     Route::resource('vehicle-type', VehicleTypeController::class);
 
-Route::get('/vehicles/{id}/details', [VehicleController::class, 'getVehicleDetails'])->name('vehicles.details');
-    Route::resource('vehicles', VehicleController::class)->middleware('quota:vehicles');
+    Route::get('/vehicles/{id}/details', [VehicleController::class, 'getVehicleDetails'])->name('vehicles.details');
+    
+    // Vehicle routes - quota check only for create/store operations
+    Route::get('/vehicles', [VehicleController::class, 'index'])->name('vehicles.index');
+    Route::get('/vehicles/create', [VehicleController::class, 'create'])->name('vehicles.create')->middleware('quota:vehicles,1');
+    Route::post('/vehicles', [VehicleController::class, 'store'])->name('vehicles.store')->middleware('quota:vehicles,1');
+    Route::get('/vehicles/{vehicle}', [VehicleController::class, 'show'])->name('vehicles.show');
+    Route::get('/vehicles/{vehicle}/edit', [VehicleController::class, 'edit'])->name('vehicles.edit');
+    Route::put('/vehicles/{vehicle}', [VehicleController::class, 'update'])->name('vehicles.update');
+    Route::delete('/vehicles/{vehicle}', [VehicleController::class, 'destroy'])->name('vehicles.destroy');
 
 });
 
@@ -581,15 +590,15 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
 // 18. ADMIN CONTROLS & PAYMENTS
 // ============================================================================
 
-Route::middleware(['auth'])->prefix('admin')->name('admin')->group(function () {
+Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () {
     // Payment Management
     Route::get('payments/pending', [AdminPaymentController::class, 'pending'])->name('payments.pending');
-    Route::get('payments/paid', [AdminPaymentController::class, 'paid'])->name('payments.paid');
+Route::get('payments/paid', [AdminPaymentController::class, 'paid'])->name('payments.paid');
     Route::get('admin/payments/paid/data', [AdminPaymentController::class, 'paidData'])->name('payments.paid.data');
     Route::post('/payments/approve/{payment}', [AdminPaymentController::class, 'approve'])->name('payments.approve');
     Route::post('payments/reject/{payment}', [AdminPaymentController::class, 'reject'])->name('payments.reject');
-    Route::get('/subscriptions/expiring', [AdminPaymentController::class, 'expiring']);
-    Route::get('/revenue/plans', [AdminPaymentController::class, 'byPlan']);
+    Route::get('payments/expiring', [AdminPaymentController::class, 'expiring'])->name('payments.expiring');
+    Route::get('revenue/plans', [AdminPaymentController::class, 'byPlan'])->name('revenue.plans');
 });
 
 Route::middleware(['auth', 'role:Admin'])->prefix('admin')->group(function () {
@@ -631,6 +640,7 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
 
     // Companies
     Route::get('company/data', [CompanyController::class, 'data'])->name('company.data');
+    Route::get('company/stats', [CompanyController::class, 'stats'])->name('company.stats');
     Route::resource('company', CompanyController::class);
 
     // SaaS-specific company routes
@@ -697,6 +707,20 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     Route::post('dashboard/plans', [\App\Http\Controllers\Admin\SubscriptionPlanController::class, 'store'])->name('dashboard.plans.store');
     Route::get('dashboard/plans/{plan}/edit', [\App\Http\Controllers\Admin\SubscriptionPlanController::class, 'edit'])->name('dashboard.plans.edit');
     Route::put('dashboard/plans/{plan}', [\App\Http\Controllers\Admin\SubscriptionPlanController::class, 'update'])->name('dashboard.plans.update');
+    Route::get('dashboard/plans/{plan}', [\App\Http\Controllers\Admin\SubscriptionPlanController::class, 'show'])->name('dashboard.plans.show');
+});
+
+// ============================================================================
+// 16A. QUOTA MANAGEMENT
+// ============================================================================
+
+Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () {
+    Route::get('quota-management', [QuotaManagementController::class, 'index'])->name('quota-management.index');
+    Route::get('quota-management/search', [QuotaManagementController::class, 'search'])->name('quota-management.search');
+    Route::get('quota-management/{company}', [QuotaManagementController::class, 'show'])->name('quota-management.show');
+    Route::put('quota-management/{company}', [QuotaManagementController::class, 'update'])->name('quota-management.update');
+    Route::post('quota-management/{company}/assign-plan', [QuotaManagementController::class, 'assignPlan'])->name('quota-management.assign-plan');
+    Route::post('quota-management/{company}/clear-cache', [QuotaManagementController::class, 'clearCache'])->name('quota-management.clear-cache');
 });
 
 // ============================================================================

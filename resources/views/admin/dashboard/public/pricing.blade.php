@@ -16,6 +16,16 @@
         Scale your fleet with confidence
     </p>
 
+    <!-- VIEW TOGGLE -->
+    <div class="view-toggle mb-4">
+        <button class="view-btn active" data-view="cards" onclick="switchView('cards')">
+            <i class="fa fa-th-large"></i> Cards
+        </button>
+        <button class="view-btn" data-view="compare" onclick="switchView('compare')">
+            <i class="fa fa-columns"></i> Compare
+        </button>
+    </div>
+
     <!-- TOGGLE -->
     <div class="billing-toggle">
         <span class="toggle-label active" data-type="monthly">Monthly</span>
@@ -27,10 +37,10 @@
 </div>
 
 <!-- PRICING -->
-<div class="container">
-<div class="row g-5 justify-content-center">
+<div class="container" id="pricingCards">
+<div class="row g-4 justify-content-center">
     @foreach($plans as $plan)
-    <div class="col-lg-4">
+    <div class="col-lg-3 col-md-4 col-sm-6">
         <div class="pricing-card dark {{ $plan->is_popular ? 'popular' : '' }}">
             @if($plan->is_popular)
             <span class="badge-popular">MOST POPULAR</span>
@@ -79,6 +89,103 @@
 </section>
 </section>
 
+<!-- COMPARISON TABLE -->
+<div class="comparison-section" id="comparisonTable" style="display: none;">
+    <div class="container">
+        <div class="table-responsive">
+            <table class="table table-dark table-bordered text-center">
+                <thead>
+                    <tr>
+                        <th class="text-start" style="width: 25%;">Features</th>
+                        @foreach($plans as $plan)
+                        <th style="min-width: 150px;">
+                            {{ $plan->name }}
+                            @if($plan->is_popular)
+                            <span class="badge bg-primary d-block mt-1">Most Popular</span>
+                            @endif
+                        </th>
+                        @endforeach
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="text-start">Best For</td>
+                        @foreach($plans as $plan)
+                        <td>{{ $plan->recommended_for ?? '-' }}</td>
+                        @endforeach
+                    </tr>
+                    <tr>
+                        <td class="text-start">Price</td>
+                        @foreach($plans as $plan)
+                        <td>
+                            <strong>{{ $plan->price ? '৳' . number_format($plan->price) : 'Contact Us' }}</strong>
+                            <small class="text-muted">/ {{ $plan->billing_cycle }}</small>
+                        </td>
+                        @endforeach
+                    </tr>
+                    <tr>
+                        <td class="text-start">Vehicles</td>
+                        @foreach($plans as $plan)
+                        <td>{{ $plan->vehicle_limit ? $plan->vehicle_limit : 'Unlimited' }}</td>
+                        @endforeach
+                    </tr>
+                    <tr>
+                        <td class="text-start">Users</td>
+                        @foreach($plans as $plan)
+                        <td>{{ $plan->user_limit ? $plan->user_limit : 'Unlimited' }}</td>
+                        @endforeach
+                    </tr>
+                    <tr>
+                        <td class="text-start">Drivers</td>
+                        @foreach($plans as $plan)
+                        <td>{{ $plan->driver_limit ? $plan->driver_limit : 'Unlimited' }}</td>
+                        @endforeach
+                    </tr>
+                    <tr>
+                        <td class="text-start">Monthly Reports</td>
+                        @foreach($plans as $plan)
+                        <td>{{ $plan->monthly_reports ? $plan->monthly_reports : 'Unlimited' }}</td>
+                        @endforeach
+                    </tr>
+                    <tr>
+                        <td class="text-start">Monthly Alerts</td>
+                        @foreach($plans as $plan)
+                        <td>{{ $plan->monthly_alerts ? $plan->monthly_alerts : 'Unlimited' }}</td>
+                        @endforeach
+                    </tr>
+                    <tr>
+                        <td class="text-start">Features</td>
+                        @foreach($plans as $plan)
+                        <td>
+                            @if($plan->features)
+                            <ul class="list-unstyled small mb-0">
+                                @foreach((array)$plan->features as $feature)
+                                <li>✔ {{ $feature }}</li>
+                                @endforeach
+                            </ul>
+                            @else
+                            -
+                            @endif
+                        </td>
+                        @endforeach
+                    </tr>
+                    <tr>
+                        <td class="text-start"></td>
+                        @foreach($plans as $plan)
+                        <td>
+                            <a href="{{ route('subscription.select', $plan->slug) }}" 
+                               class="btn btn-{{ $plan->is_popular ? 'primary' : 'outline-light' }} w-100">
+                                Select Plan
+                            </a>
+                        </td>
+                        @endforeach
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
 <!-- STYLES -->
 <style>
 .pricing-dark {
@@ -86,6 +193,41 @@
     color: #fff;
     min-height: 100vh;
         margin-left: -30px;
+}
+
+.view-toggle {
+    display: inline-flex;
+    gap: 10px;
+}
+
+.view-btn {
+    background: transparent;
+    border: 1px solid #1e293b;
+    color: #94a3b8;
+    padding: 8px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: .3s;
+}
+
+.view-btn.active {
+    background: #0d6efd;
+    border-color: #0d6efd;
+    color: #fff;
+}
+
+.comparison-section {
+    padding: 40px 0;
+}
+
+.comparison-section .table {
+    background: #020617;
+    border-color: #1e293b;
+}
+
+.comparison-section .table th {
+    background: #0f172a;
+    vertical-align: middle;
 }
 
 .billing-toggle {
@@ -211,6 +353,19 @@ toggle.addEventListener('click', () => {
         p.nextElementSibling.innerText = yearly ? 'per year' : 'per month';
     });
 });
+
+function switchView(view) {
+    document.querySelectorAll('.view-btn').forEach(b => b.classList.remove('active'));
+    document.querySelector(`[data-view="${view}"]`).classList.add('active');
+    
+    if (view === 'compare') {
+        document.getElementById('pricingCards').style.display = 'none';
+        document.getElementById('comparisonTable').style.display = 'block';
+    } else {
+        document.getElementById('pricingCards').style.display = 'flex';
+        document.getElementById('comparisonTable').style.display = 'none';
+    }
+}
 </script>
 
 @endsection

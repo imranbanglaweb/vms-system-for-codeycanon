@@ -24,12 +24,15 @@ class Company extends Model
         'updated_by'
     ];
 
-    public function units() { return $this->hasMany(Unit::class); }
     public function unit() { return $this->belongsTo(Unit::class, 'unit_id'); }
     public function departments() { return $this->hasMany(Department::class); }
     public function employees() { return $this->hasMany(Employee::class); }
     public function vehicles() { return $this->hasMany(Vehicle::class); }
     public function users(){ return $this->hasMany(User::class);}
+    public function drivers(){ return $this->hasMany(Driver::class);}
     public function subscription(){ return $this->hasOne(Subscription::class);}
+    public function aiReports(){ return $this->hasMany(AIReport::class); }
+    public function aiMaintenanceAlerts(){ return $this->hasMany(AIMaintenanceAlert::class); }
+    public function requisitions(){ return $this->hasMany(\App\Models\Requisition::class); }
 
 }

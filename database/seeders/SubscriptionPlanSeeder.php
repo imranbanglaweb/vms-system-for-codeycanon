@@ -12,6 +12,37 @@ class SubscriptionPlanSeeder extends Seeder
      */
     public function run(): void
     {
+        // Free Trial Plan
+        SubscriptionPlan::firstOrCreate(
+            ['slug' => 'free-trial'],
+            [
+                'name' => 'Free Trial',
+                'slug' => 'free-trial',
+                'price' => 0,
+                'billing_cycle' => 'monthly',
+                'vehicle_limit' => 5,
+                'user_limit' => 3,
+                'driver_limit' => 3,
+                'monthly_reports' => 10,
+                'monthly_alerts' => 20,
+                'features' => [
+                    'Fuel & Maintenance Management',
+                    'Basic Reports',
+                    'Vehicle Tracking',
+                    'Driver Management',
+                    'Requisition System',
+                    'Email Support'
+                ],
+                'is_trial' => true,
+                'trial_days' => 7,
+                'is_popular' => false,
+                'is_active' => true,
+                'recommended_for' => 'New users testing the platform',
+                'display_order' => 0,
+                'last_updated_at' => now(),
+            ]
+        );
+
         // Starter Plan
         SubscriptionPlan::firstOrCreate(
             ['slug' => 'starter'],
@@ -21,14 +52,21 @@ class SubscriptionPlanSeeder extends Seeder
                 'billing_cycle' => 'monthly',
                 'vehicle_limit' => 5,
                 'user_limit' => 3,
-                'features' => json_encode([
+                'driver_limit' => 3,
+                'monthly_reports' => 25,
+                'monthly_alerts' => 50,
+                'features' => [
                     'Fuel & Maintenance',
                     'Basic Reports',
                     'Limited Support',
-                    '✖ API Access'
-                ]),
+                    'Vehicle Tracking',
+                    'Driver Management'
+                ],
                 'is_popular' => false,
                 'is_active' => true,
+                'recommended_for' => 'Small fleets with up to 5 vehicles',
+                'display_order' => 1,
+                'last_updated_at' => now(),
             ]
         );
 
@@ -41,14 +79,23 @@ class SubscriptionPlanSeeder extends Seeder
                 'billing_cycle' => 'monthly',
                 'vehicle_limit' => 25,
                 'user_limit' => 10,
-                'features' => json_encode([
+                'driver_limit' => 10,
+                'monthly_reports' => 50,
+                'monthly_alerts' => 100,
+                'features' => [
                     'Advanced Reports',
                     'Priority Support',
                     'Fuel & Maintenance',
-                    'API Access'
-                ]),
+                    'API Access',
+                    'GPS Tracking',
+                    'Trip Sheets',
+                    'Maintenance Alerts'
+                ],
                 'is_popular' => true,
                 'is_active' => true,
+                'recommended_for' => 'Growing businesses with 5-25 vehicles',
+                'display_order' => 2,
+                'last_updated_at' => now(),
             ]
         );
 
@@ -57,18 +104,27 @@ class SubscriptionPlanSeeder extends Seeder
             ['slug' => 'enterprise'],
             [
                 'name' => 'Enterprise',
-                'price' => 0, // Custom price
+                'price' => 0,
                 'billing_cycle' => 'monthly',
-                'vehicle_limit' => null, // Unlimited
-                'user_limit' => null,    // Unlimited
-                'features' => json_encode([
+                'vehicle_limit' => 0,
+                'user_limit' => 0,
+                'driver_limit' => 0,
+                'monthly_reports' => 0,
+                'monthly_alerts' => 0,
+                'features' => [
                     'Unlimited Vehicles',
                     'Unlimited Users',
+                    'Unlimited Drivers',
                     'API & Integrations',
-                    'Dedicated Account Manager'
-                ]),
+                    'Dedicated Account Manager',
+                    'Custom Development',
+                    '24/7 Priority Support'
+                ],
                 'is_popular' => false,
                 'is_active' => true,
+                'recommended_for' => 'Large organizations with 25+ vehicles',
+                'display_order' => 3,
+                'last_updated_at' => now(),
             ]
         );
     }

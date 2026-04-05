@@ -35,39 +35,81 @@ class MenuSeeder extends Seeder
 
             // Roles & Permissions
             'role-manage',
+            'role-list',
+            'role-create',
+            'role-edit',
+            'role-delete',
+            'permission-manage',
+            'permission-create',
+            'permission-edit',
+            'permission-delete',
 
             // Users
             'user-manage',
             'user-create',
+            'user-edit',
+            'user-delete',
 
             // Menu Management
             'menu-manage',
+            'menu-create',
+            'menu-edit',
+            'menu-delete',
+            'menu-list',
+            'menu-reorder',
 
             // Employees
             'employee-manage',
+            'employee-create',
+            'employee-edit',
+            'employee-delete',
+            'employee-import',
+            'employee-export',
             'employee-view-own',
             'employee-edit-own',
             'employee-create-department',
             'employee-edit-department',
             'employee-delete-department',
+            'employee-list-department',
             'unit-manage',
+            'unit-create',
+            'unit-edit',
+            'unit-delete',
             'company-manage',
+            'company-create',
+            'company-edit',
+            'company-delete',
             'location-manage',
+            'location-create',
+            'location-edit',
+            'location-delete',
             'department-manage',
+            'department-create',
+            'department-edit',
+            'department-delete',
             'department-head-manage',
             'license-type-manage',
 
             // Drivers
             'driver-manage',
             'driver-create',
+            'driver-edit',
+            'driver-delete',
             'driver-view',
             'driver-export',
             'driver-document-manage',
             'driver-document-upload',
             'driver-document-view',
+            'driver-document-delete',
+            'driver-document-approve',
             'driver-schedule-view',
             'driver-schedule-own',
+            'driver-schedule-manage',
+            'driver-schedule-assign',
+            'driver-schedule-edit',
             'driver-performance-view',
+            'driver-performance-manage',
+            'driver-performance-report',
             'driver-access',
             'driver-list-view',
             'driver-list-department',
@@ -79,7 +121,10 @@ class MenuSeeder extends Seeder
             // Vehicles
             'vehicle-manage',
             'vehicle-create',
+            'vehicle-edit',
+            'vehicle-delete',
             'vehicle-view',
+            'vehicle-export',
             'vehicle-type-manage',
             'vehicle-list-view',
             'vehicle-list-department',
@@ -88,6 +133,9 @@ class MenuSeeder extends Seeder
             'maintenance-manage',
             'maintenance-view',
             'maintenance-create',
+            'maintenance-edit',
+            'maintenance-approve',
+            'maintenance-history',
             'maintenance-type-manage',
             'maintenance-vendor-manage',
             'maintenance-category-manage',
@@ -97,27 +145,67 @@ class MenuSeeder extends Seeder
             // Requisitions
             'requisition-create',
             'requisition-view',
+            'requisition-edit',
+            'requisition-delete',
+            'requisition-export',
+            'requisition-download',
+            'requisition-approve',
+            'requisition-pending-view',
+            'requisition-approved-view',
+            'my-requisitions',
 
             // Department Approval
             'department-approval-view',
+            'department-approval-approve',
+            'department-approval-reject',
             'requisition-approval-department',
 
             // Transport Approval
             'transport-approval-view',
+            'transport-approval-assign',
+            'transport-approval-approve',
+            'transport-approval-reject',
 
             // Trip Sheets
             'trip-manage',
             'trip-sheet-view',
             'trip-sheet-own',
+            'trip-create',
             'trip-start',
             'trip-finish',
             'trip-end',
+            'trip-export',
             'trip-fuel-log',
             'trip-fuel-own',
+
+            // Fuel Management
+            'fuel-manage',
+            'fuel-log-entry',
+            'fuel-history-view',
 
             // Profile & Employee
             'profile-view',
             'profile-edit',
+
+            // Documents
+            'document-manage',
+            'document-create',
+            'document-edit',
+            'document-delete',
+            'document-view',
+            'document-approve',
+            'document-reject',
+            'document-history',
+            'document-export',
+            'my-documents',
+
+            // Support / Helpdesk
+            'support-manage',
+            'support-create',
+            'support-edit',
+            'support-view',
+            'support-delete',
+            'support-emergency',
 
             // Payments
             'payment-approve',
@@ -133,9 +221,11 @@ class MenuSeeder extends Seeder
             'report-maintenance',
             'report-maintenance-own',
             'report-maintenance-department',
+            'report-export',
 
             // Notifications
             'notification-manage',
+            'notification-view',
 
             // Email Templates
             'email-template-manage',
@@ -150,9 +240,55 @@ class MenuSeeder extends Seeder
 
             // Subscription Plans
             'subscription-plan-manage',
+            'subscription-plan-create',
+            'subscription-plan-edit',
+            'subscription-plan-delete',
+            'subscription-plan-view',
+
+            // Tenant Management
+            'tenant-manage',
+            'tenant-activate',
+            'tenant-deactivate',
+            'tenant-data-export',
+            'tenant-statistics-view',
+
+            // Billing & Payments
+            'billing-manage',
+            'billing-view',
+            'payment-reject',
+            'payment-invoice',
+            'invoice-manage',
+            'invoice-view',
+
+            // Usage & Analytics
+            'usage-view',
+            'analytics-view',
+            'report-tenant-usage',
+            'report-billing',
+
+            // System Administration
+            'system-configure',
+            'webhook-manage',
+            'api-key-manage',
+
+            // Maintenance Schedule
+            'maintenance-schedule-manage',
+
+            // Driver Availability Own
+            'driver-availability-own',
+
+            // Trip Fuel View
+            'trip-fuel-view',
+
+            // Department Approval
+            'department-approve',
+            'transport-approve',
 
             // Translations
             'translation-manage',
+            'translation-create',
+            'translation-update',
+            'translation-auto',
         ];
 
         // Create permissions if they don't exist
@@ -215,7 +351,7 @@ class MenuSeeder extends Seeder
                 'menu_slug' => 'trip-sheets',
                 'menu_icon' => 'fa-road',
                 'menu_url' => null,
-                'menu_permission' => 'trip-manage',
+                'menu_permission' => 'trip-sheet-view',
                 'menu_order' => 5,
                 'menu_parent' => 0,
             ],
@@ -226,7 +362,7 @@ class MenuSeeder extends Seeder
                 'menu_slug' => 'vehicle-management',
                 'menu_icon' => 'fa-truck',
                 'menu_url' => null,
-                'menu_permission' => 'vehicle-manage',
+                'menu_permission' => 'vehicle-list-view',
                 'menu_order' => 6,
                 'menu_parent' => 0,
             ],
@@ -237,7 +373,7 @@ class MenuSeeder extends Seeder
                 'menu_slug' => 'driver-management',
                 'menu_icon' => 'fa-id-card',
                 'menu_url' => 'drivers.index',
-                'menu_permission' => null,
+                'menu_permission' => 'driver-list-view',
                 'menu_order' => 7,
                 'menu_parent' => 0,
             ],
@@ -248,7 +384,7 @@ class MenuSeeder extends Seeder
                 'menu_slug' => 'gps-tracking',
                 'menu_icon' => 'fa-map-marker-alt',
                 'menu_url' => null,
-                'menu_permission' => 'gps-tracking',
+                'menu_permission' => 'gps-tracking-view',
                 'menu_order' => 8,
                 'menu_parent' => 0,
             ],
@@ -270,7 +406,7 @@ class MenuSeeder extends Seeder
                 'menu_slug' => 'menu.reports',
                 'menu_icon' => 'fa-chart-simple',
                 'menu_url' => null,
-                'menu_permission' => 'report-requisition',
+                'menu_permission' => 'report-requisition-own',
                 'menu_order' => 10,
                 'menu_parent' => 0,
             ],
@@ -349,6 +485,17 @@ class MenuSeeder extends Seeder
                 'menu_url' => null,
                 'menu_permission' => null,
                 'menu_order' => 17,
+                'menu_parent' => 0,
+            ],
+
+            // 18. Public Pages
+            [
+                'menu_name' => 'Public Pages',
+                'menu_slug' => 'public-pages',
+                'menu_icon' => 'fa-globe',
+                'menu_url' => 'pricing',
+                'menu_permission' => null,
+                'menu_order' => 18,
                 'menu_parent' => 0,
             ],
 
@@ -581,7 +728,7 @@ class MenuSeeder extends Seeder
                 'menu_slug' => 'all-trip-sheets',
                 'menu_icon' => 'fa-list',
                 'menu_url' => 'trip-sheets.index',
-                'menu_permission' => 'trip-manage',
+                'menu_permission' => 'trip-sheet-view',
                 'menu_order' => 1,
                 'parent_name' => 'Trip Sheets',
             ],
@@ -595,12 +742,21 @@ class MenuSeeder extends Seeder
                 'parent_name' => 'Trip Sheets',
             ],
             [
+                'menu_name' => 'My Trips',
+                'menu_slug' => 'my-trips',
+                'menu_icon' => 'fa-user',
+                'menu_url' => 'trip-sheets.my',
+                'menu_permission' => 'trip-sheet-own',
+                'menu_order' => 3,
+                'parent_name' => 'Trip Sheets',
+            ],
+            [
                 'menu_name' => 'Active Trips',
                 'menu_slug' => 'active-trips',
                 'menu_icon' => 'fa-play-circle',
                 'menu_url' => 'trip-sheets.active',
-                'menu_permission' => 'trip-manage',
-                'menu_order' => 3,
+                'menu_permission' => 'trip-sheet-view',
+                'menu_order' => 4,
                 'parent_name' => 'Trip Sheets',
             ],
             [
@@ -608,19 +764,55 @@ class MenuSeeder extends Seeder
                 'menu_slug' => 'completed-trips',
                 'menu_icon' => 'fa-check-double',
                 'menu_url' => 'trip-sheets.completed',
-                'menu_permission' => 'trip-manage',
-                'menu_order' => 4,
+                'menu_permission' => 'trip-sheet-view',
+                'menu_order' => 5,
                 'parent_name' => 'Trip Sheets',
             ],
 
-            // ===== Vehicle Management Children (Order: 1-8) =====
+// ===== Vehicle Management Children (Order: 1-8) =====
             [
                 'menu_name' => 'Vehicle List',
                 'menu_slug' => 'vehicle-list',
                 'menu_icon' => 'fa-list',
                 'menu_url' => 'vehicles.index',
-                'menu_permission' => 'vehicle-manage',
+                'menu_permission' => 'vehicle-list-view',
                 'menu_order' => 1,
+                'parent_name' => 'Vehicle Management',
+            ],
+            [
+                'menu_name' => 'Add Vehicle',
+                'menu_slug' => 'add-vehicle',
+                'menu_icon' => 'fa-plus',
+                'menu_url' => 'vehicles.create',
+                'menu_permission' => 'vehicle-create',
+                'menu_order' => 2,
+                'parent_name' => 'Vehicle Management',
+            ],
+            [
+                'menu_name' => 'Vehicle Types',
+                'menu_slug' => 'vehicle-types',
+                'menu_icon' => 'fa-car',
+                'menu_url' => 'vehicle-type.index',
+                'menu_permission' => 'vehicle-type-manage',
+                'menu_order' => 3,
+                'parent_name' => 'Vehicle Management',
+            ],
+            [
+                'menu_name' => 'Vendor List',
+                'menu_slug' => 'vendor-list',
+                'menu_icon' => 'fa-store',
+                'menu_url' => 'vendors.index',
+                'menu_permission' => 'maintenance-vendor-manage',
+                'menu_order' => 4,
+                'parent_name' => 'Vehicle Management',
+            ],
+            [
+                'menu_name' => 'Add Vendor',
+                'menu_slug' => 'add-vendor',
+                'menu_icon' => 'fa-plus-square',
+                'menu_url' => 'vendors.create',
+                'menu_permission' => 'maintenance-vendor-manage',
+                'menu_order' => 5,
                 'parent_name' => 'Vehicle Management',
             ],
             [
@@ -858,12 +1050,21 @@ class MenuSeeder extends Seeder
                 'parent_name' => 'Reports',
             ],
             [
+                'menu_name' => 'My Requisition Report',
+                'menu_slug' => 'my-requisition-report',
+                'menu_icon' => 'fa-file-alt',
+                'menu_url' => 'reports.requisitions',
+                'menu_permission' => 'report-requisition-own',
+                'menu_order' => 2,
+                'parent_name' => 'Reports',
+            ],
+            [
                 'menu_name' => 'Vehicle Utilization',
                 'menu_slug' => 'vehicle-utilization-report',
                 'menu_icon' => 'fa-car',
                 'menu_url' => 'reports.vehicle_utilization',
                 'menu_permission' => 'report-vehicle-utilization',
-                'menu_order' => 2,
+                'menu_order' => 3,
                 'parent_name' => 'Reports',
             ],
             [
@@ -872,7 +1073,7 @@ class MenuSeeder extends Seeder
                 'menu_icon' => 'fa-gas-pump',
                 'menu_url' => 'reports.trips_fuel',
                 'menu_permission' => 'report-trip-fuel',
-                'menu_order' => 3,
+                'menu_order' => 4,
                 'parent_name' => 'Reports',
             ],
             [
@@ -881,7 +1082,7 @@ class MenuSeeder extends Seeder
                 'menu_icon' => 'fa-id-card',
                 'menu_url' => 'reports.driver_performance',
                 'menu_permission' => 'report-driver-performance',
-                'menu_order' => 4,
+                'menu_order' => 5,
                 'parent_name' => 'Reports',
             ],
             [
@@ -890,7 +1091,16 @@ class MenuSeeder extends Seeder
                 'menu_icon' => 'fa-wrench',
                 'menu_url' => 'reports.maintenance',
                 'menu_permission' => 'report-maintenance',
-                'menu_order' => 5,
+                'menu_order' => 6,
+                'parent_name' => 'Reports',
+            ],
+            [
+                'menu_name' => 'My Maintenance Report',
+                'menu_slug' => 'my-maintenance-report',
+                'menu_icon' => 'fa-wrench',
+                'menu_url' => 'reports.maintenance',
+                'menu_permission' => 'report-maintenance-own',
+                'menu_order' => 7,
                 'parent_name' => 'Reports',
             ],
 
@@ -1063,6 +1273,62 @@ class MenuSeeder extends Seeder
                 'menu_order' => 3,
                 'parent_name' => 'Company Management',
             ],
+            [
+                'menu_name' => 'Quota Management',
+                'menu_slug' => 'quota-management',
+                'menu_icon' => 'fa-tachometer-alt',
+                'menu_url' => 'admin.quota-management.index',
+                'menu_permission' => 'company-manage',
+                'menu_order' => 4,
+                'parent_name' => 'Company Management',
+            ],
+
+            // ===== Public Pages Children (Order: 1-6) =====
+            [
+                'menu_name' => 'Pricing Plans',
+                'menu_slug' => 'pricing-plans',
+                'menu_icon' => 'fa-tags',
+                'menu_url' => 'pricing',
+                'menu_permission' => null,
+                'menu_order' => 1,
+                'parent_name' => 'Public Pages',
+            ],
+            [
+                'menu_name' => 'Pending Payments',
+                'menu_slug' => 'pending-payments',
+                'menu_icon' => 'fa-hourglass-half',
+                'menu_url' => 'admin.payments.pending',
+                'menu_permission' => 'subscription-plan-manage',
+                'menu_order' => 2,
+                'parent_name' => 'Public Pages',
+            ],
+            [
+                'menu_name' => 'Paid Payments',
+                'menu_slug' => 'paid-payments',
+                'menu_icon' => 'fa-check-circle',
+                'menu_url' => 'admin.payments.paid',
+                'menu_permission' => 'subscription-plan-manage',
+                'menu_order' => 3,
+                'parent_name' => 'Public Pages',
+            ],
+            [
+                'menu_name' => 'Revenue by Plan',
+                'menu_slug' => 'revenue-plan',
+                'menu_icon' => 'fa-chart-line',
+                'menu_url' => 'admin.revenue.plans',
+                'menu_permission' => 'subscription-plan-manage',
+                'menu_order' => 4,
+                'parent_name' => 'Public Pages',
+            ],
+            [
+                'menu_name' => 'Expiring Subscriptions',
+                'menu_slug' => 'expiring-subscriptions',
+                'menu_icon' => 'fa-exclamation-triangle',
+                'menu_url' => 'admin.payments.expiring',
+                'menu_permission' => 'subscription-plan-manage',
+                'menu_order' => 5,
+                'parent_name' => 'Public Pages',
+            ],
 
             // ===== Settings Children (Order: 1-3) =====
             [
@@ -1194,7 +1460,7 @@ class MenuSeeder extends Seeder
                 'menu_name' => 'Profile Information',
                 'menu_slug' => 'profile-info',
                 'menu_icon' => 'fa-user-circle',
-                'menu_url' => 'profile.show',
+                'menu_url' => 'user-profile',
                 'menu_permission' => 'profile-view',
                 'menu_order' => 1,
                 'parent_name' => 'My Profile',
@@ -1203,7 +1469,7 @@ class MenuSeeder extends Seeder
                 'menu_name' => 'Edit Profile',
                 'menu_slug' => 'edit-profile',
                 'menu_icon' => 'fa-edit',
-                'menu_url' => 'profile.edit',
+                'menu_url' => 'user-profile',
                 'menu_permission' => 'profile-edit',
                 'menu_order' => 2,
                 'parent_name' => 'My Profile',
@@ -1212,7 +1478,7 @@ class MenuSeeder extends Seeder
                 'menu_name' => 'Change Password',
                 'menu_slug' => 'change-password',
                 'menu_icon' => 'fa-lock',
-                'menu_url' => 'password.change',
+                'menu_url' => 'user-profile',
                 'menu_permission' => 'profile-edit',
                 'menu_order' => 3,
                 'parent_name' => 'My Profile',

@@ -54,6 +54,24 @@ class CompanyController extends Controller
     }
 
     /**
+     * Get stats for dashboard
+     */
+    public function stats()
+    {
+        $total = Company::count();
+        $active = Company::where('status', 1)->count();
+        $inactive = Company::where('status', 0)->count();
+        $vehicles = \App\Models\Vehicle::count();
+        
+        return response()->json([
+            'total' => $total,
+            'active' => $active,
+            'inactive' => $inactive,
+            'vehicles' => $vehicles
+        ]);
+    }
+
+    /**
      * Get data for DataTables
      */
     public function data()
@@ -76,7 +94,7 @@ class CompanyController extends Controller
                 $html .= '</div>';
                 return $html;
             })
-            ->addColumn('subscription_info', function($row) {
+            ->addColumn('subscription', function($row) {
                 if ($row->subscription) {
                     $statusClass = $row->subscription->status === 'active' ? 'success' : 'warning';
                     $html = '<span class="badge bg-' . $statusClass . '">' . ucfirst($row->subscription->status) . '</span>';
@@ -85,23 +103,20 @@ class CompanyController extends Controller
                 }
                 return '<span class="badge bg-secondary">No Subscription</span>';
             })
-            ->addColumn('status_badge', function($row) {
+            ->addColumn('status', function($row) {
                 $statusClass = $row->status ? 'success' : 'danger';
                 $statusText = $row->status ? 'Active' : 'Inactive';
                 return '<span class="badge bg-' . $statusClass . '">' . $statusText . '</span>';
             })
-            ->addColumn('users_count', function($row) {
-                return $row->users()->count();
-            })
             ->addColumn('vehicles_count', function($row) {
                 return $row->vehicles()->count();
             })
-            ->addColumn('created_date', function($row) {
+            ->addColumn('created_at', function($row) {
                 return $row->created_at->format('M d, Y');
             })
             ->addColumn('action', function($row) {
                 $btn = '<div class="action-btns">';
-                $btn .= '<a href="' . route('company.tenant-details', $row->id) . '" class="btn btn-info btn-sm"><i class="fa fa-eye"></i> Details</a> ';
+                $btn .= '<a href="' . route('admin.company.tenant-details', $row->id) . '" class="btn btn-info btn-sm"><i class="fa fa-eye"></i> Details</a> ';
                 $btn .= '<button class="btn btn-primary btn-sm editCompany" data-id="'.$row->id.'" data-name="'.$row->company_name.'" data-code="'.$row->company_code.'"><i class="fa fa-edit"></i> Edit</button> ';
 
                 if ($row->status) {
@@ -114,7 +129,7 @@ class CompanyController extends Controller
                 $btn .= '</div>';
                 return $btn;
             })
-            ->rawColumns(['company_info', 'subscription_info', 'status_badge', 'action'])
+            ->rawColumns(['company_name', 'subscription', 'status', 'action'])
             ->make(true);
     }
 
@@ -215,7 +230,7 @@ class CompanyController extends Controller
      */
     public function tenantDetails(Company $company)
     {
-        $company->load(['subscription.plan', 'users.roles', 'departments', 'units', 'vehicles']);
+        $company->load(['subscription.plan', 'users.roles', 'departments', 'vehicles']);
 
         $usageStats = $this->quotaService->getUsageStats($company);
         $quotaAlerts = $this->quotaService->getQuotaAlerts($company);

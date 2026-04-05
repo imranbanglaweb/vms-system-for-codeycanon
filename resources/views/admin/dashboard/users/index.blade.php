@@ -78,6 +78,7 @@
                 <th>User Name</th>
                 <th>Name</th>
                 <th>Email</th>
+                <th>Company</th>
                 <th>Employee</th>
                 <th>User Type</th>
                 <th>Roles</th>
@@ -143,6 +144,7 @@ $(document).ready(function() {
             { data: 'user_name', searchable: false },
             { data: 'name', searchable: false },
             { data: 'email', searchable: false },
+            { data: 'company', searchable: false },
             { data: 'employee', searchable: false },
             { data: 'user_type' },
             { data: 'roles', searchable: false },

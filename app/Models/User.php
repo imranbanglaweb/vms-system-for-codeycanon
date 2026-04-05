@@ -33,6 +33,7 @@ class User extends Authenticatable
         'push_subscription',
         'department_id',
         'location_id',
+        'subscription_plan_id',
     ];
   
     /**

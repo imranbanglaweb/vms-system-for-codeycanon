@@ -110,10 +110,13 @@ body { background:#fff !important; }
         </strong>
     </h5>
 <br>
+    {{-- Stripe payment temporarily disabled --}}
+    {{-- 
     <div class="payment-box  mb-3" data-method="stripe">
         <i class="fa fa-card fa-lg text-primary me-2"></i>
         Pay with Card (Stripe)
     </div>
+    --}}
 
     <div class="payment-box active" data-method="manual">
         <i class="fa fa-university fa-lg text-secondary me-2"></i>
@@ -130,7 +133,10 @@ body { background:#fff !important; }
     </h4>
 
     <ul class="feature-list list-unstyled mb-4">
-        @foreach(json_decode($plan->features ?? '[]', true) as $feature)
+        @php
+            $features = is_array($plan->features) ? $plan->features : (is_string($plan->features) ? json_decode($plan->features, true) : []);
+        @endphp
+        @foreach($features as $feature)
             <li>
                 <i class="fa fa-check-circle text-success me-2"></i>
                 {{ $feature }}
@@ -144,7 +150,7 @@ body { background:#fff !important; }
 
         <input type="hidden" name="plan_id" value="{{ $plan->id }}">
         <input type="hidden" name="billing_type" id="billingType" value="monthly">
-        <input type="hidden" name="payment_method" id="paymentMethod" value="stripe">
+        <input type="hidden" name="payment_method" id="paymentMethod" value="manual">
         <input type="hidden" name="final_price" id="finalPrice" value="{{ $plan->price }}">
 
         <!-- <button type="submit" class="btn btn-success btn-lg w-100 mb-3">
@@ -201,8 +207,7 @@ body { background:#fff !important; }
 <!-- JS -->
 <script>
      window.paymentRoutes = {
-        stripe: "{{ route('payment.stripe') }}",
-       manual: "{{ route('payment.manual', ['plan' => $plan->id]) }}"
+        manual: "{{ route('payment.manual', ['plan' => $plan->id]) }}"
     };
 let basePrice = {{ (float)$plan->price }};
 const monthlyBtn = document.getElementById('monthlyBtn');
@@ -237,15 +242,11 @@ document.querySelectorAll('.payment-box').forEach(box => {
 
 
 function goToNextStep() {
-
     let billing = document.getElementById('billingType').value;
-    let method  = document.getElementById('paymentMethod').value;
     let price   = document.getElementById('finalPrice').value;
     let planId  = {{ $plan->id }};
 
-    let baseUrl = method === 'stripe'
-        ? window.paymentRoutes.stripe
-        : window.paymentRoutes.manual;
+    let baseUrl = window.paymentRoutes.manual;
 
     let params = new URLSearchParams({
         plan: planId,

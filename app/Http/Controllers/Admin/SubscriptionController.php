@@ -29,7 +29,7 @@ class SubscriptionController extends Controller
     }
 
     /**
-     * Create subscription with Stripe
+     * Create subscription with manual payment
      */
     public function store(Request $request)
     {
@@ -39,19 +39,9 @@ class SubscriptionController extends Controller
         ]);
 
         $plan = SubscriptionPlan::findOrFail($request->plan_id);
-        $company = Company::where('id', Auth::user()->company_id)->firstOrFail();
-
-        // Create Stripe subscription
-        $result = $this->stripeService->createSubscription($company, $plan);
-
-        if (!$result['success']) {
-            return back()->withErrors(['error' => $result['error']]);
-        }
-
-        return redirect()->route('subscription.confirmation', [
-            'subscription_id' => $result['subscription']->id,
-            'client_secret' => $result['client_secret'],
-        ]);
+        
+        // Redirect to manual payment form
+        return redirect()->route('payment.manual', ['plan' => $plan->id]);
     }
 
     /**

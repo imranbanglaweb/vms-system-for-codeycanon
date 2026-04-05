@@ -9,9 +9,11 @@ use App\Models\Company;
 use App\Models\Department;
 use App\Models\Unit;
 use App\Models\Location;
+use App\Models\SubscriptionPlan;
 use Spatie\Permission\Models\Role;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Storage;
@@ -153,8 +155,17 @@ class UserController extends Controller
                     return $row->email . $emailBadge;
                 })
 
+                ->addColumn('company', function ($row) {
+                    return $row->company ? '<span class="badge bg-info">'.$row->company->company_name.'</span>' : '<span class="text-muted">N/A</span>';
+                })
+
                 ->addColumn('department', function ($row) {
-                    return $row->department ? $row->department->department_name : 'N/A';
+                    // Try user department first, then employee department
+                    $dept = $row->department;
+                    if (!$dept && $row->employee && $row->employee->department) {
+                        $dept = $row->employee->department;
+                    }
+                    return $dept ? '<span class="badge bg-warning">'.$dept->department_name.'</span>' : '<span class="text-muted">N/A</span>';
                 })
 
                 ->addColumn('unit', function ($row) {
@@ -183,7 +194,7 @@ class UserController extends Controller
                     ';
                 })
 
-                ->rawColumns(['user_image','action','status','employee','email','user_type','roles'])
+                ->rawColumns(['user_image','action','status','employee','email','user_type','roles','company','department'])
                 ->make(true);
         }
 
@@ -196,11 +207,12 @@ class UserController extends Controller
         $roles = Role::orderBy('id', 'DESC')->get();
         $employees = Employee::orderBy('employee_order', 'ASC')->get();
         $companies = Company::orderBy('id', 'DESC')->get();
-        $departments = Department::orderBy('id', 'DESC')->get();
-        $units = Unit::orderBy('id', 'DESC')->get();
-        $locations = Location::orderBy('id', 'DESC')->get();
+        $departments = Department::all();
+        $units = Unit::all();
+        $locations = Location::all();
+        $plans = SubscriptionPlan::where('is_active', 1)->orderBy('display_order')->get();
 
-        return view('admin.dashboard.users.create', compact('roles','employees','companies','departments','units','locations'));
+        return view('admin.dashboard.users.create', compact('roles','employees','companies','departments','units','locations','plans'));
     }
 
     /* ------------------------------------------------------------------
@@ -285,11 +297,12 @@ class UserController extends Controller
         $roles = Role::pluck('name')->all();
         $userRole = $user->roles->pluck('name','name')->all();
         $employees = Employee::orderBy('employee_order','ASC')->get();
-        $departments = Department::orderBy('id', 'DESC')->get();
-        $units = Unit::orderBy('id', 'DESC')->get();
-        $locations = Location::orderBy('id', 'DESC')->get();
+        $departments = Department::all();
+        $units = Unit::all();
+        $locations = Location::all();
+        $plans = SubscriptionPlan::where('is_active', 1)->orderBy('display_order')->get();
 
-        return view('admin.dashboard.users.edit', compact('user','roles','userRole','employees','departments','units','locations'));
+        return view('admin.dashboard.users.edit', compact('user','roles','userRole','employees','departments','units','locations','plans'));
     }
 
     /* ------------------------------------------------------------------

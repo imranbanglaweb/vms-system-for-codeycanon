@@ -19,7 +19,7 @@ class EmployeeSeeder extends Seeder
             [
                 'name' => 'Demo Employee',
                 'employee_code' => 'EMP101',
-                'email' => 'employee.extra@codeaycanon.com',
+                'email' => 'employee.extra@garibondhu360.com',
                 'department_id' => 1,
                 'unit_id' => 1,
                 'location_id' => $firstLocation ? $firstLocation->id : 1,
@@ -31,7 +31,7 @@ class EmployeeSeeder extends Seeder
             [
                 'name' => 'John Doe',
                 'employee_code' => 'EMP102',
-                'email' => 'john.doe@codeaycanon.com',
+                'email' => 'john.doe@garibondhu360.com',
                 'department_id' => 2,
                 'unit_id' => 1,
                 'location_id' => $firstLocation ? $firstLocation->id : 1,
@@ -43,7 +43,7 @@ class EmployeeSeeder extends Seeder
             [
                 'name' => 'Jane Smith',
                 'employee_code' => 'EMP103',
-                'email' => 'jane.smith@codeaycanon.com',
+                'email' => 'jane.smith@garibondhu360.com',
                 'department_id' => 3,
                 'unit_id' => 1,
                 'location_id' => $firstLocation ? $firstLocation->id : 1,
@@ -55,7 +55,7 @@ class EmployeeSeeder extends Seeder
             [
                 'name' => 'Mike Johnson',
                 'employee_code' => 'EMP104',
-                'email' => 'mike.johnson@codeaycanon.com',
+                'email' => 'mike.johnson@garibondhu360.com',
                 'department_id' => 4,
                 'unit_id' => 1,
                 'location_id' => $firstLocation ? $firstLocation->id : 1,
@@ -67,7 +67,7 @@ class EmployeeSeeder extends Seeder
             [
                 'name' => 'Sarah Williams',
                 'employee_code' => 'EMP105',
-                'email' => 'sarah.williams@codeaycanon.com',
+                'email' => 'sarah.williams@garibondhu360.com',
                 'department_id' => 1,
                 'unit_id' => 1,
                 'location_id' => $firstLocation ? $firstLocation->id : 1,
@@ -79,7 +79,7 @@ class EmployeeSeeder extends Seeder
             [
                 'name' => 'Alex Brown',
                 'employee_code' => 'EMP200',
-                'email' => 'alex.brown@codeaycanon.com',
+                'email' => 'alex.brown@garibondhu360.com',
                 'department_id' => 2,
                 'unit_id' => 1,
                 'location_id' => $firstLocation ? $firstLocation->id : 1,
