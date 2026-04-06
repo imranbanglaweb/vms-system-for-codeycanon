@@ -421,6 +421,12 @@ class RolePermissionSeeder extends Seeder
             // Vehicle - List View Only
             'vehicle-list-view',
 
+            // Trip Sheets - Own Trips
+            'trip-sheet-view',
+            'trip-sheet-own',
+            'trip-create',
+            'trip-manage',
+
             // Maintenance - Create and View Own
             'maintenance-create',
             'maintenance-view',
@@ -558,6 +564,10 @@ class RolePermissionSeeder extends Seeder
 
             // GPS Tracking
             'gps-tracking-view',
+
+            // Trip Sheets
+            'trip-sheet-view',
+            'trip-sheet-own',
         ];
 
         $deptHead?->syncPermissions($deptHeadPermissions);

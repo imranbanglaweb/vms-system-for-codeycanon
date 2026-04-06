@@ -542,6 +542,78 @@
                 font-size: 16px;
             }
         }
+
+        /* Demo Account Buttons */
+        .demo-accounts {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            justify-content: center;
+        }
+        
+        .demo-accounts p {
+            width: 100%;
+            margin-bottom: 10px !important;
+        }
+        
+        .demo-accounts form {
+            flex: 1;
+            min-width: 120px;
+        }
+        
+        .btn-demo {
+            width: 100%;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .btn-employee {
+            background: #6c757d;
+            color: #fff;
+        }
+        
+        .btn-employee:hover {
+            background: #5a6268;
+            transform: translateY(-2px);
+        }
+        
+        .btn-depthead {
+            background: #17a2b8;
+            color: #fff;
+        }
+        
+        .btn-depthead:hover {
+            background: #138496;
+            transform: translateY(-2px);
+        }
+        
+        .btn-transport {
+            background: #28a745;
+            color: #fff;
+        }
+        
+        .btn-transport:hover {
+            background: #218838;
+            transform: translateY(-2px);
+        }
+        
+        .btn-driver {
+            background: #ffc107;
+            color: #212529;
+        }
+        
+        .btn-driver:hover {
+            background: #e0a800;
+            transform: translateY(-2px);
+        }
     </style>
 </head>
 
@@ -602,12 +674,40 @@ if ($settings && $settings->site_logo) {
                 </button>
             </form>
 
-            <!-- Pricing Link -->
-            <div class="text-center mt-4 pt-3" style="border-top: 1px solid #ddd;">
-                <a href="{{ route('pricing') }}" class="btn btn-outline-primary w-100">
-                    <i class="fas fa-tags mr-2"></i> View Pricing Plans
-                </a>
+            <!-- Demo Accounts -->
+            <div class="demo-accounts mt-4">
+                <p class="text-muted mb-2 text-center" style="font-size: 12px;">Demo Accounts - Click to Login</p>
+                <form method="POST" action="{{ route('demo.login') }}">
+                    @csrf
+                    <input type="hidden" name="email" value="employee@garibondhu360.com">
+                    <button type="submit" class="btn-demo btn-employee">
+                        <i class="fas fa-user mr-2"></i> Employee
+                    </button>
+                </form>
+                <form method="POST" action="{{ route('demo.login') }}">
+                    @csrf
+                    <input type="hidden" name="email" value="depthead@garibondhu360.com">
+                    <button type="submit" class="btn-demo btn-depthead">
+                        <i class="fas fa-user-tie mr-2"></i> Department Head
+                    </button>
+                </form>
+                <form method="POST" action="{{ route('demo.login') }}">
+                    @csrf
+                    <input type="hidden" name="email" value="transport@garibondhu360.com">
+                    <button type="submit" class="btn-demo btn-transport">
+                        <i class="fas fa-truck mr-2"></i> Transport Manager
+                    </button>
+                </form>
+                <form method="POST" action="{{ route('demo.login') }}">
+                    @csrf
+                    <input type="hidden" name="email" value="driver@garibondhu360.com">
+                    <button type="submit" class="btn-demo btn-driver">
+                        <i class="fas fa-id-card mr-2"></i> Driver
+                    </button>
+                </form>
             </div>
+
+            
         </div>
     </div>
 

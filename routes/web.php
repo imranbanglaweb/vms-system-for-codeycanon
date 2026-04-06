@@ -121,6 +121,9 @@ Route::middleware(['auth'])->group(function () {
 
 Auth::routes();
 
+// Demo Login Routes
+Route::post('/demo-login', [App\Http\Controllers\Auth\LoginController::class, 'demoLogin'])->name('demo.login');
+
 
 
 
@@ -355,9 +358,7 @@ Route::prefix('transport')->group(function () {
     Route::get('/trip-sheet/{id}', [TripSheetController::class, 'show'])->name('trip-sheets.show');
     Route::post('/trip-sheet/start/{id}', [TripSheetController::class, 'startTrip'])->name('trip-sheets.start');
     Route::post('/trip-sheet/finish/{id}', [TripSheetController::class, 'finishTrip'])->name('trip-sheets.finish');
-    Route::get('/trip-sheet/end/{id}', [TripSheetController::class, 'endTripForm'])
-        ->name('trip-sheets.end.form')
-        ->middleware('can:trip-manage');
+    Route::get('/trip-sheet/end/{id}', [TripSheetController::class, 'endTripForm'])->name('trip-sheets.end.form');
     Route::post('/trip-sheet/end/{id}', [TripSheetController::class, 'endTripSave'])->name('trip-sheets.end.save');
 });
 
@@ -483,12 +484,13 @@ Route::middleware(['auth'])->prefix('admin')->as('admin.')->group(function () {
     Route::resource('plans', SubscriptionPlanController::class)->except(['show', 'destroy']);
 });
 
-// Pricing page
-Route::get('/pricing', [SubscriptionPlanController::class, 'price'])->name('pricing');
+// Pricing page (accessible without auth)
+Route::get('/pricing', [SubscriptionPlanController::class, 'price'])->name('pricing')->middleware('web');
 
-// Subscription Routes
+// Subscription Routes - select can be accessed without auth, but store requires auth
+Route::get('/subscribe/{slug}', [SubscriptionController::class, 'select'])->name('subscription.select');
+
 Route::middleware(['auth'])->group(function () {
-    Route::get('/subscribe/{slug}', [SubscriptionController::class, 'select'])->name('subscription.select');
     Route::post('/subscribe', [SubscriptionController::class, 'store'])->name('subscription.store');
     Route::get('/subscription-expired', [SubscriptionController::class, 'expired'])->name('subscription.expired');
 });
@@ -844,6 +846,7 @@ Route::middleware(['auth'])->group(function () {
     Route::prefix('ai-maintenance-alerts')->name('ai-maintenance-alerts.')->group(function () {
         Route::get('/', [AIMaintenanceAlertController::class, 'index'])->name('index');
         Route::get('/dashboard', [AIMaintenanceAlertController::class, 'dashboard'])->name('dashboard');
+        Route::get('/generate', [AIMaintenanceAlertController::class, 'generateForm'])->name('generateForm');
         Route::post('/generate', [AIMaintenanceAlertController::class, 'generate'])->name('generate');
         Route::get('/{alert}', [AIMaintenanceAlertController::class, 'show'])->name('show');
         Route::get('/{alert}/edit', [AIMaintenanceAlertController::class, 'edit'])->name('edit');

@@ -35,6 +35,11 @@
 </style>
 
 <section role="main" class="content-body" style="background-color: #fff;">
+    <script>
+        var companyId = {{ auth()->user()->company_id ?? 'null' }};
+        var userRoles = @json(auth()->user()->getRoleNames()->toArray() ?? []);
+        var isAdmin = userRoles.includes('Super Admin') || userRoles.includes('Admin');
+    </script>
     <div class="row mb-4">
         <div class="col-12">
             <div class="page-header shadow-sm bg-white rounded-3 px-3 py-3 mb-4">
@@ -114,7 +119,11 @@ function initMap() {
 }
 
 function loadVehicleData() {
-    fetch('{{ url("/api/gps/live") }}')
+    var url = '{{ url("/api/gps/live") }}';
+    if (!isAdmin && companyId) {
+        url += '?company_id=' + companyId;
+    }
+    fetch(url)
         .then(function(response) { return response.json(); })
         .then(function(data) {
             if (data.success) {

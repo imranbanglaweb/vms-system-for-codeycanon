@@ -7,6 +7,7 @@ use App\Models\Vehicle;
 use App\Models\Driver;
 use App\Models\Vendor;
 use App\Models\Department;
+use App\Models\Company;
 use Faker\Factory as Faker;
 
 class VehicleSeeder extends Seeder
@@ -20,6 +21,10 @@ class VehicleSeeder extends Seeder
         $drivers = Driver::pluck('id')->toArray();
         $vendors = Vendor::pluck('id')->toArray();
 
+        // Get first company for company_id
+        $company = Company::first();
+        $companyId = $company ? $company->id : 1;
+
         // Ensure we have data to reference
         $defaultDept = !empty($departments) ? $departments[0] : 1;
         $defaultDriver = !empty($drivers) ? $drivers[0] : null;
@@ -32,6 +37,7 @@ class VehicleSeeder extends Seeder
                 'vehicle_type_id' => 1,
                 'seat_capacity' => 4,
                 'ownership' => 'Owned',
+                'company_id' => $companyId,
                 'department_id' => $defaultDept,
                 'license_plate' => 'DHA-METRO-12-1234',
                 'driver_id' => $defaultDriver,
@@ -46,6 +52,7 @@ class VehicleSeeder extends Seeder
                 'vehicle_type_id' => 2,
                 'seat_capacity' => 12,
                 'ownership' => 'Owned',
+                'company_id' => $companyId,
                 'department_id' => $defaultDept,
                 'license_plate' => 'DHA-METRO-12-5678',
                 'driver_id' => count($drivers) > 1 ? $drivers[1] : $defaultDriver,
@@ -60,6 +67,7 @@ class VehicleSeeder extends Seeder
                 'vehicle_type_id' => 3,
                 'seat_capacity' => 40,
                 'ownership' => 'Owned',
+                'company_id' => $companyId,
                 'department_id' => $defaultDept,
                 'license_plate' => 'DHA-METRO-12-9012',
                 'driver_id' => count($drivers) > 2 ? $drivers[2] : $defaultDriver,
@@ -74,6 +82,7 @@ class VehicleSeeder extends Seeder
                 'vehicle_type_id' => 4,
                 'seat_capacity' => 2,
                 'ownership' => 'Rented',
+                'company_id' => $companyId,
                 'department_id' => $defaultDept,
                 'license_plate' => 'DHA-METRO-12-3456',
                 'driver_id' => null,
@@ -88,6 +97,7 @@ class VehicleSeeder extends Seeder
                 'vehicle_type_id' => 1,
                 'seat_capacity' => 4,
                 'ownership' => 'Leased',
+                'company_id' => $companyId,
                 'department_id' => $defaultDept,
                 'license_plate' => 'DHA-METRO-12-7890',
                 'driver_id' => count($drivers) > 3 ? $drivers[3] : $defaultDriver,
@@ -102,6 +112,7 @@ class VehicleSeeder extends Seeder
                 'vehicle_type_id' => 2,
                 'seat_capacity' => 15,
                 'ownership' => 'Owned',
+                'company_id' => $companyId,
                 'department_id' => $defaultDept,
                 'license_plate' => 'DHA-METRO-12-1111',
                 'driver_id' => null,
@@ -116,6 +127,7 @@ class VehicleSeeder extends Seeder
                 'vehicle_type_id' => 2,
                 'seat_capacity' => 12,
                 'ownership' => 'Rented',
+                'company_id' => $companyId,
                 'department_id' => $defaultDept,
                 'license_plate' => 'DHA-METRO-12-2222',
                 'driver_id' => null,
@@ -130,6 +142,7 @@ class VehicleSeeder extends Seeder
                 'vehicle_type_id' => 1,
                 'seat_capacity' => 4,
                 'ownership' => 'Leased',
+                'company_id' => $companyId,
                 'department_id' => $defaultDept,
                 'license_plate' => 'DHA-METRO-12-3333',
                 'driver_id' => count($drivers) > 4 ? $drivers[4] : $defaultDriver,
@@ -144,6 +157,7 @@ class VehicleSeeder extends Seeder
                 'vehicle_type_id' => 3,
                 'seat_capacity' => 50,
                 'ownership' => 'Owned',
+                'company_id' => $companyId,
                 'department_id' => $defaultDept,
                 'license_plate' => 'DHA-METRO-12-4444',
                 'driver_id' => null,
@@ -158,6 +172,7 @@ class VehicleSeeder extends Seeder
                 'vehicle_type_id' => 5,
                 'seat_capacity' => 7,
                 'ownership' => 'Owned',
+                'company_id' => $companyId,
                 'department_id' => $defaultDept,
                 'license_plate' => 'DHA-METRO-12-5555',
                 'driver_id' => null,
@@ -176,6 +191,7 @@ class VehicleSeeder extends Seeder
                     'vehicle_type_id' => $vehicle['vehicle_type_id'],
                     'seat_capacity' => $vehicle['seat_capacity'],
                     'ownership' => $vehicle['ownership'],
+                    'company_id' => $vehicle['company_id'],
                     'department_id' => $vehicle['department_id'],
                     'license_plate' => $vehicle['license_plate'],
                     'driver_id' => $vehicle['driver_id'],
@@ -201,6 +217,7 @@ class VehicleSeeder extends Seeder
                 'vehicle_type_id' => $faker->numberBetween(1, 8),
                 'seat_capacity' => $faker->numberBetween(4, 50),
                 'ownership' => $faker->randomElement(['Owned', 'Rented', 'Leased']),
+                'company_id' => $companyId,
                 'department_id' => $faker->randomElement($departments) ?: $defaultDept,
                 'license_plate' => 'DHA-METRO-' . $faker->numberBetween(10, 99) . '-' . $faker->bothify('####'),
                 'driver_id' => $randomDriver,

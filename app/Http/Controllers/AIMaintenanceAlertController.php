@@ -163,6 +163,15 @@ class AIMaintenanceAlertController extends Controller
     }
 
     /**
+     * Show generate form
+     */
+    public function generateForm()
+    {
+        $vehicles = Vehicle::orderBy('vehicle_name')->get();
+        return view('admin.ai-maintenance-alerts.generate', compact('vehicles'));
+    }
+
+    /**
      * Generate new AI alert for a vehicle
      */
     public function generate(Request $request)

@@ -488,13 +488,13 @@ class MenuSeeder extends Seeder
                 'menu_parent' => 0,
             ],
 
-            // 18. Public Pages
+            // 18. Public Pages (Admin only)
             [
                 'menu_name' => 'Public Pages',
                 'menu_slug' => 'public-pages',
                 'menu_icon' => 'fa-globe',
                 'menu_url' => 'pricing',
-                'menu_permission' => null,
+                'menu_permission' => 'subscription-plan-manage',
                 'menu_order' => 18,
                 'menu_parent' => 0,
             ],
@@ -1289,7 +1289,7 @@ class MenuSeeder extends Seeder
                 'menu_slug' => 'pricing-plans',
                 'menu_icon' => 'fa-tags',
                 'menu_url' => 'pricing',
-                'menu_permission' => null,
+                'menu_permission' => 'subscription-plan-manage',
                 'menu_order' => 1,
                 'parent_name' => 'Public Pages',
             ],
@@ -1455,7 +1455,7 @@ class MenuSeeder extends Seeder
                 'parent_name' => 'Translations',
             ],
 
-            // ===== My Profile Children (Order: 1-3) =====
+            // ===== My Profile Children (Order: 1-5) =====
             [
                 'menu_name' => 'Profile Information',
                 'menu_slug' => 'profile-info',
@@ -1469,7 +1469,7 @@ class MenuSeeder extends Seeder
                 'menu_name' => 'Edit Profile',
                 'menu_slug' => 'edit-profile',
                 'menu_icon' => 'fa-edit',
-                'menu_url' => 'user-profile',
+                'menu_url' => 'user-profile?tab=edit',
                 'menu_permission' => 'profile-edit',
                 'menu_order' => 2,
                 'parent_name' => 'My Profile',
@@ -1478,9 +1478,27 @@ class MenuSeeder extends Seeder
                 'menu_name' => 'Change Password',
                 'menu_slug' => 'change-password',
                 'menu_icon' => 'fa-lock',
-                'menu_url' => 'user-profile',
+                'menu_url' => 'user-profile?tab=password',
                 'menu_permission' => 'profile-edit',
                 'menu_order' => 3,
+                'parent_name' => 'My Profile',
+            ],
+            [
+                'menu_name' => 'My Documents',
+                'menu_slug' => 'my-documents',
+                'menu_icon' => 'fa-file-alt',
+                'menu_url' => 'user-profile?tab=documents',
+                'menu_permission' => 'my-documents',
+                'menu_order' => 4,
+                'parent_name' => 'My Profile',
+            ],
+            [
+                'menu_name' => 'My Trip Sheets',
+                'menu_slug' => 'my-trips',
+                'menu_icon' => 'fa-road',
+                'menu_url' => 'trip-sheets.my',
+                'menu_permission' => 'trip-sheet-own',
+                'menu_order' => 5,
                 'parent_name' => 'My Profile',
             ],
 

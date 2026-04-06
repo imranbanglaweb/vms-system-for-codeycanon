@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Company;
 use App\Models\Driver;
 use App\Models\Requisition;
 use App\Models\TripSheet;
@@ -17,6 +18,10 @@ class TripSheetSeeder extends Seeder
      */
     public function run()
     {
+        // Get first company
+        $company = Company::first();
+        $companyId = $company ? $company->id : 1;
+        
         // Check if we have requisitions, vehicles, and drivers
         $requisitionCount = Requisition::count();
         $vehicleCount = Vehicle::count();
@@ -64,6 +69,7 @@ class TripSheetSeeder extends Seeder
             $endMeter = $startMeter + rand(50, 500);
 
             TripSheet::create([
+                'company_id' => $companyId,
                 'trip_number' => 'TRIP-' . strtoupper(uniqid()),
                 'requisition_id' => $requisition->id,
                 'vehicle_id' => $vehicle->id,
@@ -102,6 +108,7 @@ class TripSheetSeeder extends Seeder
             $startMeter = rand(10000, 50000);
 
             TripSheet::create([
+                'company_id' => $companyId,
                 'trip_number' => 'TRIP-' . strtoupper(uniqid()),
                 'requisition_id' => $requisition->id,
                 'vehicle_id' => $vehicle->id,
@@ -138,6 +145,7 @@ class TripSheetSeeder extends Seeder
             $startDate = now()->subDays(rand(5, 20));
 
             TripSheet::create([
+                'company_id' => $companyId,
                 'trip_number' => 'TRIP-' . strtoupper(uniqid()),
                 'requisition_id' => $requisition->id,
                 'vehicle_id' => $vehicle->id,

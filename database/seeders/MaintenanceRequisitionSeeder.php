@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use Illuminate\Database\Seeder;
 use App\Models\MaintenanceRequisition;
 use App\Models\MaintenanceRequisitionItem;
+use App\Models\Company;
 use Faker\Factory as Faker;
 
 class MaintenanceRequisitionSeeder extends Seeder
@@ -12,12 +13,16 @@ class MaintenanceRequisitionSeeder extends Seeder
     public function run()
     {
         $faker = Faker::create();
+        
+        // Get first company
+        $company = Company::first();
+        $companyId = $company ? $company->id : 1;
 
         // Generate 100 dummy maintenance requisitions with items
-        $this->generateDummyRequisitions($faker);
+        $this->generateDummyRequisitions($faker, $companyId);
     }
 
-    private function generateDummyRequisitions($faker)
+    private function generateDummyRequisitions($faker, $companyId = 1)
     {
         $requisitionTypes = ['scheduled', 'emergency', 'routine', 'insurance','maintenance','breakdown','inspection'];
         $priorities = ['Low', 'Medium', 'High', 'Urgent'];
@@ -76,6 +81,7 @@ class MaintenanceRequisitionSeeder extends Seeder
             $status = $faker->randomElement($statuses);
             
             $requisitionData = [
+                'company_id' => $companyId,
                 'requisition_no' => $faker->unique()->bothify('MMR-#####'),
                 'requisition_type' => $faker->randomElement($requisitionTypes),
                 'priority' => $faker->randomElement($priorities),

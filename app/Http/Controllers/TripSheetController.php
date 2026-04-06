@@ -15,7 +15,6 @@ class TripSheetController extends Controller
     public function __construct()
     {
         $this->middleware('auth');
-        $this->middleware('permission:trip-manage');
     }
 
     /**
@@ -23,16 +22,31 @@ class TripSheetController extends Controller
      */
     public function index()
     {
-        return view('admin.dashboard.approvals.transport.trip_sheets.index');
+        $this->authorize('trip-sheet-view');
+        
+        $user = auth()->user();
+        $userRole = 'admin';
+        
+        if ($user->hasRole('Driver')) {
+            $userRole = 'driver';
+        } elseif ($user->hasRole('Employee')) {
+            $userRole = 'employee';
+        } elseif ($user->hasRole('Department Head') || $user->hasRole('Manager')) {
+            $userRole = 'dept_head';
+        }
+        
+        return view('admin.dashboard.approvals.transport.trip_sheets.index', compact('userRole'));
     }
 
     public function create()
     {
+        $this->authorize('trip-create');
         return view('admin.dashboard.approvals.transport.trip_sheets.create');
     }
 
     public function store(Request $request)
     {
+        $this->authorize('trip-create');
         // Implemented as per your requirements
         dd($request->all());
     }
@@ -42,8 +56,33 @@ class TripSheetController extends Controller
      */
     public function getData(Request $request)
     {
+        $this->authorize('trip-sheet-view');
+        $user = auth()->user();
+        
         $query = TripSheet::with(['requisition', 'vehicle', 'driver'])
             ->orderBy('id', 'desc');
+
+        // Filter by user role
+        if ($user->hasRole('Driver')) {
+            // Drivers see only their own trips
+            $query->where('driver_id', $user->driver_id ?? 0);
+        } elseif ($user->hasRole('Employee')) {
+            // Employees see trips where they are a passenger
+            $employeeId = $user->employee_id ?? 0;
+            if ($employeeId) {
+                $query->whereHas('requisition.passengers', function($q) use ($employeeId) {
+                    $q->where('employee_id', $employeeId);
+                });
+            }
+        } elseif ($user->hasRole('Department Head') || $user->hasRole('Manager')) {
+            // Department Head sees trips for their department
+            if ($user->employee && $user->employee->department_id) {
+                $query->whereHas('requisition', function($q) use ($user) {
+                    $q->where('department_id', $user->employee->department_id);
+                });
+            }
+        }
+        // Admin/Super Admin/Transport see all trips (no filter)
 
         // Filters
         if ($request->filled('status')) {
@@ -115,6 +154,7 @@ class TripSheetController extends Controller
      */
     public function show($id)
     {
+        $this->authorize('trip-sheet-view');
         $trip = TripSheet::with(['requisition', 'vehicle', 'driver', 'requisition.passengers'])
             ->findOrFail($id);
             
@@ -126,6 +166,7 @@ class TripSheetController extends Controller
      */
     public function endTripForm($id)
     {
+        $this->authorize('trip-manage');
         $trip = TripSheet::with(['vehicle', 'driver'])->findOrFail($id);
 
         if ($trip->status !== TripSheet::STATUS_IN_PROGRESS) {

@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use Illuminate\Database\Seeder;
 use App\Models\Driver;
 use App\Models\Department;
+use App\Models\Company;
 use Faker\Factory as Faker;
 
 class DriverSeeder extends Seeder
@@ -16,6 +17,10 @@ class DriverSeeder extends Seeder
         // Get existing departments
         $departments = Department::pluck('id')->toArray();
         $defaultDept = !empty($departments) ? $departments[0] : 1;
+
+        // Get first company for company_id
+        $company = Company::first();
+        $companyId = $company ? $company->id : 1;
 
         // Core driver data with comprehensive information
         $drivers = [
@@ -31,6 +36,7 @@ class DriverSeeder extends Seeder
                 'present_address' => 'Mirpur Section-12, Dhaka-1216',
                 'permanent_address' => 'Tangail Sadar, Tangail',
                 'mobile' => '01711000001',
+                'company_id' => $companyId,
                 'department_id' => $defaultDept,
                 'unit_id' => 1,
                 'availability_status' => 'available',
@@ -48,6 +54,7 @@ class DriverSeeder extends Seeder
                 'present_address' => 'Gulshan Avenue, Dhaka-1212',
                 'permanent_address' => 'Rajshahi Sadar, Rajshahi',
                 'mobile' => '01711000002',
+                'company_id' => $companyId,
                 'department_id' => $defaultDept,
                 'unit_id' => 1,
                 'availability_status' => 'available',
@@ -65,6 +72,7 @@ class DriverSeeder extends Seeder
                 'present_address' => 'Banani Block-D, Dhaka-1213',
                 'permanent_address' => 'Chittagong Sadar, Chittagong',
                 'mobile' => '01711000003',
+                'company_id' => $companyId,
                 'department_id' => $defaultDept,
                 'unit_id' => 1,
                 'availability_status' => 'available',
@@ -82,6 +90,7 @@ class DriverSeeder extends Seeder
                 'present_address' => 'Uttara Sector-7, Dhaka-1230',
                 'permanent_address' => 'Khulna Sadar, Khulna',
                 'mobile' => '01711000004',
+                'company_id' => $companyId,
                 'department_id' => $defaultDept,
                 'unit_id' => 1,
                 'availability_status' => 'busy',
@@ -99,6 +108,7 @@ class DriverSeeder extends Seeder
                 'present_address' => 'Dhanmondi Road-15, Dhaka-1205',
                 'permanent_address' => 'Sylhet Sadar, Sylhet',
                 'mobile' => '01711000005',
+                'company_id' => $companyId,
                 'department_id' => $defaultDept,
                 'unit_id' => 1,
                 'availability_status' => 'available',
@@ -116,6 +126,7 @@ class DriverSeeder extends Seeder
                 'present_address' => 'Motijheel Commercial Area, Dhaka-1000',
                 'permanent_address' => 'Barisal Sadar, Barisal',
                 'mobile' => '01711000006',
+                'company_id' => $companyId,
                 'department_id' => $defaultDept,
                 'unit_id' => 1,
                 'availability_status' => 'on_leave',
@@ -133,6 +144,7 @@ class DriverSeeder extends Seeder
                 'present_address' => 'Shahbagh, Dhaka-1000',
                 'permanent_address' => 'Rangpur Sadar, Rangpur',
                 'mobile' => '01711000007',
+                'company_id' => $companyId,
                 'department_id' => $defaultDept,
                 'unit_id' => 1,
                 'availability_status' => 'available',
@@ -150,6 +162,7 @@ class DriverSeeder extends Seeder
                 'present_address' => 'Badda Gulshan North Road, Dhaka-1212',
                 'permanent_address' => 'Jessore Sadar, Jessore',
                 'mobile' => '01711000008',
+                'company_id' => $companyId,
                 'department_id' => $defaultDept,
                 'unit_id' => 1,
                 'availability_status' => 'available',
@@ -167,6 +180,7 @@ class DriverSeeder extends Seeder
                 'present_address' => 'Baridhara Diplomatic Zone, Dhaka-1212',
                 'permanent_address' => 'Dinajpur Sadar, Dinajpur',
                 'mobile' => '01711000010',
+                'company_id' => $companyId,
                 'department_id' => $defaultDept,
                 'unit_id' => 1,
                 'availability_status' => 'available',
@@ -184,6 +198,7 @@ class DriverSeeder extends Seeder
                 'present_address' => 'Lalmatia, Dhaka-1207',
                 'permanent_address' => 'Mymensingh Sadar, Mymensingh',
                 'mobile' => '01711000012',
+                'company_id' => $companyId,
                 'department_id' => $defaultDept,
                 'unit_id' => 1,
                 'availability_status' => 'on_leave',
@@ -201,6 +216,7 @@ class DriverSeeder extends Seeder
                 'present_address' => 'Niketon Gulshan, Dhaka-1212',
                 'permanent_address' => 'Kushtia Sadar, Kushtia',
                 'mobile' => '01711000014',
+                'company_id' => $companyId,
                 'department_id' => $defaultDept,
                 'unit_id' => 1,
                 'availability_status' => 'available',
@@ -218,6 +234,7 @@ class DriverSeeder extends Seeder
                 'present_address' => 'Gulshan Society, Dhaka-1212',
                 'permanent_address' => 'Pabna Sadar, Pabna',
                 'mobile' => '01711000016',
+                'company_id' => $companyId,
                 'department_id' => $defaultDept,
                 'unit_id' => 1,
                 'availability_status' => 'busy',
@@ -240,6 +257,7 @@ class DriverSeeder extends Seeder
                     'present_address' => $driver['present_address'],
                     'permanent_address' => $driver['permanent_address'],
                     'mobile' => $driver['mobile'],
+                    'company_id' => $driver['company_id'],
                     'department_id' => $driver['department_id'],
                     'unit_id' => $driver['unit_id'],
                     'availability_status' => $driver['availability_status'],
@@ -269,6 +287,7 @@ class DriverSeeder extends Seeder
                 'present_address' => $faker->address,
                 'permanent_address' => $faker->address,
                 'mobile' => $faker->phoneNumber,
+                'company_id' => $companyId,
                 'department_id' => $faker->randomElement($departments) ?: $defaultDept,
                 'unit_id' => 1,
                 'availability_status' => $faker->randomElement($availabilityStatuses),

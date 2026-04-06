@@ -180,12 +180,19 @@ class AppServiceProvider extends ServiceProvider
             );
 
         /**
-         * Settings
+         * Settings - for both auth and non-auth pages
          */
         view()->composer(
-            ['admin.dashboard.common.header', 'admin.dashboard.common.sidebar', 'admin.dashboard.master'],
+            ['admin.dashboard.common.header', 'admin.dashboard.common.sidebar', 'admin.dashboard.master', 'admin.dashboard.public.pricing'],
             function ($view) {
                 $settings = DB::table('settings')->where('id', 1)->first();
+                
+                // For non-authenticated users, only pass settings
+                if (!auth()->check()) {
+                    $view->with('settings', $settings);
+                    return;
+                }
+                
                 $user = auth()->user();
                 $isSuperAdmin = $user->hasRole('Super Admin');
                 $isAdmin = $user->hasRole('Super Admin') || $user->hasRole('Admin');

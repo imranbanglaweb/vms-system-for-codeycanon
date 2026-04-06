@@ -122,7 +122,6 @@
             overflow-x: hidden;
             padding: 15px 0;
         }
-        }
         
         .sidebar-left .nav-main {
             list-style: none;
@@ -784,9 +783,12 @@
                 
                 <div class="header-right">
                     <!-- Language Switcher -->
+                    @auth
                     @include('admin.dashboard.languages.language-switcher')
+                    @endauth
                     
                     <!-- Notifications -->
+                    @auth
                     @php
                     $notifications = \App\Models\Notification::where('user_id', auth()->id())
                         ->latest()
@@ -816,7 +818,9 @@
                             @endforelse
                         </div>
                     </div>
+                    @endauth
                     
+                    @auth
                     <!-- User Menu -->
                     <div class="dropdown" id="userDropdown">
                         <a class="user-dropdown" href="#" onclick="toggleDropdown('userDropdown'); return false;">
@@ -841,12 +845,18 @@
                             <a href="{{ route('user-profile') }}" class="dropdown-item">
                                 <i class="fa fa-user"></i> My Profile
                             </a>
+                            @auth
+                            @if(auth()->user()->hasRole('Super Admin') || auth()->user()->hasRole('Admin'))
                             <a href="{{ route('settings.index') }}" class="dropdown-item">
                                 <i class="fa fa-cog"></i> Settings
                             </a>
+                            @endif
+                            @if(auth()->user()->hasRole('Super Admin') || auth()->user()->hasRole('Admin') || auth()->user()->hasRole('Transport'))
                             <a href="{{ route('admin.plans.index') }}" class="dropdown-item">
                                 <i class="fa fa-credit-card"></i> Subscription Plan
                             </a>
+                            @endif
+                            @endauth
                             <div class="dropdown-divider"></div>
                             <a href="{{ route('logout') }}" class="dropdown-item" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
                                 <i class="fa fa-sign-out-alt"></i> Logout
@@ -856,6 +866,7 @@
                             </form>
                         </div>
                     </div>
+                    @endauth
                 </div>
             </header>
             

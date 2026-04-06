@@ -112,10 +112,31 @@ class GpsTrackingController extends Controller
     public function getLiveTracking(Request $request)
     {
         try {
-            // Get all vehicles without global scopes (to see all vehicles)
-            $vehicles = Vehicle::withoutGlobalScopes()
+            // Try to get authenticated user first
+            $user = auth()->user();
+            
+            // Get company_id from request or authenticated user
+            $companyId = $request->company_id;
+            $isAdmin = false;
+            
+            // If no company_id in request, try to get from auth user
+            if (!$companyId && $user) {
+                // Check if user is admin - if so, show all vehicles
+                if ($user->hasRole('Super Admin') || $user->hasRole('Admin')) {
+                    $isAdmin = true;
+                } else {
+                    $companyId = $user->company_id;
+                }
+            }
+            
+            // Build vehicle query with company filtering
+            $vehicleQuery = Vehicle::withoutGlobalScopes()
                 ->with(['driver', 'vehicleType'])
-                ->get()
+                ->when($companyId && !$isAdmin, function($query) use ($companyId) {
+                    $query->where('company_id', $companyId);
+                });
+            
+            $vehicles = $vehicleQuery->get()
                 ->map(function ($vehicle) {
                     $latestTrack = GpsTrack::where('vehicle_id', $vehicle->id)
                         ->latest('recorded_at')
@@ -285,7 +306,13 @@ class GpsTrackingController extends Controller
      */
     public function index()
     {
+        $user = auth()->user();
+        
+        // Filter vehicles by company for non-admin users
         $vehicles = Vehicle::with(['driver', 'vehicleType'])
+            ->when(!$user->hasRole('Super Admin') && !$user->hasRole('Admin'), function($query) use ($user) {
+                $query->where('company_id', $user->company_id);
+            })
             ->orderBy('vehicle_name')
             ->get();
 
@@ -298,7 +325,16 @@ class GpsTrackingController extends Controller
      */
     public function showVehicle($id)
     {
-        $vehicle = Vehicle::with(['driver', 'vehicleType'])->findOrFail($id);
+        $user = auth()->user();
+        
+        $vehicleQuery = Vehicle::with(['driver', 'vehicleType']);
+        
+        // Filter by company for non-admin users
+        if ($user && !$user->hasRole('Super Admin') && !$user->hasRole('Admin')) {
+            $vehicleQuery->where('company_id', $user->company_id);
+        }
+        
+        $vehicle = $vehicleQuery->findOrFail($id);
         
         $latestTrack = GpsTrack::where('vehicle_id', $id)
             ->latest('recorded_at')

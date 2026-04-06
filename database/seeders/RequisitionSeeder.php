@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use App\Models\Requisition;
+use App\Models\Company;
 use Faker\Factory as Faker;
 
 class RequisitionSeeder extends Seeder
@@ -11,11 +12,16 @@ class RequisitionSeeder extends Seeder
     public function run()
     {
         $faker = Faker::create();
+        
+        // Get first company
+        $company = Company::first();
+        $companyId = $company ? $company->id : 1;
 
         // ================= PENDING REQUISITION =================
         Requisition::updateOrCreate(
             ['requisition_number' => 'REQ-00001'],
             [
+                'company_id' => $companyId,
                 'requested_by' => 1,
                 'department_id' => 1,
                 'unit_id' => 1,

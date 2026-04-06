@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use App\Providers\RouteServiceProvider;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class LoginController extends Controller
 {
@@ -36,5 +38,22 @@ class LoginController extends Controller
     public function __construct()
     {
         $this->middleware('guest')->except('logout');
+    }
+
+    /**
+     * Demo login for quick login as different user roles
+     */
+    public function demoLogin(Request $request)
+    {
+        $email = $request->input('email');
+        
+        $user = \App\Models\User::where('email', $email)->first();
+        
+        if ($user) {
+            Auth::login($user);
+            return redirect()->route('home');
+        }
+        
+        return redirect()->route('login')->with('error', 'Demo account not found');
     }
 }

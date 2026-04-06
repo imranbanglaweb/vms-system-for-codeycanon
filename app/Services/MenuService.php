@@ -46,13 +46,13 @@ class MenuService
             ->orderBy('menu_order', 'ASC')
             ->get();
         
-        $filtered = $menus->map(function ($menu) use ($user, $isSuperAdmin, $isAdmin, $isManager, $isDriver) {
+        $filtered = $menus->map(function ($menu) use ($user, $isSuperAdmin, $isAdmin, $isManager, $isDriver, $isEmployee) {
 
             // Load children
             $children = Menu::where('menu_parent', $menu->id)
                 ->orderBy('menu_order')
                 ->get()
-                ->filter(function ($child) use ($user, $isSuperAdmin, $isAdmin, $isManager, $isDriver) {
+                ->filter(function ($child) use ($user, $isSuperAdmin, $isAdmin, $isManager, $isDriver, $isEmployee) {
                     // Super Admin and Admin see everything, others need permission
                     // Exclude employee-specific menus to avoid duplicates
                     if ($isSuperAdmin || $isAdmin) {
@@ -146,7 +146,30 @@ class MenuService
                             'maintenance-approval-department',
                             'report-requisition-department',
                             'report-maintenance-department',
+                            'department-approval-view',
+                            'department-approval-approve',
+                            'department-approval-reject',
+                            'maintenance-approval-view',
+                            // Department Head specific approval menus only
+                            'pending-requisitions',
+                            'approved-requisitions',
+                            'rejected-requisitions',
+                            'my-pending-approvals',
                         ];
+                        
+                        // Exclude transport and maintenance manager menus for Dept Head
+                        $excludeForDeptHeadChild = [
+                            'transport-approvals',
+                            'maintenance-approvals',
+                            'maintenance-transport',
+                            'maintenance-pending',
+                            'maintenance-approved-list',
+                        ];
+                        
+                        // Check if menu is excluded for department head
+                        if ($child->menu_slug && in_array($child->menu_slug, $excludeForDeptHeadChild)) {
+                            return false;
+                        }
                         
                         // Allow department head specific menus
                         if ($child->menu_permission && in_array($child->menu_permission, $deptHeadMenus)) {
@@ -167,6 +190,47 @@ class MenuService
                         if ($child->menu_permission && in_array($child->menu_permission, $adminOnlyMenus)) {
                             return false;
                         }
+                    }
+                    
+                    // For Employee role - show only employee-specific menus
+                    if ($isEmployee) {
+                        $employeeAllowedChildMenus = [
+                            'requisition-create',
+                            'requisition-view',
+                            'requisition-edit',
+                            'requisition-pending-view',
+                            'requisition-approved-view',
+                            'my-requisitions',
+                            'driver-list-view',
+                            'vehicle-list-view',
+                            'maintenance-create',
+                            'maintenance-view',
+                            'report-requisition-own',
+                            'report-maintenance-own',
+                            'employee-view-own',
+                            'employee-edit-own',
+                            'document-manage',
+                            'document-create',
+                            'document-view',
+                            'document-history',
+                            'document-export',
+                            'my-documents',
+                            'notification-view',
+                            'support-create',
+                            'support-edit',
+                            'support-view',
+                            'profile-view',
+                            'profile-edit',
+                            'trip-sheet-view',
+                            'gps-tracking-view',
+                        ];
+                        
+                        if ($child->menu_permission && in_array($child->menu_permission, $employeeAllowedChildMenus)) {
+                            return self::userHasPermission($user, $child->menu_permission);
+                        }
+                        
+                        // Show menus without specific permission requirements
+                        return !$child->menu_permission;
                     }
                     
                     return !$child->menu_permission || (self::userHasPermission($user, $child->menu_permission));
@@ -190,8 +254,8 @@ class MenuService
                 }
             } elseif ($isManager) {
                 // For Department Head, show relevant parent menus
-                // Exclude generic 'approvals' menu - use 'my-approvals' instead
                 $deptHeadParentMenus = [
+                    'approvals',
                     'my-approvals',
                     'my-team',
                     'my-vehicles',
@@ -201,9 +265,13 @@ class MenuService
                     'reports',
                 ];
                 
-                // Hide these generic menus for Department Head - use department-specific ones instead
+                // Hide these generic menus for Department Head
                 $excludeForDeptHead = [
-                    'approvals', // Use 'my-approvals' instead
+                    'settings',
+                    'employee-management',
+                    'vehicles',
+                    'public-pages',
+                    'menu-management',
                 ];
                 
                 // Show parent if it has visible children or is in allowed list
@@ -247,8 +315,29 @@ class MenuService
                 // For drivers: show if allowed parent OR (has visible children AND not excluded)
                 $menu->visible = $isAllowedParent || ($hasVisibleChildren && !$isExcludedParent);
             } else {
-                $hasPermission = !$menu->menu_permission || (Permission::where('name', $menu->menu_permission)->exists() && $user->can($menu->menu_permission));
-                $menu->visible = $children->isNotEmpty() || $hasPermission;
+                // For Employee role - show allowed parent menus
+                if ($isEmployee) {
+                    $employeeAllowedParentMenus = [
+                        'menu.dashboard',
+                        'vehicle-requisition',
+                        'maintenance',
+                        'trip-sheets',
+                        'vehicle-management',
+                        'driver-management',
+                        'fuel-management',
+                        'reports',
+                        'employee-management',
+                        'my-profile',
+                    ];
+                    
+                    $hasPermission = !$menu->menu_permission || (Permission::where('name', $menu->menu_permission)->exists() && $user->can($menu->menu_permission));
+                    $isAllowedParent = $menu->menu_slug && in_array($menu->menu_slug, $employeeAllowedParentMenus);
+                    
+                    $menu->visible = ($isAllowedParent && $children->isNotEmpty()) || $hasPermission;
+                } else {
+                    $hasPermission = !$menu->menu_permission || (Permission::where('name', $menu->menu_permission)->exists() && $user->can($menu->menu_permission));
+                    $menu->visible = $children->isNotEmpty() || $hasPermission;
+                }
             }
 
             $menu->children = $children;
