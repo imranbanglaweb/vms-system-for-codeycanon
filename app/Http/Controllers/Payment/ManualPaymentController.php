@@ -18,7 +18,16 @@ class ManualPaymentController extends Controller
     public function form($planId)
     {
         $plan = SubscriptionPlan::findOrFail($planId);
-        return view('admin.dashboard.plans.manual', compact('plan'));
+        
+        $currentSubscription = null;
+        if (auth()->check() && auth()->user()->company_id) {
+            $currentSubscription = \App\Models\Subscription::with('plan')
+                ->where('company_id', auth()->user()->company_id)
+                ->where('status', 'active')
+                ->first();
+        }
+        
+        return view('admin.dashboard.plans.manual', compact('plan', 'currentSubscription'));
     }
 
     /**
@@ -29,13 +38,22 @@ class ManualPaymentController extends Controller
         $request->validate([
             'plan_id' => 'required|exists:subscription_plans,id',
             'trx_id'  => 'required|string',
-            'amount'  => 'required|numeric|min:1',
+            'amount'  => 'nullable|numeric|min:0',
         ]);
 
         $plan = SubscriptionPlan::findOrFail($request->plan_id);
+        $amount = $request->amount ?? $plan->price;
+        
+        if (!auth()->check()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Please login to continue.',
+                'redirect' => route('login'),
+            ], 401);
+        }
+        
         $user = auth()->user();
 
-        // Validate that user has a company_id
         if (!$user->company_id) {
             return response()->json([
                 'success' => false,
@@ -69,7 +87,7 @@ class ManualPaymentController extends Controller
                 'subscription_id' => $subscription->id,
                 'plan_id'         => $plan->id,
                 'method'          => 'manual',
-                'amount'          => $request->amount,
+                'amount'          => $amount,
                 'currency'        => 'BDT',
                 'transaction_id'  => $request->trx_id,
                 'status'          => 'pending',

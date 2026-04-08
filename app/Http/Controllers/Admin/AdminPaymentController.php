@@ -139,12 +139,15 @@ class AdminPaymentController extends Controller
         ]);
 
         // Activate / extend subscription
+        $plan = $payment->plan;
+        $duration = $plan->is_trial ? ($plan->trial_days ?? 7) : 30;
+        
         Subscription::updateOrCreate(
             ['company_id' => $payment->company_id],
             [
                 'plan_id'   => $payment->plan_id,
                 'starts_at' => now(),
-                'ends_at'   => now()->addDays($payment->plan->duration_days ?? 30),
+                'ends_at'   => now()->addDays($duration),
                 'status'    => 'active',
             ]
         );

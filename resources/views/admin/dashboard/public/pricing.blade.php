@@ -44,6 +44,10 @@
         <div class="pricing-card dark {{ $plan->is_popular ? 'popular' : '' }}">
             @if($plan->is_popular)
             <span class="badge-popular">MOST POPULAR</span>
+            @elseif($plan->slug == 'free-trial')
+            <span class="badge-trial">7 DAYS FREE TRIAL</span>
+            @elseif($plan->slug == 'enterprise')
+            <span class="badge-enterprise">CUSTOM PRICING</span>
             @endif
 
             <h5 class="plan-name">{{ $plan->name }}</h5>
@@ -51,10 +55,24 @@
             <div class="price" 
                  data-monthly="{{ $plan->billing_cycle == 'monthly' ? $plan->price : 0 }}"
                  data-yearly="{{ $plan->billing_cycle == 'yearly' ? $plan->price : $plan->price * 12 }}">
-                {{ $plan->price ? '৳' : '' }}<span>{{ $plan->price }}</span>
+                @if($plan->slug == 'enterprise')
+                    <span>Custom</span>
+                @elseif($plan->price == 0)
+                    <span>Free</span>
+                @else
+                    {{ $plan->price ? '৳' : '' }}<span>{{ $plan->price }}</span>
+                @endif
             </div>
             <div class="billing-text">
-                {{ $plan->price ? 'per '.$plan->billing_cycle : 'Let’s Talk' }}
+                @if($plan->slug == 'enterprise')
+                    Contact for Pricing
+                @elseif($plan->slug == 'free-trial')
+                    7 Days Free Trial
+                @elseif($plan->price)
+                    per {{ $plan->billing_cycle }}
+                @else
+                    Let's Talk
+                @endif
             </div>
 
             <ul class="features">
@@ -72,14 +90,26 @@
                 @endif
             </ul>
 
-            <a href="{{ $plan->price ? route('register') : '#' }}" 
-               class="btn btn-{{ $plan->is_popular ? 'primary' : 'outline-light' }} w-100">
-               <i class="fa fa-user-plus"></i>&nbsp;
-               {{ $plan->price ? ($plan->is_popular ? 'Get Started' : 'Start Free Trial') : 'Contact Sales' }}
-            </a>
-            <a href="{{ route('subscription.select',$plan->slug) }}" class="btn btn-warning w-100">
-            <i class="fa fa-check-circle"></i>&nbsp; Subscribe
-            </a>
+            <div class="d-flex gap-2 mt-auto">
+                <a href="{{ route('subscription.select', $plan->slug) }}" 
+                   class="btn btn-{{ $plan->is_popular ? 'primary' : 'outline-light' }} flex-fill">
+                    <i class="fa fa-user-plus"></i>&nbsp;
+                    @if($plan->slug == 'enterprise')
+                    Contact Sales
+                    @elseif($plan->slug == 'free-trial')
+                    Start Trial
+                    @elseif($plan->is_popular)
+                    Get Started
+                    @else
+                    Start Trial
+                    @endif
+                </a>
+                @if($plan->slug != 'enterprise')
+                <a href="{{ route('subscription.select', $plan->slug) }}" class="btn btn-warning flex-fill">
+                <i class="fa fa-check-circle"></i>&nbsp; Subscribe
+                </a>
+                @endif
+            </div>
         </div>
     </div>
     @endforeach
@@ -118,8 +148,20 @@
                         <td class="text-start">Price</td>
                         @foreach($plans as $plan)
                         <td>
-                            <strong>{{ $plan->price ? '৳' . number_format($plan->price) : 'Contact Us' }}</strong>
-                            <small class="text-muted">/ {{ $plan->billing_cycle }}</small>
+                            @if($plan->slug == 'enterprise')
+                                <strong>Custom</strong>
+                            @elseif($plan->price == 0)
+                                <strong>Free</strong>
+                            @else
+                                <strong>৳{{ number_format($plan->price) }}</strong>
+                            @endif
+                            @if($plan->slug != 'enterprise' && $plan->price > 0)
+                                <small class="text-muted">/ {{ $plan->billing_cycle }}</small>
+                            @elseif($plan->is_trial && $plan->trial_days)
+                                <small class="text-success d-block">{{ $plan->trial_days }} Days Trial</small>
+                            @elseif($plan->slug == 'enterprise')
+                                <small class="text-muted d-block">Contact for pricing</small>
+                            @endif
                         </td>
                         @endforeach
                     </tr>
@@ -173,10 +215,16 @@
                         <td class="text-start"></td>
                         @foreach($plans as $plan)
                         <td>
+                            @if($plan->slug == 'enterprise')
+                            <a href="mailto:support@vms.com?subject=Enterprise%20Plan%20Inquiry" class="btn btn-outline-warning w-100">
+                                <i class="fa fa-envelope"></i> Contact Sales
+                            </a>
+                            @else
                             <a href="{{ route('subscription.select', $plan->slug) }}" 
                                class="btn btn-{{ $plan->is_popular ? 'primary' : 'outline-light' }} w-100">
-                                Select Plan
+                                {{ $plan->is_popular ? 'Get Started' : 'Start Trial' }}
                             </a>
+                            @endif
                         </td>
                         @endforeach
                     </tr>
@@ -283,6 +331,8 @@
     padding: 40px;
     text-align: center;
     height: 100%;
+    display: flex;
+    flex-direction: column;
     box-shadow: 0 0 40px rgba(13,110,253,.15);
 }
 
@@ -293,6 +343,24 @@
 
 .badge-popular {
     background: linear-gradient(90deg,#0d6efd,#6610f2);
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: .85rem;
+    display: inline-block;
+    margin-bottom: 15px;
+}
+
+.badge-trial {
+    background: linear-gradient(90deg,#10b981,#059669);
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: .85rem;
+    display: inline-block;
+    margin-bottom: 15px;
+}
+
+.badge-enterprise {
+    background: linear-gradient(90deg,#f59e0b,#d97706);
     padding: 6px 14px;
     border-radius: 20px;
     font-size: .85rem;
@@ -330,6 +398,20 @@
 
 .features .muted {
     color: #64748b;
+}
+
+.d-flex.gap-2 {
+    gap: 10px !important;
+}
+
+.d-flex.gap-2 .btn {
+    padding: 10px 12px;
+    font-weight: 600;
+    font-size: 14px;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 </style>
 

@@ -4,6 +4,13 @@
 
 @section('main_content')
 
+<script>
+function closeSuccessModal() {
+    document.getElementById('successModal').style.display = 'none';
+    window.location.href = "{{ route('home') }}";
+}
+</script>
+
 <style>
     body { background:#fff; }
 
@@ -38,6 +45,19 @@
         align-items:center;
         gap:10px;
         margin-bottom:12px;
+    }
+
+    .modal-backdrop.show {
+        opacity: 0 !important;
+    }
+
+    .modal-backdrop {
+        display: none !important;
+    }
+
+    /* Custom modal overlay for success modal */
+    #successModal.show .modal-backdrop {
+        display: none !important;
     }
 </style>
 
@@ -139,6 +159,21 @@
 <div class="card-body px-5 py-5">
 
 <!-- PLAN SUMMARY -->
+@if($currentSubscription)
+<div class="alert alert-info d-flex align-items-center mb-4" style="border-radius: 12px; background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%); border: none;">
+    <i class="fa fa-info-circle fs-4 me-3 text-primary"></i>
+    <div>
+        <strong>Current Plan:</strong> {{ $currentSubscription->plan->name }}
+        @if($currentSubscription->status === 'pending')
+        | <span class="badge bg-warning">Payment Pending Approval</span>
+        @else
+        | <strong>Started:</strong> {{ $currentSubscription->starts_at ? $currentSubscription->starts_at->format('d M Y') : 'N/A' }}
+        | <strong>Expires:</strong> {{ $currentSubscription->ends_at ? $currentSubscription->ends_at->format('d M Y') : 'N/A' }}
+        @endif
+    </div>
+</div>
+@endif
+
 <div class="row mb-5 align-items-center">
     <div class="col-md-6">
         <h4 class="fw-bold mb-1"><strong>{{ $plan->name }}</strong></h4>
@@ -167,8 +202,8 @@
             Bank Transfer
         </h4>
 
-        <p class="mb-2"><strong>Bank Name:</strong> ABC Bank Ltd.</p>
-        <p class="mb-3"><strong>Account Name:</strong> VMS Software Ltd.</p>
+        <p class="mb-2"><strong>Bank Name:</strong> Prime Bank PLC</p>
+        <p class="mb-3"><strong>Account Name:</strong> গাড়িবন্ধু ৩৬০</p>
 
         <div class="copy-row">
             <span>
@@ -182,7 +217,7 @@
             </button>
         </div>
 
-        <p class="mb-0"><strong>Branch:</strong> Main Branch</p>
+        <p class="mb-0"><strong>Branch:</strong> Banani Brance</p>
     </div>
 </div>
 
@@ -197,7 +232,7 @@
         <div class="copy-row">
             <span>
                 <strong>bKash:</strong>
-                <span id="bkash">01XXXXXXXX</span>
+                <span id="bkash">01918329829</span>
             </span>
             <button type="button"
                     class="btn btn-outline-success btn-sm copy-btn"
@@ -209,7 +244,7 @@
         <div class="copy-row">
             <span>
                 <strong>Nagad:</strong>
-                <span id="nagad">01XXXXXXXX</span>
+                <span id="nagad">01918329829</span>
             </span>
             <button type="button"
                     class="btn btn-outline-success btn-sm copy-btn"
@@ -221,7 +256,7 @@
         <div class="copy-row">
             <span>
                 <strong>Rocket:</strong>
-                <span id="rocket">01XXXXXXXX</span>
+                <span id="rocket">01918329829</span>
             </span>
             <button type="button"
                     class="btn btn-outline-success btn-sm copy-btn"
@@ -282,25 +317,31 @@
 </div>
 </div>
 </div>
-<div class="modal" id="successModal" tabindex="-1">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content text-center p-4">
-        <div class="modal-body">
-            <i class="fa fa-check-circle text-success fs-1 mb-3"></i>
-            <h4 class="fw-bold">Payment Submitted</h4>
-            <p class="text-muted">Your payment is under admin review.</p>
-
-            <a id="invoiceLink" href="#" class="btn btn-outline-primary mt-3">
-                <i class="fa fa-download me-2"></i>
-                Download Invoice
-            </a>
+<div id="successModal" class="modal" tabindex="-1" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(255,255,255,0.98); z-index:9999; align-items:center; justify-content:center;">
+  <div class="modal-dialog modal-dialog-centered modal-sm" style="max-width:400px; margin:auto;">
+    <div class="modal-content text-center" style="border-radius:20px; border:1px solid #e2e8f0; box-shadow:0 20px 60px rgba(0,0,0,0.15); background:linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);">
+      <div class="modal-body p-5">
+        <div style="width:80px; height:80px; border-radius:50%; background:linear-gradient(135deg, #10b981 0%, #059669 100%); margin:0 auto 20px; display:flex; align-items:center; justify-content:center;">
+            <i class="fa fa-check text-white" style="font-size:40px;"></i>
         </div>
+        <h3 class="fw-bold" style="color:#1e293b; margin-bottom:10px;">Payment Submitted</h3>
+        <p class="text-muted mb-4" style="font-size:15px;">Your payment is under admin review.</p>
+        <p class="text-muted mb-4" style="font-size:13px;">You'll be notified once approved.</p>
+
+        <div class="d-flex gap-2 justify-content-center">
+            <a id="invoiceLink" href="#" class="btn btn-primary" style="padding:12px 24px; border-radius:10px; font-weight:600; background:linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%); border:none;">
+                <i class="fa fa-download me-2"></i>Download Invoice
+            </a>
+            <button type="button" class="btn btn-outline-secondary" onclick="closeSuccessModal()" style="padding:12px 24px; border-radius:10px; font-weight:600;">
+                Go to Dashboard
+            </button>
+        </div>
+      </div>
     </div>
   </div>
 </div>
 
 </section>
-
 
 <script>
 document.getElementById('manualPaymentForm').addEventListener('submit', function(e) {
@@ -308,23 +349,50 @@ document.getElementById('manualPaymentForm').addEventListener('submit', function
 
     const form = this;
     const formData = new FormData(form);
+    const submitBtn = form.querySelector('button[type="submit"]');
+    const originalBtnText = submitBtn.innerHTML;
+    
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<i class="fa fa-spinner fa-spin me-2"></i> Processing...';
 
     fetch("{{ route('manual.payment.ajax') }}", {
         method: "POST",
         headers: {
-            'X-CSRF-TOKEN': document.querySelector('input[name=_token]').value
+            'X-CSRF-TOKEN': document.querySelector('input[name=_token]').value,
+            'Accept': 'application/json'
         },
         body: formData
     })
-    .then(res => res.json())
+    .then(response => {
+        if (response.status === 401 || response.redirected) {
+            window.location.href = "{{ route('login') }}";
+            return;
+        }
+        return response.json();
+    })
     .then(data => {
-        if (data.success) {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = originalBtnText;
+        
+        if (data && data.success) {
             document.getElementById('invoiceLink').href = data.invoice_url;
-            new bootstrap.Modal(document.getElementById('successModal')).show();
+            
+            // Show custom modal
+            const modalEl = document.getElementById('successModal');
+            modalEl.style.display = 'flex';
+            modalEl.style.alignItems = 'center';
+            modalEl.style.justifyContent = 'center';
+            
             form.reset();
+        } else if (data && data.message) {
+            alert(data.message);
         }
     })
-    .catch(() => alert('Something went wrong'));
+    .catch(error => {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = originalBtnText;
+        alert('Something went wrong. Please try again.');
+    });
 });
 </script>
 

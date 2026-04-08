@@ -10,6 +10,36 @@
         vertical-align: middle !important;
         font-size: 15px;
     }
+    
+    /* Custom Modal Styles - Premium Look */
+    .premium-modal .modal-content {
+        border-radius: 20px;
+        border: none;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+        background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+    }
+    
+    .premium-modal .modal-header {
+        border-bottom: 1px solid #f1f5f9;
+        padding: 20px 25px;
+    }
+    
+    .premium-modal .modal-body {
+        padding: 30px 25px;
+    }
+    
+    .premium-modal .modal-footer {
+        border-top: 1px solid #f1f5f9;
+        padding: 15px 25px;
+    }
+    
+    .modal-backdrop {
+        background-color: #fff !important;
+    }
+    
+    .modal-backdrop.show {
+        opacity: 0.8 !important;
+    }
 </style>
 @endpush
 
@@ -46,41 +76,53 @@
 </section>
 
 <!-- APPROVE MODAL -->
-<div class="modal" id="approveModal" tabindex="-1">
+<div class="modal premium-modal" id="approveModal" tabindex="-1">
 <div class="modal-dialog modal-dialog-centered">
 <div class="modal-content border-0 shadow">
-    <div class="modal-header">
-        <h5 class="modal-title">Approve Payment</h5>
+    <div class="modal-header bg-light">
+        <h5 class="modal-title fw-bold">
+            <i class="fa fa-check-circle text-success me-2"></i>Approve Payment
+        </h5>
         <button class="btn-close" data-bs-dismiss="modal"></button>
     </div>
-    <div class="modal-body text-center">
-        <i class="fa fa-circle-check fa-3x text-success mb-3"></i>
-        <p>Confirm payment approval?</p>
+    <div class="modal-body text-center py-4">
+        <div style="width:80px; height:80px; border-radius:50%; background:linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%); margin:0 auto 20px; display:flex; align-items:center; justify-content:center;">
+            <i class="fa fa-check text-success" style="font-size:36px;"></i>
+        </div>
+        <h5 class="fw-bold mb-2">Confirm Payment Approval</h5>
+        <p class="text-muted">This will activate the subscription for this company.</p>
     </div>
-    <div class="modal-footer">
-        <button class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-        <button class="btn btn-success" id="confirmApprove">Approve</button>
+    <div class="modal-footer bg-light">
+        <button class="btn btn-secondary px-4" data-dismiss="modal">Cancel</button>
+        <button class="btn btn-success px-4" id="confirmApprove">
+            <i class="fa fa-check me-2"></i>Approve
+        </button>
     </div>
 </div>
 </div>
 </div>
 
 <!-- REJECT CONFIRM MODAL -->
-<div class="modal" id="rejectModal" tabindex="-1">
+<div class="modal premium-modal" id="rejectModal" tabindex="-1">
 <div class="modal-dialog modal-dialog-centered">
 <div class="modal-content border-0 shadow">
-    <div class="modal-header">
-        <h5 class="modal-title text-danger">Reject Payment</h5>
+    <div class="modal-header bg-light">
+        <h5 class="modal-title fw-bold text-danger">
+            <i class="fa fa-times-circle me-2"></i>Reject Payment
+        </h5>
         <button class="btn-close" data-bs-dismiss="modal"></button>
     </div>
-    <div class="modal-body text-center">
-        <i class="fa fa-circle-xmark fa-3x text-danger mb-3"></i>
-        <p>Are you sure you want to reject this payment?</p>
+    <div class="modal-body text-center py-4">
+        <div style="width:80px; height:80px; border-radius:50%; background:linear-gradient(135deg, #fee2e2 0%, #fecaca 100%); margin:0 auto 20px; display:flex; align-items:center; justify-content:center;">
+            <i class="fa fa-times text-danger" style="font-size:36px;"></i>
+        </div>
+        <h5 class="fw-bold mb-2">Reject This Payment?</h5>
+        <p class="text-muted">This action cannot be undone.</p>
     </div>
-    <div class="modal-footer">
-        <button class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-        <button class="btn btn-danger" id="confirmReject">
-            Reject
+    <div class="modal-footer bg-light">
+        <button class="btn btn-secondary px-4" data-dismiss="modal">Cancel</button>
+        <button class="btn btn-danger px-4" id="confirmReject">
+            <i class="fa fa-times me-2"></i>Reject
         </button>
     </div>
 </div>
@@ -88,14 +130,16 @@
 </div>
 
 <!-- SUCCESS MODAL -->
-<div class="modal" id="successModal" tabindex="-1">
+<div class="modal premium-modal" id="successModal" tabindex="-1">
 <div class="modal-dialog modal-dialog-centered">
 <div class="modal-content border-0 shadow">
     <div class="modal-body text-center py-5">
-        <i class="fa fa-circle-check fa-4x text-success mb-3"></i>
-        <h5 class="fw-bold">Payment Approved</h5>
+        <div style="width:80px; height:80px; border-radius:50%; background:linear-gradient(135deg, #10b981 0%, #059669 100%); margin:0 auto 20px; display:flex; align-items:center; justify-content:center;">
+            <i class="fa fa-check text-white" style="font-size:40px;"></i>
+        </div>
+        <h5 class="fw-bold">Payment Approved!</h5>
         <p class="text-muted mb-4">
-            The payment has been approved successfully.
+            The subscription has been activated successfully.
         </p>
         <button class="btn btn-success px-4" data-bs-dismiss="modal">
             OK
@@ -104,12 +148,15 @@
 </div>
 </div>
 </div>
+
 <!-- REJECT SUCCESS MODAL -->
-<div class="modal" id="rejectSuccessModal" tabindex="-1">
+<div class="modal premium-modal" id="rejectSuccessModal" tabindex="-1">
 <div class="modal-dialog modal-dialog-centered">
 <div class="modal-content border-0 shadow">
     <div class="modal-body text-center py-5">
-        <i class="fa fa-circle-xmark fa-4x text-danger mb-3"></i>
+        <div style="width:80px; height:80px; border-radius:50%; background:linear-gradient(135deg, #ef4444 0%, #dc2626 100%); margin:0 auto 20px; display:flex; align-items:center; justify-content:center;">
+            <i class="fa fa-times text-white" style="font-size:40px;"></i>
+        </div>
         <h5 class="fw-bold">Payment Rejected</h5>
         <p class="text-muted">The payment has been rejected successfully.</p>
         <button class="btn btn-danger px-4" data-bs-dismiss="modal">

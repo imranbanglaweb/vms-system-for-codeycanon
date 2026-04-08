@@ -141,5 +141,23 @@ class SubscriptionController extends Controller
             'payment_methods' => $this->stripeService->getPaymentMethods($company),
         ]);
     }
+
+    /**
+     * Show user subscription page
+     */
+    public function mySubscription()
+    {
+        $company = Company::where('id', Auth::user()->company_id)->firstOrFail();
+
+        $subscription = $company->subscription()->with('plan')->first();
+
+        $recentPayments = \App\Models\Payment::where('company_id', $company->id)
+            ->with('plan')
+            ->orderBy('created_at', 'desc')
+            ->limit(5)
+            ->get();
+
+        return view('admin.dashboard.plans.subscriptions.my-subscription', compact('subscription', 'recentPayments', 'company'));
+    }
 }
 

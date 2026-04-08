@@ -1332,6 +1332,15 @@ class MenuSeeder extends Seeder
 
             // ===== Settings Children (Order: 1-3) =====
             [
+                'menu_name' => 'My Subscription',
+                'menu_slug' => 'my-subscription',
+                'menu_icon' => 'fa-credit-card',
+                'menu_url' => 'my.subscription',
+                'menu_permission' => 'my-subscription',
+                'menu_order' => 0,
+                'parent_name' => 'Settings',
+            ],
+            [
                 'menu_name' => 'General Settings',
                 'menu_slug' => 'general-settings',
                 'menu_icon' => 'fa-sliders-h',

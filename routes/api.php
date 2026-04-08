@@ -115,3 +115,43 @@ Route::middleware('web')->group(function () {
         return response()->json(['success' => true]);
     });
 });
+
+// ============================================================================
+// DRIVER MOBILE APP API ROUTES
+// ============================================================================
+
+Route::prefix('driver')->middleware('auth:api')->group(function () {
+    // Dashboard
+    Route::get('/dashboard', [App\Http\Controllers\DriverController::class, 'driverDashboard']);
+    
+    // Trips
+    Route::get('/trips', [App\Http\Controllers\DriverController::class, 'driverTrips']);
+    Route::get('/trips/{id}', [App\Http\Controllers\DriverController::class, 'driverTripStatus']);
+    Route::post('/trips/{id}/start', [App\Http\Controllers\DriverController::class, 'startTrip']);
+    Route::post('/trips/{id}/finish', [App\Http\Controllers\DriverController::class, 'finishTrip']);
+    Route::post('/trips/{id}/end', [App\Http\Controllers\DriverController::class, 'endTrip']);
+    
+    // Schedule
+    Route::get('/schedule', [App\Http\Controllers\DriverController::class, 'driverSchedule']);
+    
+    // Fuel Log
+    Route::get('/fuel-log', [App\Http\Controllers\DriverController::class, 'driverFuelLog']);
+    Route::post('/fuel-log', [App\Http\Controllers\DriverController::class, 'storeFuelLog']);
+    Route::get('/fuel-log/vehicle-data', [App\Http\Controllers\DriverController::class, 'getVehicleFuelData']);
+    
+    // Vehicle
+    Route::get('/vehicle', [App\Http\Controllers\DriverController::class, 'driverVehicle']);
+    
+    // Availability
+    Route::get('/availability', [App\Http\Controllers\DriverController::class, 'driverAvailability']);
+    Route::post('/availability', [App\Http\Controllers\DriverController::class, 'updateAvailability']);
+    
+    // Profile
+    Route::get('/profile', [App\Http\Controllers\DriverController::class, 'driverDashboard']);
+});
+
+// ============================================================================
+// AUTHENTICATION ROUTES FOR MOBILE APP
+// ============================================================================
+
+Route::post('/login', [App\Http\Controllers\Auth\LoginController::class, 'apiLogin']);

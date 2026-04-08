@@ -46,13 +46,13 @@ class MenuService
             ->orderBy('menu_order', 'ASC')
             ->get();
         
-        $filtered = $menus->map(function ($menu) use ($user, $isSuperAdmin, $isAdmin, $isManager, $isDriver, $isEmployee) {
+        $filtered = $menus->map(function ($menu) use ($user, $isSuperAdmin, $isAdmin, $isManager, $isTransport, $isDriver, $isEmployee) {
 
             // Load children
             $children = Menu::where('menu_parent', $menu->id)
                 ->orderBy('menu_order')
                 ->get()
-                ->filter(function ($child) use ($user, $isSuperAdmin, $isAdmin, $isManager, $isDriver, $isEmployee) {
+                ->filter(function ($child) use ($user, $isSuperAdmin, $isAdmin, $isManager, $isTransport, $isDriver, $isEmployee) {
                     // Super Admin and Admin see everything, others need permission
                     // Exclude employee-specific menus to avoid duplicates
                     if ($isSuperAdmin || $isAdmin) {
@@ -232,7 +232,59 @@ class MenuService
                         // Show menus without specific permission requirements
                         return !$child->menu_permission;
                     }
-                    
+
+                    // For Transport role - show transport-specific menus
+                    if ($isTransport) {
+                        $transportAllowedChildMenus = [
+                            'transport-approval-view',
+                            'transport-approval-assign',
+                            'transport-approval-approve',
+                            'transport-approval-reject',
+                            'trip-manage',
+                            'trip-sheet-view',
+                            'trip-sheet-own',
+                            'trip-create',
+                            'trip-start',
+                            'trip-finish',
+                            'trip-end',
+                            'trip-export',
+                            'driver-manage',
+                            'driver-view',
+                            'driver-create',
+                            'driver-edit',
+                            'driver-schedule-manage',
+                            'driver-schedule-view',
+                            'driver-schedule-assign',
+                            'driver-availability-manage',
+                            'driver-availability-view',
+                            'driver-availability-update',
+                            'vehicle-manage',
+                            'vehicle-view',
+                            'vehicle-create',
+                            'vehicle-edit',
+                            'maintenance-manage',
+                            'maintenance-view',
+                            'maintenance-create',
+                            'maintenance-edit',
+                            'report-trip-fuel',
+                            'report-vehicle-utilization',
+                            'settings-manage',
+                            'settings-notification',
+                            'settings-language',
+                            'profile-view',
+                            'profile-edit',
+                            'notification-view',
+                            'my-subscription',
+                        ];
+
+                        if ($child->menu_permission && in_array($child->menu_permission, $transportAllowedChildMenus)) {
+                            return self::userHasPermission($user, $child->menu_permission);
+                        }
+
+                        // Show menus without specific permission requirements
+                        return !$child->menu_permission;
+                    }
+
                     return !$child->menu_permission || (self::userHasPermission($user, $child->menu_permission));
                 })
                 ->values();
@@ -314,6 +366,25 @@ class MenuService
                 
                 // For drivers: show if allowed parent OR (has visible children AND not excluded)
                 $menu->visible = $isAllowedParent || ($hasVisibleChildren && !$isExcludedParent);
+            } elseif ($isTransport) {
+                // For Transport role - show transport-specific parent menus
+                $transportAllowedParentMenus = [
+                    'menu.dashboard',
+                    'approvals',
+                    'trip-sheets',
+                    'vehicles',
+                    'driver-management',
+                    'maintenance',
+                    'reports',
+                    'menu.settings',
+                    'my-profile',
+                ];
+
+                $hasVisibleChildren = $children->isNotEmpty();
+                $isAllowedParent = $menu->menu_slug && in_array($menu->menu_slug, $transportAllowedParentMenus);
+                $hasPermission = !$menu->menu_permission || (Permission::where('name', $menu->menu_permission)->exists() && $user->can($menu->menu_permission));
+
+                $menu->visible = $isAllowedParent || ($hasVisibleChildren && $hasPermission);
             } else {
                 // For Employee role - show allowed parent menus
                 if ($isEmployee) {
@@ -334,6 +405,24 @@ class MenuService
                     $isAllowedParent = $menu->menu_slug && in_array($menu->menu_slug, $employeeAllowedParentMenus);
                     
                     $menu->visible = ($isAllowedParent && $children->isNotEmpty()) || $hasPermission;
+                } elseif ($isTransport) {
+                    // For Transport role - show allowed parent menus
+                    $transportAllowedParentMenus = [
+                        'menu-dashboard',
+                        'approvals',
+                        'trip-sheets',
+                        'vehicles',
+                        'driver-management',
+                        'maintenance',
+                        'reports',
+                        'settings',
+                        'my-profile',
+                    ];
+                    
+                    $hasPermission = !$menu->menu_permission || (Permission::where('name', $menu->menu_permission)->exists() && $user->can($menu->menu_permission));
+                    $isAllowedParent = $menu->menu_slug && in_array($menu->menu_slug, $transportAllowedParentMenus);
+                    
+                    $menu->visible = $isAllowedParent || ($children->isNotEmpty() && $hasPermission);
                 } else {
                     $hasPermission = !$menu->menu_permission || (Permission::where('name', $menu->menu_permission)->exists() && $user->can($menu->menu_permission));
                     $menu->visible = $children->isNotEmpty() || $hasPermission;

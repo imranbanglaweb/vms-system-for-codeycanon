@@ -313,12 +313,18 @@
             <button class="btn btn-light tab-btn admin_menu active" data-target=".admin_settings">
                 <i class="fa fa-user"></i>  Admin Settings
             </button>
+            @auth
+            @if(auth()->user()->hasPermissionTo('settings-language'))
             <button class="btn btn-light tab-btn language_menu" data-target=".language_settings">
                 <i class="fa fa-language me-1"></i> Language Settings
             </button>
+            @endif
+            @if(auth()->user()->hasPermissionTo('email-setting'))
             <button class="btn btn-light tab-btn email_menu" data-target=".email_settings">
                 <i class="fa fa-envelope me-1"></i> Email Settings
             </button>
+            @endif
+            @endauth
         </div>
 
         <hr>

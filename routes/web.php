@@ -493,6 +493,7 @@ Route::get('/subscribe/{slug}', [SubscriptionController::class, 'select'])->name
 Route::middleware(['auth'])->group(function () {
     Route::post('/subscribe', [SubscriptionController::class, 'store'])->name('subscription.store');
     Route::get('/subscription-expired', [SubscriptionController::class, 'expired'])->name('subscription.expired');
+    Route::get('/my-subscription', [SubscriptionController::class, 'mySubscription'])->name('my.subscription');
 });
 
 // Subscription check for features

@@ -674,6 +674,8 @@ if ($settings && $settings->site_logo) {
                 </button>
             </form>
 
+</script>
+
             <!-- Demo Accounts -->
             <div class="demo-accounts mt-4">
                 <p class="text-muted mb-2 text-center" style="font-size: 12px;">Demo Accounts - Click to Login</p>
@@ -701,7 +703,7 @@ if ($settings && $settings->site_logo) {
                 <form method="POST" action="{{ route('demo.login') }}">
                     @csrf
                     <input type="hidden" name="email" value="driver@garibondhu360.com">
-                    <button type="submit" class="btn-demo btn-driver">
+                    <button type="submit" class="btn-demo btn-driver" id="driver-login-btn">
                         <i class="fas fa-id-card mr-2"></i> Driver
                     </button>
                 </form>

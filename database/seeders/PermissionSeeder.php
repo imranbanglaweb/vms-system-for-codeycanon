@@ -332,6 +332,7 @@ class PermissionSeeder extends Seeder
             'transport-approval-view',
             'transport-approval-assign',
             'transport-approval-approve',
+            'transport-approval-reject',
             'trip-manage',
             'trip-sheet-view',
             'trip-create',
@@ -353,6 +354,8 @@ class PermissionSeeder extends Seeder
             'maintenance-create',
             'report-trip-fuel',
             'report-vehicle-utilization',
+            'settings-manage',
+            'settings-notification',
         ]);
 
         // Employee permissions

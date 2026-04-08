@@ -11,6 +11,12 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Config;
 class SettingController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('permission:settings-manage')->only(['index', 'store']);
+        $this->middleware('permission:settings-notification')->only(['notification']);
+    }
+
     public function index()
     {
            // $menus = Menu::orderBy('menu_oder','ASC')->paginate(100);

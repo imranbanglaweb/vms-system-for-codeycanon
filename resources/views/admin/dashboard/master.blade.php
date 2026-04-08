@@ -852,7 +852,7 @@
                             </a>
                             @endif
                             @if(auth()->user()->hasRole('Super Admin') || auth()->user()->hasRole('Admin') || auth()->user()->hasRole('Transport'))
-                            <a href="{{ route('admin.plans.index') }}" class="dropdown-item">
+                            <a href="{{ route('pricing') }}" class="dropdown-item">
                                 <i class="fa fa-credit-card"></i> Subscription Plan
                             </a>
                             @endif
