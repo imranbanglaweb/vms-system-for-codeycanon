@@ -3,9 +3,23 @@
 // routes/api.php
 use App\Http\Controllers\DepartmentHeadController;
 use App\Http\Controllers\GpsTrackingController;
+use App\Http\Controllers\Api\PublicApiController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Request;
 use NotificationChannels\WebPush\PushSubscription;
+
+// ============================================================================
+// PUBLIC API ROUTES (For External Subscription System)
+// ============================================================================
+
+Route::middleware('api')->group(function () {
+    Route::post('/register', [PublicApiController::class, 'register']);
+    Route::post('/login', [PublicApiController::class, 'login']);
+    Route::post('/subscribe', [PublicApiController::class, 'subscribe']);
+    Route::post('/submit-payment', [PublicApiController::class, 'submitPayment']);
+    Route::get('/packages', [PublicApiController::class, 'packages']);
+    Route::get('/packages/{id}', [PublicApiController::class, 'packageById']);
+});
 
 // ============================================================================
 // GPS TRACKING API ROUTES (For Mobile App)

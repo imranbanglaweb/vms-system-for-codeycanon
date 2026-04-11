@@ -1329,6 +1329,33 @@ class MenuSeeder extends Seeder
                 'menu_order' => 5,
                 'parent_name' => 'Public Pages',
             ],
+            [
+                'menu_name' => 'Registered Users',
+                'menu_slug' => 'registered-users',
+                'menu_icon' => 'fa-user-plus',
+                'menu_url' => 'admin.api-payments.users',
+                'menu_permission' => 'subscription-plan-manage',
+                'menu_order' => 6,
+                'parent_name' => 'Public Pages',
+            ],
+            [
+                'menu_name' => 'API Pending Payments',
+                'menu_slug' => 'api-pending-payments',
+                'menu_icon' => 'fa-clock',
+                'menu_url' => 'admin.api-payments.pending',
+                'menu_permission' => 'subscription-plan-manage',
+                'menu_order' => 7,
+                'parent_name' => 'Public Pages',
+            ],
+            [
+                'menu_name' => 'API Paid Payments',
+                'menu_slug' => 'api-paid-payments',
+                'menu_icon' => 'fa-check',
+                'menu_url' => 'admin.api-payments.paid',
+                'menu_permission' => 'subscription-plan-manage',
+                'menu_order' => 8,
+                'parent_name' => 'Public Pages',
+            ],
 
             // ===== Settings Children (Order: 1-3) =====
             [

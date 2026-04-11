@@ -21,8 +21,10 @@ class Payment extends Model
         'amount',
         'currency',
         'transaction_id',
+        'sender_number',
         'note',
         'status',
+        'paid_at',
         'created_by',
     ];
 

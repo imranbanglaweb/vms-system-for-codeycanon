@@ -596,12 +596,19 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
 Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () {
     // Payment Management
     Route::get('payments/pending', [AdminPaymentController::class, 'pending'])->name('payments.pending');
-Route::get('payments/paid', [AdminPaymentController::class, 'paid'])->name('payments.paid');
+    Route::get('payments/paid', [AdminPaymentController::class, 'paid'])->name('payments.paid');
     Route::get('admin/payments/paid/data', [AdminPaymentController::class, 'paidData'])->name('payments.paid.data');
     Route::post('/payments/approve/{payment}', [AdminPaymentController::class, 'approve'])->name('payments.approve');
     Route::post('payments/reject/{payment}', [AdminPaymentController::class, 'reject'])->name('payments.reject');
     Route::get('payments/expiring', [AdminPaymentController::class, 'expiring'])->name('payments.expiring');
     Route::get('revenue/plans', [AdminPaymentController::class, 'byPlan'])->name('revenue.plans');
+    
+    // API Payment Management (for external subscription system)
+    Route::get('api-payments/users', [App\Http\Controllers\Admin\ApiPaymentController::class, 'registeredUsers'])->name('api-payments.users');
+    Route::get('api-payments/pending', [App\Http\Controllers\Admin\ApiPaymentController::class, 'pendingPayments'])->name('api-payments.pending');
+    Route::get('api-payments/paid', [App\Http\Controllers\Admin\ApiPaymentController::class, 'paidPayments'])->name('api-payments.paid');
+    Route::post('api-payments/approve/{payment}', [App\Http\Controllers\Admin\ApiPaymentController::class, 'approvePayment'])->name('api-payments.approve');
+    Route::post('api-payments/reject/{payment}', [App\Http\Controllers\Admin\ApiPaymentController::class, 'rejectPayment'])->name('api-payments.reject');
 });
 
 Route::middleware(['auth', 'role:Admin'])->prefix('admin')->group(function () {
