@@ -611,7 +611,7 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     Route::post('api-payments/reject/{payment}', [App\Http\Controllers\Admin\ApiPaymentController::class, 'rejectPayment'])->name('api-payments.reject');
 
     // API Data Management
-    Route::get('api-data', [App\Http\Controllers\Admin\ApiDataController::class, 'index'])->name('admin.api-data.index');
+    Route::get('api-data', [App\Http\Controllers\Admin\ApiDataController::class, 'index'])->name('api-data.index');
     Route::get('api-data/users', [App\Http\Controllers\Admin\ApiDataController::class, 'getUsers'])->name('admin.api-data.users');
     Route::get('api-data/pending-payments', [App\Http\Controllers\Admin\ApiDataController::class, 'getPendingPayments'])->name('admin.api-data.pending');
 });
