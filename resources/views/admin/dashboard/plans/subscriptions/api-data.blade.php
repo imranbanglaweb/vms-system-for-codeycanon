@@ -3,7 +3,7 @@
 @php
 $apiBaseUrl = 'http://localhost/garibondhu360/backend/public/api';
 $apiToken = '2|dSn5j6TDZlDsqyovygCwsliz5OcrLazozRBjMeJz94106c4f';
-@endpush
+@endphp
 
 @push('styles')
 <link rel="stylesheet" href="{{ asset('public/admin_resource/plugins/datatables-bs4/css/dataTables.bootstrap4.min.css') }}">
@@ -113,15 +113,15 @@ $apiToken = '2|dSn5j6TDZlDsqyovygCwsliz5OcrLazozRBjMeJz94106c4f';
                     <div class="col-md-6 mb-4">
                         <div class="card border-0 shadow-sm">
                             <div class="card-header bg-primary text-white">
-                                <h5 class="mb-0"><i class="fa-solid fa-users"></i> GET /api-data/users</h5>
+                                <h5 class="mb-0"><i class="fa-solid fa-users"></i> GET /users</h5>
                             </div>
                             <div class="card-body">
-                                <p>Fetch all registered users from the system.</p>
+                                <p>Fetch all registered users from the external API.</p>
                                 <div class="code-block">
                                     <strong>Using Fetch:</strong><br>
-                                    <pre style="margin:0;background:#1e1e1e;color:#d4d4d4;padding:10px;border-radius:4px;font-family:monospace;font-size:12px;">const response = await fetch('{{ url("/api-data") }}', {
+                                    <pre style="margin:0;background:#1e1e1e;color:#d4d4d4;padding:10px;border-radius:4px;font-family:monospace;font-size:12px;">const response = await fetch('{{ $apiBaseUrl }}/users', {
     headers: {
-        'Authorization': 'Bearer YOUR_API_TOKEN',
+        'Authorization': 'Bearer {{ $apiToken }}',
         'Content-Type': 'application/json'
     }
 });
@@ -130,9 +130,10 @@ const data = await response.json();</pre>
                                 <br>
                                 <div class="code-block">
                                     <strong>Using Axios:</strong><br>
-                                    <pre style="margin:0;background:#1e1e1e;color:#d4d4d4;padding:10px;border-radius:4px;font-family:monospace;font-size:12px;">const { data } = await axios.get('{{ url("/api-data") }}', {
-    params: { type: 'users' },
-    headers: { Authorization: 'Bearer TOKEN' }
+                                    <pre style="margin:0;background:#1e1e1e;color:#d4d4d4;padding:10px;border-radius:4px;font-family:monospace;font-size:12px;">const { data } = await axios.get('{{ $apiBaseUrl }}/users', {
+    headers: { 
+        'Authorization': 'Bearer {{ $apiToken }}' 
+    }
 });</pre>
                                 </div>
                             </div>
@@ -141,15 +142,15 @@ const data = await response.json();</pre>
                     <div class="col-md-6 mb-4">
                         <div class="card border-0 shadow-sm">
                             <div class="card-header bg-warning text-dark">
-                                <h5 class="mb-0"><i class="fa-solid fa-clock"></i> GET /api-data/pending-payments</h5>
+                                <h5 class="mb-0"><i class="fa-solid fa-clock"></i> GET /payments?status=pending</h5>
                             </div>
                             <div class="card-body">
-                                <p>Fetch all pending payments from the system.</p>
+                                <p>Fetch all pending payments from the external API.</p>
                                 <div class="code-block">
                                     <strong>Using Fetch:</strong><br>
-                                    <pre style="margin:0;background:#1e1e1e;color:#d4d4d4;padding:10px;border-radius:4px;font-family:monospace;font-size:12px;">const response = await fetch('{{ url("/api-data") }}', {
+                                    <pre style="margin:0;background:#1e1e1e;color:#d4d4d4;padding:10px;border-radius:4px;font-family:monospace;font-size:12px;">const response = await fetch('{{ $apiBaseUrl }}/payments?status=pending', {
     headers: {
-        'Authorization': 'Bearer YOUR_API_TOKEN'
+        'Authorization': 'Bearer {{ $apiToken }}'
     }
 });
 const data = await response.json();</pre>
@@ -157,8 +158,10 @@ const data = await response.json();</pre>
                                 <br>
                                 <div class="code-block">
                                     <strong>Using Axios:</strong><br>
-                                    <pre style="margin:0;background:#1e1e1e;color:#d4d4d4;padding:10px;border-radius:4px;font-family:monospace;font-size:12px;">const { data } = await axios.get('{{ url("/api-data") }}', {
-    params: { type: 'pending' }
+                                    <pre style="margin:0;background:#1e1e1e;color:#d4d4d4;padding:10px;border-radius:4px;font-family:monospace;font-size:12px;">const { data } = await axios.get('{{ $apiBaseUrl }}/payments?status=pending', {
+    headers: { 
+        'Authorization': 'Bearer {{ $apiToken }}' 
+    }
 });</pre>
                                 </div>
                             </div>
@@ -174,6 +177,9 @@ const data = await response.json();</pre>
 @push('scripts')
 <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 <script>
+const apiBaseUrl = 'http://localhost/garibondhu360/backend/public/api';
+const apiToken = '2|dSn5j6TDZlDsqyovygCwsliz5OcrLazozRBjMeJz94106c4f';
+
 let usersTable, pendingTable;
 
 $(function () {
@@ -210,9 +216,9 @@ $(function () {
 
 async function fetchUsers() {
     try {
-        const response = await fetch('{{ url("/api-data") }}', {
+        const response = await fetch(apiBaseUrl + '/users', {
             headers: {
-                'Authorization': 'Bearer YOUR_API_TOKEN',
+                'Authorization': 'Bearer ' + apiToken,
                 'Content-Type': 'application/json',
             },
         });
@@ -221,31 +227,30 @@ async function fetchUsers() {
         alert('Check console for user data');
     } catch (error) {
         console.error('Error:', error);
-        alert('Failed to fetch users');
+        alert('Failed to fetch users: ' + error.message);
     }
 }
 
 async function fetchUsersAxios() {
     try {
-        const response = await axios.get('{{ url("/api-data") }}', {
-            params: { type: 'users' },
+        const response = await axios.get(apiBaseUrl + '/users', {
             headers: {
-                'Authorization': 'Bearer YOUR_API_TOKEN'
+                'Authorization': 'Bearer ' + apiToken
             }
         });
         console.log('Users (Axios):', response.data);
         alert('Check console for user data');
     } catch (error) {
         console.error('Error:', error);
-        alert('Failed to fetch users');
+        alert('Failed to fetch users: ' + error.message);
     }
 }
 
 async function fetchPendingPayments() {
     try {
-        const response = await fetch('{{ url("/api-payments/pending") }}', {
+        const response = await fetch(apiBaseUrl + '/payments?status=pending', {
             headers: {
-                'Authorization': 'Bearer YOUR_API_TOKEN',
+                'Authorization': 'Bearer ' + apiToken,
             },
         });
         const data = await response.json();
@@ -253,7 +258,7 @@ async function fetchPendingPayments() {
         alert('Check console for pending payments data');
     } catch (error) {
         console.error('Error:', error);
-        alert('Failed to fetch pending payments');
+        alert('Failed to fetch pending payments: ' + error.message);
     }
 }
 </script>
