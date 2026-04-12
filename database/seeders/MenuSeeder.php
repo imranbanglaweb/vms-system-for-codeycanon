@@ -270,6 +270,7 @@ class MenuSeeder extends Seeder
             'system-configure',
             'webhook-manage',
             'api-key-manage',
+            'api-data-manage',
 
             // Maintenance Schedule
             'maintenance-schedule-manage',
@@ -1354,6 +1355,15 @@ class MenuSeeder extends Seeder
                 'menu_url' => 'admin.api-payments.paid',
                 'menu_permission' => 'subscription-plan-manage',
                 'menu_order' => 8,
+                'parent_name' => 'Public Pages',
+            ],
+            [
+                'menu_name' => 'API Data',
+                'menu_slug' => 'api-data',
+                'menu_icon' => 'fa-database',
+                'menu_url' => 'admin.api-data.index',
+                'menu_permission' => 'api-data-manage',
+                'menu_order' => 9,
                 'parent_name' => 'Public Pages',
             ],
 

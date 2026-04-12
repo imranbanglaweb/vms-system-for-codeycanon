@@ -609,6 +609,11 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     Route::get('api-payments/paid', [App\Http\Controllers\Admin\ApiPaymentController::class, 'paidPayments'])->name('api-payments.paid');
     Route::post('api-payments/approve/{payment}', [App\Http\Controllers\Admin\ApiPaymentController::class, 'approvePayment'])->name('api-payments.approve');
     Route::post('api-payments/reject/{payment}', [App\Http\Controllers\Admin\ApiPaymentController::class, 'rejectPayment'])->name('api-payments.reject');
+
+    // API Data Management
+    Route::get('api-data', [App\Http\Controllers\Admin\ApiDataController::class, 'index'])->name('admin.api-data.index');
+    Route::get('api-data/users', [App\Http\Controllers\Admin\ApiDataController::class, 'getUsers'])->name('admin.api-data.users');
+    Route::get('api-data/pending-payments', [App\Http\Controllers\Admin\ApiDataController::class, 'getPendingPayments'])->name('admin.api-data.pending');
 });
 
 Route::middleware(['auth', 'role:Admin'])->prefix('admin')->group(function () {
