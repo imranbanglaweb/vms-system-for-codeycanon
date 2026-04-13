@@ -5,7 +5,7 @@ $apiBaseUrl = 'http://localhost/garibondhu360/backend/public/api';
 $apiToken = '2|dSn5j6TDZlDsqyovygCwsliz5OcrLazozRBjMeJz94106c4f';
 @endphp
 
-@push('styles')
+
 <link rel="stylesheet" href="{{ asset('public/admin_resource/plugins/datatables-bs4/css/dataTables.bootstrap4.min.css') }}">
 <link rel="stylesheet" href="{{ asset('public/admin_resource/plugins/sweetalert2/sweetalert2.min.css') }}">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
@@ -42,7 +42,7 @@ $apiToken = '2|dSn5j6TDZlDsqyovygCwsliz5OcrLazozRBjMeJz94106c4f';
         padding: 4px 10px;
         border-radius: 5px;
         font-size: 13px;
-        color: #fff;
+        color: #8b6060;
     }
     .config-card .api-label {
         font-weight: 600;
@@ -134,6 +134,26 @@ $apiToken = '2|dSn5j6TDZlDsqyovygCwsliz5OcrLazozRBjMeJz94106c4f';
         background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
         color: white;
     }
+    #usersTable tbody tr:nth-child(even),
+    #pendingPaymentsTable tbody tr:nth-child(even) {
+        background-color: #f8f9fa;
+    }
+    #usersTable tbody tr:hover,
+    #pendingPaymentsTable tbody tr:hover {
+        background-color: #e9ecef !important;
+    }
+    #usersTable tbody td,
+    #pendingPaymentsTable tbody td {
+        border-bottom: 1px solid #dee2e6;
+        vertical-align: middle;
+    }
+    .dataTables_wrapper .dataTables_processing {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 20px;
+        border-radius: 10px;
+        font-weight: 600;
+    }
     .btn-gradient-warning {
         background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
         color: white;
@@ -158,7 +178,6 @@ $apiToken = '2|dSn5j6TDZlDsqyovygCwsliz5OcrLazozRBjMeJz94106c4f';
     .stat-card .stat-number { font-size: 28px; font-weight: 700; }
     .stat-card .stat-label { font-size: 14px; opacity: 0.9; }
 </style>
-@endpush
 
 @section('main_content')
 <br>
@@ -201,117 +220,62 @@ $apiToken = '2|dSn5j6TDZlDsqyovygCwsliz5OcrLazozRBjMeJz94106c4f';
             </div>
         </div>
 
-        <!-- Tabs -->
-        <ul class="nav nav-tabs premium-tabs" id="apiTab" role="tablist">
-            <li class="nav-item">
-                <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#users" type="button">
-                    <i class="fa-solid fa-users me-2"></i>Users
-                </button>
-            </li>
-            <li class="nav-item">
-                <button class="nav-link" data-bs-toggle="tab" data-bs-target="#pending" type="button">
-                    <i class="fa-solid fa-clock me-2"></i>Pending Payments
-                </button>
-            </li>
-            <li class="nav-item">
-                <button class="nav-link" data-bs-toggle="tab" data-bs-target="#endpoints" type="button">
-                    <i class="fa-solid fa-code me-2"></i>API Endpoints
-                </button>
-            </li>
-        </ul>
+       
 
-        <div class="tab-content">
-            <!-- Users Tab -->
-            <div class="tab-pane fade show active" id="users">
-                <div class="row mb-3">
-                    <div class="col-md-4">
-                        <div class="stat-card blue">
-                            <div class="stat-number" id="usersCount">0</div>
-                            <div class="stat-label">Total Users</div>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="stat-card green">
-                            <div class="stat-number" id="activeUsers">0</div>
-                            <div class="stat-label">Active Users</div>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="stat-card orange">
-                            <div class="stat-number" id="newUsers">0</div>
-                            <div class="stat-label">New This Month</div>
-                        </div>
-                    </div>
-                </div>
-                <div class="premium-card">
-                    <div class="card-body">
-                        <div class="mb-3 text-end">
-                            <button class="premium-btn btn-gradient-primary me-2" onclick="fetchUsers()">
-                                <i class="fa-solid fa-download me-1"></i> Fetch (Fetch API)
-                            </button>
-                            <button class="premium-btn btn-gradient-success" onclick="fetchUsersAxios()">
-                                <i class="fa-solid fa-download me-1"></i> Fetch (Axios)
-                            </button>
-                        </div>
-                        <table id="usersTable" class="table table-hover align-middle w-100">
-                            <thead>
-                                <tr>
-                                    <th>#</th>
-                                    <th>Name</th>
-                                    <th>Email</th>
-                                    <th>Phone</th>
-                                    <th>Company</th>
-                                    <th>Joined</th>
-                                    <th>Status</th>
-                                </tr>
-                            </thead>
-                        </table>
-                    </div>
+        <!-- Users Table Section -->
+        <div class="card mb-4" style="border-radius: 15px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); border: none;">
+            <div class="card-header" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 15px 20px; border-radius: 15px 15px 0 0;">
+                <h5 class="mb-0"><i class="fa-solid fa-users me-2"></i> Users List</h5>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table id="usersTable" class="table table-hover mb-0">
+                        <thead style="background: #f8f9fa;">
+                            <tr>
+                                <th class="py-3 px-4">#</th>
+                                <th class="py-3 px-4">Name</th>
+                                <th class="py-3 px-4">Email</th>
+                                <th class="py-3 px-4">Phone</th>
+                                <th class="py-3 px-4">Company</th>
+                                <th class="py-3 px-4">Joined</th>
+                                <th class="py-3 px-4">Status</th>
+                            </tr>
+                        </thead>
+                    </table>
                 </div>
             </div>
+        </div>
 
-            <!-- Pending Payments Tab -->
-            <div class="tab-pane fade" id="pending">
-                <div class="row mb-3">
-                    <div class="col-md-6">
-                        <div class="stat-card orange">
-                            <div class="stat-number" id="pendingCount">0</div>
-                            <div class="stat-label">Pending Payments</div>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="stat-card blue">
-                            <div class="stat-number" id="pendingAmount">$0</div>
-                            <div class="stat-label">Total Amount</div>
-                        </div>
-                    </div>
-                </div>
-                <div class="premium-card">
-                    <div class="card-body">
-                        <div class="mb-3 text-end">
-                            <button class="premium-btn btn-gradient-warning" onclick="fetchPendingPayments()">
-                                <i class="fa-solid fa-download me-1"></i> Fetch Pending Payments
-                            </button>
-                        </div>
-                        <table id="pendingPaymentsTable" class="table table-hover align-middle w-100">
-                            <thead>
-                                <tr>
-                                    <th>#</th>
-                                    <th>Company</th>
-                                    <th>Plan</th>
-                                    <th>Amount</th>
-                                    <th>Method</th>
-                                    <th>Transaction ID</th>
-                                    <th>Date</th>
-                                </tr>
-                            </thead>
-                        </table>
-                    </div>
+        <!-- Pending Payments Table Section -->
+        <div class="card mb-4" style="border-radius: 15px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); border: none;">
+            <div class="card-header" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; padding: 15px 20px; border-radius: 15px 15px 0 0;">
+                <h5 class="mb-0"><i class="fa-solid fa-clock me-2"></i> Pending Payments</h5>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table id="pendingPaymentsTable" class="table table-hover mb-0">
+                        <thead style="background: #f8f9fa;">
+                            <tr>
+                                <th class="py-3 px-4">#</th>
+                                <th class="py-3 px-4">Company</th>
+                                <th class="py-3 px-4">Plan</th>
+                                <th class="py-3 px-4">Amount</th>
+                                <th class="py-3 px-4">Method</th>
+                                <th class="py-3 px-4">Transaction ID</th>
+                                <th class="py-3 px-4">Date</th>
+                            </tr>
+                        </thead>
+                    </table>
                 </div>
             </div>
+        </div>
 
-            <!-- API Endpoints Tab -->
-            <div class="tab-pane fade" id="endpoints">
+        <!-- API Endpoints Section -->
+        <div class="tab-pane fade" id="endpoints">
+                <div class="premium-card mb-4" style="background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); border-radius: 15px; padding: 20px; color: white;">
+                    <h4 class="mb-1"><i class="fa-solid fa-code me-2"></i>API Endpoints</h4>
+                    <p class="mb-0 opacity-75">Available API endpoints and usage examples</p>
+                </div>
                 <div class="row">
                     <div class="col-md-6 mb-4">
                         <div class="premium-card">
@@ -340,7 +304,7 @@ $apiToken = '2|dSn5j6TDZlDsqyovygCwsliz5OcrLazozRBjMeJz94106c4f';
                     <div class="col-md-6 mb-4">
                         <div class="premium-card">
                             <div class="card-header warning">
-                                <i class="fa-solid fa-clock me-2"></i>GET /payments?status=pending
+                                <i class="fa-solid fa-clock me-2"></i>GET /all-payments
                             </div>
                             <div class="card-body">
                                 <p class="text-muted">Fetch all pending payments from the external API.</p>
@@ -365,9 +329,8 @@ $apiToken = '2|dSn5j6TDZlDsqyovygCwsliz5OcrLazozRBjMeJz94106c4f';
         </div>
     </div>
 </section>
-@endsection
 
-@push('scripts')
+
 <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 <script>
 const apiBaseUrl = 'http://localhost/garibondhu360/backend/public/api';
@@ -377,50 +340,50 @@ let usersTable, pendingTable;
 
 $(function () {
     usersTable = $('#usersTable').DataTable({
-        processing: true,
-        serverSide: true,
         ajax: {
             url: "{{ route('admin.api-data.index') }}",
             type: 'GET',
-            data: { type: 'users' }
+            data: { type: 'users' },
+            dataSrc: function(json) {
+                console.log('Users response:', json);
+                return json.data || [];
+            }
         },
         columns: [
             { data: 'DT_RowIndex', orderable: false, searchable: false },
             { data: 'name' },
             { data: 'email' },
-            { data: 'phone' },
+            { data: 'cell_phone' },
             { data: 'company' },
-            { data: 'joined_at' },
-            { data: 'status', orderable: false }
-        ],
-        drawCallback: function(settings) {
-            const info = this.api().page.info();
-            $('#usersCount').text(info.recordsTotal);
-            $('#activeUsers').text(info.recordsTotal);
-        }
+            { data: 'created_at' },
+            { data: 'status' }
+        ]
     });
 
     pendingTable = $('#pendingPaymentsTable').DataTable({
-        processing: true,
-        serverSide: true,
         ajax: {
             url: "{{ route('admin.api-data.index') }}",
             type: 'GET',
-            data: { type: 'pending' }
+            data: { type: 'pending' },
+            dataSrc: function(json) {
+                console.log('Pending response:', json);
+                return json.data || [];
+            }
         },
         columns: [
             { data: 'DT_RowIndex', orderable: false, searchable: false },
-            { data: 'company' },
-            { data: 'plan' },
+            { data: 'customer_name' },
+            { 
+                data: 'plan_name',
+                render: function(data, type, row) {
+                    return row['subscription.package.name'] || data || '-';
+                }
+            },
             { data: 'amount' },
-            { data: 'method', orderable: false },
+            { data: 'payment_method', orderable: false },
             { data: 'transaction_id' },
             { data: 'created_at' }
-        ],
-        drawCallback: function(settings) {
-            const info = this.api().page.info();
-            $('#pendingCount').text(info.recordsTotal);
-        }
+        ]
     });
 });
 
@@ -496,18 +459,22 @@ async function fetchUsersAxios() {
 
 async function fetchPendingPayments() {
     try {
-        const response = await fetch(apiBaseUrl + '/payments?status=pending', {
+        const response = await fetch(apiBaseUrl + '/all-payments', {
             headers: {
                 'Authorization': 'Bearer ' + apiToken,
+                'Content-Type': 'application/json',
             },
         });
         const result = await response.json();
         console.log('Pending Payments:', result);
         
-        if(result.data) {
-            $('#pendingCount').text(result.data.length);
-            const total = result.data.reduce((sum, p) => sum + (parseFloat(p.amount) || 0), 0);
+        const payments = result.data?.data || [];
+        if(payments.length > 0) {
+            $('#pendingCount').text(payments.length);
+            const total = payments.reduce((sum, p) => sum + (parseFloat(p.amount) || 0), 0);
             $('#pendingAmount').text('$' + total.toFixed(2));
+            
+            populatePendingPaymentsTable(payments);
         }
         
         Swal.fire({
@@ -526,5 +493,20 @@ async function fetchPendingPayments() {
         });
     }
 }
+
+function populatePendingPaymentsTable(payments) {
+    if(pendingTable) {
+        const tableData = payments.map(p => [
+            p.id,
+            p.customer_name || '-',
+            p.subscription?.package?.name || '-',
+            '$' + parseFloat(p.amount).toFixed(2),
+            p.payment_method || '-',
+            p.transaction_id || '-',
+            new Date(p.created_at).toLocaleDateString()
+        ]);
+        pendingTable.clear().rows.add(tableData).draw();
+    }
+}
 </script>
-@endpush
+@endsection

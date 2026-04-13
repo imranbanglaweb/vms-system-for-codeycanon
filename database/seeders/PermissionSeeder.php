@@ -252,6 +252,7 @@ class PermissionSeeder extends Seeder
             'settings-manage',
             'settings-language',
             'settings-notification',
+            'email-setting',
 
             // ================= TRANSLATION =================
             'translation-manage',

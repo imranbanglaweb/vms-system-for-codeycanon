@@ -214,6 +214,7 @@ class RolePermissionSeeder extends Seeder
             'settings-notification',
             'settings-manage',
             'settings-language',
+            'email-setting',
             'notification-manage',
             'notification-view',
 

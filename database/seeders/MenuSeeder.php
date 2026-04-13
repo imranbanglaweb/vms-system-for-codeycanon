@@ -32,6 +32,7 @@ class MenuSeeder extends Seeder
             'settings-manage',
             'settings-notification',
             'settings-language',
+            'email-setting',
 
             // Roles & Permissions
             'role-manage',

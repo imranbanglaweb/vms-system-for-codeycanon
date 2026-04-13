@@ -13,14 +13,10 @@ use Carbon\Carbon;
 class ApiDataController extends Controller
 {
     protected $apiBaseUrl = 'http://localhost/garibondhu360/backend/public/api';
-    protected $apiToken = '2|dSn5j6TDZlDsqyovygCwsliz5OcrLazozRBjMeJz94106c4f';
+    protected $apiToken = '2|nRwYaSJDJQom1TOLQksZQSS8S2bRu76Hde4YbRhF248df895';
 
     public function index(Request $request)
     {
-        if ($request->has('type') && $request->type === 'users') {
-            return $this->getUsers($request);
-        }
-        
         if ($request->has('type') && $request->type === 'pending') {
             return $this->getPendingPaymentsDataTable($request);
         }
@@ -43,21 +39,24 @@ class ApiDataController extends Controller
             if ($response->successful()) {
                 $users = $response->json('data') ?? [];
                 
-                return DataTables::of(collect($users))
-                    ->addIndexColumn()
-                    ->addColumn('name', fn($u) => $u['name'] ?? 'N/A')
-                    ->addColumn('email', fn($u) => $u['email'] ?? 'N/A')
-                    ->addColumn('phone', fn($u) => $u['cell_phone'] ?? $u['phone'] ?? 'N/A')
-                    ->addColumn('company', fn($u) => $u['company']['name'] ?? $u['company_name'] ?? 'N/A')
-                    ->addColumn('joined_at', fn($u) => isset($u['created_at']) ? Carbon::parse($u['created_at'])->format('d M Y') : 'N/A')
-                    ->addColumn('status', fn($u) => '<span class="badge bg-success">Active</span>')
-                    ->rawColumns(['status'])
-                    ->make(true);
+                $indexedUsers = array_values(array_map(function($u, $index) {
+                    return [
+                        'DT_RowIndex' => $index + 1,
+                        'name' => $u['name'] ?? 'N/A',
+                        'email' => $u['email'] ?? 'N/A',
+                        'cell_phone' => $u['cell_phone'] ?? $u['phone'] ?? 'N/A',
+                        'company' => 'N/A',
+                        'created_at' => isset($u['created_at']) ? Carbon::parse($u['created_at'])->format('d M Y') : 'N/A',
+                        'status' => '<span class="badge bg-success">Active</span>'
+                    ];
+                }, $users, array_keys($users)));
+                
+                return response()->json(['data' => $indexedUsers]);
             }
             
-            return DataTables::of(collect([]))->make(true);
+            return response()->json(['data' => [], 'error' => 'API error: ' . $response->status()]);
         } catch (\Exception $e) {
-            return DataTables::of(collect([]))->make(true);
+            return response()->json(['data' => [], 'error' => $e->getMessage()]);
         }
     }
 
@@ -67,28 +66,34 @@ class ApiDataController extends Controller
             $response = Http::withHeaders([
                 'Authorization' => 'Bearer ' . $this->apiToken,
                 'Content-Type' => 'application/json',
-            ])->get($this->apiBaseUrl . '/payments', [
-                'status' => 'pending'
-            ]);
+            ])->get($this->apiBaseUrl . '/all-payments');
 
-            if ($response->successful()) {
-                $payments = $response->json('data') ?? [];
-                
-                return DataTables::of(collect($payments))
-                    ->addIndexColumn()
-                    ->addColumn('company', fn($p) => $p['company']['name'] ?? $p['company_name'] ?? 'N/A')
-                    ->addColumn('plan', fn($p) => $p['plan']['name'] ?? $p['plan_name'] ?? 'N/A')
-                    ->addColumn('amount', fn($p) => number_format($p['amount'] ?? 0, 2))
-                    ->addColumn('method', fn($p) => '<span class="badge bg-info text-dark">' . strtoupper($p['method'] ?? 'N/A') . '</span>')
-                    ->addColumn('transaction_id', fn($p) => $p['transaction_id'] ?? 'N/A')
-                    ->addColumn('created_at', fn($p) => isset($p['created_at']) ? Carbon::parse($p['created_at'])->format('d M Y H:i') : 'N/A')
-                    ->rawColumns(['method'])
-                    ->make(true);
+            if ($response->status() === 404) {
+                return response()->json(['data' => []]);
             }
             
-            return DataTables::of(collect([]))->make(true);
+            if ($response->successful()) {
+                $responseData = $response->json('data');
+                $payments = $responseData['data'] ?? $responseData ?? [];
+                
+                $indexedPayments = array_values(array_map(function($p, $index) {
+                    return [
+                        'DT_RowIndex' => $index + 1,
+                        'customer_name' => $p['customer_name'] ?? 'N/A',
+                        'plan_name' => $p['subscription']['package']['name'] ?? $p['subscription']['package']['name_bn'] ?? 'N/A',
+                        'amount' => number_format(floatval($p['amount'] ?? 0), 2),
+                        'payment_method' => '<span class="badge bg-info text-dark">' . strtoupper($p['payment_method'] ?? 'N/A') . '</span>',
+                        'transaction_id' => $p['transaction_id'] ?? 'N/A',
+                        'created_at' => isset($p['created_at']) ? Carbon::parse($p['created_at'])->format('d M Y H:i') : 'N/A'
+                    ];
+                }, $payments, array_keys($payments)));
+                
+                return response()->json(['data' => $indexedPayments]);
+            }
+            
+            return response()->json(['data' => []]);
         } catch (\Exception $e) {
-            return DataTables::of(collect([]))->make(true);
+            return response()->json(['data' => [], 'error' => $e->getMessage()]);
         }
     }
 
@@ -109,12 +114,12 @@ class ApiDataController extends Controller
 
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to fetch users from API'
+                'message' => 'Failed to fetch users from API. Status: ' . $response->status() . ' - ' . $response->body()
             ], 400);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => $e->getMessage()
+                'message' => 'Connection failed: ' . $e->getMessage()
             ], 500);
         }
     }
