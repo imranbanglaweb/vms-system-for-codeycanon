@@ -58,7 +58,7 @@ class _LoginPageState extends State<LoginPage> {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   const SizedBox(height: 60),
-                  Icon(
+                  const Icon(
                     Icons.directions_car,
                     size: 80,
                     color: AppTheme.primaryColor,

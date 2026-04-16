@@ -1,6 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../data/repositories/driver_repository.dart';
-import '../../../data/models/dashboard_model.dart';
 import 'dashboard_event.dart';
 
 class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {

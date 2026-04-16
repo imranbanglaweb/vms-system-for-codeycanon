@@ -24,7 +24,6 @@ class AvailabilityUpdateRequested extends ProfileEvent {
   List<Object?> get props => [status, notes, availableFrom, availableUntil];
 }
 
-
 abstract class ProfileState extends Equatable {
   @override
   List<Object?> get props => [];

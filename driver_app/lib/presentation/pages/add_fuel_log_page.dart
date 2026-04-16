@@ -123,7 +123,7 @@ class _AddFuelLogPageState extends State<AddFuelLogPage> {
                     }
                     
                     return DropdownButtonFormField<Vehicle>(
-                      value: _selectedVehicle,
+                      initialValue: _selectedVehicle,
                       decoration: const InputDecoration(
                         labelText: 'Vehicle',
                         prefixIcon: Icon(Icons.directions_car),
@@ -161,7 +161,7 @@ class _AddFuelLogPageState extends State<AddFuelLogPage> {
                 const SizedBox(height: 16),
                 
                 DropdownButtonFormField<String>(
-                  value: _selectedFuelType,
+                  initialValue: _selectedFuelType,
                   decoration: const InputDecoration(
                     labelText: 'Fuel Type',
                     prefixIcon: Icon(Icons.local_gas_station),
@@ -245,11 +245,11 @@ class _AddFuelLogPageState extends State<AddFuelLogPage> {
                             borderRadius: BorderRadius.circular(8),
                             child: Image.file(_receiptImage!, fit: BoxFit.cover),
                           )
-                        : Column(
+                        : const Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Icon(Icons.camera_alt, size: 40, color: AppTheme.textSecondary),
-                              const SizedBox(height: 8),
+                              SizedBox(height: 8),
                               Text('Tap to add receipt photo', style: TextStyle(color: AppTheme.textSecondary)),
                             ],
                           ),

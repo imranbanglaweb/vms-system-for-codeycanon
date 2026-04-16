@@ -144,45 +144,39 @@ class HomeController extends Controller
         ]);
         
         // Build base query based on role
-        $baseQuery = Requisition::query();
-        
-        if ($isManager && $user->department_id) {
-            // Managers see only their department's requisitions
-            $baseQuery->where('department_id', $user->department_id);
-        }
-        
-        // Role-based requisition visibility for lists
+        $baseQuery = Requisition::withoutGlobalScopes();
+
         if ($isEmployee) {
-            $requisitions = Requisition::where('created_by', $user->id)->latest()->get();
+            $requisitions = Requisition::withoutGlobalScopes()->where('created_by', $user->id)->latest()->get();
             // dd($requisitions);
         } elseif ($isTransport) {
             // Transport sees pending transport approval (department_status = Approved, transport_status = Pending)
-            $requisitions = Requisition::where('department_status', 'Approved')
+            $requisitions = Requisition::withoutGlobalScopes()->where('department_status', 'Approved')
                 ->where('transport_status', 'Pending')
                 ->latest()->get();
         } elseif ($isManager) {
             // Manager sees pending department approval
-            $requisitions = Requisition::where('department_status', 'Pending')
+            $requisitions = Requisition::withoutGlobalScopes()->where('department_status', 'Pending')
                 ->where('requested_by', $user->id)
                 ->latest()->get();
         } else {
             // Admin/Super Admin sees all
-            $requisitions = Requisition::latest()->get();
+            $requisitions = Requisition::withoutGlobalScopes()->latest()->get();
         }
 
         // Dashboard counters (role-based)
         if ($isAdmin) {
-            $transportPending = Requisition::where('transport_status', 'Pending')->count();
-            $transportApproved = Requisition::where('transport_status', 'Approved')->count();
-            $transportRejected = Requisition::where('transport_status', 'Rejected')->count();
+            $transportPending = Requisition::withoutGlobalScopes()->where('transport_status', 'Pending')->count();
+            $transportApproved = Requisition::withoutGlobalScopes()->where('transport_status', 'Approved')->count();
+            $transportRejected = Requisition::withoutGlobalScopes()->where('transport_status', 'Rejected')->count();
             $adminPending = 0;
             $adminApproved = 0;
             $adminRejected = 0;
         } elseif ($isTransport) {
-            $transportPending = Requisition::where('department_status', 'Approved')
+            $transportPending = Requisition::withoutGlobalScopes()->where('department_status', 'Approved')
                 ->where('transport_status', 'Pending')->count();
-            $transportApproved = Requisition::where('transport_status', 'Approved')->count();
-            $transportRejected = Requisition::where('transport_status', 'Rejected')->count();
+            $transportApproved = Requisition::withoutGlobalScopes()->where('transport_status', 'Approved')->count();
+            $transportRejected = Requisition::withoutGlobalScopes()->where('transport_status', 'Rejected')->count();
             $adminPending = 0;
             $adminApproved = 0;
             $adminRejected = 0;
@@ -203,7 +197,7 @@ class HomeController extends Controller
         }
 
         // Dashboard counters (overall with role-based filtering)
-        $statusQuery = Requisition::query();
+        $statusQuery = Requisition::withoutGlobalScopes();
         
         // For employees, always filter by requested_by
         // This ensures employees see their own data even if role is not assigned
@@ -230,7 +224,7 @@ class HomeController extends Controller
         // Debug: Check actual department_status values
         \Log::info('Department Status Check', [
             'total_records' => $totalQuery->count(),
-            'distinct_statuses' => Requisition::select('department_status')->distinct()->pluck('department_status')->toArray(),
+            'distinct_statuses' => Requisition::withoutGlobalScopes()->select('department_status')->distinct()->pluck('department_status')->toArray(),
             'isAdmin' => $isAdmin,
             'isEmployee' => $isEmployee,
             'isManager' => $isManager,
@@ -253,7 +247,7 @@ class HomeController extends Controller
         $cancelled = $statusQuery->where('status', 'Cancelled')->count();
 
         // Latest requisitions (role-based)
-        $latestQuery = Requisition::with(['employee', 'vehicleType']);
+        $latestQuery = Requisition::withoutGlobalScopes()->with(['employee', 'vehicleType']);
         if ($isEmployee) {
             $latestQuery->where('created_by', $user->id);
         } elseif (!$isAdmin && !$isManager && !$isTransport) {
@@ -274,7 +268,7 @@ class HomeController extends Controller
             $months->push($dt->format('Y-m'));
         }
 
-        $monthlyQuery = Requisition::select(
+        $monthlyQuery = Requisition::withoutGlobalScopes()->select(
                 DB::raw("DATE_FORMAT(travel_date, '%Y-%m') as ym"),
                 DB::raw('count(*) as total')
             )
@@ -298,7 +292,7 @@ class HomeController extends Controller
         }
 
         // Department-wise requests (pie) (chart 2) - role-based
-        $deptQuery = Requisition::select('departments.department_name as label', DB::raw('count(*) as value'))
+        $deptQuery = Requisition::withoutGlobalScopes()->select('departments.department_name as label', DB::raw('count(*) as value'))
             ->join('departments', 'requisitions.department_id', '=', 'departments.id');
         
         if ($isEmployee) {
@@ -325,7 +319,7 @@ class HomeController extends Controller
         ]);
 
         // Top active users (chart 4) - role-based
-        $topUsersQuery = Requisition::select('created_by', DB::raw('count(*) as total'))
+        $topUsersQuery = Requisition::withoutGlobalScopes()->select('created_by', DB::raw('count(*) as total'))
             ->groupBy('created_by')
             ->orderBy('total','desc')
             ->with('requestedBy')

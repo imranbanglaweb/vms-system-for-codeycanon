@@ -22,12 +22,16 @@ return [
     'allowed_origins' => [
         'http://localhost:3000', 
         'http://localhost:3001', 
+        'http://localhost:56374',
         'http://127.0.0.1:3000', 
         'http://127.0.0.1:3001',
         'https://garibondhu360.nextdigihome.com',
     ],
 
-    'allowed_origins_patterns' => [],
+    'allowed_origins_patterns' => [
+        '/^http:\/\/localhost:\d+$/',
+        '/^http:\/\/127\.0\.0\.1:\d+$/',
+    ],
 
     'allowed_headers' => ['*'],
 

@@ -413,6 +413,101 @@ class DriverController extends Controller
     public function driverDashboard()
     {
         $driver = $this->getDriverByUser();
+        
+        // Return JSON for API requests (mobile app)
+        if (request()->expectsJson() || request()->is('api/*')) {
+            if (!$driver) {
+                return response()->json([
+                    'driver' => null,
+                    'todayTrips' => [],
+                    'upcomingTrips' => [],
+                    'recentTrips' => [],
+                    'assignedTrips' => [],
+                    'activeTrip' => null,
+                    'pendingTripsCount' => 0,
+                    'activeTripsCount' => 0,
+                    'completedTripsCount' => 0,
+                ]);
+            }
+            
+            $todayTrips = \App\Models\Requisition::where('assigned_driver_id', $driver->id)
+                ->whereDate('travel_date', today())
+                ->whereIn('transport_status', ['Approved', 'Pending', 'In Transit'])
+                ->with(['vehicle', 'requestedBy', 'assignedVehicle', 'passengers'])
+                ->get()
+                ->map(fn($t) => $this->transformTrip($t));
+            
+            $upcomingTrips = \App\Models\Requisition::where('assigned_driver_id', $driver->id)
+                ->whereDate('travel_date', '>', today())
+                ->where('transport_status', 'Approved')
+                ->with(['vehicle', 'requestedBy', 'assignedVehicle', 'passengers'])
+                ->orderBy('travel_date', 'asc')
+                ->take(5)
+                ->get()
+                ->map(fn($t) => $this->transformTrip($t));
+            
+            $recentTrips = \App\Models\Requisition::where('assigned_driver_id', $driver->id)
+                ->where('status', 'Completed')
+                ->with(['vehicle', 'requestedBy', 'assignedVehicle', 'passengers'])
+                ->orderBy('travel_date', 'desc')
+                ->take(5)
+                ->get()
+                ->map(fn($t) => $this->transformTrip($t));
+            
+            $assignedTrips = \App\Models\Requisition::where('assigned_driver_id', $driver->id)
+                ->where(function($query) {
+                    $query->where(function($q) {
+                        $q->whereDate('travel_date', today())
+                          ->whereIn('transport_status', ['Approved', 'Pending', 'In Transit']);
+                    })->orWhere(function($q) {
+                        $q->where('transport_status', 'In Transit');
+                    });
+                })
+                ->with(['vehicle', 'requestedBy', 'assignedVehicle', 'passengers'])
+                ->orderBy('travel_date', 'asc')
+                ->get()
+                ->map(fn($t) => $this->transformTrip($t));
+            
+            $activeTrip = \App\Models\Requisition::where('assigned_driver_id', $driver->id)
+                ->where('transport_status', 'In Transit')
+                ->with(['vehicle', 'requestedBy', 'assignedVehicle', 'passengers'])
+                ->first();
+            
+            $pendingTripsCount = \App\Models\Requisition::where('assigned_driver_id', $driver->id)
+                ->whereIn('transport_status', ['Pending', 'Approved'])
+                ->whereDate('travel_date', '>=', today())
+                ->count();
+            
+            $activeTripsCount = \App\Models\Requisition::where('assigned_driver_id', $driver->id)
+                ->where('transport_status', 'In Transit')
+                ->count();
+            
+            $completedTripsCount = \App\Models\Requisition::where('assigned_driver_id', $driver->id)
+                ->where('status', 'Completed')
+                ->whereDate('travel_date', today())
+                ->count();
+            
+            return response()->json([
+                'driver' => $driver ? [
+                    'id' => $driver->id,
+                    'driverName' => $driver->driver_name,
+                    'licenseNumber' => $driver->license_number,
+                    'licenseType' => $driver->license_type,
+                    'mobile' => $driver->mobile,
+                    'availabilityStatus' => $driver->availability_status,
+                ] : null,
+                'todayTrips' => $todayTrips,
+                'upcomingTrips' => $upcomingTrips,
+                'recentTrips' => $recentTrips,
+                'assignedTrips' => $assignedTrips,
+                'activeTrip' => $activeTrip ? $this->transformTrip($activeTrip) : null,
+                'pendingTripsCount' => $pendingTripsCount,
+                'activeTripsCount' => $activeTripsCount,
+                'completedTripsCount' => $completedTripsCount,
+            ]);
+        }
+        
+        // Web view response
         $todayTrips = collect();
         $upcomingTrips = collect();
         $recentTrips = collect();
@@ -474,7 +569,7 @@ class DriverController extends Controller
             ->orderBy('travel_date', 'asc')
             ->get();
         
-        return view('admin.dashboard.driver.dashboard', compact('driver', 'todayTrips', 'upcomingTrips', 'recentTrips', 'assignedTrips', 'activeTrip', 'pendingTrips'));
+        return view('admin.dashboard.driver.dashboard', compact('driver', 'todayTrips', 'upcomingTrips', 'recentTrips', 'assignedTrips', 'activeTrip'));
     }
 
     /**
@@ -955,6 +1050,33 @@ class DriverController extends Controller
         $vehicle = null;
         $maintenanceRecords = collect();
         
+        // JSON response for API
+        if (request()->expectsJson() || request()->is('api/*')) {
+            if (!$driver) {
+                return response()->json(['vehicle' => null]);
+            }
+            
+            $vehicle = Vehicle::where('driver_id', $driver->id)->first();
+            
+            if (!$vehicle) {
+                return response()->json(['vehicle' => null]);
+            }
+            
+            return response()->json([
+                'vehicle' => [
+                    'id' => $vehicle->id,
+                    'vehicle_name' => $vehicle->vehicle_name,
+                    'vehicle_number' => $vehicle->vehicle_number,
+                    'vehicle_type' => $vehicle->vehicle_type,
+                    'brand' => $vehicle->brand,
+                    'model' => $vehicle->model,
+                    'color' => $vehicle->color,
+                    'seating_capacity' => $vehicle->seating_capacity,
+                    'status' => $vehicle->status,
+                ]
+            ]);
+        }
+        
         if (!$driver) {
             return view('admin.dashboard.driver.vehicle', compact('driver', 'vehicle', 'maintenanceRecords'));
         }
@@ -970,5 +1092,87 @@ class DriverController extends Controller
             ->get();
         
         return view('admin.dashboard.driver.vehicle', compact('driver', 'vehicle', 'maintenanceRecords'));
+    }
+
+    /**
+     * Driver Profile API - returns JSON for mobile app
+     */
+    public function driverProfile()
+    {
+        try {
+            // Check if user is authenticated
+            if (!auth()->check()) {
+                return response()->json([
+                    'id' => 0,
+                    'driver_name' => 'Guest User',
+                    'license_number' => null,
+                    'license_type' => null,
+                    'mobile' => null,
+                    'nid' => null,
+                    'present_address' => null,
+                    'permanent_address' => null,
+                    'photograph' => null,
+                    'availability_status' => 'available',
+                    'availability_notes' => null,
+                    'available_from' => null,
+                    'available_until' => null,
+                ]);
+            }
+            
+            $driver = $this->getDriverByUser();
+            
+            if (!$driver) {
+                // Return from authenticated user
+                $user = auth()->user();
+                return response()->json([
+                    'id' => 0,
+                    'driver_name' => $user->name,
+                    'license_number' => null,
+                    'license_type' => null,
+                    'mobile' => $user->cell_phone,
+                    'nid' => null,
+                    'present_address' => null,
+                    'permanent_address' => null,
+                    'photograph' => null,
+                    'availability_status' => 'available',
+                    'availability_notes' => null,
+                    'available_from' => null,
+                    'available_until' => null,
+                ]);
+            }
+            
+            return response()->json([
+                'id' => $driver->id,
+                'driver_name' => $driver->driver_name,
+                'license_number' => $driver->license_number,
+                'license_type' => $driver->license_type,
+                'mobile' => $driver->mobile,
+                'nid' => $driver->nid,
+                'present_address' => $driver->present_address,
+                'permanent_address' => $driver->permanent_address,
+                'photograph' => $driver->photograph,
+                'availability_status' => $driver->availability_status,
+                'availability_notes' => $driver->availability_notes,
+                'available_from' => $driver->available_from,
+                'available_until' => $driver->available_until,
+            ]);
+        } catch (\Exception $e) {
+            // Return a valid response even on error
+            return response()->json([
+                'id' => 0,
+                'driver_name' => 'Unknown',
+                'license_number' => null,
+                'license_type' => null,
+                'mobile' => null,
+                'nid' => null,
+                'present_address' => null,
+                'permanent_address' => null,
+                'photograph' => null,
+                'availability_status' => 'available',
+                'availability_notes' => null,
+                'available_from' => null,
+                'available_until' => null,
+            ]);
+        }
     }
 }

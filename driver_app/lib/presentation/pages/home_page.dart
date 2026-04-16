@@ -8,7 +8,6 @@ import '../blocs/fuel/fuel_bloc.dart';
 import '../blocs/fuel/fuel_event.dart';
 import '../blocs/profile/profile_bloc.dart';
 import '../blocs/profile/profile_event.dart';
-import '../../core/theme/app_theme.dart';
 import 'dashboard_page.dart';
 import 'trips_page.dart';
 import 'fuel_page.dart';

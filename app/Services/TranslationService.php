@@ -112,13 +112,29 @@ class TranslationService
                 ->where('key', $key)
                 ->first();
 
-            $translationId = $translation?->id ?? DB::table('translations')->insertGetId([
-                'group' => $group,
-                'key' => $key,
-                'text' => $this->fallbackLocale === $locale ? $value : '',
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]);
+            if (!$translation) {
+                try {
+                    $translationId = DB::table('translations')->insertGetId([
+                        'group' => $group,
+                        'key' => $key,
+                        'text' => $this->fallbackLocale === $locale ? $value : '',
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ]);
+                } catch (\Illuminate\Database\QueryException $e) {
+                    if ($e->errorInfo[1] == 1062) {
+                        $translation = DB::table('translations')
+                            ->where('group', $group)
+                            ->where('key', $key)
+                            ->first();
+                        $translationId = $translation->id;
+                    } else {
+                        throw $e;
+                    }
+                }
+            } else {
+                $translationId = $translation->id;
+            }
 
             DB::table('translation_values')->updateOrInsert(
                 [

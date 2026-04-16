@@ -33,7 +33,7 @@ class Driver extends Equatable {
 
   factory Driver.fromJson(Map<String, dynamic> json) {
     return Driver(
-      id: json['id'] ?? 0,
+      id: json['id'] is int ? json['id'] : int.tryParse(json['id']?.toString() ?? '0') ?? 0,
       driverName: json['driver_name'] ?? '',
       licenseNumber: json['license_number'],
       licenseType: json['license_type'],

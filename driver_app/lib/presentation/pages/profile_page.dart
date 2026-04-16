@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../core/theme/app_theme.dart';
+import '../../data/models/driver_model.dart';
+import '../../data/models/vehicle_model.dart';
 import '../blocs/profile/profile_bloc.dart';
 import '../blocs/profile/profile_event.dart';
 import '../blocs/auth/auth_bloc.dart';
@@ -32,9 +34,9 @@ class ProfilePage extends StatelessWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.error_outline, size: 64, color: AppTheme.errorColor),
+                  const Icon(Icons.error_outline, size: 64, color: AppTheme.errorColor),
                   const SizedBox(height: 16),
-                  Text('Error loading profile'),
+                  const Text('Error loading profile'),
                   const SizedBox(height: 8),
                   ElevatedButton(
                     onPressed: () {
@@ -48,8 +50,10 @@ class ProfilePage extends StatelessWidget {
           }
 
           if (state is ProfileLoaded) {
-            final driver = state.driver;
-            final vehicle = state.vehicle;
+            final Driver? driver = state.driver as Driver?;
+            final Vehicle? vehicle = state.vehicle as Vehicle?;
+
+            debugPrint('ProfileLoaded - driver: $driver, vehicle: $vehicle');
 
             return SingleChildScrollView(
               padding: const EdgeInsets.all(16),
@@ -89,6 +93,8 @@ class ProfilePage extends StatelessWidget {
             );
           }
 
+          // Debug: Print current state
+          debugPrint('Current ProfileState: ${state.runtimeType}');
           return const Center(child: Text('Loading profile...'));
         },
       ),
@@ -192,7 +198,7 @@ class ProfilePage extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                   decoration: BoxDecoration(
-                    color: statusColor.withOpacity(0.1),
+                    color: statusColor.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(20),
                     border: Border.all(color: statusColor),
                   ),
@@ -244,7 +250,7 @@ class ProfilePage extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             DropdownButtonFormField<String>(
-              value: selectedStatus,
+              initialValue: selectedStatus,
               decoration: const InputDecoration(labelText: 'Status'),
               items: const [
                 DropdownMenuItem(value: 'available', child: Text('Available')),

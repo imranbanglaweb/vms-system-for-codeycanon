@@ -39,7 +39,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       final data = await _repository.login(event.email, event.password);
       final driver = data['driver'] != null 
           ? Driver.fromJson(data['driver']) 
-          : Driver(id: 0, driverName: 'Driver');
+          : const Driver(id: 0, driverName: 'Driver');
       emit(AuthAuthenticated(driver: driver));
     } catch (e) {
       String errorMessage = e.toString();

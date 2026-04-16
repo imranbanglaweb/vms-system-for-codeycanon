@@ -35,9 +35,9 @@ class DashboardPage extends StatelessWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.error_outline, size: 64, color: AppTheme.errorColor),
+                  const Icon(Icons.error_outline, size: 64, color: AppTheme.errorColor),
                   const SizedBox(height: 16),
-                  Text('Error loading dashboard'),
+                  const Text('Error loading dashboard'),
                   const SizedBox(height: 8),
                   ElevatedButton(
                     onPressed: () {
@@ -134,10 +134,10 @@ class DashboardPage extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         child: Row(
           children: [
-            CircleAvatar(
+            const CircleAvatar(
               radius: 24,
               backgroundColor: AppTheme.primaryColor,
-              child: const Icon(Icons.person, color: Colors.white, size: 28),
+              child: Icon(Icons.person, color: Colors.white, size: 28),
             ),
             const SizedBox(width: 16),
             Expanded(
@@ -216,7 +216,7 @@ class DashboardPage extends StatelessWidget {
           Icon(
             Icons.directions_car_outlined,
             size: 64,
-            color: AppTheme.textSecondary.withOpacity(0.5),
+            color: AppTheme.textSecondary.withValues(alpha: 0.5),
           ),
           const SizedBox(height: 16),
           Text(

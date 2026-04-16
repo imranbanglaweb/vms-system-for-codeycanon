@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:intl/intl.dart';
 import '../../core/theme/app_theme.dart';
 import '../blocs/fuel/fuel_bloc.dart';
 import '../blocs/fuel/fuel_event.dart';
@@ -88,7 +87,7 @@ class FuelPage extends StatelessWidget {
           Icon(
             Icons.local_gas_station_outlined,
             size: 64,
-            color: AppTheme.textSecondary.withOpacity(0.5),
+            color: AppTheme.textSecondary.withValues(alpha: 0.5),
           ),
           const SizedBox(height: 16),
           Text(

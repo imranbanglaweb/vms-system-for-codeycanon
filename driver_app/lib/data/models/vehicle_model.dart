@@ -27,14 +27,16 @@ class Vehicle extends Equatable {
 
   factory Vehicle.fromJson(Map<String, dynamic> json) {
     return Vehicle(
-      id: json['id'] ?? 0,
+      id: json['id'] is int ? json['id'] : int.tryParse(json['id']?.toString() ?? '0') ?? 0,
       vehicleName: json['vehicle_name'] ?? '',
       vehicleNumber: json['vehicle_number'] ?? '',
       vehicleType: json['vehicle_type'],
       brand: json['brand'],
       model: json['model'],
       color: json['color'],
-      seatingCapacity: json['seating_capacity'],
+      seatingCapacity: json['seating_capacity'] is int 
+          ? json['seating_capacity'] 
+          : int.tryParse(json['seating_capacity']?.toString() ?? '0'),
       status: json['status'],
       photograph: json['photograph'],
     );

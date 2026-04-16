@@ -21,7 +21,7 @@ class FuelLogCard extends StatelessWidget {
               children: [
                 Row(
                   children: [
-                    Icon(Icons.local_gas_station, color: AppTheme.secondaryColor),
+                    const Icon(Icons.local_gas_station, color: AppTheme.secondaryColor),
                     const SizedBox(width: 8),
                     Text(
                       fuelLog.vehicleName ?? 'Unknown Vehicle',

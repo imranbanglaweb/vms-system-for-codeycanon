@@ -527,30 +527,20 @@ Route::middleware(['auth'])->group(function () {
 });
 
 // ============================================================================
-// 15. TENANT MANAGEMENT (SaaS)
+// 15. TENANT MANAGEMENT (SaaS) - DISABLED (Controller not found)
 // ============================================================================
 
-Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () {
-    Route::resource('tenants', \App\Http\Controllers\Admin\TenantController::class);
-    Route::post('tenants/{tenant}/upgrade-subscription', [\App\Http\Controllers\Admin\TenantController::class, 'upgradeSubscription'])->name('tenants.upgrade-subscription');
-    Route::post('tenants/{tenant}/deactivate', [\App\Http\Controllers\Admin\TenantController::class, 'deactivate'])->name('tenants.deactivate');
-    Route::post('tenants/{tenant}/reactivate', [\App\Http\Controllers\Admin\TenantController::class, 'reactivate'])->name('tenants.reactivate');
-    Route::get('tenants/{tenant}/export-data', [\App\Http\Controllers\Admin\TenantController::class, 'exportData'])->name('tenants.export-data');
-    Route::get('tenants/{tenant}/statistics', [\App\Http\Controllers\Admin\TenantController::class, 'statistics'])->name('tenants.statistics');
-});
+// Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () {
+//     Route::resource('tenants', \App\Http\Controllers\Admin\TenantController::class);
+// });
 
 // ============================================================================
-// 15. TENANT MANAGEMENT (SaaS)
+// 15. TENANT MANAGEMENT (SaaS) - DISABLED
 // ============================================================================
 
-Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () {
-    Route::resource('tenants', \App\Http\Controllers\Admin\TenantController::class);
-    Route::post('tenants/{tenant}/upgrade-subscription', [\App\Http\Controllers\Admin\TenantController::class, 'upgradeSubscription'])->name('tenants.upgrade-subscription');
-    Route::post('tenants/{tenant}/deactivate', [\App\Http\Controllers\Admin\TenantController::class, 'deactivate'])->name('tenants.deactivate');
-    Route::post('tenants/{tenant}/reactivate', [\App\Http\Controllers\Admin\TenantController::class, 'reactivate'])->name('tenants.reactivate');
-    Route::get('tenants/{tenant}/export-data', [\App\Http\Controllers\Admin\TenantController::class, 'exportData'])->name('tenants.export-data');
-    Route::get('tenants/{tenant}/statistics', [\App\Http\Controllers\Admin\TenantController::class, 'statistics'])->name('tenants.statistics');
-});
+// Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () {
+//     Route::resource('tenants', \App\Http\Controllers\Admin\TenantController::class);
+// });
 
 // ============================================================================
 // 16. SUBSCRIPTION PLANS MANAGEMENT
@@ -577,17 +567,12 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
 });
 
 // ============================================================================
-// 17. TENANT MANAGEMENT (SaaS)
+// 15. TENANT MANAGEMENT (SaaS) - DISABLED (Controller not found)
 // ============================================================================
 
-Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () {
-    Route::resource('tenants', \App\Http\Controllers\Admin\TenantController::class);
-    Route::post('tenants/{tenant}/upgrade-subscription', [\App\Http\Controllers\Admin\TenantController::class, 'upgradeSubscription'])->name('tenants.upgrade-subscription');
-    Route::post('tenants/{tenant}/deactivate', [\App\Http\Controllers\Admin\TenantController::class, 'deactivate'])->name('tenants.deactivate');
-    Route::post('tenants/{tenant}/reactivate', [\App\Http\Controllers\Admin\TenantController::class, 'reactivate'])->name('tenants.reactivate');
-    Route::get('tenants/{tenant}/export-data', [\App\Http\Controllers\Admin\TenantController::class, 'exportData'])->name('tenants.export-data');
-    Route::get('tenants/{tenant}/statistics', [\App\Http\Controllers\Admin\TenantController::class, 'statistics'])->name('tenants.statistics');
-});
+// Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () {
+//     Route::resource('tenants', \App\Http\Controllers\Admin\TenantController::class);
+// });
 
 // ============================================================================
 // 18. ADMIN CONTROLS & PAYMENTS

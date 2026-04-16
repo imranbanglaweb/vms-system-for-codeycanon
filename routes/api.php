@@ -12,7 +12,7 @@ use NotificationChannels\WebPush\PushSubscription;
 // PUBLIC API ROUTES (For External Subscription System)
 // ============================================================================
 
-Route::middleware('api')->group(function () {
+Route::middleware(['cors', 'api'])->group(function () {
     Route::post('/register', [PublicApiController::class, 'register']);
     Route::post('/login', [PublicApiController::class, 'login']);
     Route::post('/subscribe', [PublicApiController::class, 'subscribe']);
@@ -161,7 +161,7 @@ Route::prefix('driver')->middleware('auth:api')->group(function () {
     Route::post('/availability', [App\Http\Controllers\DriverController::class, 'updateAvailability']);
     
     // Profile
-    Route::get('/profile', [App\Http\Controllers\DriverController::class, 'driverDashboard']);
+    Route::get('/profile', [App\Http\Controllers\DriverController::class, 'driverProfile']);
 });
 
 // ============================================================================
