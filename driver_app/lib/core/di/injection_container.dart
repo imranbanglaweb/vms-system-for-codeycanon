@@ -6,6 +6,7 @@ import '../../presentation/blocs/dashboard/dashboard_bloc.dart';
 import '../../presentation/blocs/trips/trips_bloc.dart';
 import '../../presentation/blocs/fuel/fuel_bloc.dart';
 import '../../presentation/blocs/profile/profile_bloc.dart';
+import '../providers/settings_provider.dart';
 
 final getIt = GetIt.instance;
 
@@ -13,6 +14,10 @@ void setupDependencies() {
   getIt.registerLazySingleton<ApiClient>(() => ApiClient());
   getIt.registerLazySingleton<DriverRepository>(
     () => DriverRepository(getIt<ApiClient>()),
+  );
+
+  getIt.registerLazySingleton<SettingsProvider>(
+    () => SettingsProvider(getIt<DriverRepository>()),
   );
 
   getIt.registerFactory<AuthBloc>(

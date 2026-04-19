@@ -17,12 +17,15 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
   ) async {
     emit(ProfileLoading());
     try {
+      debugPrint('ProfileBloc - Calling getProfile...');
       final driver = await _repository.getProfile();
+      debugPrint('ProfileBloc - getProfile returned: $driver');
       final vehicle = await _repository.getVehicle();
-      debugPrint('ProfileBloc - driver: $driver, vehicle: $vehicle');
+      debugPrint('ProfileBloc - getVehicle returned: $vehicle');
       emit(ProfileLoaded(driver: driver, vehicle: vehicle));
-    } catch (e) {
+    } catch (e, stackTrace) {
       debugPrint('ProfileBloc error: $e');
+      debugPrint('Stack trace: $stackTrace');
       emit(ProfileError(message: e.toString()));
     }
   }

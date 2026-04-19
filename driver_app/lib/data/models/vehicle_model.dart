@@ -27,18 +27,20 @@ class Vehicle extends Equatable {
 
   factory Vehicle.fromJson(Map<String, dynamic> json) {
     return Vehicle(
-      id: json['id'] is int ? json['id'] : int.tryParse(json['id']?.toString() ?? '0') ?? 0,
-      vehicleName: json['vehicle_name'] ?? '',
-      vehicleNumber: json['vehicle_number'] ?? '',
-      vehicleType: json['vehicle_type'],
-      brand: json['brand'],
-      model: json['model'],
-      color: json['color'],
-      seatingCapacity: json['seating_capacity'] is int 
-          ? json['seating_capacity'] 
+      id: json['id'] is int
+          ? json['id']
+          : int.tryParse(json['id']?.toString() ?? '0') ?? 0,
+      vehicleName: json['vehicle_name']?.toString() ?? '',
+      vehicleNumber: json['vehicle_number']?.toString() ?? '',
+      vehicleType: json['vehicle_type']?.toString(),
+      brand: json['brand']?.toString(),
+      model: json['model']?.toString(),
+      color: json['color']?.toString(),
+      seatingCapacity: json['seating_capacity'] is int
+          ? json['seating_capacity']
           : int.tryParse(json['seating_capacity']?.toString() ?? '0'),
-      status: json['status'],
-      photograph: json['photograph'],
+      status: json['status']?.toString(),
+      photograph: json['photograph']?.toString(),
     );
   }
 
@@ -59,7 +61,15 @@ class Vehicle extends Equatable {
 
   @override
   List<Object?> get props => [
-    id, vehicleName, vehicleNumber, vehicleType, brand, model,
-    color, seatingCapacity, status, photograph
-  ];
+        id,
+        vehicleName,
+        vehicleNumber,
+        vehicleType,
+        brand,
+        model,
+        color,
+        seatingCapacity,
+        status,
+        photograph
+      ];
 }

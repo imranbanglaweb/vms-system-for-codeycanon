@@ -61,7 +61,8 @@ class ApiClient {
   }
 
   Future<Response> getDriverTrips({int page = 1}) async {
-    return await _dio.get(ApiConstants.driverTrips, queryParameters: {'page': page});
+    return await _dio
+        .get(ApiConstants.driverTrips, queryParameters: {'page': page});
   }
 
   Future<Response> getTripDetails(int tripId) async {
@@ -85,14 +86,17 @@ class ApiClient {
   }
 
   Future<Response> getFuelLogs({int page = 1}) async {
-    return await _dio.get(ApiConstants.driverFuelLog, queryParameters: {'page': page});
+    return await _dio
+        .get(ApiConstants.driverFuelLog, queryParameters: {'page': page});
   }
 
   Future<Response> getFuelVehicleData(int vehicleId) async {
-    return await _dio.get('/driver/fuel-log/vehicle-data', queryParameters: {'vehicle_id': vehicleId});
+    return await _dio.get('/driver/fuel-log/vehicle-data',
+        queryParameters: {'vehicle_id': vehicleId});
   }
 
-  Future<Response> submitFuelLog(Map<String, dynamic> data, String? imagePath) async {
+  Future<Response> submitFuelLog(
+      Map<String, dynamic> data, String? imagePath) async {
     if (imagePath != null) {
       final formData = FormData.fromMap({
         ...data,
@@ -116,5 +120,9 @@ class ApiClient {
 
   Future<Response> getDriverProfile() async {
     return await _dio.get(ApiConstants.driverProfile);
+  }
+
+  Future<Response> getSettings() async {
+    return await _dio.get(ApiConstants.settingsEndpoint);
   }
 }

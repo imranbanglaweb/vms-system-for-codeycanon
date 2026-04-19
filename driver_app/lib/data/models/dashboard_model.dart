@@ -30,18 +30,28 @@ class DriverDashboard extends Equatable {
     return DriverDashboard(
       driver: json['driver'] != null ? Driver.fromJson(json['driver']) : null,
       todayTrips: json['todayTrips'] != null
-          ? (json['todayTrips'] as List).map((t) => Trip.fromJson(t)).toList()
+          ? (json['todayTrips'] as List)
+              .map((t) => Trip.fromJson(t as Map<String, dynamic>))
+              .toList()
           : [],
       upcomingTrips: json['upcomingTrips'] != null
-          ? (json['upcomingTrips'] as List).map((t) => Trip.fromJson(t)).toList()
+          ? (json['upcomingTrips'] as List)
+              .map((t) => Trip.fromJson(t as Map<String, dynamic>))
+              .toList()
           : [],
       recentTrips: json['recentTrips'] != null
-          ? (json['recentTrips'] as List).map((t) => Trip.fromJson(t)).toList()
+          ? (json['recentTrips'] as List)
+              .map((t) => Trip.fromJson(t as Map<String, dynamic>))
+              .toList()
           : [],
       assignedTrips: json['assignedTrips'] != null
-          ? (json['assignedTrips'] as List).map((t) => Trip.fromJson(t)).toList()
+          ? (json['assignedTrips'] as List)
+              .map((t) => Trip.fromJson(t as Map<String, dynamic>))
+              .toList()
           : [],
-      activeTrip: json['activeTrip'] != null ? Trip.fromJson(json['activeTrip']) : null,
+      activeTrip: json['activeTrip'] != null
+          ? Trip.fromJson(json['activeTrip'] as Map<String, dynamic>)
+          : null,
       pendingTripsCount: json['pendingTripsCount'] ?? 0,
       activeTripsCount: json['activeTripsCount'] ?? 0,
       completedTripsCount: json['completedTripsCount'] ?? 0,
@@ -50,9 +60,16 @@ class DriverDashboard extends Equatable {
 
   @override
   List<Object?> get props => [
-    driver, todayTrips, upcomingTrips, recentTrips, assignedTrips,
-    activeTrip, pendingTripsCount, activeTripsCount, completedTripsCount
-  ];
+        driver,
+        todayTrips,
+        upcomingTrips,
+        recentTrips,
+        assignedTrips,
+        activeTrip,
+        pendingTripsCount,
+        activeTripsCount,
+        completedTripsCount
+      ];
 }
 
 class DriverVehicle extends Equatable {
@@ -66,7 +83,8 @@ class DriverVehicle extends Equatable {
 
   factory DriverVehicle.fromJson(Map<String, dynamic> json) {
     return DriverVehicle(
-      vehicle: json['vehicle'] != null ? Vehicle.fromJson(json['vehicle']) : null,
+      vehicle:
+          json['vehicle'] != null ? Vehicle.fromJson(json['vehicle']) : null,
       maintenanceRecords: json['maintenanceRecords'] != null
           ? List<dynamic>.from(json['maintenanceRecords'])
           : [],

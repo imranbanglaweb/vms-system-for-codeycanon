@@ -35,29 +35,40 @@ class FuelLog extends Equatable {
 
   factory FuelLog.fromJson(Map<String, dynamic> json) {
     return FuelLog(
-      id: json['id'] ?? 0,
-      driverId: json['driver_id'],
-      vehicleId: json['vehicle_id'],
-      vehicleName: json['vehicle_name'],
-      vehicleNumber: json['vehicle_number'],
-      fuelDate: json['fuel_date'] != null 
-          ? DateTime.tryParse(json['fuel_date']) 
+      id: json['id'] is int
+          ? json['id']
+          : int.tryParse(json['id']?.toString() ?? '0') ?? 0,
+      driverId: json['driver_id'] is int
+          ? json['driver_id']
+          : json['driver_id'] != null
+              ? int.tryParse(json['driver_id'].toString())
+              : null,
+      vehicleId: json['vehicle_id'] is int
+          ? json['vehicle_id']
+          : json['vehicle_id'] != null
+              ? int.tryParse(json['vehicle_id'].toString())
+              : null,
+      vehicleName: json['vehicle_name']?.toString(),
+      vehicleNumber: json['vehicle_number']?.toString(),
+      fuelDate: json['fuel_date'] != null
+          ? DateTime.tryParse(json['fuel_date'].toString())
           : null,
-      fuelType: json['fuel_type'] ?? json['fuel_type'],
-      quantity: json['quantity'] != null 
-          ? double.tryParse(json['quantity'].toString()) 
+      fuelType: json['fuel_type']?.toString(),
+      quantity: json['quantity'] != null
+          ? double.tryParse(json['quantity'].toString())
           : null,
-      cost: json['cost'] != null 
-          ? double.tryParse(json['cost'].toString()) 
+      cost: json['cost'] != null
+          ? double.tryParse(json['cost'].toString())
           : null,
-      location: json['location'] ?? json['fuel_station'],
-      receiptImage: json['receipt_image'],
-      odometerReading: json['odometer_reading'] != null 
-          ? double.tryParse(json['odometer_reading'].toString()) 
+      location:
+          json['location']?.toString() ?? json['fuel_station']?.toString(),
+      receiptImage: json['receipt_image']?.toString(),
+      odometerReading: json['odometer_reading'] != null
+          ? double.tryParse(json['odometer_reading'].toString())
           : null,
-      notes: json['notes'],
-      createdAt: json['created_at'] != null 
-          ? DateTime.tryParse(json['created_at']) 
+      notes: json['notes']?.toString(),
+      createdAt: json['created_at'] != null
+          ? DateTime.tryParse(json['created_at'].toString())
           : null,
     );
   }
@@ -84,7 +95,19 @@ class FuelLog extends Equatable {
 
   @override
   List<Object?> get props => [
-    id, driverId, vehicleId, vehicleName, vehicleNumber, fuelDate,
-    fuelType, quantity, cost, location, receiptImage, odometerReading, notes, createdAt
-  ];
+        id,
+        driverId,
+        vehicleId,
+        vehicleName,
+        vehicleNumber,
+        fuelDate,
+        fuelType,
+        quantity,
+        cost,
+        location,
+        receiptImage,
+        odometerReading,
+        notes,
+        createdAt
+      ];
 }

@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import '../../core/theme/app_theme.dart';
+import '../../core/providers/settings_provider.dart';
 import '../blocs/dashboard/dashboard_bloc.dart';
 import '../blocs/dashboard/dashboard_event.dart';
 import '../widgets/trip_card.dart';
@@ -12,22 +14,63 @@ class DashboardPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Dashboard'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            onPressed: () {
-              context.read<DashboardBloc>().add(DashboardRefreshRequested());
-            },
+    return Consumer<SettingsProvider>(
+      builder: (context, settings, child) {
+        return Scaffold(
+          appBar: AppBar(
+            title: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(6),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.2),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: settings.logoUrl != null
+                      ? ClipRRect(
+                          borderRadius: BorderRadius.circular(4),
+                          child: Image.network(
+                            settings.logoUrl!,
+                            width: 20,
+                            height: 20,
+                            fit: BoxFit.cover,
+                            errorBuilder: (context, error, stack) => const Icon(Icons.directions_car, size: 20),
+                          ),
+                        )
+                      : const Icon(Icons.directions_car, size: 20),
+                ),
+                const SizedBox(width: 8),
+                Text(settings.title),
+              ],
+            ),
+            actions: [
+              IconButton(
+                icon: const Icon(Icons.refresh),
+                onPressed: () {
+                  context.read<DashboardBloc>().add(DashboardRefreshRequested());
+                },
+              ),
+            ],
           ),
-        ],
-      ),
-      body: BlocBuilder<DashboardBloc, DashboardState>(
+          body: BlocBuilder<DashboardBloc, DashboardState>(
         builder: (context, state) {
           if (state is DashboardLoading) {
-            return const Center(child: CircularProgressIndicator());
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  CircularProgressIndicator(
+                    color: AppTheme.primaryColor,
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    'Loading dashboard...',
+                    style: TextStyle(color: AppTheme.textSecondary),
+                  ),
+                ],
+              ),
+            );
           }
 
           if (state is DashboardError) {
@@ -35,13 +78,16 @@ class DashboardPage extends StatelessWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Icon(Icons.error_outline, size: 64, color: AppTheme.errorColor),
+                  const Icon(Icons.error_outline,
+                      size: 64, color: AppTheme.errorColor),
                   const SizedBox(height: 16),
                   const Text('Error loading dashboard'),
                   const SizedBox(height: 8),
                   ElevatedButton(
                     onPressed: () {
-                      context.read<DashboardBloc>().add(DashboardLoadRequested());
+                      context
+                          .read<DashboardBloc>()
+                          .add(DashboardLoadRequested());
                     },
                     child: const Text('Retry'),
                   ),
@@ -66,52 +112,46 @@ class DashboardPage extends StatelessWidget {
                       _buildWelcomeCard(context, dashboard.driver!.driverName),
                       const SizedBox(height: 16),
                     ],
-
                     _buildStatsRow(context, dashboard),
                     const SizedBox(height: 24),
-
                     if (dashboard.activeTrip != null) ...[
                       _buildSectionTitle(context, 'Active Trip'),
                       const SizedBox(height: 8),
                       TripCard(trip: dashboard.activeTrip!, isActive: true),
                       const SizedBox(height: 24),
                     ],
-
                     if (dashboard.todayTrips.isNotEmpty) ...[
-                      _buildSectionTitle(context, 'Today\'s Trips (${dashboard.todayTrips.length})'),
+                      _buildSectionTitle(context,
+                          'Today\'s Trips (${dashboard.todayTrips.length})'),
                       const SizedBox(height: 8),
                       ...dashboard.todayTrips.take(3).map((trip) => Padding(
-                        padding: const EdgeInsets.only(bottom: 8),
-                        child: TripCard(trip: trip),
-                      )),
+                            padding: const EdgeInsets.only(bottom: 8),
+                            child: TripCard(trip: trip),
+                          )),
                       const SizedBox(height: 24),
                     ],
-
                     if (dashboard.upcomingTrips.isNotEmpty) ...[
                       _buildSectionTitle(context, 'Upcoming Trips'),
                       const SizedBox(height: 8),
                       ...dashboard.upcomingTrips.take(3).map((trip) => Padding(
-                        padding: const EdgeInsets.only(bottom: 8),
-                        child: TripCard(trip: trip),
-                      )),
+                            padding: const EdgeInsets.only(bottom: 8),
+                            child: TripCard(trip: trip),
+                          )),
                       const SizedBox(height: 24),
                     ],
-
                     if (dashboard.recentTrips.isNotEmpty) ...[
                       _buildSectionTitle(context, 'Recent Completed'),
                       const SizedBox(height: 8),
                       ...dashboard.recentTrips.take(3).map((trip) => Padding(
-                        padding: const EdgeInsets.only(bottom: 8),
-                        child: TripCard(trip: trip),
-                      )),
+                            padding: const EdgeInsets.only(bottom: 8),
+                            child: TripCard(trip: trip),
+                          )),
                     ],
-
                     if (dashboard.todayTrips.isEmpty &&
                         dashboard.upcomingTrips.isEmpty &&
                         dashboard.recentTrips.isEmpty &&
                         dashboard.activeTrip == null)
                       _buildEmptyState(context),
-
                     const SizedBox(height: 16),
                   ],
                 ),
@@ -124,20 +164,36 @@ class DashboardPage extends StatelessWidget {
       ),
     );
   }
-
-  Widget _buildWelcomeCard(BuildContext context, String driverName) {
+}
     final now = DateTime.now();
-    final greeting = now.hour < 12 ? 'Good Morning' : (now.hour < 17 ? 'Good Afternoon' : 'Good Evening');
+    final greeting = now.hour < 12
+        ? 'Good Morning'
+        : (now.hour < 17 ? 'Good Afternoon' : 'Good Evening');
 
     return Card(
-      child: Padding(
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(12),
+          gradient: LinearGradient(
+            colors: [
+              AppTheme.primaryColor,
+              AppTheme.primaryColor.withValues(alpha: 0.8),
+            ],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+        ),
         padding: const EdgeInsets.all(16),
         child: Row(
           children: [
-            const CircleAvatar(
-              radius: 24,
-              backgroundColor: AppTheme.primaryColor,
-              child: Icon(Icons.person, color: Colors.white, size: 28),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.2),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: const Icon(Icons.directions_car,
+                  color: Colors.white, size: 32),
             ),
             const SizedBox(width: 16),
             Expanded(
@@ -147,16 +203,21 @@ class DashboardPage extends StatelessWidget {
                   Text(
                     '$greeting,',
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: AppTheme.textSecondary,
-                    ),
+                          color: Colors.white70,
+                        ),
                   ),
                   Text(
                     driverName,
-                    style: Theme.of(context).textTheme.headlineSmall,
+                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
                   ),
                   Text(
                     DateFormat('EEEE, MMMM d, y').format(now),
-                    style: Theme.of(context).textTheme.bodySmall,
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: Colors.white70,
+                        ),
                   ),
                 ],
               ),
@@ -222,15 +283,15 @@ class DashboardPage extends StatelessWidget {
           Text(
             'No trips assigned',
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
-              color: AppTheme.textSecondary,
-            ),
+                  color: AppTheme.textSecondary,
+                ),
           ),
           const SizedBox(height: 8),
           Text(
             'Your scheduled trips will appear here',
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: AppTheme.textSecondary,
-            ),
+                  color: AppTheme.textSecondary,
+                ),
           ),
         ],
       ),

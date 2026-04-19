@@ -33,22 +33,24 @@ class Driver extends Equatable {
 
   factory Driver.fromJson(Map<String, dynamic> json) {
     return Driver(
-      id: json['id'] is int ? json['id'] : int.tryParse(json['id']?.toString() ?? '0') ?? 0,
-      driverName: json['driver_name'] ?? '',
-      licenseNumber: json['license_number'],
-      licenseType: json['license_type'],
-      mobile: json['mobile'],
-      nid: json['nid'],
-      presentAddress: json['present_address'],
-      permanentAddress: json['permanent_address'],
-      photograph: json['photograph'],
-      availabilityStatus: json['availability_status'],
-      availabilityNotes: json['availability_notes'],
-      availableFrom: json['available_from'] != null 
-          ? DateTime.tryParse(json['available_from']) 
+      id: json['id'] is int
+          ? json['id']
+          : int.tryParse(json['id']?.toString() ?? '0') ?? 0,
+      driverName: json['driver_name']?.toString() ?? '',
+      licenseNumber: json['license_number']?.toString(),
+      licenseType: json['license_type']?.toString(),
+      mobile: json['mobile']?.toString(),
+      nid: json['nid']?.toString(),
+      presentAddress: json['present_address']?.toString(),
+      permanentAddress: json['permanent_address']?.toString(),
+      photograph: json['photograph']?.toString(),
+      availabilityStatus: json['availability_status']?.toString(),
+      availabilityNotes: json['availability_notes']?.toString(),
+      availableFrom: json['available_from'] != null
+          ? DateTime.tryParse(json['available_from'].toString())
           : null,
-      availableUntil: json['available_until'] != null 
-          ? DateTime.tryParse(json['available_until']) 
+      availableUntil: json['available_until'] != null
+          ? DateTime.tryParse(json['available_until'].toString())
           : null,
     );
   }
@@ -73,8 +75,18 @@ class Driver extends Equatable {
 
   @override
   List<Object?> get props => [
-    id, driverName, licenseNumber, licenseType, mobile, nid,
-    presentAddress, permanentAddress, photograph, availabilityStatus,
-    availabilityNotes, availableFrom, availableUntil
-  ];
+        id,
+        driverName,
+        licenseNumber,
+        licenseType,
+        mobile,
+        nid,
+        presentAddress,
+        permanentAddress,
+        photograph,
+        availabilityStatus,
+        availabilityNotes,
+        availableFrom,
+        availableUntil
+      ];
 }
