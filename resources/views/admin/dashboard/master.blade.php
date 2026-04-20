@@ -782,6 +782,11 @@
                 </div>
                 
                 <div class="header-right">
+                    <!-- Reload Button -->
+                    <a class="header-icon-btn" href="javascript:location.reload();" title="Reload Page">
+                        <i class="fa fa-sync-alt"></i>
+                    </a>
+                    
                     <!-- Language Switcher -->
                     @auth
                     @include('admin.dashboard.languages.language-switcher')

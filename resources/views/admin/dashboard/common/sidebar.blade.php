@@ -214,13 +214,15 @@
     }
 </style>
 <aside id="sidebar-left" class="sidebar-left">
-    <div class="sidebar-header">
+    <div class="sidebar-header" style="padding: 15px; display: flex; align-items: center; justify-content: space-between;">
         <div class="sidebar-title">
             <a href="{{ route('home') }}" class="logo logo-link" title="Go to Dashboard">
-                @if(!empty($settings->logo))
-                    <img src="{{ asset('public/uploads/logo/'.$settings->logo) }}" alt="Logo" class="logo-image">
+                @if(!empty($settings->admin_logo))
+                    <img src="{{ asset('public/admin_resource/assets/images/'.$settings->admin_logo) }}" alt="Logo" class="logo-image" style="max-height: 45px; max-width: 160px;">
+                @elseif(!empty($settings->logo))
+                    <img src="{{ asset('public/uploads/logo/'.$settings->logo) }}" alt="Logo" class="logo-image" style="max-height: 45px; max-width: 160px;">
                 @else
-                    <span class="logo-text">গাড়িবন্ধু ৩৬০</span>
+                    <span class="logo-text" style="font-size: 20px; font-weight: 700; color: #fff;">গাড়িবন্ধু ৩৬০</span>
                 @endif
             </a>
         </div>
@@ -228,6 +230,9 @@
             <i class="fa fa-bars toggle-icon"></i>
             <span class="toggle-label"></span>
         </button>
+        <a href="javascript:location.reload();" class="sidebar-reload" title="Reload Page" style="position: absolute; right: 50px; top: 50%; transform: translateY(-50%); color: rgba(255,255,255,0.7); font-size: 16px; cursor: pointer;">
+            <i class="fa fa-sync-alt"></i>
+        </a>
     </div>
     <div class="sidebar-content">
         <nav class="nav-main">
