@@ -13,8 +13,21 @@ import 'presentation/blocs/profile/profile_bloc.dart';
 import 'presentation/pages/login_page.dart';
 import 'presentation/pages/home_page.dart';
 
-class VmsDriverApp extends StatelessWidget {
+class VmsDriverApp extends StatefulWidget {
   const VmsDriverApp({super.key});
+
+  @override
+  State<VmsDriverApp> createState() => _VmsDriverAppState();
+}
+
+class _VmsDriverAppState extends State<VmsDriverApp> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      getIt<SettingsProvider>().loadSettings();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -38,23 +51,27 @@ class VmsDriverApp extends StatelessWidget {
       ],
       child: ChangeNotifierProvider.value(
         value: getIt<SettingsProvider>(),
-        child: MaterialApp(
-          title: 'VMS Driver',
-          debugShowCheckedModeBanner: false,
-          theme: AppTheme.lightTheme,
-          home: BlocBuilder<AuthBloc, AuthState>(
-            builder: (context, state) {
-              if (state is AuthLoading || state is AuthInitial) {
-                return const Scaffold(
-                  body: Center(child: CircularProgressIndicator()),
-                );
-              }
-              if (state is AuthAuthenticated) {
-                return const HomePage();
-              }
-              return const LoginPage();
-            },
-          ),
+        child: Consumer<SettingsProvider>(
+          builder: (context, settings, child) {
+            return MaterialApp(
+              title: settings.title,
+              debugShowCheckedModeBanner: false,
+              theme: AppTheme.lightTheme,
+              home: BlocBuilder<AuthBloc, AuthState>(
+                builder: (context, state) {
+                  if (state is AuthLoading || state is AuthInitial) {
+                    return const Scaffold(
+                      body: Center(child: CircularProgressIndicator()),
+                    );
+                  }
+                  if (state is AuthAuthenticated) {
+                    return const HomePage();
+                  }
+                  return const LoginPage();
+                },
+              ),
+            );
+          },
         ),
       ),
     );

@@ -169,7 +169,7 @@ class _AddFuelLogPageState extends State<AddFuelLogPage> {
                   const LinearProgressIndicator()
                 else
                   DropdownButtonFormField<Vehicle>(
-                    value: _selectedVehicle,
+                    initialValue: _selectedVehicle,
                     decoration: const InputDecoration(
                       labelText: 'Vehicle',
                       prefixIcon: Icon(Icons.directions_car),
