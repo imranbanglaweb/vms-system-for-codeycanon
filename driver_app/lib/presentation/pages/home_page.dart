@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:provider/provider.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/providers/settings_provider.dart';
@@ -105,18 +104,16 @@ class _HomePageState extends State<HomePage>
                             shape: BoxShape.circle,
                           ),
                           child: settings.logoUrl != null
-                              ? ClipOval(
-                                  child: Image.network(
-                                    settings.logoUrl!,
-                                    width: 64,
-                                    height: 64,
-                                    fit: BoxFit.cover,
-                                    errorBuilder: (context, error, stack) =>
-                                        const Icon(
-                                      Icons.directions_car,
-                                      size: 64,
-                                      color: AppTheme.primaryColor,
-                                    ),
+                              ? Image.network(
+                                  settings.logoUrl!,
+                                  width: 64,
+                                  height: 64,
+                                  fit: BoxFit.contain,
+                                  errorBuilder: (context, error, stack) =>
+                                      const Icon(
+                                    Icons.directions_car,
+                                    size: 64,
+                                    color: AppTheme.primaryColor,
                                   ),
                                 )
                               : const Icon(
@@ -145,7 +142,7 @@ class _HomePageState extends State<HomePage>
                                   ),
                         ),
                         const SizedBox(height: 32),
-                        SizedBox(
+                        const SizedBox(
                           width: 40,
                           height: 40,
                           child: CircularProgressIndicator(

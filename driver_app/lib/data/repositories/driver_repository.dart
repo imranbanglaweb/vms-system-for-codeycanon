@@ -134,6 +134,11 @@ class DriverRepository {
           .map((v) => Vehicle.fromJson(v as Map<String, dynamic>))
           .toList();
     }
+    if (response.data['vehicle'] != null) {
+      return [
+        Vehicle.fromJson(response.data['vehicle'] as Map<String, dynamic>)
+      ];
+    }
     return [];
   }
 

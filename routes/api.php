@@ -180,7 +180,7 @@ Route::get('/settings', function () {
 
     $logoUrl = null;
     if ($settings && $settings->admin_logo) {
-        $logoUrl = asset('public/admin_resource/assets/images/'.$settings->admin_logo);
+        $logoUrl = url('/api/logo/'.$settings->admin_logo);
     }
 
     return response()->json([
@@ -189,3 +189,18 @@ Route::get('/settings', function () {
         'description' => $settings->admin_description ?? 'Fleet Management Solution',
     ]);
 });
+
+Route::get('/logo/{filename}', function ($filename) {
+    $path = public_path('admin_resource/assets/images/'.$filename);
+
+    if (! file_exists($path)) {
+        return response()->json(['error' => 'Logo not found'], 404);
+    }
+
+    $mime = mime_content_type($path);
+
+    return response()->file($path, [
+        'Content-Type' => $mime,
+        'Access-Control-Allow-Origin' => '*',
+    ]);
+})->where('filename', '.*');

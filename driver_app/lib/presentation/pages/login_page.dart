@@ -5,7 +5,6 @@ import '../blocs/auth/auth_bloc.dart';
 import '../blocs/auth/auth_event.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/providers/settings_provider.dart';
-import '../../core/constants/app_constants.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -27,7 +26,7 @@ class _LoginPageState extends State<LoginPage>
   @override
   void initState() {
     super.initState();
-    
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<SettingsProvider>().loadSettings();
     });
@@ -107,17 +106,21 @@ class _LoginPageState extends State<LoginPage>
                             shape: BoxShape.circle,
                           ),
                           child: settings.logoUrl != null
-                              ? ClipOval(
-                                  child: Image.network(
-                                    settings.logoUrl!,
-                                    width: 80,
-                                    height: 80,
-                                    fit: BoxFit.cover,
-                                    errorBuilder: (context, error, stack) => const Icon(
-                                      Icons.directions_car,
-                                      size: 80,
-                                      color: AppTheme.primaryColor,
-                                    ),
+                              ? Image.network(
+                                  settings.logoUrl!,
+                                  width: 80,
+                                  height: 80,
+                                  fit: BoxFit.contain,
+                                  loadingBuilder:
+                                      (context, child, loadingProgress) {
+                                    if (loadingProgress == null) return child;
+                                    return const CircularProgressIndicator();
+                                  },
+                                  errorBuilder: (context, error, stack) =>
+                                      const Icon(
+                                    Icons.directions_car,
+                                    size: 80,
+                                    color: AppTheme.primaryColor,
                                   ),
                                 )
                               : const Icon(
@@ -132,7 +135,10 @@ class _LoginPageState extends State<LoginPage>
                         opacity: _fadeAnimation,
                         child: Text(
                           settings.title,
-                          style: Theme.of(context).textTheme.displaySmall?.copyWith(
+                          style: Theme.of(context)
+                              .textTheme
+                              .displaySmall
+                              ?.copyWith(
                                 fontWeight: FontWeight.bold,
                                 color: AppTheme.primaryColor,
                               ),
@@ -144,9 +150,10 @@ class _LoginPageState extends State<LoginPage>
                         opacity: _fadeAnimation,
                         child: Text(
                           settings.description,
-                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                color: AppTheme.textSecondary,
-                              ),
+                          style:
+                              Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                    color: AppTheme.textSecondary,
+                                  ),
                           textAlign: TextAlign.center,
                         ),
                       ),
@@ -223,7 +230,8 @@ class _LoginPageState extends State<LoginPage>
                                         color: Colors.white,
                                       ),
                                     )
-                                  : const Text('Sign In');
+                                  : const Text('Sign In'),
+                            );
                           },
                         ),
                       ),
