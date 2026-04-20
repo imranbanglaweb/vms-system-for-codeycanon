@@ -4,17 +4,16 @@ namespace App\Services;
 
 use App\Models\EmailLog;
 use App\Models\EmailTemplate;
-use App\Models\Requisition;
 use App\Models\MaintenanceRequisition;
+use App\Models\Requisition;
 use App\Models\User;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Mail;
-use Illuminate\Database\Eloquent\Model;
 
 /**
  * EmailService - Handles dynamic email notifications for requisition workflow
- * 
+ *
  * This service is used by:
  * - SendRequisitionStatusEmail listener
  * - DepartmentApprovalController
@@ -40,10 +39,6 @@ class EmailService
 
     /**
      * Create a new EmailService instance
-     *
-     * @param \Illuminate\Contracts\Mail\Mailer $mailer
-     * @param EmailTemplate $emailTemplate
-     * @param EmailLog $emailLog
      */
     public function __construct(
         \Illuminate\Contracts\Mail\Mailer $mailer,
@@ -58,24 +53,23 @@ class EmailService
     /**
      * Send email when requisition is created (to Department Head)
      *
-     * @param Requisition $requisition
-     * @param string|null $customEmail Optional custom email recipient
-     * @return bool
+     * @param  string|null  $customEmail  Optional custom email recipient
      */
     public function sendRequisitionCreated(Requisition $requisition, ?string $customEmail = null): bool
     {
         // If custom email is provided, use it instead of default recipients
-        if (!empty($customEmail)) {
+        if (! empty($customEmail)) {
             $recipients = [$customEmail];
         } else {
             $recipients = $this->getRecipients('created', $requisition);
         }
-        
+
         if (empty($recipients)) {
             Log::warning('EmailService: No recipients found for requisition created notification', [
                 'requisition_id' => $requisition->id,
-                'custom_email' => $customEmail
+                'custom_email' => $customEmail,
             ]);
+
             return false;
         }
 
@@ -91,18 +85,16 @@ class EmailService
 
     /**
      * Send email when Department Head approves (to Transport Head)
-     *
-     * @param Requisition $requisition
-     * @return bool
      */
     public function sendDepartmentApproved(Requisition $requisition): bool
     {
         $recipients = $this->getRecipients('dept_approved', $requisition);
-        
+
         if (empty($recipients)) {
             Log::warning('EmailService: No recipients found for department approved notification', [
-                'requisition_id' => $requisition->id
+                'requisition_id' => $requisition->id,
             ]);
+
             return false;
         }
 
@@ -118,18 +110,16 @@ class EmailService
 
     /**
      * Send email when Transport approves (to Requester, Driver, Transport Head)
-     *
-     * @param Requisition $requisition
-     * @return bool
      */
     public function sendTransportApproved(Requisition $requisition): bool
     {
         $recipients = $this->getRecipients('transport_approved', $requisition);
-        
+
         if (empty($recipients)) {
             Log::warning('EmailService: No recipients found for transport approved notification', [
-                'requisition_id' => $requisition->id
+                'requisition_id' => $requisition->id,
             ]);
+
             return false;
         }
 
@@ -146,27 +136,26 @@ class EmailService
     /**
      * Send email when maintenance requisition is created (to Department Head)
      *
-     * @param MaintenanceRequisition $requisition
-     * @param string|null $customEmail Optional custom email recipient
-     * @return bool
+     * @param  string|null  $customEmail  Optional custom email recipient
      */
     public function sendMaintenanceRequisitionCreated(MaintenanceRequisition $requisition, ?string $customEmail = null): bool
     {
         $recipients = [];
-        
+
         // If custom email is provided, use it
-        if (!empty($customEmail)) {
+        if (! empty($customEmail)) {
             $recipients = [$customEmail];
         } else {
             // Get Department Head emails
             $recipients = $this->getMaintenanceDepartmentHeadEmails($requisition);
         }
-        
+
         if (empty($recipients)) {
             Log::warning('EmailService: No recipients found for maintenance requisition created notification', [
                 'maintenance_requisition_id' => $requisition->id,
-                'custom_email' => $customEmail
+                'custom_email' => $customEmail,
             ]);
+
             return false;
         }
 
@@ -182,18 +171,16 @@ class EmailService
 
     /**
      * Send email when maintenance is approved by department (to Transport Head)
-     *
-     * @param MaintenanceRequisition $requisition
-     * @return bool
      */
     public function sendMaintenanceDepartmentApproved(MaintenanceRequisition $requisition): bool
     {
         $recipients = $this->getMaintenanceTransportHeadEmails($requisition);
-        
+
         if (empty($recipients)) {
             Log::warning('EmailService: No recipients found for maintenance department approved notification', [
-                'maintenance_requisition_id' => $requisition->id
+                'maintenance_requisition_id' => $requisition->id,
             ]);
+
             return false;
         }
 
@@ -209,9 +196,6 @@ class EmailService
 
     /**
      * Send email when maintenance is approved by transport (to Department Head and Requester)
-     *
-     * @param MaintenanceRequisition $requisition
-     * @return bool
      */
     public function sendMaintenanceTransportApproved(MaintenanceRequisition $requisition): bool
     {
@@ -219,11 +203,12 @@ class EmailService
             $this->getMaintenanceRequesterEmails($requisition),
             $this->getMaintenanceDepartmentHeadEmails($requisition)
         );
-        
+
         if (empty($recipients)) {
             Log::warning('EmailService: No recipients found for maintenance transport approved notification', [
-                'maintenance_requisition_id' => $requisition->id
+                'maintenance_requisition_id' => $requisition->id,
             ]);
+
             return false;
         }
 
@@ -239,18 +224,16 @@ class EmailService
 
     /**
      * Send email when maintenance is fully approved (to Requester)
-     *
-     * @param MaintenanceRequisition $requisition
-     * @return bool
      */
     public function sendMaintenanceApproved(MaintenanceRequisition $requisition): bool
     {
         $recipients = $this->getMaintenanceRequesterEmails($requisition);
-        
+
         if (empty($recipients)) {
             Log::warning('EmailService: No recipients found for maintenance approved notification', [
-                'maintenance_requisition_id' => $requisition->id
+                'maintenance_requisition_id' => $requisition->id,
             ]);
+
             return false;
         }
 
@@ -266,9 +249,6 @@ class EmailService
 
     /**
      * Get Department Head emails for maintenance requisition
-     *
-     * @param MaintenanceRequisition $requisition
-     * @return array
      */
     protected function getMaintenanceDepartmentHeadEmails(MaintenanceRequisition $requisition): array
     {
@@ -284,9 +264,6 @@ class EmailService
 
     /**
      * Get Transport Head emails for maintenance requisition
-     *
-     * @param MaintenanceRequisition $requisition
-     * @return array
      */
     protected function getMaintenanceTransportHeadEmails(MaintenanceRequisition $requisition): array
     {
@@ -302,16 +279,13 @@ class EmailService
 
     /**
      * Get requester emails for maintenance requisition
-     *
-     * @param MaintenanceRequisition $requisition
-     * @return array
      */
     protected function getMaintenanceRequesterEmails(MaintenanceRequisition $requisition): array
     {
         $emails = [];
 
         $employee = $requisition->employee;
-        if ($employee && !empty($employee->email)) {
+        if ($employee && ! empty($employee->email)) {
             $emails[] = $employee->email;
         }
 
@@ -320,40 +294,34 @@ class EmailService
 
     /**
      * Get department head user by department ID
-     *
-     * @param int $departmentId
-     * @return User|null
      */
     protected function getDepartmentHeadUser(int $departmentId): ?User
     {
         return User::whereHas('roles', function ($query) {
             $query->whereIn('name', ['Department Head', 'Manager']);
         })->where('department_id', $departmentId)
-          ->where('email', '!=', '')
-          ->whereNotNull('email')
-          ->first();
+            ->where('email', '!=', '')
+            ->whereNotNull('email')
+            ->first();
     }
 
     /**
      * Prepare template data from maintenance requisition
-     *
-     * @param MaintenanceRequisition $requisition
-     * @return array
      */
     protected function prepareMaintenanceTemplateData(MaintenanceRequisition $requisition): array
     {
         $employee = $requisition->employee;
         $vehicle = $requisition->vehicle;
         $vendor = $requisition->vendor;
-        
+
         // Get admin settings
         $adminSettings = DB::table('settings')->where('id', 1)->first();
         $adminTitle = $adminSettings->admin_title ?? 'Transport Management System';
         $adminLogo = $adminSettings->admin_logo ?? 'default.png';
         $baseUrl = config('app.url', 'http://localhost');
-        $adminLogoUrl = !empty($adminSettings->admin_logo) 
-            ? $baseUrl . '/public/admin_resource/assets/images/' . $adminSettings->admin_logo
-            : $baseUrl . '/public/admin_resource/assets/images/default.png';
+        $adminLogoUrl = ! empty($adminSettings->admin_logo)
+            ? $baseUrl.'/public/admin_resource/assets/images/'.$adminSettings->admin_logo
+            : $baseUrl.'/public/admin_resource/assets/images/default.png';
 
         // Get department name from employee
         $departmentName = 'N/A';
@@ -396,26 +364,22 @@ class EmailService
 
     /**
      * Generic method for sending templated emails
-     *
-     * @param string $templateType
-     * @param array $recipients
-     * @param array $data
-     * @return bool
      */
     public function sendTemplatedEmail(string $templateType, array $recipients, array $data): bool
     {
         $template = $this->getTemplate($templateType);
 
-        if (!$template) {
+        if (! $template) {
             $this->logEmail(
                 null,
                 implode(', ', $recipients),
                 'Template Not Found',
-                'Template type: ' . $templateType,
+                'Template type: '.$templateType,
                 EmailLog::STATUS_FAILED,
-                'Email template not found for type: ' . $templateType
+                'Email template not found for type: '.$templateType
             );
             Log::error('EmailService: Email template not found', ['type' => $templateType]);
+
             return false;
         }
 
@@ -428,7 +392,7 @@ class EmailService
         foreach ($recipients as $recipient) {
             try {
                 $this->mailer->to($recipient)->send(new \App\Mail\GenericMailable($subject, $body));
-                
+
                 $this->logEmail(
                     $template->id,
                     $recipient,
@@ -439,7 +403,7 @@ class EmailService
             } catch (\Exception $e) {
                 $success = false;
                 $errorMessage = $e->getMessage();
-                
+
                 $this->logEmail(
                     $template->id,
                     $recipient,
@@ -452,7 +416,7 @@ class EmailService
                 Log::error('EmailService: Failed to send email', [
                     'recipient' => $recipient,
                     'template_type' => $templateType,
-                    'error' => $errorMessage
+                    'error' => $errorMessage,
                 ]);
             }
         }
@@ -462,10 +426,6 @@ class EmailService
 
     /**
      * Find active template by type
-     *
-     * @param string $type
-     * @param bool $isActive
-     * @return EmailTemplate|null
      */
     public function getTemplate(string $type, bool $isActive = true): ?EmailTemplate
     {
@@ -480,10 +440,6 @@ class EmailService
 
     /**
      * Replace template variables with data
-     *
-     * @param EmailTemplate $template
-     * @param array $data
-     * @return array
      */
     public function renderTemplate(EmailTemplate $template, array $data): array
     {
@@ -492,14 +448,6 @@ class EmailService
 
     /**
      * Log email to email_logs table
-     *
-     * @param int|null $templateId
-     * @param string $recipient
-     * @param string $subject
-     * @param string $body
-     * @param string $status
-     * @param string|null $errorMessage
-     * @return EmailLog
      */
     public function logEmail(
         ?int $templateId,
@@ -518,16 +466,12 @@ class EmailService
             'error_message' => $errorMessage,
             'sent_at' => $status === EmailLog::STATUS_SENT ? now() : null,
             'created_by' => auth()->id() ?? 1,
-            'updated_by' => auth()->id() ?? 1
+            'updated_by' => auth()->id() ?? 1,
         ]);
     }
 
     /**
      * Get recipients based on notification type
-     *
-     * @param string $type
-     * @param Requisition $requisition
-     * @return array
      */
     public function getRecipients(string $type, Requisition $requisition): array
     {
@@ -565,16 +509,13 @@ class EmailService
 
     /**
      * Get requester emails
-     *
-     * @param Requisition $requisition
-     * @return array
      */
     protected function getRequesterEmails(Requisition $requisition): array
     {
         $emails = [];
 
         $requester = $requisition->requestedBy;
-        if ($requester && !empty($requester->email)) {
+        if ($requester && ! empty($requester->email)) {
             $emails[] = $requester->email;
         }
 
@@ -583,9 +524,6 @@ class EmailService
 
     /**
      * Get Department Head emails
-     *
-     * @param Requisition $requisition
-     * @return array
      */
     protected function getDepartmentHeadEmails(Requisition $requisition): array
     {
@@ -596,7 +534,7 @@ class EmailService
         if ($department) {
             // Use the model's accessor which has fallback logic
             $headEmail = $department->head_email;
-            if (!empty($headEmail)) {
+            if (! empty($headEmail)) {
                 $emails[] = $headEmail;
             }
         }
@@ -610,7 +548,7 @@ class EmailService
                     ->where('email', '!=', '')
                     ->pluck('email')
                     ->toArray();
-                
+
                 $emails = array_merge($emails, $headUsers);
             }
         }
@@ -620,9 +558,6 @@ class EmailService
 
     /**
      * Get Transport Head emails
-     *
-     * @param Requisition $requisition
-     * @return array
      */
     protected function getTransportHeadEmails(Requisition $requisition): array
     {
@@ -630,7 +565,7 @@ class EmailService
 
         // Get transport admin/head from the requisition
         $transportAdmin = $requisition->transportAdmin;
-        if ($transportAdmin && !empty($transportAdmin->email)) {
+        if ($transportAdmin && ! empty($transportAdmin->email)) {
             $emails[] = $transportAdmin->email;
         }
 
@@ -645,33 +580,30 @@ class EmailService
 
     /**
      * Get Driver emails
-     *
-     * @param Requisition $requisition
-     * @return array
      */
     protected function getDriverEmails(Requisition $requisition): array
     {
         $emails = [];
 
         $driver = $requisition->assignedDriver ?? $requisition->driver;
-        
+
         // First check if driver has direct email
-        if ($driver && !empty($driver->email)) {
+        if ($driver && ! empty($driver->email)) {
             $emails[] = $driver->email;
         }
-        
+
         // If driver has employee_id, try to get email from employee
         if (empty($emails) && $driver && $driver->employee_id) {
             $employee = \App\Models\Employee::find($driver->employee_id);
-            if ($employee && !empty($employee->email)) {
+            if ($employee && ! empty($employee->email)) {
                 $emails[] = $employee->email;
             }
         }
-        
+
         // Also check for user account linked to driver via employee
         if (empty($emails) && $driver && $driver->employee_id) {
             $user = \App\Models\User::where('employee_id', $driver->employee_id)->first();
-            if ($user && !empty($user->email)) {
+            if ($user && ! empty($user->email)) {
                 $emails[] = $user->email;
             }
         }
@@ -681,9 +613,6 @@ class EmailService
 
     /**
      * Prepare template data from requisition
-     *
-     * @param Requisition $requisition
-     * @return array
      */
     protected function prepareTemplateData(Requisition $requisition): array
     {
@@ -691,7 +620,7 @@ class EmailService
         $department = $requisition->department;
         $driver = $requisition->assignedDriver ?? $requisition->driver;
         $vehicle = $requisition->assignedVehicle ?? $requisition->vehicle;
-        
+
         // Get driver contact info - try employee first, then driver fields
         $driverPhone = '';
         $driverEmail = '';
@@ -704,20 +633,20 @@ class EmailService
                 $driverPhone = $driver->phone ?? $driver->mobile ?? '';
             }
         }
-        
+
         // Get department head info for department approval emails
         $headName = 'Department Head';
         $approvedByName = null;
         $approvedByEmail = null;
-        
+
         // Get department head name from the department's head_employee relationship
         if ($department && $department->headEmployee) {
             $headName = $department->headEmployee->name;
         } elseif ($department && $department->head_email) {
             // Use department name as fallback if head name not available
-            $headName = $department->department_name . ' Department Head';
+            $headName = $department->department_name.' Department Head';
         }
-        
+
         // Get the user who approved (for approval emails)
         if ($requisition->department_approved_by) {
             $approvedBy = User::find($requisition->department_approved_by);
@@ -726,21 +655,23 @@ class EmailService
                 $approvedByEmail = $approvedBy->email;
             }
         }
-        
-        // Get admin settings for email templates
-        $adminSettings = DB::table('settings')->where('id', 1)->first();
+
+        // Get admin settings for email templates (cached for 1 hour)
+        $adminSettings = Cache::remember('admin_settings_for_emails', 3600, function () {
+            return DB::table('settings')->where('id', 1)->first();
+        });
         $adminTitle = $adminSettings->admin_title ?? 'Transport Management System';
         $adminDescription = $adminSettings->admin_description ?? 'Fleet Management Solution';
         $adminLogo = $adminSettings->admin_logo ?? 'default.png';
         // Generate absolute URL for logo - needed for emails
         $baseUrl = config('app.url', 'http://localhost');
-        $adminLogoUrl = !empty($adminSettings->admin_logo) 
-            ? $baseUrl . '/public/admin_resource/assets/images/' . $adminSettings->admin_logo
-            : $baseUrl . '/public/admin_resource/assets/images/default.png';
+        $adminLogoUrl = ! empty($adminSettings->admin_logo)
+            ? $baseUrl.'/public/admin_resource/assets/images/'.$adminSettings->admin_logo
+            : $baseUrl.'/public/admin_resource/assets/images/default.png';
 
         return [
             'requisition_number' => $requisition->requisition_number ?? 'N/A',
-            'requester_name' => $requester ? ($requester->name ?? $requester->first_name . ' ' . $requester->last_name) : 'N/A',
+            'requester_name' => $requester ? ($requester->name ?? $requester->first_name.' '.$requester->last_name) : 'N/A',
             'requester_email' => $requester->email ?? 'N/A',
             'department_name' => $department ? ($department->department_name ?? 'N/A') : 'N/A',
             'pickup_location' => $requisition->from_location ?? 'N/A',
@@ -749,7 +680,7 @@ class EmailService
             'pickup_time' => $requisition->travel_time ? $requisition->travel_time->format('H:i') : 'N/A',
             'purpose' => $requisition->purpose ?? 'N/A',
             'vehicle_type' => $vehicle ? ($vehicle->vehicle_type ?? $vehicle->name) : ($requisition->vehicle_type ?? 'N/A'),
-            'passengers' => (string)($requisition->number_of_passenger ?? $requisition->total_passenger_count ?? 0),
+            'passengers' => (string) ($requisition->number_of_passenger ?? $requisition->total_passenger_count ?? 0),
             'status' => $requisition->status ?? 'N/A',
             'approval_url' => route('requisitions.show', $requisition->id),
             'company_name' => config('app.name', 'Transport Management System'),

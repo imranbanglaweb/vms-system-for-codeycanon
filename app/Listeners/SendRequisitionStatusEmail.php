@@ -7,17 +7,13 @@ use App\Services\EmailService;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Queue\InteractsWithQueue;
 
-class SendRequisitionStatusEmail
+class SendRequisitionStatusEmail implements ShouldQueue
 {
-    /**
-     * @var EmailService
-     */
-    protected $emailService;
+    use InteractsWithQueue;
 
     /**
      * Create the event listener.
      *
-     * @param EmailService $emailService
      * @return void
      */
     public function __construct(EmailService $emailService)
@@ -28,7 +24,6 @@ class SendRequisitionStatusEmail
     /**
      * Handle the event.
      *
-     * @param  RequisitionStatusChanged  $event
      * @return void
      */
     public function handle(RequisitionStatusChanged $event)

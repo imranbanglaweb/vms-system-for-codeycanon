@@ -2,10 +2,11 @@
 
 namespace App\Observers;
 
+use App\Jobs\SendRequisitionCreatedEmailJob;
 use App\Models\Requisition;
 use App\Models\User;
-use App\Services\EmailService;
 use App\Notifications\RequisitionCreatedNotification;
+use App\Services\EmailService;
 
 class RequisitionObserver
 {
@@ -17,7 +18,6 @@ class RequisitionObserver
     /**
      * Create a new observer instance.
      *
-     * @param EmailService $emailService
      * @return void
      */
     public function __construct(EmailService $emailService)
@@ -28,30 +28,30 @@ class RequisitionObserver
     /**
      * Handle the Requisition "created" event.
      *
-     * @param Requisition $requisition
      * @return void
      */
     public function created(Requisition $requisition)
     {
-        // Send email notification to department head
-        $this->emailService->sendRequisitionCreated($requisition);
+        // Send email notification to department head via queued job
+        SendRequisitionCreatedEmailJob::dispatch($requisition);
 
         // Also send push notifications to admins (existing behavior)
-        $users = User::where('role', 'admin')->get();
+        // Optimized: use withCount() for efficient count check
+        $users = User::where('role', 'admin')
+            ->withCount('pushSubscriptions')
+            ->having('push_subscriptions_count', '>', 0)
+            ->get();
 
         foreach ($users as $user) {
-            if ($user->pushSubscriptions()->count()) {
-                $user->notify(
-                    new RequisitionCreatedNotification($requisition)
-                );
-            }
+            $user->notify(
+                new RequisitionCreatedNotification($requisition)
+            );
         }
     }
 
     /**
      * Handle the Requisition "updated" event.
      *
-     * @param Requisition $requisition
      * @return void
      */
     public function updated(Requisition $requisition)
@@ -69,7 +69,6 @@ class RequisitionObserver
     /**
      * Handle the Requisition "deleted" event.
      *
-     * @param Requisition $requisition
      * @return void
      */
     public function deleted(Requisition $requisition)
@@ -80,7 +79,6 @@ class RequisitionObserver
     /**
      * Handle the Requisition "restored" event.
      *
-     * @param Requisition $requisition
      * @return void
      */
     public function restored(Requisition $requisition)

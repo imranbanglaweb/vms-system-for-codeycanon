@@ -2,7 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Mail\RequisitionStatusChangedMail;
+use App\Jobs\SendRequisitionCreatedEmailJob;
+use App\Mail\RequisitionStatusMail;
 use App\Models\Department;
 use App\Models\Driver;
 use App\Models\Employee;
@@ -145,55 +146,59 @@ class RequisitionController extends Controller
         $user = Auth::user();
         $isEmployee = $user->hasRole('Employee');
 
-        $vehicles = Vehicle::where('status', 1)->get();
-        $drivers = Driver::where('status', 1)->get();
-        $departments = Department::all();
-        $units = Unit::all();
-        $vehicleTypes = VehicleType::all();
-        $employees = Employee::all();
+        // Optimized queries: only fetch necessary columns
+        $vehicles = Vehicle::where('status', 1)->select('id', 'vehicle_number', 'model')->get();
+        $drivers = Driver::where('status', 1)->select('id', 'name')->get();
+        $departments = Department::select('id', 'department_name')->get();
+        $units = Unit::select('id', 'unit_name')->get();
+        $vehicleTypes = VehicleType::select('id', 'vehicle_type')->get();
 
-        // Try to find the employee record that matches the logged-in user
-        $selectedEmployeeId = null;
-
-        // Method 1: Match by employee_id stored in users table (most reliable - direct link)
-        if ($user->employee_id) {
-            $matchingEmployee = Employee::find($user->employee_id);
-            if ($matchingEmployee) {
-                $selectedEmployeeId = $matchingEmployee->id;
+        // For Employee role, only fetch their own employee record
+        // For Admin/Transport/Manager, fetch all employees (needed for passenger selection)
+        if ($isEmployee) {
+            $selectedEmployeeId = null;
+            if ($user->employee_id) {
+                $selectedEmployee = Employee::find($user->employee_id);
+                if ($selectedEmployee) {
+                    $selectedEmployeeId = $selectedEmployee->id;
+                    $employees = collect([$selectedEmployee]); // Only current employee
+                } else {
+                    $employees = collect(); // Empty fallback
+                }
+            } else {
+                // Fallback matching
+                $matchingEmployee = null;
+                if ($user->cell_phone) {
+                    $matchingEmployee = Employee::where('phone', $user->cell_phone)->first();
+                }
+                if (! $matchingEmployee) {
+                    $matchingEmployee = Employee::where('name', 'like', '%'.$user->name.'%')->first();
+                }
+                if ($matchingEmployee) {
+                    $selectedEmployeeId = $matchingEmployee->id;
+                    $employees = collect([$matchingEmployee]);
+                } else {
+                    $employees = collect();
+                }
             }
-        }
-
-        // Method 2: Match by phone if available
-        if (! $selectedEmployeeId && $user->cell_phone) {
-            $matchingEmployee = Employee::where('phone', $user->cell_phone)->first();
-            if ($matchingEmployee) {
-                $selectedEmployeeId = $matchingEmployee->id;
-            }
-        }
-
-        // Method 3: Match by name as last resort
-        if (! $selectedEmployeeId) {
-            $matchingEmployee = Employee::where('name', 'like', '%'.$user->name.'%')->first();
-            if ($matchingEmployee) {
-                $selectedEmployeeId = $matchingEmployee->id;
-            }
+        } else {
+            // Admin/Transport/Manager need full employee list for passenger selection
+            $employees = Employee::select('id', 'name')->get();
+            $selectedEmployeeId = null;
         }
 
         return view('admin.dashboard.requisition.create', [
             'action' => route('requisitions.store'),
             'method' => 'POST',
-            'units' => Unit::all(),
+            'units' => $units,
             'requisition' => new Requisition,
             'vehicles' => $vehicles,
             'employees' => $employees,
             'departments' => $departments,
             'vehicleTypes' => $vehicleTypes,
-            'units' => $units,
             'drivers' => $drivers,
             'selectedEmployeeId' => $selectedEmployeeId,
         ]);
-
-        // return view('admin.dashboard.requisition.create', compact('employees', 'vehicleTypes'));
     }
 
     public function validateAjax(Request $request)
@@ -288,16 +293,22 @@ class RequisitionController extends Controller
                 'created_by' => auth()->id() ?? 1,
             ]);
 
-            // Add passengers if any
+            // Add passengers if any (bulk insert for performance)
             if (! empty($request->passengers)) {
+                $passengerData = [];
                 foreach ($request->passengers as $passenger) {
                     if (! empty($passenger['employee_id'])) {
-                        \App\Models\RequisitionPassenger::create([
+                        $passengerData[] = [
                             'requisition_id' => $requisition->id,
                             'employee_id' => $passenger['employee_id'],
                             'created_by' => auth()->id() ?? 1,
-                        ]);
+                            'created_at' => now(),
+                            'updated_at' => now(),
+                        ];
                     }
+                }
+                if (! empty($passengerData)) {
+                    \App\Models\RequisitionPassenger::insert($passengerData);
                 }
             }
 
@@ -306,10 +317,11 @@ class RequisitionController extends Controller
             // Send email notification to department head (only if toggle is checked)
             if ($request->send_email_to_head == 1 && ! empty($request->department_head_email)) {
                 try {
-                    $this->emailService->sendRequisitionCreated($requisition, $request->department_head_email);
-                    Log::info('Email notification sent for requisition created: '.$requisition->requisition_number.' to: '.$request->department_head_email);
+                    // Queue job instead of sending synchronously
+                    SendRequisitionCreatedEmailJob::dispatch($requisition, $request->department_head_email);
+                    Log::info('Email notification queued for requisition created: '.$requisition->requisition_number.' to: '.$request->department_head_email);
                 } catch (\Exception $e) {
-                    Log::error('Failed to send requisition created email: '.$e->getMessage());
+                    Log::error('Failed to queue email job: '.$e->getMessage());
                 }
             } else {
                 Log::info('Email notification skipped for requisition: '.$requisition->requisition_number.' (toggle not checked or no email provided)');
@@ -639,13 +651,13 @@ class RequisitionController extends Controller
             'note' => "Status changed from {$old} to {$new}. Remarks: ".($request->comment ?? 'N/A'),
         ]);
 
-        // SEND EMAIL TO EMPLOYEE
+        // SEND EMAIL TO EMPLOYEE (queued)
         Mail::to($req->requestedBy->email)
-            ->send(new RequisitionStatusChangedMail($req, $new, $request->comment ?? null));
+            ->queue(new RequisitionStatusMail($req, $new, $request->comment ?? null));
 
-        // OPTIONAL: SEND EMAIL TO ADMIN
+        // OPTIONAL: SEND EMAIL TO ADMIN (queued)
         Mail::to('admin@company.com')
-            ->send(new RequisitionStatusChangedMail($req, $new));
+            ->queue(new RequisitionStatusMail($req, $new));
 
         return response()->json(['success' => true]);
     }
