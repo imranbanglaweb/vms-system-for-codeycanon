@@ -255,43 +255,13 @@ class RequisitionController extends Controller
             ], 422);
         }
 
-        // 🔵 AUTO GENERATE UNIQUE REQUISITION NUMBER with database locking
-        $retry = 0;
-        $maxAttempts = 5;
+        // 🔵 AUTO GENERATE UNIQUE REQUISITION NUMBER
+        $maxNumber = DB::table('requisitions')
+            ->where('requisition_number', 'like', 'REQ-0000%')
+            ->selectRaw('COALESCE(MAX(CAST(SUBSTRING(requisition_number, 5) AS UNSIGNED)), 0) + 1 as next_num')
+            ->value('next_num');
 
-        do {
-            if ($retry > 0) {
-                usleep(100000 * $retry);
-            }
-
-            // Use DB::statement with LOCK to prevent race conditions
-            $maxNumber = DB::table('requisitions')
-                ->where('requisition_number', 'like', 'REQ-0000%')
-                ->lockForUpdate()
-                ->selectRaw('MAX(CAST(SUBSTRING(requisition_number, 5) AS UNSIGNED)) as max_num')
-                ->value('max_num');
-
-            $number = ($maxNumber ?? 0) + 1;
-            $requisition_number = 'REQ-'.str_pad($number, 5, '0', STR_PAD_LEFT);
-
-            // Check if the generated number already exists
-            $exists = DB::table('requisitions')
-                ->where('requisition_number', $requisition_number)
-                ->exists();
-
-            if (! $exists) {
-                break; // Found a unique number
-            }
-
-            $retry++;
-        } while ($retry < $maxAttempts);
-
-        if ($exists) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Unable to generate unique requisition number. Please try again.',
-            ], 500);
-        }
+        $requisition_number = 'REQ-'.str_pad($maxNumber, 5, '0', STR_PAD_LEFT);
 
         // Get employee record to auto-populate department and unit if not provided
         $employee = Employee::find($request->employee_id);
