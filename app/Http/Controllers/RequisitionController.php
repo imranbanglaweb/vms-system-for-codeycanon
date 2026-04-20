@@ -356,7 +356,11 @@ class RequisitionController extends Controller
             ], 200);
 
         } catch (\Throwable $e) {
-            DB::rollBack();
+            try {
+                DB::rollBack();
+            } catch (\Exception $rollbackError) {
+                \Log::warning('Rollback failed: '.$rollbackError->getMessage());
+            }
             \Log::error('Requisition store error: '.$e->getMessage());
 
             return response()->json([
