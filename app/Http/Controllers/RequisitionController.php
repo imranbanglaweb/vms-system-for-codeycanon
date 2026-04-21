@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Jobs\SendRequisitionCreatedEmailJob;
 use App\Mail\RequisitionStatusMail;
 use App\Models\Department;
 use App\Models\Driver;
@@ -302,14 +301,7 @@ class RequisitionController extends Controller
 
                     DB::commit();
 
-                    try {
-                        if ($request->send_email_to_head == 1 && ! empty($request->department_head_email)) {
-                            SendRequisitionCreatedEmailJob::dispatch($requisition, $request->department_head_email);
-                        }
-                        $this->sendRequisitionCreatedNotifications($requisition);
-                    } catch (\Throwable $notifyError) {
-                        \Log::warning('Post-create notification failed: '.$notifyError->getMessage());
-                    }
+                    // RequisitionObserver handles email notifications after create
 
                     return response()->json([
                         'status' => 'success',
