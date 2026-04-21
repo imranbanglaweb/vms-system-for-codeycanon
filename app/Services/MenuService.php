@@ -268,6 +268,7 @@ class MenuService
                             'maintenance-edit',
                             'report-trip-fuel',
                             'report-vehicle-utilization',
+                            'settings',
                             'settings-manage',
                             'settings-notification',
                             'settings-language',
@@ -278,6 +279,11 @@ class MenuService
                         ];
 
                         if ($child->menu_permission && in_array($child->menu_permission, $transportAllowedChildMenus)) {
+                            // Allow settings menus for transport without strict permission check
+                            if (in_array($child->menu_permission, ['settings', 'settings-manage', 'settings-notification', 'settings-language'])) {
+                                return true;
+                            }
+
                             return self::userHasPermission($user, $child->menu_permission);
                         }
 
