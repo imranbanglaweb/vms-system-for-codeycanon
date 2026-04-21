@@ -795,13 +795,8 @@
                     <!-- Notifications -->
                     @auth
                     @php
-                    $notifications = \App\Models\Notification::where('user_id', auth()->id())
-                        ->latest()
-                        ->limit(10)
-                        ->get();
-                    $unreadCount = \App\Models\Notification::where('user_id', auth()->id())
-                        ->where('is_read', 0)
-                        ->count();
+                    $notifications = auth()->user()->unreadNotifications()->limit(10)->get();
+                    $unreadCount = auth()->user()->unreadNotifications()->count();
                     @endphp
                     
                     <div class="dropdown" id="notificationDropdown">
@@ -814,8 +809,8 @@
                         <div class="dropdown-menu">
                             <div class="dropdown-header">Notifications</div>
                             @forelse($notifications as $note)
-                                <a href="{{ $note->link ?? '#' }}" class="dropdown-item">
-                                    <strong>{{ $note->title }}</strong>
+                                <a href="#" class="dropdown-item" onclick="markNotificationAsRead('{{ $note->id }}'); return true;">
+                                    <strong>{{ $note->data['title'] ?? 'New Notification' }}</strong>
                                     <small class="text-muted d-block">{{ $note->created_at->diffForHumans() }}</small>
                                 </a>
                             @empty
@@ -964,6 +959,22 @@
                 });
             }
         });
+        
+        // Mark notification as read
+        function markNotificationAsRead(notificationId) {
+            fetch('/notifications/mark-read/' + notificationId, {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'Content-Type': 'application/json'
+                }
+            }).then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    location.reload();
+                }
+            });
+        }
     </script>
 </body>
 </html>

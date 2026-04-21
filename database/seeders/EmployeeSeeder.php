@@ -2,10 +2,10 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
 use App\Models\Employee;
 use App\Models\Location;
 use Faker\Factory as Faker;
+use Illuminate\Database\Seeder;
 
 class EmployeeSeeder extends Seeder
 {
@@ -96,6 +96,7 @@ class EmployeeSeeder extends Seeder
                 [
                     'name' => $employee['name'],
                     'employee_code' => $employee['employee_code'],
+                    'company_id' => 1,
                     'department_id' => $employee['department_id'],
                     'unit_id' => $employee['unit_id'],
                     'location_id' => $employee['location_id'],
@@ -110,18 +111,20 @@ class EmployeeSeeder extends Seeder
         // Generate 100 dummy employees
         for ($i = 0; $i < 100; $i++) {
             Employee::updateOrCreate(
-                ['employee_code' => 'EMP' . str_pad($i + 200, 4, '0', STR_PAD_LEFT)],
+                ['employee_code' => 'EMP'.str_pad($i + 200, 4, '0', STR_PAD_LEFT)],
                 [
                     'name' => $faker->name,
                     'email' => $faker->unique()->safeEmail,
-                'department_id' => $faker->numberBetween(1, 10),
-                'unit_id' => $faker->numberBetween(1, 6),
-                'location_id' => $faker->numberBetween(1, 5),
-                'designation' => $faker->jobTitle,
-                'phone' => $faker->phoneNumber,
-                'employee_type' => $faker->randomElement(['Permanent', 'Contract', 'Intern']),
-                'status' => 'Active',
-            ]);
+                    'company_id' => 1,
+                    'department_id' => $faker->numberBetween(1, 10),
+                    'unit_id' => $faker->numberBetween(1, 6),
+                    'location_id' => $faker->numberBetween(1, 5),
+                    'designation' => $faker->jobTitle,
+                    'phone' => $faker->phoneNumber,
+                    'employee_type' => $faker->randomElement(['Permanent', 'Contract', 'Intern']),
+                    'status' => 'Active',
+                ]
+            );
         }
     }
 }

@@ -6,90 +6,74 @@
 |==========================================================================
 */
 
-use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\Auth;
-
+use App\Http\Controllers\Admin\AdminPaymentController;
+use App\Http\Controllers\Admin\PushTestController;
 // ============================================================================
 // CONTROLLER IMPORTS
 // ============================================================================
 
 // Core Controllers
-use App\Http\Controllers\HomeController;
-use App\Http\Controllers\PushSubscriptionController;
-
-use App\Http\Controllers\GpsTrackingController;
-use App\Http\Controllers\GpsDeviceController;
-
-// Vehicle & Transport
-use App\Http\Controllers\VehicleController;
-use App\Http\Controllers\VehicleTypeController;
-use App\Http\Controllers\DriverController;
-use App\Http\Controllers\VendorController;
-use App\Http\Controllers\TripSheetController;
-
-// Requisitions & Approvals
-use App\Http\Controllers\RequisitionController;
-use App\Http\Controllers\RequisitionApprovalController;
-use App\Http\Controllers\DepartmentApprovalController;
-use App\Http\Controllers\TransportApprovalController;
-
-// Maintenance
-use App\Http\Controllers\MaintenanceController;
-use App\Http\Controllers\MaintenanceTypeController;
-use App\Http\Controllers\MaintenanceVendorController;
-use App\Http\Controllers\MaintenanceScheduleController;
-use App\Http\Controllers\MaintenanceRequisitionController;
-use App\Http\Controllers\MaintenanceApprovalController;
-use App\Http\Controllers\MaintenanceTransportApprovalController;
-use App\Http\Controllers\MaintenanceCategoryController;
-
-// Reports
-use App\Http\Controllers\Reports\ReportController;
-use App\Http\Controllers\Reports\RequisitionReportController;
-use App\Http\Controllers\Reports\MaintenanceReportController;
-use App\Http\Controllers\Reports\TripFuelReportController;
-use App\Http\Controllers\Reports\VehicleUtilizationReportController;
-use App\Http\Controllers\Reports\DriverPerformanceReportController;
-
-// AI Features
-use App\Http\Controllers\AIMaintenanceAlertController;
-use App\Http\Controllers\AIReportController;
-
-// Admin & Settings
-use App\Http\Controllers\RoleController;
-use App\Http\Controllers\PermissionController;
-use App\Http\Controllers\SettingController;
-use App\Http\Controllers\MenuController;
-use App\Http\Controllers\NotificationController;
-// Subscriptions & Payments
-use App\Http\Controllers\Admin\SubscriptionPlanController;
 use App\Http\Controllers\Admin\QuotaManagementController;
 use App\Http\Controllers\Admin\SubscriptionController;
-use App\Http\Controllers\Admin\AdminPaymentController;
-use App\Http\Controllers\Payment\ManualPaymentController;
-use App\Http\Controllers\Admin\PushTestController;
-
-// Organization Structure
-use App\Http\Controllers\CompanyController;
-use App\Http\Controllers\DepartmentController;
-use App\Http\Controllers\DepartmentHeadController;
-use App\Http\Controllers\UnitController;
-use App\Http\Controllers\LocationController;
-use App\Http\Controllers\EmployeeController;
-use App\Http\Controllers\DepartmentEmployeeController;
-use App\Http\Controllers\UserController;
-
-
-// Other Controllers
+use App\Http\Controllers\Admin\SubscriptionPlanController;
+use App\Http\Controllers\AIMaintenanceAlertController;
+// Vehicle & Transport
+use App\Http\Controllers\AIReportController;
 use App\Http\Controllers\CategoryController;
-use App\Http\Controllers\LicneseTypeController;
-use App\Http\Controllers\TranslationController;
-use App\Http\Controllers\LanguageController;
+use App\Http\Controllers\CompanyController;
+use App\Http\Controllers\DepartmentApprovalController;
+use App\Http\Controllers\DepartmentController;
+// Requisitions & Approvals
+use App\Http\Controllers\DepartmentEmployeeController;
+use App\Http\Controllers\DepartmentHeadController;
+use App\Http\Controllers\DriverController;
 use App\Http\Controllers\EmailLogController;
+// Maintenance
 use App\Http\Controllers\EmailTemplateController;
+use App\Http\Controllers\EmployeeController;
+use App\Http\Controllers\GpsDeviceController;
+use App\Http\Controllers\GpsTrackingController;
+use App\Http\Controllers\HomeController;
+use App\Http\Controllers\LanguageController;
+// Reports
+use App\Http\Controllers\LicneseTypeController;
+use App\Http\Controllers\LocationController;
+use App\Http\Controllers\MaintenanceApprovalController;
+use App\Http\Controllers\MaintenanceCategoryController;
+use App\Http\Controllers\MaintenanceRequisitionController;
+// AI Features
+use App\Http\Controllers\MaintenanceTransportApprovalController;
+use App\Http\Controllers\MaintenanceTypeController;
+// Admin & Settings
+use App\Http\Controllers\MaintenanceVendorController;
+use App\Http\Controllers\MenuController;
+use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\Payment\ManualPaymentController;
+use App\Http\Controllers\PermissionController;
+// Subscriptions & Payments
+use App\Http\Controllers\PushSubscriptionController;
+use App\Http\Controllers\Reports\DriverPerformanceReportController;
+use App\Http\Controllers\Reports\MaintenanceReportController;
+use App\Http\Controllers\Reports\RequisitionReportController;
+use App\Http\Controllers\Reports\TripFuelReportController;
+use App\Http\Controllers\Reports\VehicleUtilizationReportController;
+// Organization Structure
+use App\Http\Controllers\RequisitionApprovalController;
+use App\Http\Controllers\RequisitionController;
+use App\Http\Controllers\RoleController;
+use App\Http\Controllers\SettingController;
 use App\Http\Controllers\TestEmailController;
-
-use App\Notifications\TestPushNotification;
+use App\Http\Controllers\TranslationController;
+use App\Http\Controllers\TransportApprovalController;
+use App\Http\Controllers\TripSheetController;
+// Other Controllers
+use App\Http\Controllers\UnitController;
+use App\Http\Controllers\UserController;
+use App\Http\Controllers\VehicleController;
+use App\Http\Controllers\VehicleTypeController;
+use App\Http\Controllers\VendorController;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Route;
 
 // ============================================================================
 // EMAIL LOGS ROUTES
@@ -108,7 +92,7 @@ Route::middleware(['auth'])->group(function () {
     Route::post('email-templates/toggle-status', [EmailTemplateController::class, 'toggleStatus'])->name('email-templates.toggle-status');
     Route::post('email-templates/{id}/restore', [EmailTemplateController::class, 'restore'])->name('email-templates.restore');
     Route::get('email-templates/{id}/preview', [EmailTemplateController::class, 'preview'])->name('email-templates.preview');
-    
+
     // Test Email Routes
     Route::get('email/test', [TestEmailController::class, 'index'])->name('admin.email.test');
     Route::post('email/test/preview', [TestEmailController::class, 'preview'])->name('admin.email.test.preview');
@@ -124,18 +108,6 @@ Auth::routes();
 // Demo Login Routes
 Route::post('/demo-login', [App\Http\Controllers\Auth\LoginController::class, 'demoLogin'])->name('demo.login');
 
-
-
-
-
-
-
-
-
-
-
-
-
 // ============================================================================
 // 2. DASHBOARD & HOME
 // ============================================================================
@@ -143,6 +115,7 @@ Route::post('/demo-login', [App\Http\Controllers\Auth\LoginController::class, 'd
 // Route for service worker (must be accessible without auth)
 Route::get('/service-worker.js', function () {
     $path = public_path('service-worker.js');
+
     return response()->file($path, [
         'Content-Type' => 'application/javascript',
     ]);
@@ -153,10 +126,10 @@ Route::middleware('web')->post('/api/push/subscribe', [PushSubscriptionControlle
 
 Route::middleware(['auth'])->group(function () {
     Route::redirect('/', 'login');
-    
+
     // Home & Dashboard
     Route::get('/home', [HomeController::class, 'index'])->name('home');
-    
+
     // AJAX endpoints for dashboard
     Route::get('/admin/dashboard/data', [HomeController::class, 'data'])->name('admin.dashboard.data');
     Route::get('/dashboard/recent-documents', [HomeController::class, 'getRecentDocuments'])->name('dashboard.recent-documents');
@@ -171,7 +144,7 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('vehicle-type', VehicleTypeController::class);
 
     Route::get('/vehicles/{id}/details', [VehicleController::class, 'getVehicleDetails'])->name('vehicles.details');
-    
+
     // Vehicle routes - quota check only for create/store operations
     Route::get('/vehicles', [VehicleController::class, 'index'])->name('vehicles.index');
     Route::get('/vehicles/create', [VehicleController::class, 'create'])->name('vehicles.create')->middleware('quota:vehicles,1');
@@ -213,10 +186,10 @@ Route::middleware(['prevent-back-history'])->group(function () {
     // DataTable AJAX endpoint
     Route::get('drivers/data', [DriverController::class, 'data'])->name('drivers.data');
     Route::get('drivers/list', [DriverController::class, 'list'])->name('drivers.list');
-    
+
     // CRUD operations
     Route::resource('drivers', DriverController::class);
-    
+
     // AJAX helpers
     Route::get('/get-departments-by-unit', [DriverController::class, 'getDepartmentsByUnit'])->name('getDepartmentsByUnit');
     Route::get('/get-employee-info', [DriverController::class, 'getEmployeeInfo'])->name('getEmployeeInfo');
@@ -235,84 +208,80 @@ Route::middleware(['auth'])->group(function () {
 // ============================================================================
 
 Route::middleware(['prevent-back-history'])->group(function () {
-    
-    
+
     // AJAX endpoints
     Route::get('/requisitions-search', [RequisitionController::class, 'index'])->name('requisitions.search');
     Route::post('/requisitions/validate', [RequisitionController::class, 'validateAjax'])->name('requisitions.validate');
     Route::get('/get-employee-details/{id}', [EmployeeController::class, 'getEmployeeDetails'])->name('employee.details');
-    
-   
 
-Route::get('/drivers/by-vehicle/{vehicle}', [DriverController::class, 'getByVehicle'])
-    ->name('drivers.by.vehicle');
+    Route::get('/drivers/by-vehicle/{vehicle}', [DriverController::class, 'getByVehicle'])
+        ->name('drivers.by.vehicle');
 
-// ============================================================================
-// DRIVER PORTAL ROUTES
-// ============================================================================
+    // ============================================================================
+    // DRIVER PORTAL ROUTES
+    // ============================================================================
 
-Route::middleware(['auth'])->prefix('driver')->name('driver.')->group(function () {
-    // Driver Dashboard
-    Route::get('/dashboard', [DriverController::class, 'driverDashboard'])->name('dashboard');
-    
-    // My Schedule
-    Route::get('/schedule', [DriverController::class, 'driverSchedule'])->name('schedule');
-    
-    // My Trips
-    Route::get('/trips', [DriverController::class, 'driverTrips'])->name('trips');
-    
-    // Trip Status Update
-    Route::get('/trip-status', [DriverController::class, 'driverTripStatus'])->name('trip.status');
-    Route::get('/trip-status/{id}', [DriverController::class, 'driverTripStatus'])->name('trip.status.view');
-    Route::post('/trip/{id}/start', [DriverController::class, 'startTrip'])->name('trip.start');
-    Route::post('/trip/{id}/finish', [DriverController::class, 'finishTrip'])->name('trip.finish');
-    Route::post('/trip/{id}/end', [DriverController::class, 'endTrip'])->name('trip.end');
-    Route::patch('/trip/{id}/complete', [DriverController::class, 'endTrip'])->name('trip.complete');
-    
-    // Fuel Log (Driver)
-    Route::get('/fuel-log', [DriverController::class, 'driverFuelLog'])->name('fuel.log');
-    Route::post('/fuel-log/store', [DriverController::class, 'storeFuelLog'])->name('fuel.store');
-    Route::get('/fuel-log/vehicle-data', [DriverController::class, 'getVehicleFuelData'])->name('fuel.vehicle.data');
-    
-    // Fuel History (Admin)
-    Route::get('/fuel-history', [DriverController::class, 'fuelHistory'])->name('fuel.history');
-    
-    // Fuel Purchase Log (Admin)
-    Route::get('/fuel-purchase-log', [DriverController::class, 'fuelPurchaseLog'])->name('fuel.purchase.log');
-    
-    // Monthly Fuel Summary (Admin)
-    Route::get('/fuel-monthly-summary', [DriverController::class, 'fuelMonthlySummary'])->name('fuel.monthly.summary');
-    
-    // Vehicle Fuel Efficiency (Admin)
-    Route::get('/fuel-efficiency', [DriverController::class, 'fuelEfficiency'])->name('fuel.efficiency');
-    
-    // Availability
-    Route::get('/availability', [DriverController::class, 'driverAvailability'])->name('availability');
-    Route::post('/availability/update', [DriverController::class, 'updateAvailability'])->name('availability.update');
-    
-    // My Vehicle
-    Route::get('/vehicle', [DriverController::class, 'driverVehicle'])->name('vehicle');
-});
+    Route::middleware(['auth'])->prefix('driver')->name('driver.')->group(function () {
+        // Driver Dashboard
+        Route::get('/dashboard', [DriverController::class, 'driverDashboard'])->name('dashboard');
 
-Route::resource('requisitions', RequisitionController::class);
-    
+        // My Schedule
+        Route::get('/schedule', [DriverController::class, 'driverSchedule'])->name('schedule');
+
+        // My Trips
+        Route::get('/trips', [DriverController::class, 'driverTrips'])->name('trips');
+
+        // Trip Status Update
+        Route::get('/trip-status', [DriverController::class, 'driverTripStatus'])->name('trip.status');
+        Route::get('/trip-status/{id}', [DriverController::class, 'driverTripStatus'])->name('trip.status.view');
+        Route::post('/trip/{id}/start', [DriverController::class, 'startTrip'])->name('trip.start');
+        Route::post('/trip/{id}/finish', [DriverController::class, 'finishTrip'])->name('trip.finish');
+        Route::post('/trip/{id}/end', [DriverController::class, 'endTrip'])->name('trip.end');
+        Route::patch('/trip/{id}/complete', [DriverController::class, 'endTrip'])->name('trip.complete');
+
+        // Fuel Log (Driver)
+        Route::get('/fuel-log', [DriverController::class, 'driverFuelLog'])->name('fuel.log');
+        Route::post('/fuel-log/store', [DriverController::class, 'storeFuelLog'])->name('fuel.store');
+        Route::get('/fuel-log/vehicle-data', [DriverController::class, 'getVehicleFuelData'])->name('fuel.vehicle.data');
+
+        // Fuel History (Admin)
+        Route::get('/fuel-history', [DriverController::class, 'fuelHistory'])->name('fuel.history');
+
+        // Fuel Purchase Log (Admin)
+        Route::get('/fuel-purchase-log', [DriverController::class, 'fuelPurchaseLog'])->name('fuel.purchase.log');
+
+        // Monthly Fuel Summary (Admin)
+        Route::get('/fuel-monthly-summary', [DriverController::class, 'fuelMonthlySummary'])->name('fuel.monthly.summary');
+
+        // Vehicle Fuel Efficiency (Admin)
+        Route::get('/fuel-efficiency', [DriverController::class, 'fuelEfficiency'])->name('fuel.efficiency');
+
+        // Availability
+        Route::get('/availability', [DriverController::class, 'driverAvailability'])->name('availability');
+        Route::post('/availability/update', [DriverController::class, 'updateAvailability'])->name('availability.update');
+
+        // My Vehicle
+        Route::get('/vehicle', [DriverController::class, 'driverVehicle'])->name('vehicle');
+    });
+
+    Route::resource('requisitions', RequisitionController::class);
+
     // Status & Workflow
     Route::post('/requisitions/update-status/{id}', [RequisitionController::class, 'updateStatus'])->name('requisitions.updateStatus');
     Route::post('{id}/workflow/update', [RequisitionController::class, 'updateWorkflow'])->name('requisitions.workflow.update');
     Route::post('requisitions/{id}/workflow/update', [RequisitionController::class, 'updateWorkflow'])
         ->middleware('auth', 'role:transport,admin')->name('requisitions.workflow.update');
-    
+
     // Transport Approval
     Route::post('/requisitions/transport-approve/{id}', [RequisitionApprovalController::class, 'transportApprove'])->name('requisitions.transport.approve');
     Route::post('/requisitions/transport-reject/{id}', [RequisitionApprovalController::class, 'transportReject'])->name('requisitions.transport.reject');
-    
+
     // Admin Final Approval
     Route::post('/requisitions/admin-approve/{id}', [RequisitionApprovalController::class, 'adminApprove'])->name('requisitions.admin.approve');
     Route::post('/requisitions/admin-reject/{id}', [RequisitionApprovalController::class, 'adminReject'])->name('requisitions.admin.reject');
-    
+
     // Role-based requisition access
-    Route::group(['middleware' => 'role:employee,transport,admin'], function() {
-    });
+    Route::group(['middleware' => 'role:employee,transport,admin'], function () {});
 });
 
 // ============================================================================
@@ -322,11 +291,11 @@ Route::resource('requisitions', RequisitionController::class);
 Route::prefix('department')->group(function () {
     // AJAX endpoint
     Route::get('/approvals/ajax', [DepartmentApprovalController::class, 'ajax'])->name('department.approvals.ajax');
-    
+
     // Department Head Approvals
-    Route::get('/approvals', [DepartmentApprovalController::class, 'index'])->name('department.approvals.index');
-    Route::get('/approvals/approved', [DepartmentApprovalController::class, 'index'])->name('department.approvals.approved');
-    Route::get('/approvals/rejected', [DepartmentApprovalController::class, 'index'])->name('department.approvals.rejected');
+    Route::get('/approvals', [DepartmentApprovalController::class, 'index'])->defaults('type', 'pending')->name('department.approvals.index');
+    Route::get('/approvals/approved', [DepartmentApprovalController::class, 'index'])->defaults('type', 'approved')->name('department.approvals.approved');
+    Route::get('/approvals/rejected', [DepartmentApprovalController::class, 'index'])->defaults('type', 'rejected')->name('department.approvals.rejected');
     Route::get('/approvals/my', [DepartmentApprovalController::class, 'myApprovals'])->name('department.approvals.my');
     Route::get('/approvals/{id}', [DepartmentApprovalController::class, 'show'])->name('department.approvals.show');
     Route::post('/approvals/{id}/approve', [DepartmentApprovalController::class, 'approve'])->name('department.approvals.approve');
@@ -347,7 +316,7 @@ Route::prefix('transport')->group(function () {
     Route::post('/approvals/{id}/reject', [TransportApprovalController::class, 'reject'])->name('transport.approvals.reject');
     Route::get('/approvals/{id}/availability', [TransportApprovalController::class, 'availability'])->name('transport.approvals.availability');
     Route::get('/approvals/{id}/vehicle/{vehicleId}/drivers', [TransportApprovalController::class, 'getDriversForVehicle'])->name('transport.approvals.drivers-for-vehicle');
-    
+
     // Trip Sheets
     Route::get('/trip-sheets', [TripSheetController::class, 'index'])->name('trip-sheets.index');
     Route::get('/trip-sheets/create', [TripSheetController::class, 'create'])->name('trip-sheets.create');
@@ -378,7 +347,7 @@ Route::middleware(['auth'])->prefix('admin')->group(function () {
         // Approved requisitions list - must be before {id} route
         Route::get('/approved', [MaintenanceApprovalController::class, 'approved'])->name('approved');
         Route::get('/approved/ajax', [MaintenanceApprovalController::class, 'approved'])->name('approved.ajax');
-        
+
         Route::get('/ajax', [MaintenanceApprovalController::class, 'ajax'])->name('ajax');
         Route::get('/{id}', [MaintenanceApprovalController::class, 'show'])->name('show');
         Route::post('/{id}/approve', [MaintenanceApprovalController::class, 'approve'])->name('approve');
@@ -394,8 +363,6 @@ Route::middleware(['auth'])->prefix('admin')->group(function () {
         Route::post('/{id}/reject', [MaintenanceTransportApprovalController::class, 'reject'])->name('reject');
     });
 });
-
-
 
 // ============================================================================
 // 11. MAINTENANCE TYPES, VENDORS & SCHEDULES
@@ -417,7 +384,6 @@ Route::prefix('maintenance-vendors')->middleware('auth')->group(function () {
     Route::post('/update/{vendor}', [MaintenanceVendorController::class, 'update'])->name('maintenance.vendors.update');
     Route::delete('/delete/{vendor}', [MaintenanceVendorController::class, 'destroy'])->name('maintenance.vendors.destroy');
 });
-
 
 Route::prefix('maintenance-categories')->group(function () {
     Route::get('/', [MaintenanceCategoryController::class, 'index'])->name('maintenance-categories.index');
@@ -512,16 +478,16 @@ Route::middleware(['auth'])->group(function () {
     // Route::get('/payment/stripe', [StripeController::class,'pay'])
     //     ->name('payment.stripe');
     // Route::get('/stripe/success', [StripeController::class, 'success'])->name('stripe.success');
-    
+
     // Manual Payment
     Route::get('/payment/manual/{plan}', [ManualPaymentController::class, 'form'])->name('payment.manual');
     Route::post('/manual-payment/ajax-store', [ManualPaymentController::class, 'ajaxStore'])->name('manual.payment.ajax');
     Route::post('/manual-payment/store', [ManualPaymentController::class, 'store']);
-    
+
     // Invoices
     Route::get('/invoice/{payment}', [ManualPaymentController::class, 'invoice'])->name('invoice.download');
     Route::get('/admin/payments/{payment}/invoice', [ManualPaymentController::class, 'invoice'])->name('admin.payments.invoice');
-    
+
     // Stripe (disabled - controller not implemented)
     // Route::get('/stripe/success', [StripeController::class, 'success'])->name('stripe.success');
 });
@@ -587,7 +553,7 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     Route::post('payments/reject/{payment}', [AdminPaymentController::class, 'reject'])->name('payments.reject');
     Route::get('payments/expiring', [AdminPaymentController::class, 'expiring'])->name('payments.expiring');
     Route::get('revenue/plans', [AdminPaymentController::class, 'byPlan'])->name('revenue.plans');
-    
+
     // API Payment Management (for external subscription system)
     Route::get('api-payments/users', [App\Http\Controllers\Admin\ApiPaymentController::class, 'registeredUsers'])->name('api-payments.users');
     Route::get('api-payments/pending', [App\Http\Controllers\Admin\ApiPaymentController::class, 'pendingPayments'])->name('api-payments.pending');
@@ -623,7 +589,7 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     Route::get('employees/profiles', [EmployeeController::class, 'profiles'])->name('employees.profiles');
     Route::get('employees/approvals', [EmployeeController::class, 'approvals'])->name('employees.approvals');
     Route::resource('employees', EmployeeController::class);
-    
+
     // Department Employees (for Department Head)
     Route::get('admin/employees/department', [DepartmentEmployeeController::class, 'index'])->name('employees.department.index');
     Route::get('employees/department/create', [DepartmentEmployeeController::class, 'create'])->name('employees.department.create');
@@ -632,7 +598,7 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     Route::get('employees/department/{employee}/edit', [DepartmentEmployeeController::class, 'edit'])->name('employees.department.edit');
     Route::put('employees/department/{employee}', [DepartmentEmployeeController::class, 'update'])->name('employees.department.update');
     Route::delete('employees/department/{employee}', [DepartmentEmployeeController::class, 'destroy'])->name('employees.department.destroy');
-    
+
     // Units
     Route::get('units/data', [UnitController::class, 'data'])->name('units.data');
     Route::get('units/list', [UnitController::class, 'list'])->name('units.list');
@@ -658,14 +624,14 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     Route::resource('departments', DepartmentController::class);
     Route::get('departments/{id}/head-info', [DepartmentController::class, 'getHeadInfo'])->name('departments.head-info');
     Route::get('unit-wise-department', [DepartmentController::class, 'unitWiseDepartment'])->name('unit-wise-department');
-    
+
     // Department Heads Management
     Route::get('department-heads', [DepartmentHeadController::class, 'index'])->name('department-heads.index');
     Route::post('department-heads', [DepartmentHeadController::class, 'store'])->name('department-heads.store');
     Route::post('department-heads/send-notification', [DepartmentHeadController::class, 'sendNotification'])->name('department-heads.send-notification');
     Route::delete('department-heads/remove', [DepartmentHeadController::class, 'remove'])->name('department-heads.remove');
     Route::get('department-heads/employees/{departmentId}', [DepartmentHeadController::class, 'getEmployeesByDepartment'])->name('department-heads.employees');
-    
+
     // Locations
     Route::get('locations/data', [LocationController::class, 'data'])->name('locations.data');
     Route::get('locations/list', [LocationController::class, 'list'])->name('locations.list');
@@ -678,17 +644,17 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
 
 Route::middleware(['auth'])->group(function () {
     // Employees (note: admin employees routes are in the admin prefix group above)
-    
+
     // Users
     Route::get('users/getData', [UserController::class, 'getData'])->name('users.getData');
     Route::get('users/search', [UserController::class, 'search'])->name('users.search');
-    
+
     Route::post('users/validate', [UserController::class, 'validateUser'])->name('users.validate');
     Route::post('users/ajaxSubmit', [UserController::class, 'ajaxSubmit'])->name('users.ajaxSubmit');
-    
+
     // Get employee details for auto-populate
     Route::get('users/employee-details/{employeeId}', [UserController::class, 'getEmployeeDetails'])->name('users.get-employee-details');
-    
+
     // User Profile
     Route::resource('users', UserController::class);
     Route::get('user-profile', [UserController::class, 'userprofile'])->name('user-profile');
@@ -733,7 +699,7 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     Route::get('roles', [RoleController::class, 'index'])->name('roles.index');
     Route::resource('roles', RoleController::class);
     Route::post('roles/{id}/duplicate', [RoleController::class, 'duplicate'])
-    ->name('roles.duplicate');
+        ->name('roles.duplicate');
     // Permissions
     Route::get('permissions', [PermissionController::class, 'index'])->name('permissions.index');
     Route::get('permissions/create', [PermissionController::class, 'create'])->name('permissions.create');
@@ -755,15 +721,16 @@ Route::middleware(['auth'])->group(function () {
     Route::post('push-clear-all', [PushSubscriptionController::class, 'clearAll'])->name('push.clearAll');
     Route::get('/admin/push-subscribers', [PushSubscriptionController::class, 'index'])->name('admin.push.subscribers');
     Route::get('/settings/notifications', [SettingController::class, 'notification'])->name('settings.notifications');
-    
+
     Route::post('/admin/push/test', [PushTestController::class, 'send'])->name('admin.push.test');
-    
+
     // Test Push Notification
     Route::get('/test-push', function () {
-        auth()->user()->notify(new \App\Notifications\RequisitionCreated());
+        auth()->user()->notify(new \App\Notifications\RequisitionCreated);
+
         return 'Push Sent';
     });
-    
+
     // Admin: Clear ALL push subscriptions (for fixing key mismatches)
     Route::post('/admin/push/clear-all', [PushTestController::class, 'clearAllSubscriptions'])->name('admin.push.clearAll');
 
@@ -778,7 +745,6 @@ Route::middleware(['auth'])->group(function () {
     Route::get('notifications', [NotificationController::class, 'index'])->name('admin.notifications.all');
 });
 
-
 // ============================================================================
 // 21. LANGUAGES & LOCALIZATION
 // ============================================================================
@@ -787,7 +753,7 @@ Route::middleware(['auth'])->prefix('Super Admin')->group(function () {
     Route::post('/language/switch', [LanguageController::class, 'switch'])->name('admin.language.switch');
     Route::get('/language/current', [LanguageController::class, 'current'])->name('language.current');
     Route::get('/language/list', [LanguageController::class, 'list'])->name('language.list');
-    
+
     Route::get('/translations', [TranslationController::class, 'index'])->name('admin.translations');
     Route::post('/translations', [TranslationController::class, 'store'])->name('translations.store');
     Route::post('/translations/update', [TranslationController::class, 'update'])->name('translations.update');
@@ -805,13 +771,13 @@ Route::middleware(['auth'])->group(function () {
     // License Types
     Route::get('license-types/data', [LicneseTypeController::class, 'data'])->name('license-types.data');
     Route::resource('license-types', LicneseTypeController::class);
-    
+
     // Categories
     if (class_exists(\App\Http\Controllers\CategoryController::class)) {
         Route::resource('categories', CategoryController::class);
     }
     Route::post('import-category', [CategoryController::class, 'import'])->name('category.import-category');
-    
+
     // Settings & Configuration
     Route::get('settings', [SettingController::class, 'index'])->name('settings.index');
     Route::post('settings/store', [SettingController::class, 'store'])->name('settings.store');
@@ -820,11 +786,11 @@ Route::middleware(['auth'])->group(function () {
     Route::post('admin/mail/clear-cache', [SettingController::class, 'clearMailConfigCache'])->name('admin.mail.clear-cache');
     Route::post('admin/language/sync', [SettingController::class, 'syncLanguages'])->name('admin.language.sync');
     Route::get('admin/settings/get-logo', [SettingController::class, 'getLogo'])->name('admin.settings.get-logo');
-    
+
     // Menus
     Route::resource('menus', MenuController::class);
     Route::post('menus/reorder', [MenuController::class, 'menuoder'])->name('menus.reorder');
-    
+
 });
 
 // ============================================================================
@@ -867,8 +833,22 @@ Route::middleware(['auth'])->group(function () {
     // API endpoints for stats
     Route::get('/api/ai-maintenance-alerts/stats', [AIMaintenanceAlertController::class, 'stats'])->name('ai-maintenance-alerts.stats');
     Route::get('/api/ai-reports/stats', [AIReportController::class, 'stats'])->name('ai-reports.stats');
-   
+
 });
+
+// ============================================================================
+// Notification Routes
+// ============================================================================
+Route::post('/notifications/mark-read/{id}', function ($id) {
+    $notification = auth()->user()->notifications()->find($id);
+    if ($notification) {
+        $notification->markAsRead();
+
+        return response()->json(['status' => 'success']);
+    }
+
+    return response()->json(['status' => 'error', 'message' => 'Not found'], 404);
+})->name('notifications.mark-read');
 
 // ============================================================================
 // END OF ROUTES FILE

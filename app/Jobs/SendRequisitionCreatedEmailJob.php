@@ -32,7 +32,6 @@ class SendRequisitionCreatedEmailJob implements ShouldQueue
     /**
      * Execute the job.
      *
-     * @param EmailService $emailService
      * @return void
      */
     public function handle(EmailService $emailService)
@@ -44,15 +43,12 @@ class SendRequisitionCreatedEmailJob implements ShouldQueue
             'assignedDriver',
             'driver',
             'assignedVehicle',
-            'vehicle'
+            'vehicle',
         ])->find($this->requisitionId);
 
-        if (!$requisition) {
+        if (! $requisition) {
             return;
         }
-
-        $emailService->sendRequisitionCreated($requisition, $this->customEmail);
-    }
 
         $emailService->sendRequisitionCreated($requisition, $this->customEmail);
     }

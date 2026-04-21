@@ -4,8 +4,6 @@ namespace App\Observers;
 
 use App\Jobs\SendRequisitionCreatedEmailJob;
 use App\Models\Requisition;
-use App\Models\User;
-use App\Notifications\RequisitionCreatedNotification;
 use App\Services\EmailService;
 
 class RequisitionObserver
@@ -32,20 +30,10 @@ class RequisitionObserver
      */
     public function created(Requisition $requisition)
     {
-        // Send email notification to department head via queued job
-        SendRequisitionCreatedEmailJob::dispatch($requisition);
-
-        // Also send push notifications to admins (existing behavior)
-        // Optimized: use withCount() for efficient count check
-        $users = User::where('role', 'admin')
-            ->withCount('pushSubscriptions')
-            ->having('push_subscriptions_count', '>', 0)
-            ->get();
-
-        foreach ($users as $user) {
-            $user->notify(
-                new RequisitionCreatedNotification($requisition)
-            );
+        try {
+            SendRequisitionCreatedEmailJob::dispatch($requisition);
+        } catch (\Throwable $e) {
+            \Log::warning('RequisitionObserver email job error: '.$e->getMessage());
         }
     }
 

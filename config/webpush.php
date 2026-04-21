@@ -2,23 +2,10 @@
 
 // Set OpenSSL config path for Windows XAMPP before loading - MUST be done first
 if (PHP_OS === 'WINNT') {
-    // Try multiple possible paths
-    $possiblePaths = [
-        'D:/MYProject/apache/conf/openssl.cnf',
-        'D:/MYProject/php/extras/ssl/openssl.cnf',
-        'D:/MYProject/php/extras/openssl/openssl.cnf',
-        __DIR__ . '/../openssl.cnf',
-        __DIR__ . '/../openssl2.cnf',
-    ];
-    
-    foreach ($possiblePaths as $path) {
-        if (file_exists($path)) {
-            putenv('OPENSSL_CONF=' . $path);
-            $_ENV['OPENSSL_CONF'] = $path;
-            $_SERVER['OPENSSL_CONF'] = $path;
-            break;
-        }
-    }
+    $opensslConf = __DIR__.'/../openssl.cnf';
+    putenv('OPENSSL_CONF='.$opensslConf);
+    $_ENV['OPENSSL_CONF'] = $opensslConf;
+    $_SERVER['OPENSSL_CONF'] = $opensslConf;
 }
 
 return [

@@ -156,6 +156,17 @@ $(function(){
 
     $.ajaxSetup({ headers:{ 'X-CSRF-TOKEN':'{{ csrf_token() }}' } });
 
+    // Get type from URL path or server-side variable
+    var currentPath = window.location.pathname;
+    var type = "{{ $type ?? 'pending' }}";
+    if (currentPath.includes('/approvals/approved')) {
+        type = 'approved';
+    } else if (currentPath.includes('/approvals/rejected')) {
+        type = 'rejected';
+    } else if (currentPath.includes('/approvals/my')) {
+        type = 'my';
+    }
+
     var table = $('#requisitionTable').DataTable({
         processing:true,
         serverSide:true,
@@ -172,6 +183,7 @@ $(function(){
                 d.date_from = $('#dateFrom').val();
                 d.date_to = $('#dateTo').val();
                 d.search_text = $('#searchBox').val();
+                d.type = type;
             }
         },
 

@@ -147,44 +147,23 @@ class RequisitionController extends Controller
         $isEmployee = $user->hasRole('Employee');
 
         // Optimized queries: only fetch necessary columns
-        $vehicles = Vehicle::where('status', 1)->select('id', 'vehicle_number', 'model')->get();
-        $drivers = Driver::where('status', 1)->select('id', 'name')->get();
+        $vehicles = Vehicle::where('status', 1)->select('id', 'vehicle_number', 'vehicle_name')->get();
+        $drivers = Driver::where('status', 1)->select('id', 'driver_name')->get();
         $departments = Department::select('id', 'department_name')->get();
         $units = Unit::select('id', 'unit_name')->get();
-        $vehicleTypes = VehicleType::select('id', 'vehicle_type')->get();
+        $vehicleTypes = VehicleType::select('id', 'name')->get();
 
-        // For Employee role, only fetch their own employee record
-        // For Admin/Transport/Manager, fetch all employees (needed for passenger selection)
-        if ($isEmployee) {
-            $selectedEmployeeId = null;
-            if ($user->employee_id) {
-                $selectedEmployee = Employee::find($user->employee_id);
-                if ($selectedEmployee) {
-                    $selectedEmployeeId = $selectedEmployee->id;
-                    $employees = collect([$selectedEmployee]); // Only current employee
-                } else {
-                    $employees = collect(); // Empty fallback
-                }
-            } else {
-                // Fallback matching
-                $matchingEmployee = null;
-                if ($user->cell_phone) {
-                    $matchingEmployee = Employee::where('phone', $user->cell_phone)->first();
-                }
-                if (! $matchingEmployee) {
-                    $matchingEmployee = Employee::where('name', 'like', '%'.$user->name.'%')->first();
-                }
-                if ($matchingEmployee) {
-                    $selectedEmployeeId = $matchingEmployee->id;
-                    $employees = collect([$matchingEmployee]);
-                } else {
-                    $employees = collect();
-                }
-            }
-        } else {
-            // Admin/Transport/Manager need full employee list for passenger selection
-            $employees = Employee::select('id', 'name')->get();
-            $selectedEmployeeId = null;
+        // Fetch all employees for passenger selection
+        // Need to bypass company scope and filter by active status
+        $employees = Employee::withoutGlobalScope(\App\Models\Scopes\CompanyScope::class)
+            ->where('status', 'Active')
+            ->select('id', 'name')
+            ->get();
+
+        // Determine selected employee (for employee role, pre-select themselves)
+        $selectedEmployeeId = null;
+        if ($isEmployee && $user->employee_id) {
+            $selectedEmployeeId = $user->employee_id;
         }
 
         return view('admin.dashboard.requisition.create', [
@@ -260,113 +239,103 @@ class RequisitionController extends Controller
             ], 422);
         }
 
-        // 🔵 AUTO GENERATE UNIQUE REQUISITION NUMBER
-        $maxNumber = DB::table('requisitions')
-            ->where('requisition_number', 'like', 'REQ-0000%')
-            ->selectRaw('COALESCE(MAX(CAST(SUBSTRING(requisition_number, 5) AS UNSIGNED)), 0) + 1 as next_num')
-            ->value('next_num');
-
-        $requisition_number = 'REQ-'.str_pad($maxNumber, 5, '0', STR_PAD_LEFT);
-
         // Get employee record to auto-populate department and unit if not provided
         $employee = Employee::find($request->employee_id);
         DB::beginTransaction();
         try {
-            $requisition = Requisition::create([
-                'requested_by' => $request->employee_id,
-                'company_id' => auth()->user()->company_id,
-                'vehicle_id' => $request->vehicle_id ?? null,
-                'department_id' => $request->department_id,
-                'unit_id' => $request->unit_id,
-                'vehicle_type' => $request->vehicle_type ?? null,
-                'driver_id' => $request->driver_id ?? null,
-                'requisition_number' => $requisition_number,
-                'from_location' => $request->from_location,
-                'to_location' => $request->to_location,
-                'requisition_date' => $request->requisition_date,
-                'number_of_passenger' => $request->number_of_passenger,
-                'travel_date' => $request->travel_date,
-                'return_date' => $request->return_date,
-                'purpose' => $request->purpose,
-                'status' => 'Pending', // Initial status for workflow
-                'transport_remarks' => 'Pending Department Approval',
-                'created_by' => auth()->id() ?? 1,
-            ]);
+            $maxNumber = DB::table('requisitions')
+                ->where('requisition_number', 'like', 'REQ-%')
+                ->selectRaw('COALESCE(MAX(CAST(SUBSTRING(requisition_number, 5) AS UNSIGNED)), 0) + 1 as next_num')
+                ->value('next_num');
 
-            // Add passengers if any (bulk insert for performance)
-            if (! empty($request->passengers)) {
-                $passengerData = [];
-                foreach ($request->passengers as $passenger) {
-                    if (! empty($passenger['employee_id'])) {
-                        $passengerData[] = [
-                            'requisition_id' => $requisition->id,
-                            'employee_id' => $passenger['employee_id'],
-                            'created_by' => auth()->id() ?? 1,
-                            'created_at' => now(),
-                            'updated_at' => now(),
-                        ];
+            $requisition_number = 'REQ-'.str_pad($maxNumber, 5, '0', STR_PAD_LEFT);
+
+            $maxRetries = 5;
+            $created = false;
+
+            while (! $created && $maxRetries > 0) {
+                try {
+                    $requisition = Requisition::create([
+                        'requested_by' => $request->employee_id,
+                        'company_id' => auth()->user()->company_id,
+                        'vehicle_id' => $request->vehicle_id ?? null,
+                        'department_id' => $request->department_id,
+                        'unit_id' => $request->unit_id,
+                        'vehicle_type' => $request->vehicle_type ?? null,
+                        'driver_id' => $request->driver_id ?? null,
+                        'requisition_number' => $requisition_number,
+                        'from_location' => $request->from_location,
+                        'to_location' => $request->to_location,
+                        'requisition_date' => $request->requisition_date,
+                        'number_of_passenger' => $request->number_of_passenger,
+                        'travel_date' => $request->travel_date,
+                        'return_date' => $request->return_date,
+                        'purpose' => $request->purpose,
+                        'status' => 'Pending',
+                        'department_status' => 'Pending',
+                        'transport_remarks' => 'Pending Department Approval',
+                        'created_by' => auth()->id() ?? 1,
+                    ]);
+                    $created = true;
+
+                    if (! empty($request->passengers)) {
+                        try {
+                            $passengerData = [];
+                            foreach ($request->passengers as $passenger) {
+                                if (! empty($passenger['employee_id'])) {
+                                    $passengerData[] = [
+                                        'requisition_id' => $requisition->id,
+                                        'employee_id' => $passenger['employee_id'],
+                                        'created_by' => auth()->id() ?? 1,
+                                        'created_at' => now(),
+                                        'updated_at' => now(),
+                                    ];
+                                }
+                            }
+                            if (! empty($passengerData)) {
+                                \App\Models\RequisitionPassenger::insert($passengerData);
+                            }
+                        } catch (\Exception $passengerError) {
+                            \Log::warning('Failed to add passengers: '.$passengerError->getMessage());
+                        }
+                    }
+
+                    DB::commit();
+
+                    try {
+                        if ($request->send_email_to_head == 1 && ! empty($request->department_head_email)) {
+                            SendRequisitionCreatedEmailJob::dispatch($requisition, $request->department_head_email);
+                        }
+                        $this->sendRequisitionCreatedNotifications($requisition);
+                    } catch (\Throwable $notifyError) {
+                        \Log::warning('Post-create notification failed: '.$notifyError->getMessage());
+                    }
+
+                    return response()->json([
+                        'status' => 'success',
+                        'message' => 'Requisition created successfully! (notifications may be delayed)',
+                        'data' => $requisition,
+                    ], 201);
+                } catch (\Illuminate\Database\QueryException $e) {
+                    if ($e->getCode() == 23000 && str_contains($e->getMessage(), 'Duplicate entry')) {
+                        $maxRetries--;
+                        if ($maxRetries > 0) {
+                            $maxNumber = DB::table('requisitions')
+                                ->where('requisition_number', 'like', 'REQ-%')
+                                ->selectRaw('COALESCE(MAX(CAST(SUBSTRING(requisition_number, 5) AS UNSIGNED)), 0) + 1 as next_num')
+                                ->value('next_num');
+                            $requisition_number = 'REQ-'.str_pad($maxNumber, 5, '0', STR_PAD_LEFT);
+                            \Log::warning("Requisition number collision, retrying with: $requisition_number");
+                        }
+                    } else {
+                        throw $e;
                     }
                 }
-                if (! empty($passengerData)) {
-                    \App\Models\RequisitionPassenger::insert($passengerData);
-                }
             }
 
-            DB::commit();
-
-            // Send email notification to department head (only if toggle is checked)
-            if ($request->send_email_to_head == 1 && ! empty($request->department_head_email)) {
-                try {
-                    // Queue job instead of sending synchronously
-                    SendRequisitionCreatedEmailJob::dispatch($requisition, $request->department_head_email);
-                    Log::info('Email notification queued for requisition created: '.$requisition->requisition_number.' to: '.$request->department_head_email);
-                } catch (\Exception $e) {
-                    Log::error('Failed to queue email job: '.$e->getMessage());
-                }
-            } else {
-                Log::info('Email notification skipped for requisition: '.$requisition->requisition_number.' (toggle not checked or no email provided)');
+            if (! $created) {
+                throw new \Exception('Failed to create requisition after retries');
             }
-
-            // Get users with specific roles AND push subscriptions
-            $users = User::whereHas('roles', function ($q) {
-                $q->whereIn('name', ['Super Admin', 'Demo Role']);
-            })
-                // ->whereHas('pushSubscriptions')
-                ->get();
-            // dd($users);
-
-            // Log the users we found
-            Log::info('Push notification target users count: '.$users->count());
-            foreach ($users as $user) {
-                Log::info('User ID: '.$user->id.', Email: '.$user->email);
-            }
-
-            // Send notification to these users
-            if ($users->isNotEmpty()) {
-                Notification::send($users, new RequisitionCreated($requisition));
-            } else {
-                Log::warning('No users found with roles and push subscriptions.');
-            }
-
-            // Also try sending directly to Super Admin (ID 1)
-            $user = User::find(1);
-            if ($user) {
-                $user->notify(new RequisitionCreated($requisition));
-                Log::info('Direct notification sent to User ID 1.');
-            } else {
-                Log::warning('User ID 1 not found.');
-            }
-
-            // event(new RequisitionCreated($requisition));
-
-            return response()->json([
-                'status' => 'success',
-                'message' => 'Requisition created successfully!',
-                'redirect_url' => route('requisitions.index'),
-                'users_found' => $users->pluck('id'),
-                'direct_user' => $user ? $user->id : null,
-            ], 200);
-
         } catch (\Throwable $e) {
             try {
                 DB::rollBack();
@@ -853,5 +822,58 @@ class RequisitionController extends Controller
             'status' => 'success',
             'drivers' => $drivers,
         ]);
+    }
+
+    /**
+     * Send notifications when requisition is created
+     * Notifies: Department Head, Transport Manager, and Self
+     */
+    private function sendRequisitionCreatedNotifications(Requisition $requisition)
+    {
+        $notificationUsers = collect();
+        $creatorUser = Auth::user();
+
+        // 1. Get department head(s) for the same department
+        $deptHeadUsers = User::whereHas('roles', function ($q) {
+            $q->whereIn('name', ['Department Head', 'Super Admin', 'Admin']);
+        })
+            ->where('department_id', $requisition->department_id)
+            ->where('id', '!=', $creatorUser->id)
+            ->get();
+        $notificationUsers = $notificationUsers->merge($deptHeadUsers);
+
+        // 2. Get Transport Managers
+        $transportUsers = User::whereHas('roles', function ($q) {
+            $q->whereIn('name', ['Transport', 'Transport_Head', 'Super Admin', 'Admin']);
+        })
+            ->get();
+        $notificationUsers = $notificationUsers->merge($transportUsers);
+
+        // 3. Get the requester themselves (if they have a user account)
+        if ($creatorUser) {
+            $notificationUsers->push($creatorUser);
+        }
+
+        // Remove duplicates
+        $notificationUsers = $notificationUsers->unique('id');
+
+        Log::info('Requisition created notifications - target users count: '.$notificationUsers->count());
+        foreach ($notificationUsers as $u) {
+            Log::info('Notifying user ID: '.$u->id.', Email: '.$u->email);
+        }
+
+        try {
+            if ($notificationUsers->isNotEmpty()) {
+                foreach ($notificationUsers as $user) {
+                    try {
+                        $user->notify(new RequisitionCreated($requisition));
+                    } catch (\Throwable $userError) {
+                        \Log::warning('Failed to notify user '.$user->id.': '.$userError->getMessage());
+                    }
+                }
+            }
+        } catch (\Throwable $e) {
+            \Log::warning('Notification send failed: '.$e->getMessage().' | File: '.$e->getFile().' | Line: '.$e->getLine());
+        }
     }
 }

@@ -366,7 +366,6 @@ class MenuService
                     'trip-sheets',
                     'vehicles',
                     'driver-management',
-                    'maintenance',
                     'reports',
                     'menu.settings',
                 ];
@@ -375,7 +374,12 @@ class MenuService
                 $isAllowedParent = $menu->menu_slug && in_array($menu->menu_slug, $transportAllowedParentMenus);
                 $hasPermission = ! $menu->menu_permission || (Permission::where('name', $menu->menu_permission)->exists() && $user->can($menu->menu_permission));
 
-                $menu->visible = $isAllowedParent || ($hasVisibleChildren && $hasPermission);
+                // Hide My Profile and Maintenance menus for Transport role
+                if (in_array($menu->menu_slug, ['my-profile', 'maintenance'])) {
+                    $menu->visible = false;
+                } else {
+                    $menu->visible = $isAllowedParent || ($hasVisibleChildren && $hasPermission);
+                }
             } else {
                 // For Employee role - show allowed parent menus
                 if ($isEmployee) {
