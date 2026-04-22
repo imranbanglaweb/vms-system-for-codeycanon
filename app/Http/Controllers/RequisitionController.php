@@ -301,7 +301,12 @@ class RequisitionController extends Controller
 
                     DB::commit();
 
-                    // RequisitionObserver handles email notifications after create
+                    // Send email notification via queue (async)
+                    try {
+                        \App\Jobs\SendRequisitionCreatedEmailJob::dispatch($requisition);
+                    } catch (\Throwable $e) {
+                        \Log::warning('Email job dispatch failed: '.$e->getMessage());
+                    }
 
                     return response()->json([
                         'status' => 'success',
