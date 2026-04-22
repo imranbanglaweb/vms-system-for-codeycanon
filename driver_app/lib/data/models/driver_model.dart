@@ -36,15 +36,20 @@ class Driver extends Equatable {
       id: json['id'] is int
           ? json['id']
           : int.tryParse(json['id']?.toString() ?? '0') ?? 0,
-      driverName: json['driver_name']?.toString() ?? '',
-      licenseNumber: json['license_number']?.toString(),
-      licenseType: json['license_type']?.toString(),
+      driverName: json['driverName']?.toString() ??
+          json['driver_name']?.toString() ??
+          '',
+      licenseNumber: json['licenseNumber']?.toString() ??
+          json['license_number']?.toString(),
+      licenseType:
+          json['licenseType']?.toString() ?? json['license_type']?.toString(),
       mobile: json['mobile']?.toString(),
       nid: json['nid']?.toString(),
       presentAddress: json['present_address']?.toString(),
       permanentAddress: json['permanent_address']?.toString(),
       photograph: json['photograph']?.toString(),
-      availabilityStatus: json['availability_status']?.toString(),
+      availabilityStatus: json['availabilityStatus']?.toString() ??
+          json['availability_status']?.toString(),
       availabilityNotes: json['availability_notes']?.toString(),
       availableFrom: json['available_from'] != null
           ? DateTime.tryParse(json['available_from'].toString())
