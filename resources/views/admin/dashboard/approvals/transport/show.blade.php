@@ -1040,7 +1040,7 @@ function alertBox(type, message, title = ''){
     });
 }
 
-// Assign Vehicle & Driver with loading effect
+// Assign Vehicle & Driver with loading effect and SweetAlert confirmation
 function submitAssign() {
     // DEBUG: Log form data
     console.log('[DEBUG] Form serialize:', $('#assignForm').serialize());
@@ -1049,17 +1049,53 @@ function submitAssign() {
     console.log('[DEBUG] Transport type:', $('#transportTypeSelect').val());
     
     let transportTypeId = $('#transportTypeSelect').val();
+    let vehicleId = $('#vehicleSelect').val();
+    let driverId = $('#driverSelect').val();
+    let driverName = $('#driverSelect option:selected').text();
+    let vehicleName = $('#vehicleSelect option:selected').text();
     
     if (!transportTypeId) {
-        alert('Please select a Transport Type before assigning vehicle and driver.');
+        Swal.fire({
+            icon: 'warning',
+            title: 'Transport Type Required',
+            text: 'Please select a Transport Type before assigning vehicle and driver.',
+            confirmButtonText: 'OK'
+        });
         return;
     }
     
-    if (!$('#vehicleSelect').val() || !$('#driverSelect').val()) {
-        alert('Please select both vehicle and driver.');
+    if (!vehicleId || !driverId) {
+        Swal.fire({
+            icon: 'warning',
+            title: 'Selection Required',
+            text: 'Please select both vehicle and driver.',
+            confirmButtonText: 'OK'
+        });
         return;
     }
     
+    // SweetAlert confirmation for driver assignment
+    Swal.fire({
+        title: 'Assign Driver',
+        html: `<p>Are you sure you want to assign this driver?</p>
+               <div class="text-start mt-3 p-3 bg-light rounded">
+                   <strong><i class="fa fa-car me-1"></i> Vehicle:</strong> ${vehicleName}<br>
+                   <strong><i class="fa fa-user me-1"></i> Driver:</strong> ${driverName}
+               </div>`,
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: '<i class="fa fa-check me-1"></i> Yes, Assign',
+        cancelButtonText: 'Cancel',
+        confirmButtonColor: '#28a745',
+        cancelButtonColor: '#6c757d'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            performDriverAssignment();
+        }
+    });
+}
+
+function performDriverAssignment() {
     var $btn = $('#actionForm button[type="submit"]');
     var originalText = $btn.html();
     $btn.prop('disabled', true).html('<i class="fa fa-spinner fa-spin me-2"></i> Assigning...');
@@ -1069,7 +1105,20 @@ function submitAssign() {
         type: 'POST',
         data: $('#actionForm').serialize(),
         success: function(res) {
-            alertBox('success', res.message, 'Success!');
+            let driverName = $('#driverSelect option:selected').text();
+            let vehicleName = $('#vehicleSelect option:selected').text();
+            Swal.fire({
+                icon: 'success',
+                title: 'Driver Assigned!',
+                html: `<div class="text-start">
+                    <p class="mb-2">${res.message}</p>
+                    <div class="p-3 bg-light rounded mt-2">
+                        <strong><i class="fa fa-user me-1"></i> Driver:</strong> ${driverName}<br>
+                        <strong><i class="fa fa-car me-1"></i> Vehicle:</strong> ${vehicleName}
+                    </div>
+                </div>`,
+                confirmButtonText: 'OK'
+            });
             setTimeout(() => location.reload(), 1500);
         },
         error: function(xhr) {
@@ -1078,13 +1127,28 @@ function submitAssign() {
                 if (xhr.responseJSON.errors) {
                     let errors = xhr.responseJSON.errors;
                     let firstError = Object.values(errors)[0][0];
-                    alertBox('error', firstError);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Assignment Failed',
+                        text: firstError,
+                        confirmButtonText: 'OK'
+                    });
                 }
                 else if (xhr.responseJSON.message) {
-                    alertBox('error', xhr.responseJSON.message);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Assignment Failed',
+                        text: xhr.responseJSON.message,
+                        confirmButtonText: 'OK'
+                    });
                 }
             } else {
-                alertBox('error', 'Assignment failed. Please try again.');
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Assignment failed. Please try again.',
+                    confirmButtonText: 'OK'
+                });
             }
         }
     });

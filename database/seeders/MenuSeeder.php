@@ -2,10 +2,10 @@
 
 namespace Database\Seeders;
 
+use Carbon\Carbon;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
-use Carbon\Carbon;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\PermissionRegistrar;
 
@@ -771,7 +771,7 @@ class MenuSeeder extends Seeder
                 'parent_name' => 'Trip Sheets',
             ],
 
-// ===== Vehicle Management Children (Order: 1-8) =====
+            // ===== Vehicle Management Children (Order: 1-8) =====
             [
                 'menu_name' => 'Vehicle List',
                 'menu_slug' => 'vehicle-list',
@@ -926,6 +926,24 @@ class MenuSeeder extends Seeder
                 'menu_url' => 'driver.trips',
                 'menu_permission' => 'driver-access',
                 'menu_order' => 8,
+                'parent_name' => 'Driver Management',
+            ],
+            [
+                'menu_name' => 'Trip Status',
+                'menu_slug' => 'driver-trip-status',
+                'menu_icon' => 'fa-clipboard-check',
+                'menu_url' => 'driver.trip.status',
+                'menu_permission' => 'driver-access',
+                'menu_order' => 8.5,
+                'parent_name' => 'Driver Management',
+            ],
+            [
+                'menu_name' => 'Live Tracking',
+                'menu_slug' => 'driver-live-tracking',
+                'menu_icon' => 'fa-satellite-dish',
+                'menu_url' => 'driver.live.tracking',
+                'menu_permission' => 'driver-access',
+                'menu_order' => 8.6,
                 'parent_name' => 'Driver Management',
             ],
             [
@@ -1539,15 +1557,6 @@ class MenuSeeder extends Seeder
                 'menu_order' => 4,
                 'parent_name' => 'My Profile',
             ],
-            [
-                'menu_name' => 'My Trip Sheets',
-                'menu_slug' => 'my-trips',
-                'menu_icon' => 'fa-road',
-                'menu_url' => 'trip-sheets.my',
-                'menu_permission' => 'trip-sheet-own',
-                'menu_order' => 5,
-                'parent_name' => 'My Profile',
-            ],
 
             // ===== Menu Management Children (Order: 1-2) =====
             [
@@ -1574,7 +1583,7 @@ class MenuSeeder extends Seeder
         foreach ($childMenus as $child) {
             $parentName = $child['parent_name'];
             $parentId = $parentIdMap[$parentName] ?? 0;
-            
+
             DB::table('menus')->insert([
                 'menu_name' => $child['menu_name'],
                 'menu_slug' => $child['menu_slug'],
@@ -1591,7 +1600,7 @@ class MenuSeeder extends Seeder
         }
 
         $this->command->info('Menu seeder completed successfully!');
-        $this->command->info('Total parent menus: ' . count($parentMenus));
-        $this->command->info('Total child menus: ' . count($childMenus));
+        $this->command->info('Total parent menus: '.count($parentMenus));
+        $this->command->info('Total child menus: '.count($childMenus));
     }
 }

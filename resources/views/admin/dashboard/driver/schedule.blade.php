@@ -182,35 +182,80 @@
     </header>
 
     <div class="container-fluid">
+        @if(!$driver)
+        <div class="alert alert-warning mb-4">
+            <i class="fa fa-exclamation-triangle mr-2"></i>
+            <strong>No Driver Profile Found!</strong> Your account is not linked to any driver profile.
+        </div>
+        @endif
+        
         <div class="row">
             <div class="col-md-12">
                 @if(isset($schedules) && $schedules->count() > 0)
                 <div class="table-card">
-                    <div class="card-header">
-                        <h3 class="card-title mb-0"><i class="fa fa-list mr-2"></i>Upcoming Trip Schedule</h3>
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h3 class="card-title mb-0"><i class="fa fa-list mr-2"></i>Upcoming Trip Schedule ({{ $schedules->count() }} Trips)</h3>
                     </div>
                     <div class="card-body">
                         <table class="table">
                             <thead>
                                 <tr>
-                                    <th>Trip Date</th>
+                                    <th>Req. No.</th>
+                                    <th>Travel Date</th>
                                     <th>Vehicle</th>
                                     <th>Route</th>
                                     <th>Purpose</th>
+                                    <th>Passengers</th>
                                     <th>Status</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 @foreach($schedules as $schedule)
                                 <tr>
-                                    <td>{{ date('d M Y', strtotime($schedule->trip_date)) }}</td>
-                                    <td>{{ $schedule->vehicle->vehicle_name ?? 'N/A' }}</td>
-                                    <td>{{ $schedule->from_location ?? 'N/A' }} to {{ $schedule->to_location ?? 'N/A' }}</td>
+                                    <td><strong>#{{ $schedule->requisition_number ?? $schedule->id }}</strong></td>
+                                    <td>{{ \Carbon\Carbon::parse($schedule->travel_date)->format('d M Y') }}</td>
+                                    <td>
+                                        @if($schedule->assignedVehicle)
+                                            {{ $schedule->assignedVehicle->vehicle_name ?? 'N/A' }}
+                                            @if($schedule->assignedVehicle->number_plate)
+                                                <br><small class="text-muted">{{ $schedule->assignedVehicle->number_plate }}</small>
+                                            @endif
+                                        @else
+                                            N/A
+                                        @endif
+                                    </td>
+                                    <td>
+                                        @if($schedule->from_location && $schedule->to_location)
+                                            {{ $schedule->from_location }} <i class="fa fa-arrow-right mx-1 text-muted"></i> {{ $schedule->to_location }}
+                                        @else
+                                            {{ $schedule->from_location ?? 'N/A' }} - {{ $schedule->to_location ?? 'N/A' }}
+                                        @endif
+                                    </td>
                                     <td>{{ $schedule->purpose ?? 'N/A' }}</td>
                                     <td>
-                                        <span class="badge badge-{{ $schedule->status == 'completed' ? 'success' : ($schedule->status == 'in_progress' ? 'info' : 'warning') }}">
-                                            {{ ucfirst($schedule->status) }}
-                                        </span>
+                                        @if($schedule->passengers && $schedule->passengers->count() > 0)
+                                            {{ $schedule->passengers->count() }}
+                                        @else
+                                            {{ $schedule->number_of_passenger ?? 0 }}
+                                        @endif
+                                    </td>
+                                    <td>
+                                        @switch($schedule->transport_status)
+                                            @case('Pending')
+                                                <span class="badge badge-warning">Pending</span>
+                                                @break
+                                            @case('Approved')
+                                                <span class="badge badge-info">Approved</span>
+                                                @break
+                                            @case('In Transit')
+                                                <span class="badge badge-secondary">In Transit</span>
+                                                @break
+                                            @case('Completed')
+                                                <span class="badge badge-success">Completed</span>
+                                                @break
+                                            @default
+                                                <span class="badge badge-secondary">{{ ucfirst($schedule->transport_status) }}</span>
+                                        @endswitch
                                     </td>
                                 </tr>
                                 @endforeach
@@ -223,7 +268,7 @@
                     <div class="card-body">
                         <div class="alert alert-info">
                             <i class="fa fa-info-circle mr-2"></i>
-                            No upcoming trips scheduled for you.
+                            No upcoming trips scheduled. Contact dispatch if you expect assignments.
                         </div>
                     </div>
                 </div>

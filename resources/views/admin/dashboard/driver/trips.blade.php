@@ -1,6 +1,7 @@
 @extends('admin.dashboard.master')
 
 @section('main_content')
+<link rel="stylesheet" href="{{ asset('public/admin_resource/plugins/sweetalert2/sweetalert2.min.css') }}">
 <style>
     :root {
         --primary-color: #4f46e5;
@@ -188,57 +189,82 @@
     </header>
 
     <div class="container-fluid">
+        @if(!$driver)
+        <div class="alert alert-warning mb-4">
+            <i class="fa fa-exclamation-triangle mr-2"></i>
+            <strong>No Driver Profile Found!</strong> Your account is not linked to any driver profile.
+        </div>
+        @endif
+        
         <div class="row">
             <div class="col-md-12">
                 @if(isset($trips) && $trips->count() > 0)
                 <div class="table-card">
-                    <div class="card-header">
-                        <h3 class="card-title mb-0"><i class="fa fa-list mr-2"></i>All Trip History</h3>
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h3 class="card-title mb-0"><i class="fa fa-list mr-2"></i>All Trip History ({{ $trips->count() }} Trips)</h3>
                     </div>
                     <div class="card-body">
                         <table class="table">
                             <thead>
                                 <tr>
-                                    <th>Trip Date</th>
+                                    <th>Req. No.</th>
+                                    <th>Travel Date</th>
                                     <th>Vehicle</th>
                                     <th>Route</th>
                                     <th>Purpose</th>
-                                    <th>Start Time</th>
-                                    <th>End Time</th>
+                                    <th>Passengers</th>
                                     <th>Status</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 @foreach($trips as $trip)
                                 <tr>
-                                    <td>{{ date('d M Y', strtotime($trip->trip_date)) }}</td>
-                                    <td>{{ $trip->vehicle->vehicle_name ?? 'N/A' }}</td>
+                                    <td><strong>#{{ $trip->requisition_number ?? $trip->id }}</strong></td>
+                                    <td>{{ \Carbon\Carbon::parse($trip->travel_date)->format('d M Y') }}</td>
+                                    <td>
+                                        @if($trip->assignedVehicle)
+                                            {{ $trip->assignedVehicle->vehicle_name ?? 'N/A' }}
+                                            @if($trip->assignedVehicle->number_plate)
+                                                <br><small class="text-muted">{{ $trip->assignedVehicle->number_plate }}</small>
+                                            @endif
+                                        @else
+                                            N/A
+                                        @endif
+                                    </td>
                                     <td>
                                         @if($trip->from_location && $trip->to_location)
-                                            {{ $trip->from_location }} to {{ $trip->to_location }}
+                                            {{ $trip->from_location }} <i class="fa fa-arrow-right mx-1 text-muted"></i> {{ $trip->to_location }}
                                         @else
                                             {{ $trip->from_location ?? 'N/A' }} - {{ $trip->to_location ?? 'N/A' }}
                                         @endif
                                     </td>
                                     <td>{{ $trip->purpose ?? 'N/A' }}</td>
-                                    <td>{{ $trip->start_time ? date('h:i A', strtotime($trip->start_time)) : 'N/A' }}</td>
-                                    <td>{{ $trip->end_time ? date('h:i A', strtotime($trip->end_time)) : 'N/A' }}</td>
                                     <td>
-                                        @switch($trip->status)
-                                            @case('started')
-                                                <span class="badge badge-info">Started</span>
+                                        @if($trip->passengers && $trip->passengers->count() > 0)
+                                            {{ $trip->passengers->count() }} passenger(s)
+                                        @else
+                                            {{ $trip->number_of_passenger ?? 0 }}
+                                        @endif
+                                    </td>
+                                    <td>
+                                        @switch($trip->transport_status)
+                                            @case('Pending')
+                                                <span class="badge badge-warning">Pending</span>
                                                 @break
-                                            @case('in_progress')
-                                                <span class="badge badge-warning">In Progress</span>
+                                            @case('Approved')
+                                                <span class="badge badge-info">Approved</span>
                                                 @break
-                                            @case('completed')
+                                            @case('In Transit')
+                                                <span class="badge badge-secondary">In Transit</span>
+                                                @break
+                                            @case('Completed')
                                                 <span class="badge badge-success">Completed</span>
                                                 @break
-                                            @case('cancelled')
+                                            @case('Cancelled')
                                                 <span class="badge badge-danger">Cancelled</span>
                                                 @break
                                             @default
-                                                <span class="badge badge-secondary">{{ ucfirst($trip->status) }}</span>
+                                                <span class="badge badge-secondary">{{ ucfirst($trip->transport_status) }}</span>
                                         @endswitch
                                     </td>
                                 </tr>
@@ -252,7 +278,7 @@
                     <div class="card-body">
                         <div class="alert alert-info">
                             <i class="fa fa-info-circle mr-2"></i>
-                            No trips found in your history.
+                            No trips found. You have no assigned trips yet.
                         </div>
                     </div>
                 </div>

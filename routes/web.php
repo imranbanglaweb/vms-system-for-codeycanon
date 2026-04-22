@@ -239,6 +239,9 @@ Route::middleware(['prevent-back-history'])->group(function () {
         Route::post('/trip/{id}/end', [DriverController::class, 'endTrip'])->name('trip.end');
         Route::patch('/trip/{id}/complete', [DriverController::class, 'endTrip'])->name('trip.complete');
 
+        // Live Tracking
+        Route::get('/live-tracking', [DriverController::class, 'driverLiveTracking'])->name('live.tracking');
+
         // Fuel Log (Driver)
         Route::get('/fuel-log', [DriverController::class, 'driverFuelLog'])->name('fuel.log');
         Route::post('/fuel-log/store', [DriverController::class, 'storeFuelLog'])->name('fuel.store');

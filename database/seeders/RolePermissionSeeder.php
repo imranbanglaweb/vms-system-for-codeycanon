@@ -3,8 +3,8 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use Spatie\Permission\Models\Role;
 use Spatie\Permission\Models\Permission;
+use Spatie\Permission\Models\Role;
 use Spatie\Permission\PermissionRegistrar;
 
 class RolePermissionSeeder extends Seeder
@@ -15,12 +15,12 @@ class RolePermissionSeeder extends Seeder
 
         // ================= ROLES =================
         $superAdmin = Role::where('name', 'Super Admin')->first();
-        $admin      = Role::where('name', 'Admin')->first();
-        $transport  = Role::where('name', 'Transport')->first();
-        $employee   = Role::where('name', 'Employee')->first();
-        $deptHead   = Role::where('name', 'Department Head')->first();
-        $manager    = Role::where('name', 'Manager')->first();
-        $driver     = Role::where('name', 'Driver')->first();
+        $admin = Role::where('name', 'Admin')->first();
+        $transport = Role::where('name', 'Transport')->first();
+        $employee = Role::where('name', 'Employee')->first();
+        $deptHead = Role::where('name', 'Department Head')->first();
+        $manager = Role::where('name', 'Manager')->first();
+        $driver = Role::where('name', 'Driver')->first();
 
         // ================= SUPER ADMIN =================
         $superAdmin?->syncPermissions(Permission::all());
@@ -91,26 +91,26 @@ class RolePermissionSeeder extends Seeder
             'driver-view',
             'driver-export',
             'license-type-manage',
-            
+
             // Driver Documents
             'driver-document-manage',
             'driver-document-upload',
             'driver-document-view',
             'driver-document-delete',
             'driver-document-approve',
-            
+
             // Driver Schedule
             'driver-schedule-manage',
             'driver-schedule-view',
             'driver-schedule-assign',
             'driver-schedule-edit',
             'driver-schedule-own',
-            
+
             // Driver Performance
             'driver-performance-manage',
             'driver-performance-view',
             'driver-performance-report',
-            
+
             // Driver Availability
             'driver-availability-manage',
             'driver-availability-view',
@@ -341,17 +341,17 @@ class RolePermissionSeeder extends Seeder
             // GPS Tracking
             'gps-tracking',
             'gps-tracking-view',
-            
+
             // Driver Schedule
             'driver-schedule-manage',
             'driver-schedule-view',
             'driver-schedule-assign',
             'driver-schedule-own',
-            
+
             // Driver Performance
             'driver-performance-view',
             'driver-performance-report',
-            
+
             // Driver Availability
             'driver-availability-manage',
             'driver-availability-view',
@@ -472,7 +472,7 @@ class RolePermissionSeeder extends Seeder
         // ================= DEPARTMENT HEAD =================
         $deptHeadPermissions = [
             'dashboard',
-            
+
             // Requisitions
             'requisition-view',
             'requisition-create',
@@ -482,18 +482,18 @@ class RolePermissionSeeder extends Seeder
             'requisition-pending-view',
             'requisition-approved-view',
             'my-requisitions',
-            
+
             // Department Approval
             'department-approve',
             'department-approval-view',
             'department-approval-approve',
             'department-approval-reject',
             'requisition-approval-department',
-            
+
             // Transport Approval
             'transport-approval-view',
             'transport-approval-assign',
-            
+
             // Trip Sheets
             'trip-sheet-view',
             'trip-sheet-own',
@@ -503,7 +503,7 @@ class RolePermissionSeeder extends Seeder
             'trip-finish',
             'trip-end',
             'trip-export',
-            
+
             // Employee Management (Department specific)
             'employee-list-department',
             'employee-create-department',
@@ -515,7 +515,7 @@ class RolePermissionSeeder extends Seeder
             'employee-create',
             'employee-edit',
             'employee-export',
-            
+
             // Department / Unit
             'department-manage',
             'department-create',
@@ -523,23 +523,23 @@ class RolePermissionSeeder extends Seeder
             'unit-manage',
             'unit-create',
             'unit-edit',
-            
+
             // Vehicle (View for department)
             'vehicle-list-department',
             'vehicle-view',
             'vehicle-export',
-            
+
             // Driver (View for department)
             'driver-list-department',
             'driver-view',
-            
+
             // Maintenance
             'maintenance-view',
             'maintenance-create',
             'maintenance-approval-view',
             'maintenance-approval-department',
             'maintenance-manage',
-            
+
             // Reports (Department specific)
             'report-requisition-department',
             'report-maintenance-department',
@@ -548,14 +548,14 @@ class RolePermissionSeeder extends Seeder
             'report-trip-fuel',
             'report-vehicle-utilization',
             'report-export',
-            
+
             // Profile
             'profile-view',
             'profile-edit',
-            
+
             // Notifications
             'notification-view',
-            
+
             // Documents
             'document-manage',
             'document-view',
@@ -575,8 +575,8 @@ class RolePermissionSeeder extends Seeder
 
         // ================= MANAGER =================
         $managerPermissions = [
-            'dashboard',
-            
+            // 'dashboard',
+
             // Requisitions
             'requisition-view',
             'requisition-create',
@@ -586,16 +586,16 @@ class RolePermissionSeeder extends Seeder
             'requisition-pending-view',
             'requisition-approved-view',
             'my-requisitions',
-            
+
             // Department Approval
             'department-approval-view',
             'department-approval-approve',
-            
+
             // Transport Approval
             'transport-approval-view',
             'transport-approval-assign',
             'transport-approval-approve',
-            
+
             // Trip Sheets
             'trip-sheet-view',
             'trip-sheet-own',
@@ -608,7 +608,7 @@ class RolePermissionSeeder extends Seeder
             'trip-fuel-log',
             'trip-fuel-own',
             'trip-fuel-view',
-            
+
             // Driver Performance
             'driver-view',
             'driver-list-view',
@@ -620,12 +620,12 @@ class RolePermissionSeeder extends Seeder
             'driver-availability-update',
             'driver-access',
             'driver-vehicle',
-            
+
             // Vehicles
             'vehicle-view',
             'vehicle-list-view',
             'vehicle-export',
-            
+
             // Maintenance
             'maintenance-view',
             'maintenance-create',
@@ -633,7 +633,7 @@ class RolePermissionSeeder extends Seeder
             'maintenance-manage',
             'maintenance-type-manage',
             'maintenance-vendor-manage',
-            
+
             // Reports
             'report-requisition',
             'report-requisition-own',
@@ -683,47 +683,41 @@ class RolePermissionSeeder extends Seeder
 
         // ================= DRIVER =================
         $driverPermissions = [
-            'dashboard',
-            
+            // 'dashboard',
+
             // Driver Access - Required for driver personal module menus
             'driver-access',
-            
+
             // Driver Schedule
             'driver-schedule-view',
             'driver-schedule-own',
             'driver-availability-view',
             'driver-availability-update',
-            
+
             // Trip Sheets - Own trips only
-            'trip-sheet-view',
-            'trip-sheet-own',
-            'trip-start',
-            'trip-finish',
-            'trip-end',
-            
+            // 'trip-sheet-view',
+            // 'trip-sheet-own',
+            // 'trip-start',
+            // 'trip-finish',
+            // 'trip-end',
+
             // Fuel & Expense Logging
             'trip-fuel-log',
             'trip-fuel-own',
             'trip-fuel-view',
-            
+
             // Driver Documents - View own documents
             'driver-document-view',
             'driver-document-upload',
-            
+
             // Driver Vehicle - View assigned vehicle
             'driver-vehicle',
-            
+
             // Driver Performance - View own performance
             'driver-performance-view',
-            
+
             // Notifications
             'notification-view',
-            
-            // Profile & Employee - View and edit own profile
-            'profile-view',
-            'profile-edit',
-            'employee-view-own',
-            'employee-edit-own',
 
             // GPS Tracking
             'gps-tracking-view',
