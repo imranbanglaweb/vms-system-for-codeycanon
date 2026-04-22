@@ -6,7 +6,6 @@ use App\Models\Department;
 use App\Models\Requisition;
 use App\Models\Unit;
 use App\Models\User;
-use App\Notifications\DepartmentApproved;
 use App\Services\EmailService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -98,48 +97,12 @@ class DepartmentApprovalController extends Controller
             'department_remarks' => $request->remarks,
         ]);
 
-        // Send email notification to Transport Head
+        // Send email notification via queue (async)
         try {
             $this->emailService->sendDepartmentApproved($requisition);
-            Log::info('Department approval email sent for requisition: '.$requisition->requisition_number);
+            Log::info('Department approval email queued for requisition: '.$requisition->requisition_number);
         } catch (\Exception $e) {
             Log::error('Failed to send department approval email: '.$e->getMessage());
-        }
-
-        // Send push notification to Transport Head, Transport Managers, AND the Requester
-        $notificationUsers = User::whereHas('roles', function ($query) {
-            $query->whereIn('name', ['Transport_Head', 'Transport', 'Super Admin', 'Admin']);
-        })
-            ->where('id', '!=', $user->id)
-            ->get();
-
-        // Also notify the requester if they have a user account (linked via employee_id)
-        $requesterUser = User::where('employee_id', $requisition->requested_by)->first();
-        if ($requesterUser && ! $notificationUsers->contains($requesterUser)) {
-            $notificationUsers = $notificationUsers->push($requesterUser);
-        }
-
-        // Log the users we found
-        Log::info('Push notification target users count: '.$notificationUsers->count());
-        foreach ($notificationUsers as $notificationUser) {
-            Log::info('User ID: '.$notificationUser->id.', Email: '.$notificationUser->email);
-        }
-
-        // Send notification to these users
-        if ($notificationUsers->isNotEmpty()) {
-            Notification::send($notificationUsers, new DepartmentApproved($requisition));
-            Log::info('Push notification sent via Notification::send');
-        } else {
-            Log::warning('No users found for push notification.');
-        }
-
-        // Also try sending directly to Super Admin (ID 1) as fallback
-        $superAdmin = User::find(1);
-        if ($superAdmin) {
-            $superAdmin->notify(new DepartmentApproved($requisition));
-            Log::info('Direct notification sent to Super Admin (User ID 1)');
-        } else {
-            Log::warning('Super Admin (User ID 1) not found.');
         }
 
         return response()->json(['status' => 'success', 'message' => 'Requisition approved and forwarded to the Transport department.']);
