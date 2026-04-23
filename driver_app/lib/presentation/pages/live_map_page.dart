@@ -1,6 +1,11 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:share_plus/share_plus.dart';
+import '../../core/di/injection_container.dart';
 import '../../core/theme/app_theme.dart';
+import '../../data/repositories/driver_repository.dart';
 import '../blocs/dashboard/dashboard_bloc.dart';
 import '../blocs/dashboard/dashboard_event.dart';
 
@@ -13,6 +18,7 @@ class LiveMapPage extends StatefulWidget {
 
 class _LiveMapPageState extends State<LiveMapPage> {
   bool _isTrackingEnabled = false;
+  StreamSubscription<Position>? _locationSubscription;
 
   @override
   void initState() {
@@ -340,7 +346,7 @@ class _LiveMapPageState extends State<LiveMapPage> {
       children: [
         Expanded(
           child: ElevatedButton.icon(
-            onPressed: _isTrackingEnabled ? _updateLocation : null,
+            onPressed: _isTrackingEnabled ? _manualLocationUpdate : null,
             icon: Icon(
                 _isTrackingEnabled ? Icons.refresh : Icons.refresh_outlined),
             label: const Text('Update Location'),
@@ -367,43 +373,259 @@ class _LiveMapPageState extends State<LiveMapPage> {
     );
   }
 
-  void _startTracking() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('GPS tracking started'),
-        backgroundColor: AppTheme.successColor,
-      ),
-    );
-    // TODO: Implement actual GPS tracking start
+  Future<void> _startTracking() async {
+    try {
+      // Check location permissions
+      LocationPermission permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+        if (permission == LocationPermission.denied) {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content:
+                    Text('Location permissions are required for GPS tracking'),
+                backgroundColor: AppTheme.errorColor,
+              ),
+            );
+          }
+          return;
+        }
+      }
+
+      if (permission == LocationPermission.deniedForever) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text(
+                  'Location permissions are permanently denied. Please enable them in settings.'),
+              backgroundColor: AppTheme.errorColor,
+            ),
+          );
+        }
+        return;
+      }
+
+      // Check if location services are enabled
+      bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      if (!serviceEnabled) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content:
+                  Text('Location services are disabled. Please enable them.'),
+              backgroundColor: AppTheme.errorColor,
+            ),
+          );
+        }
+        return;
+      }
+
+      // Start location tracking
+      const LocationSettings locationSettings = LocationSettings(
+        accuracy: LocationAccuracy.high,
+        distanceFilter: 10, // Update every 10 meters
+      );
+
+      _locationSubscription = Geolocator.getPositionStream(
+        locationSettings: locationSettings,
+      ).listen((Position position) {
+        _updateLocation(position);
+      });
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('GPS tracking started'),
+            backgroundColor: AppTheme.successColor,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to start GPS tracking: ${e.toString()}'),
+            backgroundColor: AppTheme.errorColor,
+          ),
+        );
+      }
+    }
   }
 
   void _stopTracking() {
+    // Cancel location subscription
+    _locationSubscription?.cancel();
+    _locationSubscription = null;
+
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
         content: Text('GPS tracking stopped'),
         backgroundColor: AppTheme.warningColor,
       ),
     );
-    // TODO: Implement actual GPS tracking stop
   }
 
-  void _updateLocation() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Location updated'),
-        backgroundColor: AppTheme.primaryColor,
-      ),
-    );
-    // TODO: Implement location update
+  Future<void> _manualLocationUpdate() async {
+    try {
+      Position position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high,
+      );
+      _updateLocation(position);
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to get current location: ${e.toString()}'),
+            backgroundColor: AppTheme.errorColor,
+          ),
+        );
+      }
+    }
   }
 
-  void _shareLocation() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Location sharing feature coming soon'),
-        backgroundColor: AppTheme.primaryColor,
-      ),
-    );
-    // TODO: Implement location sharing
+  void _updateLocation(Position position) {
+    // Log the location data for debugging
+    debugPrint(
+        'Location updated: Lat=${position.latitude}, Lng=${position.longitude}, Accuracy=${position.accuracy}m');
+
+    // Send location to backend API
+    _sendLocationToBackend(position);
+  }
+
+  Future<void> _sendLocationToBackend(Position position) async {
+    try {
+      // Get the repository from dependency injection
+      final repository = getIt<DriverRepository>();
+
+      // Prepare location data
+      final locationData = {
+        'latitude': position.latitude,
+        'longitude': position.longitude,
+        'accuracy': position.accuracy,
+        'speed': position.speed,
+        'altitude': position.altitude,
+        'heading': position.heading,
+        'timestamp': position.timestamp.toIso8601String(),
+      };
+
+      // Send to backend
+      await repository.updateDriverLocation(locationData);
+
+      // Optional: Update UI with current location if needed
+      if (mounted) {
+        // Here you could update a state variable to show current location
+        // For example: setState(() => _currentPosition = position);
+      }
+
+      debugPrint('Location successfully sent to backend');
+    } catch (e) {
+      // Log error but don't show user notification for every location update
+      // to avoid spamming the user with error messages during GPS issues
+      debugPrint('Failed to send location to backend: $e');
+    }
+  }
+
+  Future<void> _shareLocation() async {
+    try {
+      // Check if location services are enabled
+      bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      if (!serviceEnabled) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text(
+                  'Location services are disabled. Please enable them to share location.'),
+              backgroundColor: AppTheme.errorColor,
+            ),
+          );
+        }
+        return;
+      }
+
+      // Check permissions
+      LocationPermission permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+        if (permission == LocationPermission.denied) {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content:
+                    Text('Location permissions are required to share location'),
+                backgroundColor: AppTheme.errorColor,
+              ),
+            );
+          }
+          return;
+        }
+      }
+
+      if (permission == LocationPermission.deniedForever) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text(
+                  'Location permissions are permanently denied. Please enable them in settings.'),
+              backgroundColor: AppTheme.errorColor,
+            ),
+          );
+        }
+        return;
+      }
+
+      // Get current location
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Getting current location...'),
+            backgroundColor: AppTheme.primaryColor,
+          ),
+        );
+      }
+
+      Position position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high,
+        timeLimit: const Duration(seconds: 10),
+      );
+
+      // Create shareable location message
+      final locationMessage = _createLocationShareMessage(position);
+
+      // Share the location
+      await Share.share(
+        locationMessage,
+        subject: 'My Current Location',
+      );
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to share location: ${e.toString()}'),
+            backgroundColor: AppTheme.errorColor,
+          ),
+        );
+      }
+    }
+  }
+
+  String _createLocationShareMessage(Position position) {
+    final latitude = position.latitude.toStringAsFixed(6);
+    final longitude = position.longitude.toStringAsFixed(6);
+    final accuracy = position.accuracy.toStringAsFixed(1);
+
+    // Create a comprehensive location message
+    final message = '''
+My Current Location
+
+📍 Coordinates: $latitude, $longitude
+🎯 Accuracy: ±${accuracy}m
+🕒 Time: ${position.timestamp.toLocal().toString()}
+
+Google Maps: https://maps.google.com/?q=$latitude,$longitude
+    '''
+        .trim();
+
+    return message;
   }
 }

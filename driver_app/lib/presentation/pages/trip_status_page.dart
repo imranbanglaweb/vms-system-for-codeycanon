@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../core/di/injection_container.dart';
 import '../../core/theme/app_theme.dart';
+import '../../data/repositories/driver_repository.dart';
 import '../blocs/dashboard/dashboard_bloc.dart';
 import '../blocs/dashboard/dashboard_event.dart';
 import 'schedule_page.dart';
@@ -210,14 +212,14 @@ class _TripStatusPageState extends State<TripStatusPage> {
                       ),
                       Text(
                         '${trip.fromLocation ?? 'N/A'} → ${trip.toLocation ?? 'N/A'}',
-                        style: TextStyle(
+                        style: const TextStyle(
                           color: AppTheme.textSecondary,
                           fontSize: 14,
                         ),
                       ),
                       Text(
                         '${trip.travelDate ?? 'N/A'} • ${trip.numberOfPassengers ?? 0} passengers',
-                        style: TextStyle(
+                        style: const TextStyle(
                           color: AppTheme.textSecondary,
                           fontSize: 12,
                         ),
@@ -249,7 +251,7 @@ class _TripStatusPageState extends State<TripStatusPage> {
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton.icon(
-                  onPressed: () => _startTrip(context, trip),
+                  onPressed: () => _startTrip(trip),
                   icon: const Icon(Icons.play_arrow),
                   label: const Text('Start Trip'),
                   style: ElevatedButton.styleFrom(
@@ -262,7 +264,7 @@ class _TripStatusPageState extends State<TripStatusPage> {
                 children: [
                   Expanded(
                     child: OutlinedButton.icon(
-                      onPressed: () => _finishTrip(context, trip),
+                      onPressed: () => _finishTrip(trip),
                       icon: const Icon(Icons.check_circle_outline),
                       label: const Text('Finish Trip'),
                     ),
@@ -270,7 +272,7 @@ class _TripStatusPageState extends State<TripStatusPage> {
                   const SizedBox(width: 8),
                   Expanded(
                     child: ElevatedButton.icon(
-                      onPressed: () => _endTrip(context, trip),
+                      onPressed: () => _endTrip(trip),
                       icon: const Icon(Icons.stop),
                       label: const Text('End Trip'),
                       style: ElevatedButton.styleFrom(
@@ -314,39 +316,108 @@ class _TripStatusPageState extends State<TripStatusPage> {
     }
   }
 
-  void _startTrip(BuildContext context, trip) {
-    // TODO: Implement trip start API call
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: const Text('Trip started successfully'),
-        backgroundColor: AppTheme.successColor,
-      ),
-    );
-    // Refresh data
-    context.read<DashboardBloc>().add(DashboardRefreshRequested());
+  Future<void> _startTrip(trip) async {
+    try {
+      // Get the repository from dependency injection
+      final repository = getIt<DriverRepository>();
+
+      // Call the API to start the trip
+      await repository.startTrip(trip.id);
+
+      // Show success message
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Trip started successfully'),
+            backgroundColor: AppTheme.successColor,
+          ),
+        );
+      }
+
+      // Refresh data
+      if (mounted) {
+        context.read<DashboardBloc>().add(DashboardRefreshRequested());
+      }
+    } catch (e) {
+      // Show error message
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to start trip: ${e.toString()}'),
+            backgroundColor: AppTheme.errorColor,
+          ),
+        );
+      }
+    }
   }
 
-  void _finishTrip(BuildContext context, trip) {
-    // TODO: Implement trip finish API call
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Trip finished successfully'),
-        backgroundColor: AppTheme.primaryColor,
-      ),
-    );
-    // Refresh data
-    context.read<DashboardBloc>().add(DashboardRefreshRequested());
+  Future<void> _finishTrip(trip) async {
+    try {
+      // Get the repository from dependency injection
+      final repository = getIt<DriverRepository>();
+
+      // Call the API to finish the trip
+      await repository.finishTrip(trip.id);
+
+      // Show success message
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Trip finished successfully'),
+            backgroundColor: AppTheme.primaryColor,
+          ),
+        );
+      }
+
+      // Refresh data
+      if (mounted) {
+        context.read<DashboardBloc>().add(DashboardRefreshRequested());
+      }
+    } catch (e) {
+      // Show error message
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to finish trip: ${e.toString()}'),
+            backgroundColor: AppTheme.errorColor,
+          ),
+        );
+      }
+    }
   }
 
-  void _endTrip(BuildContext context, trip) {
-    // TODO: Implement trip end API call
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Trip ended successfully'),
-        backgroundColor: AppTheme.primaryColor,
-      ),
-    );
-    // Refresh data
-    context.read<DashboardBloc>().add(DashboardRefreshRequested());
+  Future<void> _endTrip(trip) async {
+    try {
+      // Get the repository from dependency injection
+      final repository = getIt<DriverRepository>();
+
+      // Call the API to end the trip
+      await repository.endTrip(trip.id);
+
+      // Show success message
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Trip ended successfully'),
+            backgroundColor: AppTheme.primaryColor,
+          ),
+        );
+      }
+
+      // Refresh data
+      if (mounted) {
+        context.read<DashboardBloc>().add(DashboardRefreshRequested());
+      }
+    } catch (e) {
+      // Show error message
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to end trip: ${e.toString()}'),
+            backgroundColor: AppTheme.errorColor,
+          ),
+        );
+      }
+    }
   }
 }

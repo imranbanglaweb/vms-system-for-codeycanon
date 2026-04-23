@@ -178,7 +178,7 @@ class _SchedulePageState extends State<SchedulePage> {
           ),
           child: Row(
             children: [
-              Icon(
+              const Icon(
                 Icons.calendar_today,
                 size: 20,
                 color: AppTheme.primaryColor,
@@ -186,7 +186,7 @@ class _SchedulePageState extends State<SchedulePage> {
               const SizedBox(width: 8),
               Text(
                 displayDate,
-                style: TextStyle(
+                style: const TextStyle(
                   fontWeight: FontWeight.w600,
                   color: AppTheme.primaryColor,
                 ),
@@ -228,7 +228,7 @@ class _SchedulePageState extends State<SchedulePage> {
                                   AppTheme.primaryColor.withValues(alpha: 0.1),
                               borderRadius: BorderRadius.circular(6),
                             ),
-                            child: Icon(
+                            child: const Icon(
                               Icons.directions_car,
                               size: 18,
                               color: AppTheme.primaryColor,
@@ -248,7 +248,7 @@ class _SchedulePageState extends State<SchedulePage> {
                                 ),
                                 Text(
                                   '${trip.fromLocation ?? 'N/A'} → ${trip.toLocation ?? 'N/A'}',
-                                  style: TextStyle(
+                                  style: const TextStyle(
                                     color: AppTheme.textSecondary,
                                     fontSize: 12,
                                   ),
@@ -278,7 +278,7 @@ class _SchedulePageState extends State<SchedulePage> {
                       const SizedBox(height: 8),
                       Row(
                         children: [
-                          Icon(
+                          const Icon(
                             Icons.access_time,
                             size: 14,
                             color: AppTheme.textSecondary,
@@ -286,13 +286,13 @@ class _SchedulePageState extends State<SchedulePage> {
                           const SizedBox(width: 4),
                           Text(
                             trip.travelDate ?? 'Time not set',
-                            style: TextStyle(
+                            style: const TextStyle(
                               color: AppTheme.textSecondary,
                               fontSize: 12,
                             ),
                           ),
                           const SizedBox(width: 16),
-                          Icon(
+                          const Icon(
                             Icons.people,
                             size: 14,
                             color: AppTheme.textSecondary,
@@ -300,7 +300,7 @@ class _SchedulePageState extends State<SchedulePage> {
                           const SizedBox(width: 4),
                           Text(
                             '${trip.numberOfPassengers ?? 0} passengers',
-                            style: TextStyle(
+                            style: const TextStyle(
                               color: AppTheme.textSecondary,
                               fontSize: 12,
                             ),

@@ -127,6 +127,14 @@ class DriverRepository {
     }
   }
 
+  Future<void> updateDriverLocation(Map<String, dynamic> data) async {
+    final response = await _apiClient.updateDriverLocation(data);
+    if (response.statusCode != 200) {
+      throw Exception(
+          response.data['message'] ?? 'Failed to update driver location');
+    }
+  }
+
   Future<List<Vehicle>> getAssignedVehicles() async {
     final response = await _apiClient.getDriverVehicle();
     if (response.data['vehicles'] != null) {

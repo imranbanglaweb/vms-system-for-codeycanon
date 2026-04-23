@@ -219,14 +219,14 @@ class _MyTripsPageState extends State<MyTripsPage>
                       ),
                       Text(
                         '${trip.fromLocation ?? 'N/A'} → ${trip.toLocation ?? 'N/A'}',
-                        style: TextStyle(
+                        style: const TextStyle(
                           color: AppTheme.textSecondary,
                           fontSize: 14,
                         ),
                       ),
                       Text(
                         '${trip.travelDate ?? 'N/A'} • ${trip.numberOfPassengers ?? 0} passengers',
-                        style: TextStyle(
+                        style: const TextStyle(
                           color: AppTheme.textSecondary,
                           fontSize: 12,
                         ),
@@ -264,7 +264,7 @@ class _MyTripsPageState extends State<MyTripsPage>
                 ),
                 child: Row(
                   children: [
-                    Icon(
+                    const Icon(
                       Icons.directions_car,
                       size: 16,
                       color: AppTheme.textSecondary,
@@ -272,7 +272,7 @@ class _MyTripsPageState extends State<MyTripsPage>
                     const SizedBox(width: 8),
                     Text(
                       trip.assignedVehicle.vehicleName ?? 'Assigned Vehicle',
-                      style: TextStyle(
+                      style: const TextStyle(
                         color: AppTheme.textSecondary,
                         fontSize: 12,
                       ),
@@ -288,7 +288,7 @@ class _MyTripsPageState extends State<MyTripsPage>
                         ),
                         child: Text(
                           trip.assignedVehicle.numberPlate!,
-                          style: TextStyle(
+                          style: const TextStyle(
                             color: AppTheme.primaryColor,
                             fontSize: 10,
                             fontWeight: FontWeight.w600,

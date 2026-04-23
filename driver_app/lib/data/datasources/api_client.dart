@@ -115,7 +115,12 @@ class ApiClient {
   }
 
   Future<Response> updateAvailability(Map<String, dynamic> data) async {
-    return await _dio.post(ApiConstants.driverAvailability, data: data);
+    return await _dio.put(ApiConstants.driverAvailability, data: data);
+  }
+
+  Future<Response> updateDriverLocation(Map<String, dynamic> data) async {
+    return await _dio.post('${ApiConstants.baseUrl}/driver/location',
+        data: data);
   }
 
   Future<Response> getDriverProfile() async {

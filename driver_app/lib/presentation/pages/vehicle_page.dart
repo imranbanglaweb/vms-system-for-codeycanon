@@ -191,7 +191,7 @@ class VehiclePage extends StatelessWidget {
                       color: AppTheme.successColor.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(8),
                     ),
-                    child: Icon(
+                    child: const Icon(
                       Icons.check_circle,
                       color: AppTheme.successColor,
                     ),
@@ -218,7 +218,7 @@ class VehiclePage extends StatelessWidget {
                       ],
                     ),
                   ),
-                  Icon(
+                  const Icon(
                     Icons.arrow_forward_ios,
                     size: 16,
                     color: AppTheme.textSecondary,
