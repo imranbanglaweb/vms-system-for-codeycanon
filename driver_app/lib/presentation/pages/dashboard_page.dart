@@ -8,6 +8,13 @@ import '../blocs/dashboard/dashboard_bloc.dart';
 import '../blocs/dashboard/dashboard_event.dart';
 import '../widgets/trip_card.dart';
 import '../widgets/stats_card.dart';
+import 'live_map_page.dart';
+import 'availability_page.dart';
+import 'vehicle_page.dart';
+import 'trip_status_page.dart';
+import 'schedule_page.dart';
+import 'my_trips_page.dart';
+import 'add_fuel_log_page.dart';
 
 class DashboardPage extends StatelessWidget {
   const DashboardPage({super.key});
@@ -361,7 +368,7 @@ class DashboardPage extends StatelessWidget {
                 icon: Icons.map_outlined,
                 title: 'Live Map',
                 subtitle: 'GPS Tracking',
-                onTap: () {},
+                onTap: () => _navigateToLiveMap(context),
               ),
             ),
             const SizedBox(width: 8),
@@ -371,7 +378,7 @@ class DashboardPage extends StatelessWidget {
                 icon: Icons.playlist_add_check,
                 title: 'Trip Status',
                 subtitle: 'Start/End trips',
-                onTap: () {},
+                onTap: () => _navigateToTripStatusPage(context),
               ),
             ),
             const SizedBox(width: 8),
@@ -381,7 +388,7 @@ class DashboardPage extends StatelessWidget {
                 icon: Icons.calendar_today_outlined,
                 title: 'Schedule',
                 subtitle: 'View upcoming',
-                onTap: () {},
+                onTap: () => _navigateToSchedulePage(context),
               ),
             ),
           ],
@@ -395,7 +402,7 @@ class DashboardPage extends StatelessWidget {
                 icon: Icons.list_alt_outlined,
                 title: 'My Trips',
                 subtitle: 'All trips',
-                onTap: () {},
+                onTap: () => _navigateToMyTripsPage(context),
               ),
             ),
             const SizedBox(width: 8),
@@ -405,7 +412,7 @@ class DashboardPage extends StatelessWidget {
                 icon: Icons.access_time_outlined,
                 title: 'Availability',
                 subtitle: 'Update status',
-                onTap: () {},
+                onTap: () => _navigateToAvailability(context),
               ),
             ),
             const SizedBox(width: 8),
@@ -414,8 +421,8 @@ class DashboardPage extends StatelessWidget {
                 context,
                 icon: Icons.local_gas_station_outlined,
                 title: 'Fuel Log',
-                subtitle: 'Log fuel',
-                onTap: () {},
+                subtitle: 'Add fuel entry',
+                onTap: () => _navigateToFuelPage(context),
               ),
             ),
             const SizedBox(width: 8),
@@ -425,7 +432,7 @@ class DashboardPage extends StatelessWidget {
                 icon: Icons.directions_car_outlined,
                 title: 'My Vehicle',
                 subtitle: 'View details',
-                onTap: () {},
+                onTap: () => _navigateToVehicle(context),
               ),
             ),
           ],
@@ -514,6 +521,49 @@ class DashboardPage extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+
+  void _navigateToTripStatusPage(BuildContext context) {
+    Navigator.of(context).push(
+      MaterialPageRoute(builder: (_) => const TripStatusPage()),
+    );
+  }
+
+  void _navigateToSchedulePage(BuildContext context) {
+    Navigator.of(context).push(
+      MaterialPageRoute(builder: (_) => const SchedulePage()),
+    );
+  }
+
+  void _navigateToMyTripsPage(BuildContext context) {
+    Navigator.of(context).push(
+      MaterialPageRoute(builder: (_) => const MyTripsPage()),
+    );
+  }
+
+  void _navigateToFuelPage(BuildContext context) {
+    // Navigate to Add Fuel Log page
+    Navigator.of(context).push(
+      MaterialPageRoute(builder: (_) => const AddFuelLogPage()),
+    );
+  }
+
+  void _navigateToLiveMap(BuildContext context) {
+    Navigator.of(context).push(
+      MaterialPageRoute(builder: (_) => const LiveMapPage()),
+    );
+  }
+
+  void _navigateToAvailability(BuildContext context) {
+    Navigator.of(context).push(
+      MaterialPageRoute(builder: (_) => const AvailabilityPage()),
+    );
+  }
+
+  void _navigateToVehicle(BuildContext context) {
+    Navigator.of(context).push(
+      MaterialPageRoute(builder: (_) => const VehiclePage()),
     );
   }
 }

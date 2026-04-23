@@ -13,6 +13,7 @@ class DriverDashboard extends Equatable {
   final int pendingTripsCount;
   final int activeTripsCount;
   final int completedTripsCount;
+  final Map<String, dynamic>? lastVehicle;
 
   const DriverDashboard({
     this.driver,
@@ -24,6 +25,7 @@ class DriverDashboard extends Equatable {
     this.pendingTripsCount = 0,
     this.activeTripsCount = 0,
     this.completedTripsCount = 0,
+    this.lastVehicle,
   });
 
   factory DriverDashboard.fromJson(Map<String, dynamic> json) {
@@ -55,6 +57,7 @@ class DriverDashboard extends Equatable {
       pendingTripsCount: json['pendingTripsCount'] ?? 0,
       activeTripsCount: json['activeTripsCount'] ?? 0,
       completedTripsCount: json['completedTripsCount'] ?? 0,
+      lastVehicle: json['lastVehicle'] as Map<String, dynamic>?,
     );
   }
 
@@ -68,7 +71,8 @@ class DriverDashboard extends Equatable {
         activeTrip,
         pendingTripsCount,
         activeTripsCount,
-        completedTripsCount
+        completedTripsCount,
+        lastVehicle
       ];
 }
 
