@@ -2,15 +2,15 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
-use App\Models\User;
-use App\Models\Employee;
 use App\Models\Department;
-use App\Models\Unit;
-use App\Models\Location;
 use App\Models\Driver;
-use Spatie\Permission\Models\Role;
+use App\Models\Employee;
+use App\Models\Location;
+use App\Models\Unit;
+use App\Models\User;
+use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
+use Spatie\Permission\Models\Role;
 
 class UserSeeder extends Seeder
 {
@@ -19,10 +19,10 @@ class UserSeeder extends Seeder
         // ================= ROLES =================
         $superAdminRole = Role::where('name', 'Super Admin')->first();
         $adminRole = Role::where('name', 'Admin')->first();
-        $deptHeadRole   = Role::where('name', 'Department Head')->first();
-        $transportRole  = Role::where('name', 'Transport')->first();
-        $employeeRole   = Role::where('name', 'Employee')->first();
-        $driverRole     = Role::where('name', 'Driver')->first();
+        $deptHeadRole = Role::where('name', 'Department Head')->first();
+        $transportRole = Role::where('name', 'Transport')->first();
+        $employeeRole = Role::where('name', 'Employee')->first();
+        $driverRole = Role::where('name', 'Driver')->first();
 
         // Get first records for linking
         $firstEmployee = Employee::first();
@@ -41,7 +41,7 @@ class UserSeeder extends Seeder
             'designation' => 'Super Administrator',
             'department_id' => 1,
         ];
-        
+
         $superAdminEmp = Employee::firstOrCreate(
             ['email' => $superAdminEmpData['email']],
             [
@@ -81,7 +81,13 @@ class UserSeeder extends Seeder
             ]
         );
         $superAdmin->assignRole($superAdminRole);
-        $this->command->info("Created Super Admin: superadmin@vms.com / password");
+
+        // Assign Meta Pixel permissions to Super Admin
+        if ($superAdminRole) {
+            $superAdminRole->givePermissionTo(['analytics-view', 'system-configure']);
+        }
+
+        $this->command->info('Created Super Admin: superadmin@vms.com / password');
 
         // ================= ADMIN EMPLOYEE =================
         $adminEmpData = [
@@ -92,7 +98,7 @@ class UserSeeder extends Seeder
             'designation' => 'System Administrator',
             'department_id' => 1,
         ];
-        
+
         $adminEmp = Employee::firstOrCreate(
             ['email' => $adminEmpData['email']],
             [
@@ -132,7 +138,13 @@ class UserSeeder extends Seeder
             ]
         );
         $admin->assignRole($adminRole);
-        $this->command->info("Created Admin: admin@garibondhu360.com / password");
+
+        // Assign Meta Pixel permissions to Admin
+        if ($adminRole) {
+            $adminRole->givePermissionTo(['analytics-view', 'system-configure']);
+        }
+
+        $this->command->info('Created Admin: admin@garibondhu360.com / password');
 
         // ================= TRANSPORT ADMIN EMPLOYEE =================
         $transportEmpData = [
@@ -143,7 +155,7 @@ class UserSeeder extends Seeder
             'designation' => 'Transport Manager',
             'department_id' => 9, // Transport department
         ];
-        
+
         $transportEmp = Employee::firstOrCreate(
             ['email' => $transportEmpData['email']],
             [
@@ -183,7 +195,7 @@ class UserSeeder extends Seeder
             ]
         );
         $transport->assignRole($transportRole);
-        $this->command->info("Created Transport Admin: transport@garibondhu360.com / password");
+        $this->command->info('Created Transport Admin: transport@garibondhu360.com / password');
 
         // ================= DEPARTMENT HEAD EMPLOYEE =================
         $deptHeadEmpData = [
@@ -194,7 +206,7 @@ class UserSeeder extends Seeder
             'designation' => 'Department Head',
             'department_id' => 1,
         ];
-        
+
         $deptHeadEmp = Employee::firstOrCreate(
             ['email' => $deptHeadEmpData['email']],
             [
@@ -234,7 +246,7 @@ class UserSeeder extends Seeder
             ]
         );
         $deptHead->assignRole($deptHeadRole);
-        $this->command->info("Created Department Head: depthead@garibondhu360.com / password");
+        $this->command->info('Created Department Head: depthead@garibondhu360.com / password');
 
         // ================= EMPLOYEE USER =================
         // Create employee record first, then user
@@ -245,7 +257,7 @@ class UserSeeder extends Seeder
             'mobile' => '01700000005',
             'designation' => 'Officer',
         ];
-        
+
         // Create employee record for the employee user
         $employeeRecord = Employee::firstOrCreate(
             ['email' => $employeeData['email']],
@@ -266,7 +278,7 @@ class UserSeeder extends Seeder
                 'permanent_address' => 'Dhaka, Bangladesh',
             ]
         );
-        
+
         // Create user for employee
         $employeeUser = User::firstOrCreate(
             ['email' => $employeeData['email']],
@@ -286,7 +298,7 @@ class UserSeeder extends Seeder
             ]
         );
         $employeeUser->assignRole($employeeRole);
-        $this->command->info("Created Employee User: employee@garibondhu360.com / password");
+        $this->command->info('Created Employee User: employee@garibondhu360.com / password');
 
         // ================= ADDITIONAL EMPLOYEE USER =================
         // Create additional employee record first, then user
@@ -297,7 +309,7 @@ class UserSeeder extends Seeder
             'mobile' => '01700000006',
             'designation' => 'Senior Officer',
         ];
-        
+
         // Create employee record for the additional employee user
         $employeeRecord2 = Employee::firstOrCreate(
             ['email' => $employeeData2['email']],
@@ -318,7 +330,7 @@ class UserSeeder extends Seeder
                 'permanent_address' => 'Dhaka, Bangladesh',
             ]
         );
-        
+
         // Create user for additional employee
         $employeeUser2 = User::firstOrCreate(
             ['email' => $employeeData2['email']],
@@ -338,7 +350,7 @@ class UserSeeder extends Seeder
             ]
         );
         $employeeUser2->assignRole($employeeRole);
-        $this->command->info("Created Employee User: employee2@garibondhu360.com / password");
+        $this->command->info('Created Employee User: employee2@garibondhu360.com / password');
 
         // ================= DRIVER USER (ONLY ONE) =================
         // Create only one driver with employee record
@@ -353,7 +365,7 @@ class UserSeeder extends Seeder
 
         // Get the driver record
         $driverRecord = Driver::where('license_number', $driverData['license_number'])->first();
-        
+
         // Create employee record for the driver
         $employeeDriver = Employee::firstOrCreate(
             ['email' => $driverData['email']],
@@ -374,7 +386,7 @@ class UserSeeder extends Seeder
                 'permanent_address' => $driverRecord ? $driverRecord->permanent_address : 'Dhaka, Bangladesh',
             ]
         );
-        
+
         // Create or update user for driver
         $driverUser = User::firstOrCreate(
             ['email' => $driverData['email']],
@@ -393,15 +405,15 @@ class UserSeeder extends Seeder
                 'cell_phone' => $driverData['mobile'],
             ]
         );
-        
+
         // Create driver role if doesn't exist
-        if (!$driverRole) {
+        if (! $driverRole) {
             $driverRole = Role::firstOrCreate(['name' => 'Driver', 'guard_name' => 'web']);
         }
-        
+
         // Assign driver role
         $driverUser->syncRoles([$driverRole]);
-        $this->command->info("Created Driver User: driver@garibondhu360.com / password");
+        $this->command->info('Created Driver User: driver@garibondhu360.com / password');
 
         // ================= SUMMARY =================
         $this->command->info('');

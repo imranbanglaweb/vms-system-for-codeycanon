@@ -479,58 +479,146 @@ class MenuSeeder extends Seeder
                 'menu_parent' => 0,
             ],
 
-            // 17. AI Features
+            // 17. Meta Pixel Analytics
             [
-                'menu_name' => 'AI Features',
-                'menu_slug' => 'ai-features',
-                'menu_icon' => 'fa-brain',
+                'menu_name' => 'Meta Pixel Analytics',
+                'menu_slug' => 'metapixel-analytics',
+                'menu_icon' => 'fa-chart-pie',
                 'menu_url' => null,
                 'menu_permission' => null,
                 'menu_order' => 17,
                 'menu_parent' => 0,
             ],
 
-            // 18. Public Pages (Admin only)
+            // 18. AI Features
+            [
+                'menu_name' => 'AI Features',
+                'menu_slug' => 'ai-features',
+                'menu_icon' => 'fa-brain',
+                'menu_url' => null,
+                'menu_permission' => null,
+                'menu_order' => 18,
+                'menu_parent' => 0,
+            ],
+
+            // 19. Analytics
+            [
+                'menu_name' => 'Analytics',
+                'menu_slug' => 'menu.analytics',
+                'menu_icon' => 'fa-chart-simple',
+                'menu_url' => null,
+                'menu_permission' => 'analytics-view',
+                'menu_order' => 19,
+                'menu_parent' => 0,
+            ],
+
+            // 20. Usage & Analytics
+            [
+                'menu_name' => 'Usage & Analytics',
+                'menu_slug' => 'usage-analytics',
+                'menu_icon' => 'fa-chart-line',
+                'menu_url' => null,
+                'menu_permission' => 'usage-view',
+                'menu_order' => 20,
+                'menu_parent' => 0,
+            ],
+
+            // 21. Public Pages (Admin only) - Updated from 18
             [
                 'menu_name' => 'Public Pages',
                 'menu_slug' => 'public-pages',
                 'menu_icon' => 'fa-globe',
                 'menu_url' => 'pricing',
                 'menu_permission' => 'subscription-plan-manage',
-                'menu_order' => 18,
+                'menu_order' => 21,
                 'menu_parent' => 0,
             ],
 
-            // 18. Translations
+            // 22. Translations - Updated from 18
             [
                 'menu_name' => 'Translations',
                 'menu_slug' => 'translations-manage',
                 'menu_icon' => 'fa-language',
                 'menu_url' => null,
                 'menu_permission' => 'translation-manage',
-                'menu_order' => 18,
+                'menu_order' => 22,
                 'menu_parent' => 0,
             ],
 
-            // 19. My Profile
+            // 23. My Profile - Updated from 19
             [
                 'menu_name' => 'My Profile',
                 'menu_slug' => 'my-profile',
                 'menu_icon' => 'fa-user',
                 'menu_url' => 'user-profile',
                 'menu_permission' => 'employee-view-own',
-                'menu_order' => 19,
+                'menu_order' => 23,
                 'menu_parent' => 0,
             ],
 
-            // 20. Menu Management
+            // 24. Menu Management - Updated from 20
             [
                 'menu_name' => 'Menu Management',
                 'menu_slug' => 'menu-manage',
                 'menu_icon' => 'fa-sitemap',
                 'menu_url' => null,
                 'menu_permission' => 'menu-manage',
-                'menu_order' => 20,
+                'menu_order' => 24,
+                'menu_parent' => 0,
+            ],
+
+            // System Configuration
+            [
+                'menu_name' => 'System Configuration',
+                'menu_slug' => 'system-configuration',
+                'menu_icon' => 'fa-server',
+                'menu_url' => null,
+                'menu_permission' => 'system-configure',
+                'menu_order' => 25,
+                'menu_parent' => 0,
+            ],
+
+            // Driver Availability Own
+            [
+                'menu_name' => 'Driver Availability',
+                'menu_slug' => 'driver-availability-own',
+                'menu_icon' => 'fa-clock',
+                'menu_url' => null,
+                'menu_permission' => 'driver-availability-own',
+                'menu_order' => 26,
+                'menu_parent' => 0,
+            ],
+
+            // Trip Fuel View
+            [
+                'menu_name' => 'Trip Fuel View',
+                'menu_slug' => 'trip-fuel-view',
+                'menu_icon' => 'fa-gas-pump',
+                'menu_url' => null,
+                'menu_permission' => 'trip-fuel-view',
+                'menu_order' => 27,
+                'menu_parent' => 0,
+            ],
+
+            // Department Approval
+            [
+                'menu_name' => 'Department Approval',
+                'menu_slug' => 'department-approve',
+                'menu_icon' => 'fa-check-circle',
+                'menu_url' => null,
+                'menu_permission' => 'department-approve',
+                'menu_order' => 28,
+                'menu_parent' => 0,
+            ],
+
+            // Transport Approval
+            [
+                'menu_name' => 'Transport Approval',
+                'menu_slug' => 'transport-approve',
+                'menu_icon' => 'fa-truck',
+                'menu_url' => null,
+                'menu_permission' => 'transport-approve',
+                'menu_order' => 29,
                 'menu_parent' => 0,
             ],
         ];
@@ -1556,6 +1644,62 @@ class MenuSeeder extends Seeder
                 'menu_permission' => 'my-documents',
                 'menu_order' => 4,
                 'parent_name' => 'My Profile',
+            ],
+
+            // ===== Meta Pixel Analytics Children (Order: 1-6) =====
+            [
+                'menu_name' => 'Dashboard Overview',
+                'menu_slug' => 'metapixel-dashboard',
+                'menu_icon' => 'fa-chart-pie',
+                'menu_url' => 'metapixel.dashboard',
+                'menu_permission' => null,
+                'menu_order' => 1,
+                'parent_name' => 'Meta Pixel Analytics',
+            ],
+            [
+                'menu_name' => 'Page Analytics',
+                'menu_slug' => 'metapixel-pages',
+                'menu_icon' => 'fa-file-alt',
+                'menu_url' => 'metapixel.pages',
+                'menu_permission' => null,
+                'menu_order' => 2,
+                'parent_name' => 'Meta Pixel Analytics',
+            ],
+            [
+                'menu_name' => 'User Events',
+                'menu_slug' => 'metapixel-events',
+                'menu_icon' => 'fa-user',
+                'menu_url' => 'metapixel.events',
+                'menu_permission' => null,
+                'menu_order' => 3,
+                'parent_name' => 'Meta Pixel Analytics',
+            ],
+            [
+                'menu_name' => 'Traffic Sources',
+                'menu_slug' => 'metapixel-sources',
+                'menu_icon' => 'fa-external-link-alt',
+                'menu_url' => 'metapixel.sources',
+                'menu_permission' => null,
+                'menu_order' => 4,
+                'parent_name' => 'Meta Pixel Analytics',
+            ],
+            [
+                'menu_name' => 'Conversion Tracking',
+                'menu_slug' => 'metapixel-conversions',
+                'menu_icon' => 'fa-chart-line',
+                'menu_url' => 'metapixel.conversions',
+                'menu_permission' => null,
+                'menu_order' => 5,
+                'parent_name' => 'Meta Pixel Analytics',
+            ],
+            [
+                'menu_name' => 'Pixel Configuration',
+                'menu_slug' => 'metapixel-config',
+                'menu_icon' => 'fa-cog',
+                'menu_url' => 'metapixel.config',
+                'menu_permission' => null,
+                'menu_order' => 6,
+                'parent_name' => 'Meta Pixel Analytics',
             ],
 
             // ===== Menu Management Children (Order: 1-2) =====

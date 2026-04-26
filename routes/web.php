@@ -66,6 +66,7 @@ use App\Http\Controllers\TestEmailController;
 use App\Http\Controllers\TranslationController;
 use App\Http\Controllers\TransportApprovalController;
 use App\Http\Controllers\TripSheetController;
+use App\Http\Controllers\Admin\MetaPixelController;
 // Other Controllers
 use App\Http\Controllers\UnitController;
 use App\Http\Controllers\UserController;
@@ -794,6 +795,14 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('menus', MenuController::class);
     Route::post('menus/reorder', [MenuController::class, 'menuoder'])->name('menus.reorder');
 
+    // Meta Pixel Analytics
+    Route::get('metapixel/dashboard', [MetaPixelController::class, 'dashboard'])->name('metapixel.dashboard');
+    Route::get('metapixel/pages', [MetaPixelController::class, 'pages'])->name('metapixel.pages');
+    Route::get('metapixel/events', [MetaPixelController::class, 'events'])->name('metapixel.events');
+    Route::get('metapixel/sources', [MetaPixelController::class, 'sources'])->name('metapixel.sources');
+    Route::get('metapixel/conversions', [MetaPixelController::class, 'conversions'])->name('metapixel.conversions');
+    Route::get('metapixel/config', [MetaPixelController::class, 'config'])->name('metapixel.config');
+    Route::post('metapixel/config', [MetaPixelController::class, 'updateConfig'])->name('metapixel.config.update');
 });
 
 // ============================================================================

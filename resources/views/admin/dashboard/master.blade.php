@@ -4,6 +4,9 @@
     @include('admin.dashboard.common.header')
     
     <!-- Premium Dashboard Styling -->
+    <!-- Meta Pixel Tracking Component -->
+    @include('components.metapixel')
+
     <style>
         :root {
             --primary-color: #1e3a5f;
