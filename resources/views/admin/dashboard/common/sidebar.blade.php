@@ -189,6 +189,13 @@
         font-size: 16px;
     }
     
+    /* Menu favicon styling */
+    .sidebar-left .menu-favicon {
+        width: 20px;
+        height: 20px;
+        object-fit: contain;
+    }
+    
     /* Menu link styling */
     .sidebar-left .menu-link {
         position: relative;
@@ -283,12 +290,16 @@
         };
     @endphp
 
-    @if($children->isEmpty())
+                @if($children->isEmpty())
         @php $menuUrl = $getUrl($menu->menu_url); @endphp
         @if($menuUrl !== '#')
         <li class="{{ request()->routeIs($menu->menu_url) ? 'nav-active' : '' }}">
             <a href="{{ $menuUrl }}" class="menu-link">
-                <i class="fa {{ $menu->menu_icon }}"></i>
+                @if(!empty($menu->menu_favicon))
+                    <img src="{{ asset('public/admin_resource/assets/images/'.$menu->menu_favicon) }}" alt="" class="menu-favicon">
+                @else
+                    <i class="fa {{ $menu->menu_icon }}"></i>
+                @endif
                 <span>{{ trans(ensure_menu_translation($menu->menu_name)) }}</span>
             </a>
         </li>
@@ -296,7 +307,11 @@
     @else
         <li class="nav-parent {{ $isActiveParent ? 'nav-expanded nav-active' : '' }}">
             <a href="javascript:void(0)" class="menu-link" onclick="toggleMenu(this)">
-                <i class="fa {{ $menu->menu_icon }}"></i>
+                @if(!empty($menu->menu_favicon))
+                    <img src="{{ asset('public/admin_resource/assets/images/'.$menu->menu_favicon) }}" alt="" class="menu-favicon">
+                @else
+                    <i class="fa {{ $menu->menu_icon }}"></i>
+                @endif
                 <span>{{ trans(ensure_menu_translation($menu->menu_name)) }}</span>
             </a>
             <ul class="nav nav-children {{ $isActiveParent ? 'show' : '' }}">
@@ -307,7 +322,11 @@
                     @if($childUrl !== '#')
                     <li class="{{ request()->routeIs($child->menu_url) ? 'nav-active' : '' }}">
                         <a href="{{ $childUrl }}" class="menu-link">
-                            <i class="fa {{ $child->menu_icon }}"></i>
+                            @if(!empty($child->menu_favicon))
+                                <img src="{{ asset('public/admin_resource/assets/images/'.$child->menu_favicon) }}" alt="" class="menu-favicon">
+                            @else
+                                <i class="fa {{ $child->menu_icon }}"></i>
+                            @endif
                             <span>{{ trans(ensure_menu_translation($child->menu_name)) }}</span>
                         </a>
                     </li>
