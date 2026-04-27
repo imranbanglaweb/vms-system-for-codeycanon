@@ -1,13 +1,21 @@
-<html lang="{{ app()->getLocale() }}">
-<head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <!-- CSRF Token -->
-    <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>Ticketing System</title>
-    <link rel="shortcut icon" type="image/png" href="{{ asset('favicon.ico') }}">
-    <link rel="shortcut icon" type="image/x-icon" href="{{ asset('favicon.ico') }}">
+ <html lang="{{ app()->getLocale() }}">
+ <head>
+     <meta charset="utf-8">
+     <meta http-equiv="X-UA-Compatible" content="IE=edge">
+     <meta name="viewport" content="width=device-width, initial-scale=1">
+     <!-- CSRF Token -->
+     <meta name="csrf-token" content="{{ csrf_token() }}">
+     <title>Ticketing System</title>
+     @php
+         $settings = \Illuminate\Support\Facades\DB::table('settings')->where('id', 1)->first();
+     @endphp
+     @if(!empty($settings->favicon))
+         <link rel="shortcut icon" type="image/png" href="{{ asset('public/admin_resource/assets/images/'.$settings->favicon) }}">
+         <link rel="shortcut icon" type="image/x-icon" href="{{ asset('public/admin_resource/assets/images/'.$settings->favicon) }}">
+     @else
+         <link rel="shortcut icon" type="image/png" href="{{ asset('favicon.ico') }}">
+         <link rel="shortcut icon" type="image/x-icon" href="{{ asset('favicon.ico') }}">
+     @endif
     <!-- Scripts -->
     <script src="{{ asset('public/js/app.js') }}" defer></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.13.0/css/all.min.css" rel="stylesheet">

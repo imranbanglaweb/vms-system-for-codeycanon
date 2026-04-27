@@ -308,10 +308,13 @@
             </a>
         </div>
 
-        {{-- TAB BUTTONS --}}
+         {{-- TAB BUTTONS --}}
         <div class="mb-4">
             <button class="btn btn-light tab-btn admin_menu active" data-target=".admin_settings">
                 <i class="fa fa-user"></i>  Admin Settings
+            </button>
+            <button class="btn btn-light tab-btn favicon_menu" data-target=".favicon_settings">
+                <i class="fa fa-icons"></i> Favicon Settings
             </button>
             @auth
             @if(auth()->user()->hasPermissionTo('settings-language'))
@@ -347,7 +350,7 @@
                     {!! Form::text('admin_description', $settings->admin_description ?? null, ['class'=>'form-control']) !!}
                 </div>
 
-                <label>Admin Logo:</label>
+                 <label>Admin Logo:</label>
                 <div class="d-flex align-items-center gap-3 mb-3">
                     <input type="file" name="admin_logo">
                     @if(!empty($settings->admin_logo))
@@ -355,14 +358,27 @@
                     @endif
                 </div>
 
-                <label>Favicon:</label>
-                <div class="d-flex align-items-center gap-3 mb-3">
-                    <input type="file" name="favicon" accept="image/png,image/x-icon,image/vnd.microsoft.icon">
-                    @if(!empty($settings->favicon))
-                        <img src="{{ asset('public/admin_resource/assets/images/'.$settings->favicon) }}" width="40" style="padding:5px;background:#f0f0f0;border-radius:4px;">
-                    @else
-                        <img src="{{ asset('favicon.ico') }}" width="40" style="padding:5px;background:#f0f0f0;border-radius:4px;">
-                    @endif
+            </div>
+
+            {{-- FAVICON SETTINGS CARD --}}
+            <div class="col-md-12 favicon_settings settings-card" style="display: none;">
+
+                <h4 class="mb-4"><i class="fa fa-icons text-primary me-2"></i>Favicon Settings</h4>
+                <p class="text-muted mb-4">Manage the favicon that appears in the browser tab.</p>
+
+                <div class="row">
+                    <div class="col-md-12">
+                        <label>Favicon</label>
+                        <div class="d-flex align-items-center gap-3 mb-3">
+                            <input type="file" name="favicon" accept="image/png,image/x-icon,image/vnd.microsoft.icon">
+                            @if(!empty($settings->favicon))
+                                <img src="{{ asset('public/admin_resource/assets/images/'.$settings->favicon) }}" width="40" style="padding:5px;background:#f0f0f0;border-radius:4px;">
+                            @else
+                                <img src="{{ asset('favicon.ico') }}" width="40" style="padding:5px;background:#f0f0f0;border-radius:4px;">
+                            @endif
+                        </div>
+                        <small class="text-muted">Recommended size: 32x32px or 16x16px. Formats: PNG, ICO</small>
+                    </div>
                 </div>
 
             </div>

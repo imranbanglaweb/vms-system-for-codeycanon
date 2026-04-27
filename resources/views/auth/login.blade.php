@@ -1,12 +1,20 @@
 
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>গাড়িবন্ধু ৩৬০ – Fleet & Transport Management System (Laravel)</title>
-    <link rel="shortcut icon" type="image/png" href="{{ asset('favicon.ico') }}">
-    <link rel="shortcut icon" type="image/x-icon" href="{{ asset('favicon.ico') }}">
+ <!DOCTYPE html>
+ <html lang="en">
+ <head>
+     <meta charset="UTF-8">
+     <title>গাড়িবন্ধু ৩৬০ – Fleet & Transport Management System (Laravel)</title>
+     @php
+         $settings = \Illuminate\Support\Facades\DB::table('settings')->where('id', 1)->first();
+     @endphp
+     @if(!empty($settings->favicon))
+         <link rel="shortcut icon" type="image/png" href="{{ asset('public/admin_resource/assets/images/'.$settings->favicon) }}">
+         <link rel="shortcut icon" type="image/x-icon" href="{{ asset('public/admin_resource/assets/images/'.$settings->favicon) }}">
+     @else
+         <link rel="shortcut icon" type="image/png" href="{{ asset('favicon.ico') }}">
+         <link rel="shortcut icon" type="image/x-icon" href="{{ asset('favicon.ico') }}">
+     @endif
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <!-- Bootstrap + FontAwesome -->
