@@ -221,18 +221,18 @@
     }
 </style>
 <aside id="sidebar-left" class="sidebar-left">
-    <div class="sidebar-header" style="padding: 15px; display: flex; align-items: center; justify-content: space-between;">
-        <div class="sidebar-title">
-            <a href="{{ route('home') }}" class="logo logo-link" title="Go to Dashboard">
-                @if(!empty($settings->admin_logo))
-                    <img src="{{ asset('public/admin_resource/assets/images/'.$settings->admin_logo) }}" alt="Logo" class="logo-image" style="max-height: 45px; max-width: 160px;">
-                @elseif(!empty($settings->logo))
-                    <img src="{{ asset('public/uploads/logo/'.$settings->logo) }}" alt="Logo" class="logo-image" style="max-height: 45px; max-width: 160px;">
-                @else
-                    <span class="logo-text" style="font-size: 20px; font-weight: 700; color: #fff;">গাড়িবন্ধু ৩৬০</span>
-                @endif
-            </a>
-        </div>
+     <div class="sidebar-header" style="padding: 10px 15px; display: flex; align-items: center; justify-content: space-between;">
+         <div class="sidebar-title" style="flex: 1; text-align: center;">
+             <a href="{{ route('home') }}" class="logo logo-link" title="Go to Dashboard">
+                 @if(!empty($settings->admin_logo))
+                     <img src="{{ asset('public/admin_resource/assets/images/'.$settings->admin_logo) }}" alt="Logo" class="logo-image" style="display: block; max-height: 40px; max-width: 150px;">
+                 @elseif(!empty($settings->logo))
+                     <img src="{{ asset('public/uploads/logo/'.$settings->logo) }}" alt="Logo" class="logo-image" style="display: block; max-height: 40px; max-width: 150px;">
+                 @else
+                     <span class="logo-text" style="font-size: 20px; font-weight: 700; color: #fff;">গাড়িবন্ধু ৩৬০</span>
+                 @endif
+             </a>
+         </div>
         <button class="sidebar-toggle hidden-xs" onclick="toggleSidebarCollapse()" title="Toggle Sidebar" aria-label="Toggle sidebar navigation" type="button">
             <i class="fa fa-bars toggle-icon"></i>
             <span class="toggle-label"></span>
