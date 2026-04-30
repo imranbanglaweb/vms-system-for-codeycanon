@@ -15,7 +15,7 @@
          <link rel="shortcut icon" type="image/png" href="{{ asset('favicon.ico') }}">
          <link rel="shortcut icon" type="image/x-icon" href="{{ asset('favicon.ico') }}">
      @endif
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
     <!-- Bootstrap + FontAwesome -->
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
@@ -533,10 +533,11 @@
             color: #FFD700;
         }
 
-        @media(max-width: 850px) {
+        @media(max-width: 1024px) {
             .login-left {
                 width: 100%;
                 box-shadow: none;
+                padding: 30px 20px;
             }
             .login-right {
                 display: none;
@@ -549,14 +550,247 @@
             .system-text p {
                 font-size: 16px;
             }
+            
+            .login-box {
+                max-width: 100%;
+            }
+        }
+        
+        @media(max-width: 768px) {
+            .login-wrapper {
+                height: auto;
+                min-height: 100vh;
+            }
+            
+            .login-left {
+                padding: 20px 15px;
+                min-height: auto;
+            }
+            
+            .login-box {
+                padding: 20px 15px;
+            }
+            
+            .login-box .logo {
+                width: 60px;
+                height: 60px;
+            }
+            
+            .login-box .logo i {
+                font-size: 28px;
+            }
+            
+            .login-box .brand-title {
+                font-size: 20px;
+            }
+            
+            .login-box .brand-tagline {
+                font-size: 13px;
+            }
+            
+            .login-box h3 {
+                font-size: 18px;
+                margin-bottom: 20px;
+            }
+            
+            .form-control {
+                height: 42px;
+                font-size: 16px; /* Prevents zoom on iOS */
+                padding-left: 35px;
+            }
+            
+            .input-icon {
+                font-size: 18px;
+                left: 12px;
+            }
+            
+            .btn-login {
+                padding: 14px 0;
+                font-size: 16px;
+            }
+            
+            .demo-accounts {
+                margin-top: 25px;
+            }
+            
+            .demo-accounts p {
+                font-size: 13px;
+                margin-bottom: 12px !important;
+            }
+            
+            .btn-demo {
+                padding: 10px 12px;
+                font-size: 12px;
+                min-width: 100px;
+            }
+            
+            .system-text {
+                top: 10%;
+                left: 20px;
+            }
+            
+            .system-text h1 {
+                font-size: 24px;
+            }
+            
+            .system-text p {
+                font-size: 14px;
+            }
+            
+            .road-container {
+                height: 50%;
+            }
+        }
+        
+        @media(max-width: 480px) {
+            .login-box {
+                padding: 15px 10px;
+            }
+            
+            .login-box .logo {
+                width: 50px;
+                height: 50px;
+            }
+            
+            .login-box .logo i {
+                font-size: 24px;
+            }
+            
+            .login-box h5 {
+                font-size: 16px;
+            }
+            
+            .login-box .form-group {
+                margin-bottom: 15px;
+            }
+            
+            .btn-demo {
+                padding: 8px 10px;
+                font-size: 11px;
+                min-width: 80px;
+            }
+            
+            .system-text {
+                left: 10px;
+            }
+            
+            .system-text h1 {
+                font-size: 20px;
+            }
+            
+            .system-text p {
+                font-size: 12px;
+            }
+            
+            .cloud {
+                width: 80px;
+                height: 30px;
+            }
+            
+            .car-container {
+                width: 200px;
+                height: 90px;
+                bottom: 25%;
+            }
+            
+            .car-body {
+                border-radius: 10px 10px 4px 4px;
+            }
+            
+            .car-window {
+                width: 35%;
+                height: 25px;
+            }
+            
+            .car-wheel {
+                width: 28px;
+                height: 28px;
+                bottom: -12px;
+            }
         }
 
-        /* Demo Account Buttons */
-        .demo-accounts {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-            justify-content: center;
+        /* Mobile Touch Optimizations */
+        @media (max-width: 768px) {
+            /* Prevent form zoom on iOS */
+            input[type="text"],
+            input[type="password"] {
+                font-size: 16px;
+            }
+            
+            /* Larger touch targets */
+            .btn-login {
+                min-height: 48px;
+                padding: 14px 20px;
+            }
+            
+            .btn-demo {
+                min-height: 44px;
+                padding: 10px 16px;
+            }
+            
+            .form-control {
+                min-height: 44px;
+            }
+            
+            /* Better spacing for mobile */
+            .login-box .form-group {
+                margin-bottom: 16px;
+            }
+            
+            .login-box .form-group:last-of-type {
+                margin-bottom: 20px;
+            }
+        }
+        
+        /* Orientation change handling */
+        @media (max-height: 500px) and (orientation: landscape) {
+            .login-wrapper {
+                height: auto;
+                min-height: 100vh;
+            }
+            
+            .login-left {
+                height: auto;
+                min-height: 100vh;
+                padding: 40px 20px;
+            }
+            
+            .login-right {
+                display: none;
+            }
+            
+            .system-text {
+                display: none;
+            }
+        }
+        
+        /* High resolution displays */
+        @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+            .login-box .logo {
+                box-shadow: 0 8px 20px rgba(79, 70, 229, 0.3);
+            }
+            
+            .btn-login {
+                box-shadow: 0 4px 12px rgba(79, 70, 229, 0.4);
+            }
+        }
+        
+        /* Reduced motion for accessibility */
+        @media (prefers-reduced-motion: reduce) {
+            .road-surface,
+            .car-container,
+            .car-wheel,
+            .tree,
+            .lamp-post,
+            .cloud {
+                animation: none !important;
+            }
+            
+            .car-body,
+            .btn-login:hover {
+                transform: none !important;
+                transition: none !important;
+            }
         }
         
         .demo-accounts p {
@@ -656,26 +890,31 @@ if ($settings && $settings->site_logo) {
 <hr>
             <form method="POST" action="{{ route('login') }}">
                 @csrf
-                <div class="form-group position-relative">
-                    <i class="fas fa-user input-icon"></i>
-                    <input type="text"
-                           name="email"
-                           value="{{ old('email') }}"
-                           class="form-control @error('email') is-invalid @enderror"
-                           placeholder="Enter Employee ID"
-                           required autofocus>
-                    @error('email') <span class="invalid-feedback"><strong>{{ $message }}</strong></span> @enderror
-                </div>
+                    <div class="form-group position-relative">
+                        <i class="fas fa-user input-icon"></i>
+                        <input type="text"
+                               name="email"
+                               value="{{ old('email') }}"
+                               class="form-control @error('email') is-invalid @enderror"
+                               placeholder="Enter Employee ID"
+                               required autofocus
+                               autocapitalize="off"
+                               autocomplete="username"
+                               inputmode="text">
+                        @error('email') <span class="invalid-feedback"><strong>{{ $message }}</strong></span> @enderror
+                    </div>
 
-                <div class="form-group position-relative">
-                    <i class="fas fa-lock input-icon"></i>
-                    <input type="password"
-                           name="password"
-                           class="form-control @error('password') is-invalid @enderror"
-                           placeholder="Enter Password"
-                           required>
-                    @error('password') <span class="invalid-feedback"><strong>{{ $message }}</strong></span> @enderror
-                </div>
+                    <div class="form-group position-relative">
+                        <i class="fas fa-lock input-icon"></i>
+                        <input type="password"
+                               name="password"
+                               class="form-control @error('password') is-invalid @enderror"
+                               placeholder="Enter Password"
+                               required
+                               autocomplete="current-password"
+                               inputmode="text">
+                        @error('password') <span class="invalid-feedback"><strong>{{ $message }}</strong></span> @enderror
+                    </div>
 
                 <button type="submit" class="btn-login">
                     <i class="fas fa-sign-in-alt mr-2"></i> Login
@@ -687,28 +926,28 @@ if ($settings && $settings->site_logo) {
             <!-- Demo Accounts -->
             <div class="demo-accounts mt-4">
                 <p class="text-muted mb-2 text-center" style="font-size: 12px;">Demo Accounts - Click to Login</p>
-                <form method="POST" action="{{ route('demo.login') }}">
+                <form method="POST" action="{{ route('demo.login') }}" autocomplete="off">
                     @csrf
                     <input type="hidden" name="email" value="employee@garibondhu360.com">
                     <button type="submit" class="btn-demo btn-employee">
                         <i class="fas fa-user mr-2"></i> Employee
                     </button>
                 </form>
-                <form method="POST" action="{{ route('demo.login') }}">
+                <form method="POST" action="{{ route('demo.login') }}" autocomplete="off">
                     @csrf
                     <input type="hidden" name="email" value="depthead@garibondhu360.com">
                     <button type="submit" class="btn-demo btn-depthead">
                         <i class="fas fa-user-tie mr-2"></i> Department Head
                     </button>
                 </form>
-                <form method="POST" action="{{ route('demo.login') }}">
+                <form method="POST" action="{{ route('demo.login') }}" autocomplete="off">
                     @csrf
                     <input type="hidden" name="email" value="transport@garibondhu360.com">
                     <button type="submit" class="btn-demo btn-transport">
                         <i class="fas fa-truck mr-2"></i> Transport Manager
                     </button>
                 </form>
-                <form method="POST" action="{{ route('demo.login') }}">
+                <form method="POST" action="{{ route('demo.login') }}" autocomplete="off">
                     @csrf
                     <input type="hidden" name="email" value="driver@garibondhu360.com">
                     <button type="submit" class="btn-demo btn-driver" id="driver-login-btn">

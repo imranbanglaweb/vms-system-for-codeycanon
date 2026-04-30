@@ -7,6 +7,9 @@
     <!-- Meta Pixel Tracking Component -->
     @include('components.metapixel')
 
+    <!-- Responsive Dashboard CSS -->
+    <link href="{{ asset('public/css/responsive-dashboard.css') }}" rel="stylesheet">
+
     <style>
         :root {
             --primary-color: #1e3a5f;
@@ -659,10 +662,31 @@
             margin: 5px 0;
         }
         
-        /* Responsive */
-        @media (max-width: 1024px) {
+         /* Mobile Responsive - Enhanced */
+        @media (max-width: 1200px) {
+            .sidebar-left {
+                width: 240px;
+            }
+            
+            .body {
+                margin-left: 240px;
+            }
+            
+            .sidebar-left.collapsed,
+            .sidebar-collapsed .sidebar-left {
+                width: 60px;
+            }
+            
+            .sidebar-collapsed .body {
+                margin-left: 60px;
+            }
+        }
+        
+        @media (max-width: 992px) {
             .sidebar-left {
                 transform: translateX(-100%);
+                transition: transform 0.3s ease;
+                z-index: 1050;
             }
             
             .sidebar-left.show {
@@ -670,14 +694,288 @@
             }
             
             .body {
-                margin-left: 0;
+                margin-left: 0 !important;
+            }
+            
+            .sidebar-left.collapsed,
+            .sidebar-left.show {
+                width: 260px;
+            }
+            
+            .sidebar-left.show + .overlay {
+                content: '';
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: rgba(0,0,0,0.5);
+                z-index: 1040;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .header {
+                padding: 12px 15px;
+                flex-wrap: wrap;
+                gap: 10px;
+            }
+            
+            .header-left {
+                gap: 10px;
+            }
+            
+            .header-search {
+                display: none;
             }
             
             .header-toggle {
                 display: block;
+                font-size: 18px;
+                width: 36px;
+                height: 36px;
             }
             
-            .header-search {
+            .page-header {
+                padding: 15px;
+                margin-bottom: 15px;
+            }
+            
+            .page-title {
+                font-size: 20px;
+            }
+            
+            .page-content {
+                padding: 0 15px 15px;
+            }
+            
+            .card {
+                margin-bottom: 15px;
+            }
+            
+            .card-body {
+                padding: 15px;
+            }
+            
+            .user-info {
+                display: none;
+            }
+            
+            .header-right {
+                gap: 8px;
+            }
+            
+            .header-icon-btn {
+                width: 36px;
+                height: 36px;
+            }
+            
+            /* Dashboard Cards Stack on Mobile */
+            .row > [class*="col-"] {
+                margin-bottom: 15px;
+            }
+            
+            /* Stats cards */
+            .stat-card {
+                margin-bottom: 15px;
+            }
+            
+            /* Table responsive wrapper */
+            .table-responsive {
+                display: block;
+                width: 100%;
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+            
+            /* Form elements */
+            .form-control, .form-select {
+                font-size: 16px; /* Prevents zoom on iOS */
+            }
+            
+            /* Buttons */
+            .btn {
+                font-size: 14px;
+                padding: 8px 16px;
+            }
+            
+            .btn-lg {
+                padding: 12px 20px;
+                font-size: 16px;
+            }
+            
+            /* Toast notifications */
+            .toast {
+                width: calc(100% - 30px);
+                margin: 10px;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .header {
+                padding: 10px 12px;
+            }
+            
+            .page-header {
+                padding: 12px 10px;
+            }
+            
+            .page-title {
+                font-size: 18px;
+            }
+            
+            .page-breadcrumb {
+                font-size: 12px;
+            }
+            
+            .page-content {
+                padding: 0 10px 10px;
+            }
+            
+            .card-header {
+                padding: 12px 15px;
+                flex-direction: column;
+                gap: 10px;
+                align-items: flex-start;
+            }
+            
+            .card-body {
+                padding: 12px;
+            }
+            
+            /* Compact badges */
+            .badge {
+                font-size: 10px;
+                padding: 3px 6px;
+            }
+            
+            /* Small screen table adjustments */
+            table {
+                font-size: 13px;
+            }
+            
+            table th,
+            table td {
+                padding: 8px 6px;
+            }
+            
+            /* Hide less important columns on very small screens */
+            .table-responsive th:not(:nth-child(1)),
+            .table-responsive td:not(:nth-child(1)) {
+                min-width: 60px;
+            }
+        }
+        
+        /* Large screen optimization */
+        @media (min-width: 1400px) {
+            .sidebar-left {
+                width: 280px;
+            }
+            
+            .body {
+                margin-left: 280px;
+            }
+            
+            .sidebar-left.collapsed,
+            .sidebar-collapsed .sidebar-left {
+                width: 70px;
+            }
+            
+            .sidebar-collapsed .body {
+                margin-left: 70px;
+            }
+        }
+        
+        /* Touch device optimizations */
+        @media (hover: none) and (pointer: coarse) {
+            /* Larger touch targets for mobile */
+            .nav-main > li > a {
+                padding: 15px;
+                min-height: 48px;
+            }
+            
+            .nav-children > li > a {
+                padding: 12px 15px 12px 45px;
+                min-height: 44px;
+            }
+            
+            .dropdown-item {
+                padding: 12px 15px;
+                min-height: 48px;
+            }
+            
+            .header-icon-btn {
+                width: 44px;
+                height: 44px;
+            }
+            
+            /* Remove hover-only effects */
+            .sidebar-left .nav-main > li > a:hover {
+                background: rgba(255,255,255,0.1);
+            }
+            
+            /* Better tap feedback */
+            .sidebar-left .nav-main > li > a:active,
+            .dropdown-item:active,
+            .header-icon-btn:active {
+                opacity: 0.7;
+                transform: scale(0.98);
+            }
+        }
+        
+        /* High DPI screens */
+        @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+            .card {
+                border-width: 1px;
+            }
+            
+            .sidebar-left {
+                box-shadow: 0 0 30px rgba(0,0,0,0.15);
+            }
+        }
+        
+        /* Reduced motion preference */
+        @media (prefers-reduced-motion: reduce) {
+            .sidebar-left,
+            .body,
+            .header-toggle,
+            .dropdown-menu {
+                transition: none !important;
+            }
+            
+            .animate_loader {
+                animation: none;
+            }
+            
+            .loader-logo {
+                animation: none;
+            }
+        }
+        
+        /* Print styles */
+        @media print {
+            .sidebar-left,
+            .header,
+            .header-toggle,
+            .dropdown-menu {
+                display: none !important;
+            }
+            
+            .body {
+                margin-left: 0 !important;
+                padding: 0 !important;
+            }
+            
+            .page-content {
+                padding: 0 !important;
+            }
+            
+            .card {
+                box-shadow: none !important;
+                border: 1px solid #ccc !important;
+            }
+            
+            .header-icon-btn {
                 display: none;
             }
         }
@@ -772,6 +1070,14 @@
         
         <!-- Main Content -->
         <section class="body">
+            <!-- Mobile Sidebar Toggle -->
+            <button class="mobile-sidebar-toggle" onclick="toggleMobileSidebar()" aria-label="Toggle navigation menu">
+                <i class="fa fa-bars"></i>
+            </button>
+            
+            <!-- Sidebar Overlay -->
+            <div class="sidebar-overlay" onclick="toggleMobileSidebar()"></div>
+            
             <!-- Header -->
             <header class="header">
                 <div class="header-left">

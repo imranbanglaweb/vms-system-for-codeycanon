@@ -222,25 +222,30 @@
 </style>
 <aside id="sidebar-left" class="sidebar-left">
      <div class="sidebar-header" style="padding: 10px 15px; display: flex; align-items: center; justify-content: space-between;">
-         <div class="sidebar-title" style="flex: 1; text-align: center;">
-             <a href="{{ route('home') }}" class="logo logo-link" title="Go to Dashboard">
-                 @if(!empty($settings->admin_logo))
-                     <img src="{{ asset('public/admin_resource/assets/images/'.$settings->admin_logo) }}" alt="Logo" class="logo-image" style="display: block; max-height: 40px; max-width: 150px;">
-                 @elseif(!empty($settings->logo))
-                     <img src="{{ asset('public/uploads/logo/'.$settings->logo) }}" alt="Logo" class="logo-image" style="display: block; max-height: 40px; max-width: 150px;">
-                 @else
-                     <span class="logo-text" style="font-size: 20px; font-weight: 700; color: #fff;">গাড়িবন্ধু ৩৬০</span>
-                 @endif
-             </a>
-         </div>
-        <button class="sidebar-toggle hidden-xs" onclick="toggleSidebarCollapse()" title="Toggle Sidebar" aria-label="Toggle sidebar navigation" type="button">
-            <i class="fa fa-bars toggle-icon"></i>
-            <span class="toggle-label"></span>
-        </button>
-        <a href="javascript:location.reload();" class="sidebar-reload" title="Reload Page" style="position: absolute; right: 50px; top: 50%; transform: translateY(-50%); color: rgba(255,255,255,0.7); font-size: 16px; cursor: pointer;">
-            <i class="fa fa-sync-alt"></i>
-        </a>
-    </div>
+          <div class="sidebar-title" style="flex: 1; text-align: center;">
+              <a href="{{ route('home') }}" class="logo logo-link" title="Go to Dashboard">
+                  @if(!empty($settings->admin_logo))
+                      <img src="{{ asset('public/admin_resource/assets/images/'.$settings->admin_logo) }}" alt="Logo" class="logo-image" style="display: block; max-height: 40px; max-width: 150px;">
+                  @elseif(!empty($settings->logo))
+                      <img src="{{ asset('public/uploads/logo/'.$settings->logo) }}" alt="Logo" class="logo-image" style="display: block; max-height: 40px; max-width: 150px;">
+                  @else
+                      <span class="logo-text" style="font-size: 20px; font-weight: 700; color: #fff;">গাড়িবন্ধু ৩৬০</span>
+                  @endif
+              </a>
+          </div>
+         <button class="sidebar-toggle hidden-xs" onclick="toggleSidebarCollapse()" title="Toggle Sidebar" aria-label="Toggle sidebar navigation" type="button">
+             <i class="fa fa-bars toggle-icon"></i>
+             <span class="toggle-label"></span>
+         </button>
+         <a href="javascript:location.reload();" class="sidebar-reload" title="Reload Page" style="position: absolute; right: 50px; top: 50%; transform: translateY(-50%); color: rgba(255,255,255,0.7); font-size: 16px; cursor: pointer;">
+             <i class="fa fa-sync-alt"></i>
+         </a>
+     </div>
+     
+     <!-- Mobile Close Button -->
+     <button class="sidebar-mobile-close" onclick="toggleMobileSidebar()" aria-label="Close menu">
+         <i class="fa fa-times"></i>
+     </button>
     <div class="sidebar-content">
         <nav class="nav-main">
             <ul class="nav nav-main">
@@ -345,40 +350,71 @@
     </div>
 </aside>
 
-<script>
-    // Toggle menu function for parent menus with children
-    function toggleMenu(element) {
-        var parentLi = element.closest('li.nav-parent');
-        var childrenUl = parentLi.querySelector('.nav-children');
-        
-        // Toggle the show class
-        childrenUl.classList.toggle('show');
-        
-        // Toggle the nav-expanded class on parent
-        parentLi.classList.toggle('nav-expanded');
-        
-        // Prevent default link behavior
-        return false;
-    }
-    
-    // Sidebar collapse toggle
-    function toggleSidebarCollapse() {
-        var body = document.body;
-        var sidebar = document.querySelector('.sidebar-left');
-        var content = document.querySelector('.body');
-        
-        body.classList.toggle('sidebar-collapsed');
-        
-        if (body.classList.contains('sidebar-collapsed')) {
-            sidebar.classList.add('collapsed');
-            if (content) {
-                content.style.marginLeft = '70px';
-            }
-        } else {
-            sidebar.classList.remove('collapsed');
-            if (content) {
-                content.style.marginLeft = '260px';
-            }
-        }
-    }
-</script>
+     <script>
+     // Toggle menu function for parent menus with children
+     function toggleMenu(element) {
+         var parentLi = element.closest('li.nav-parent');
+         var childrenUl = parentLi.querySelector('.nav-children');
+         
+         // Toggle the show class
+         childrenUl.classList.toggle('show');
+         
+         // Toggle the nav-expanded class on parent
+         parentLi.classList.toggle('nav-expanded');
+         
+         // Prevent default link behavior
+         return false;
+     }
+     
+     // Sidebar collapse toggle
+     function toggleSidebarCollapse() {
+         var body = document.body;
+         var sidebar = document.querySelector('.sidebar-left');
+         var content = document.querySelector('.body');
+         
+         body.classList.toggle('sidebar-collapsed');
+         
+         if (body.classList.contains('sidebar-collapsed')) {
+             sidebar.classList.add('collapsed');
+             if (content) {
+                 content.style.marginLeft = '70px';
+             }
+         } else {
+             sidebar.classList.remove('collapsed');
+             if (content) {
+                 content.style.marginLeft = '260px';
+             }
+         }
+     }
+     
+     // Mobile sidebar toggle
+     function toggleMobileSidebar() {
+         var sidebar = document.querySelector('.sidebar-left');
+         var overlay = document.querySelector('.sidebar-overlay');
+         
+         sidebar.classList.toggle('show');
+         overlay.classList.toggle('show');
+         
+         // Prevent body scroll when sidebar is open
+         if (sidebar.classList.contains('show')) {
+             document.body.style.overflow = 'hidden';
+         } else {
+             document.body.style.overflow = '';
+         }
+     }
+     
+     // Close mobile sidebar when clicking on overlay
+     document.addEventListener('click', function(e) {
+         var sidebar = document.querySelector('.sidebar-left');
+         var overlay = document.querySelector('.sidebar-overlay');
+         var toggleBtn = document.querySelector('.mobile-sidebar-toggle');
+         
+         if (!sidebar.contains(e.target) && !toggleBtn.contains(e.target)) {
+             if (sidebar.classList.contains('show')) {
+                 sidebar.classList.remove('show');
+                 if (overlay) overlay.classList.remove('show');
+                 document.body.style.overflow = '';
+             }
+         }
+     });
+     </script>

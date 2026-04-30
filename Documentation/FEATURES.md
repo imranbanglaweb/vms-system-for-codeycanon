@@ -312,5 +312,5 @@ The system provides RESTful APIs for:
 
 ---
 
-*Last Updated: February 2026*
-*Version: 1.1.0*
+*Last Updated: April 2026*
+*Version: 1.2.0*
