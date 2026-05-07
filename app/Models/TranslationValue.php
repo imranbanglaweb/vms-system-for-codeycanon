@@ -7,15 +7,21 @@ use Illuminate\Database\Eloquent\Model;
 
 class TranslationValue extends Model
 {
-    protected $fillable = ['translation_id', 'language_code', 'value'];
-    
+    use HasFactory;
+
+    protected $fillable = [
+        'translation_id',
+        'language_code',
+        'value',
+    ];
+
+    public $timestamps = false;
+
+    /**
+     * Get the translation that owns the value.
+     */
     public function translation()
     {
         return $this->belongsTo(Translation::class);
-    }
-    
-    public function language()
-    {
-        return $this->belongsTo(Language::class, 'language_code', 'code');
     }
 }

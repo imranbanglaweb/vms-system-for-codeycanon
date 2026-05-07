@@ -12,16 +12,16 @@
 
     <style>
         :root {
-            --primary-color: #1e3a5f;
-            --primary-light: #2d5a87;
-            --secondary-color: #3498db;
-            --accent-color: #e74c3c;
-            --sidebar-bg: #2c3e50;
-            --sidebar-dark: #1a252f;
+            --primary-color: #00d4aa;
+            --primary-light: #00b894;
+            --secondary-color: #8b5cf6;
+            --accent-color: #ff6b6b;
+            --sidebar-bg: #0f0f12;
+            --sidebar-dark: #1a1a1f;
             --header-bg: #ffffff;
-            --content-bg: #f5f7fa;
-            --text-color: #2c3e50;
-            --text-light: #7f8c8d;
+            --content-bg: #f8fafc;
+            --text-color: #1e293b;
+            --text-light: #64748b;
             --border-color: #e2e8f0;
             --shadow-sm: 0 1px 3px rgba(0,0,0,0.08);
             --shadow-md: 0 4px 12px rgba(0,0,0,0.1);

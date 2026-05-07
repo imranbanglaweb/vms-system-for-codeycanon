@@ -3,161 +3,109 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\Company;
-use App\Models\Subscription;
-use App\Models\SubscriptionPlan;
-use App\Services\StripePaymentService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 
 class SubscriptionController extends Controller
 {
-    protected $stripeService;
-
-    public function __construct(StripePaymentService $stripeService)
+    /**
+     * Display active subscriptions
+     */
+    public function active()
     {
-        $this->stripeService = $stripeService;
+        return view('admin.subscriptions.active');
     }
 
     /**
-     * Show plan selection page
+     * Display expired subscriptions
      */
-    public function select($slug)
+    public function expired()
     {
-        $plan = SubscriptionPlan::where('slug', $slug)->firstOrFail();
-        return view('admin.dashboard.public.subscribe', compact('plan'));
+        $expiredSubscriptions = \App\Models\Subscription::with(['company', 'plan', 'payments'])
+            ->where(function ($query) {
+                $query->where('status', '!=', 'active')
+                      ->orWhere('end_date', '<', now());
+            })
+            ->orderBy('end_date', 'desc')
+            ->paginate(15);
+
+        // Calculate additional data for each subscription
+        $expiredSubscriptions->getCollection()->transform(function ($subscription) {
+            $subscription->days_expired = $subscription->end_date
+                ? now()->diffInDays($subscription->end_date)
+                : 0;
+
+            // Determine reactivation status based on some logic
+            // For now, using a simple heuristic
+            if ($subscription->status === 'active') {
+                $subscription->reactivation_status = 'Active';
+            } elseif ($subscription->days_expired < 30) {
+                $subscription->reactivation_status = 'Eligible';
+            } elseif ($subscription->days_expired < 90) {
+                $subscription->reactivation_status = 'Contacted';
+            } else {
+                $subscription->reactivation_status = 'Lost';
+            }
+
+            return $subscription;
+        });
+
+        // Calculate stats
+        $totalExpired = \App\Models\Subscription::where(function ($query) {
+            $query->where('status', '!=', 'active')
+                  ->orWhere('end_date', '<', now());
+        })->count();
+
+        $recentlyExpired = \App\Models\Subscription::where(function ($query) {
+            $query->where('status', '!=', 'active')
+                  ->orWhere('end_date', '<', now());
+        })->where('end_date', '>=', now()->subDays(30))->count();
+
+        $reactivated = \App\Models\Subscription::where('status', 'active')
+            ->where('updated_at', '>=', now()->subDays(30))
+            ->count();
+
+        $lostRevenue = \App\Models\Subscription::with('payments')
+            ->where(function ($query) {
+                $query->where('status', '!=', 'active')
+                      ->orWhere('end_date', '<', now());
+            })
+            ->get()
+            ->sum(function ($subscription) {
+                return $subscription->payments->last() ? $subscription->payments->last()->amount : 0;
+            });
+
+        return view('admin.subscriptions.expired', compact(
+            'expiredSubscriptions',
+            'totalExpired',
+            'recentlyExpired',
+            'reactivated',
+            'lostRevenue'
+        ));
     }
 
     /**
-     * Create subscription with manual payment
+     * Display billing history
      */
-    public function store(Request $request)
+    public function billing()
     {
-        $request->validate([
-            'plan_id' => 'required|exists:subscription_plans,id',
-            'payment_method_id' => 'nullable|string',
-        ]);
+        $payments = \App\Models\Payment::with(['company', 'plan', 'subscription'])
+            ->orderBy('paid_at', 'desc')
+            ->paginate(15);
 
-        $plan = SubscriptionPlan::findOrFail($request->plan_id);
-        
-        // Redirect to manual payment form
-        return redirect()->route('payment.manual', ['plan' => $plan->id]);
-    }
+        // Calculate stats
+        $totalRevenue = \App\Models\Payment::where('status', 'paid')->sum('amount');
+        $monthlyRevenue = \App\Models\Payment::where('status', 'paid')
+            ->where('paid_at', '>=', now()->startOfMonth())
+            ->sum('amount');
+        $pendingPayments = \App\Models\Payment::where('status', 'pending')->count();
+        $failedPayments = \App\Models\Payment::where('status', 'failed')->count();
 
-    /**
-     * Show subscription confirmation page
-     */
-    public function confirmation(Request $request)
-    {
-        $subscription = Subscription::with(['plan', 'company'])
-            ->where('id', $request->subscription_id)
-            ->where('company_id', Auth::user()->company_id)
-            ->firstOrFail();
-
-        return view('admin.dashboard.public.subscription-confirmation', [
-            'subscription' => $subscription,
-            'client_secret' => $request->client_secret,
-        ]);
-    }
-
-    /**
-     * Cancel subscription
-     */
-    public function cancel(Request $request)
-    {
-        $request->validate([
-            'subscription_id' => 'required|exists:subscriptions,id',
-            'cancel_immediately' => 'boolean',
-        ]);
-
-        $subscription = Subscription::where('id', $request->subscription_id)
-            ->where('company_id', Auth::user()->company_id)
-            ->firstOrFail();
-
-        $result = $this->stripeService->cancelSubscription(
-            $subscription,
-            $request->boolean('cancel_immediately', false)
-        );
-
-        if (!$result['success']) {
-            return response()->json([
-                'success' => false,
-                'message' => $result['error'],
-            ], 400);
-        }
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Subscription cancelled successfully',
-        ]);
-    }
-
-    /**
-     * Change subscription plan
-     */
-    public function changePlan(Request $request)
-    {
-        $request->validate([
-            'subscription_id' => 'required|exists:subscriptions,id',
-            'new_plan_id' => 'required|exists:subscription_plans,id',
-        ]);
-
-        $subscription = Subscription::where('id', $request->subscription_id)
-            ->where('company_id', Auth::user()->company_id)
-            ->firstOrFail();
-
-        $newPlan = SubscriptionPlan::findOrFail($request->new_plan_id);
-
-        $result = $this->stripeService->changePlan($subscription, $newPlan);
-
-        if (!$result['success']) {
-            return response()->json([
-                'success' => false,
-                'message' => $result['error'],
-            ], 400);
-        }
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Plan changed successfully',
-        ]);
-    }
-
-    /**
-     * Get subscription details
-     */
-    public function show()
-    {
-        $company = Company::where('id', Auth::user()->company_id)->firstOrFail();
-
-        $subscription = $company->subscription()->with('plan')->first();
-
-        if (!$subscription) {
-            return response()->json(['error' => 'No active subscription'], 404);
-        }
-
-        return response()->json([
-            'subscription' => $subscription,
-            'payment_methods' => $this->stripeService->getPaymentMethods($company),
-        ]);
-    }
-
-    /**
-     * Show user subscription page
-     */
-    public function mySubscription()
-    {
-        $company = Company::where('id', Auth::user()->company_id)->firstOrFail();
-
-        $subscription = $company->subscription()->with('plan')->first();
-
-        $recentPayments = \App\Models\Payment::where('company_id', $company->id)
-            ->with('plan')
-            ->orderBy('created_at', 'desc')
-            ->limit(5)
-            ->get();
-
-        return view('admin.dashboard.plans.subscriptions.my-subscription', compact('subscription', 'recentPayments', 'company'));
+        return view('admin.subscriptions.billing', compact(
+            'payments',
+            'totalRevenue',
+            'monthlyRevenue',
+            'pendingPayments',
+            'failedPayments'
+        ));
     }
 }
-

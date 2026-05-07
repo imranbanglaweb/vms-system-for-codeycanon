@@ -150,7 +150,7 @@ class AppServiceProvider extends ServiceProvider
             }
         );
 
-        View::composer('admin.dashboard.dashboard',
+        View::composer('admin.dashboard.admin.dashboard',
             function ($view) {
                 $user = auth()->user();
                 $isSuperAdmin = $user->hasRole('Super Admin');

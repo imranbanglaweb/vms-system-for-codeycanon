@@ -30,6 +30,18 @@ class RolePermissionSeeder extends Seeder
 
             'dashboard',
 
+            // Marketplace
+            'product-manage',
+            'product-view',
+            'product-create',
+            'product-edit',
+            'order-manage',
+            'order-view',
+            'customer-manage',
+            'customer-view',
+            'content-manage',
+            'analytics-dashboard',
+
             // Requisitions
             'requisition-create',
             'requisition-view',
@@ -67,17 +79,6 @@ class RolePermissionSeeder extends Seeder
             'trip-fuel-log',
             'trip-fuel-own',
             'trip-fuel-view',
-
-            // Vehicles
-            'vehicle-manage',
-            'vehicle-create',
-            'vehicle-edit',
-            'vehicle-delete',
-            'vehicle-view',
-            'vehicle-export',
-            'vehicle-type-manage',
-            'vehicle-list-view',
-            'vehicle-list-department',
 
             // GPS Tracking
             'gps-tracking',
@@ -259,8 +260,11 @@ class RolePermissionSeeder extends Seeder
             'subscription-plan-view',
 
             // SaaS / Company Management
-            'company-manage',
-            'subscription-plan-manage',
+            'tenant-manage',
+            'tenant-activate',
+            'tenant-deactivate',
+            'tenant-data-export',
+            'tenant-statistics-view',
             'tenant-manage',
             'tenant-activate',
             'tenant-deactivate',
@@ -620,11 +624,6 @@ class RolePermissionSeeder extends Seeder
             'driver-availability-update',
             'driver-access',
             'driver-vehicle',
-
-            // Vehicles
-            'vehicle-view',
-            'vehicle-list-view',
-            'vehicle-export',
 
             // Maintenance
             'maintenance-view',

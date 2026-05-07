@@ -7,44 +7,62 @@ use Illuminate\Database\Eloquent\Model;
 
 class Menu extends Model
 {
-    // use HasFactory;
+    use HasFactory;
 
-     protected $table = 'menus';
-    // protected $dates = ['deleted_at'];
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var array<int, string>
+     */
     protected $fillable = [
-        'id',
         'menu_name',
-        'menu_parent',
         'menu_slug',
-        'menu_type',
-        'menu_location',
         'menu_icon',
-        'menu_order',
         'menu_url',
         'menu_permission',
-        'status',
+        'menu_order',
+        'menu_parent',
         'created_by',
-        'name',
-        'url',
+        'updated_by',
     ];
 
-    public function children()
-    {
-        return $this->hasMany(Menu::class, 'menu_parent')
-                    ->orderBy('menu_order', 'ASC');
-    }
-
+    /**
+     * Get the parent menu.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
     public function parent()
     {
         return $this->belongsTo(Menu::class, 'menu_parent');
     }
 
-    // Add a scope to always order by menu_oder
-    protected static function boot()
+    /**
+     * Get the child menus.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function children()
     {
-        parent::boot();
-        static::addGlobalScope('order', function ($builder) {
-            $builder->orderBy('menu_order', 'asc');
-        });
+        return $this->hasMany(Menu::class, 'menu_parent')->orderBy('menu_order');
+    }
+
+    /**
+     * Get the user who created the menu.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
+    public function creator()
+    {
+        return $this->belongsTo(User::class, 'created_by');
+    }
+
+    /**
+     * Get the user who last updated the menu.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
+    public function updater()
+    {
+        return $this->belongsTo(User::class, 'updated_by');
     }
 }

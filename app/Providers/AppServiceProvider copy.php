@@ -74,7 +74,7 @@ class AppServiceProvider extends ServiceProvider
         // Add this if your app is in a subdirectory
         \URL::forceRootUrl(config('app.url'));
 
-        view()->composer(['admin.dashboard.dashboard', 'admin.dashboard.common.sidebar'], function ($view) {
+        view()->composer(['admin.dashboard.admin.dashboard', 'admin.dashboard.common.sidebar'], function ($view) {
 $sidebar_menus = Menu::orderBy('id','ASC')->where('menu_parent',0)->get();
      
         $view->with('sidebar_menus', $sidebar_menus);

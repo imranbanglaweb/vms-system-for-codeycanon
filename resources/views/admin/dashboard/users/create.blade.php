@@ -32,66 +32,6 @@
                 @csrf
                 <div class="row g-3">
 
-                    {{-- Company --}}
-                    <div class="col-md-6">
-                        <label for="company_id" class="form-label"><strong>Select Company <span class="text-danger">*</span></strong></label>
-                        <select name="company_id" id="company_id" class="form-control select2">
-                            <option value="">Please Select Company</option>
-                            @foreach($companies as $company)
-                                <option value="{{ $company->id }}">{{ $company->company_name }}</option>
-                            @endforeach
-                        </select>
-                        <div class="invalid-feedback"></div>
-                    </div>
-
-                    {{-- Employee --}}
-                    <div class="col-md-6">
-                        <label for="employee_id" class="form-label"><strong>Select Employee <span class="text-danger">*</span></strong></label>
-                        <select name="employee_id" class="form-control select2 employee_id">
-                            <option value="">Please Select</option>
-                            @foreach($employees as $list)
-                                <option value="{{ $list->id }}">{{ $list->name }} -- {{ $list->employee_code }}</option>
-                            @endforeach
-                        </select>
-                        <div class="invalid-feedback"></div>
-                    </div>
-
-                    {{-- Department --}}
-                    <div class="col-md-6">
-                        <label for="department_id" class="form-label"><strong>Select Department</strong></label>
-                        <select name="department_id" id="department_id" class="form-control select2">
-                            <option value="">Please Select</option>
-                            @foreach($departments as $department)
-                                <option value="{{ $department->id }}">{{ $department->department_name }}</option>
-                            @endforeach
-                        </select>
-                        <div class="invalid-feedback"></div>
-                    </div>
-
-                    {{-- Unit --}}
-                    <div class="col-md-6">
-                        <label for="unit_id" class="form-label"><strong>Select Unit</strong></label>
-                        <select name="unit_id" id="unit_id" class="form-control select2">
-                            <option value="">Please Select</option>
-                            @foreach($units as $unit)
-                                <option value="{{ $unit->id }}">{{ $unit->unit_name }}</option>
-                            @endforeach
-                        </select>
-                        <div class="invalid-feedback"></div>
-                    </div>
-
-                    {{-- Location --}}
-                    <div class="col-md-6">
-                        <label for="location_id" class="form-label"><strong>Select Location</strong></label>
-                        <select name="location_id" id="location_id" class="form-control select2">
-                            <option value="">Please Select</option>
-                            @foreach($locations as $location)
-                                <option value="{{ $location->id }}">{{ $location->location_name }}</option>
-                            @endforeach
-                        </select>
-                        <div class="invalid-feedback"></div>
-                    </div>
-
                     {{-- Subscription Plan --}}
                     <div class="col-md-6">
                         <label for="subscription_plan_id" class="form-label"><strong>Select Subscription Plan</strong></label>
@@ -238,8 +178,6 @@ $(document).ready(function() {
 
     // Custom server-side message map (fieldName -> custom message)
     const customServerMessages = {
-        company_id: 'Please choose a company.',
-        employee_id: 'Please select an employee.',
         user_type: 'Please choose a user type.',
         head_department_id: 'Please select department to assign as head.',
         user_name: 'Please enter the user name.',

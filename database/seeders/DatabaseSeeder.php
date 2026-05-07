@@ -6,38 +6,106 @@ use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
 {
-    public function run()
+    /**
+     * Seed the application's database for Next Digi Home (Digital Products Marketplace).
+     */
+    public function run(): void
     {
         $this->call([
-            PermissionSeeder::class,
+            // ============================================================================
+            // BASIC SETUP - Essential for any Laravel app
+            // ============================================================================
+
+            // Language and localization
+            LanguageSeeder::class,
+
+            // Settings and configurations
+            SettingSeeder::class,
+            EmailSettingSeeder::class,
+
+            // ============================================================================
+            // ROLES, PERMISSIONS & USERS - Core system for admin access
+            // ============================================================================
+
+            // Roles and permissions (must come before users)
             RoleSeeder::class,
-            MenuSeeder::class,
+            PermissionSeeder::class,
             RolePermissionSeeder::class,
+            SaaSPermissionsSeeder::class,
+
+            // Users - Next Digi Home admin accounts
+            UserSeeder::class,
+
+            // ============================================================================
+            // SUBSCRIPTIONS & PLANS - For Next Digi Home SaaS features
+            // ============================================================================
+
+            // Subscription plans for marketplace tiers
+            SubscriptionPlanSeeder::class,
+            SaaSSubscriptionPlansSeeder::class,
+
+            // ============================================================================
+            // MENUS & NAVIGATION - For admin panel
+            // ============================================================================
+
+            MenuSeeder::class,
+
+            // ============================================================================
+            // PRODUCTS & CATEGORIES - For the marketplace
+            // ============================================================================
+
+            CategorySeeder::class,
+            ProductSeeder::class,
+            PurchaseSeeder::class,
+
+            // ============================================================================
+            // EMAIL TEMPLATES - For marketplace communications
+            // ============================================================================
+
+            EmailTemplateSeeder::class,
+
+            // ============================================================================
+            // FRONTEND CONTENT - For Next Digi Home landing pages
+            // ============================================================================
+
+            // Hero slider and content
+            HeroSliderSeeder::class,
+            PageContentSeeder::class,
+            ContentSeeder::class,
+
+            // Stats and testimonials
+            StatsSeeder::class,
+            TestimonialsSeeder::class,
+            TeamMembersSeeder::class,
+
+            // Contact information
+            ContactInfoSeeder::class,
+
+            // ============================================================================
+            // VEHICLE MANAGEMENT SYSTEM SEEDERS - SKIPPED (Not needed for Next Digi Home)
+            // ============================================================================
+            /*
             CompanySeeder::class,
-            LocationSeeder::class,
             UnitSeeder::class,
             DepartmentSeeder::class,
-            UserSeeder::class,
+            LocationSeeder::class,
             EmployeeSeeder::class,
-            DepartmentHeadSeeder::class,
-            VehicleTypeSeeder::class,
-            LicenseTypeSeeder::class,
-            VendorSeeder::class,
             DriverSeeder::class,
-            VehicleSeeder::class,
-            GpsDeviceSeeder::class,
-            GpsTrackSeeder::class,
-            RequisitionSeeder::class,
-            RequisitionPassengerSeeder::class,
-            TripSheetSeeder::class,
+            DepartmentHeadSeeder::class,
+
+            LicenseTypeSeeder::class,
             MaintenanceTypeSeeder::class,
             MaintenanceCategorySeeder::class,
             MaintenanceVendorSeeder::class,
+            RequisitionSeeder::class,
+            RequisitionPassengerSeeder::class,
             MaintenanceRequisitionSeeder::class,
-            LanguageSeeder::class,
-            SubscriptionPlanSeeder::class,
-            EmailTemplateSeeder::class,
-            EmailSettingSeeder::class,
+            GpsDeviceSeeder::class,
+            GpsTrackSeeder::class,
+            VendorSeeder::class,
+            CompanyMenuSeeder::class,
+            TripSheetSeeder::class,
+            */
         ]);
     }
 }

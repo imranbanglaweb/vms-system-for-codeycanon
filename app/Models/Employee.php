@@ -4,42 +4,92 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use App\Models\Department;
-use App\Models\Unit;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use App\Models\Scopes\CompanyScope;
+
 class Employee extends Model
 {
     use HasFactory;
+
     protected $fillable = [
-        'location_id','company_id', 'unit_id', 'department_id', 'employee_code', 'name', 'email', 'phone', 'employee_type', 'designation', 'blood_group', 'nid', 'photo', 'present_address', 'permanent_address', 'join_date', 'status'
+        'name',
+        'employee_code',
+        'email',
+        'phone',
+        'designation',
+        'employee_type',
+        'status',
+        'address',
+        'date_of_birth',
+        'joining_date',
+        'photo',
+        'employee_order',
+        'department_id',
+        'unit_id',
+        'location_id',
+        'company_id',
     ];
 
-    protected static function booted()
+    protected $casts = [
+        'date_of_birth' => 'date',
+        'joining_date' => 'date',
+        'employee_order' => 'integer',
+    ];
+
+    // Relationships
+    public function department()
     {
-        static::addGlobalScope(new CompanyScope);
+        return $this->belongsTo(Department::class);
     }
 
-
-
-  public function requisitions(): HasMany
-    {
-        return $this->hasMany(Requisition::class, 'requested_by');
-    }
-
-   public function department(): BelongsTo
-        {
-            return $this->belongsTo(Department::class, 'department_id');
-        }
     public function unit()
     {
-        return $this->belongsTo(Unit::class, 'unit_id', 'id');
+        return $this->belongsTo(Unit::class);
     }
-    public function officeLocation() { return $this->belongsTo(Location::class, 'office_location_id'); }
-    
-    public function location() { return $this->belongsTo(Location::class, 'location_id'); }
-    
-    public function company() { return $this->belongsTo(Company::class, 'company_id'); }
 
+    public function location()
+    {
+        return $this->belongsTo(Location::class);
+    }
+
+    public function company()
+    {
+        return $this->belongsTo(Company::class);
+    }
+
+    public function user()
+    {
+        return $this->hasOne(User::class, 'employee_id');
+    }
+
+    // Scopes
+    public function scopeActive($query)
+    {
+        return $query->where('status', 'Active');
+    }
+
+    public function scopeInactive($query)
+    {
+        return $query->where('status', 'Inactive');
+    }
+
+    public function scopePermanent($query)
+    {
+        return $query->where('employee_type', 'Permanent');
+    }
+
+    public function scopeContract($query)
+    {
+        return $query->where('employee_type', 'Contract');
+    }
+
+    // Accessor for full name (same as name for now)
+    public function getFullNameAttribute()
+    {
+        return $this->name;
+    }
+
+    // Accessor for photo URL
+    public function getPhotoUrlAttribute()
+    {
+        return $this->photo ? asset('storage/employees/' . $this->photo) : asset('images/default-avatar.png');
+    }
 }

@@ -1,7 +1,7 @@
 		<!-- Basic -->
 		<meta charset="UTF-8">
 
-		<title>Dashboard | {{ $settings->admin_title ?? 'গাড়িবন্ধু ৩৬০ – Fleet & Transport Management System' }}</title>
+		<title>Dashboard | {{ $settings->admin_title ?? 'Next Digi Home - Premium Digital Products Marketplace' }}</title>
 	@if(!empty($settings->favicon))
 		<link rel="shortcut icon" type="image/png" href="{{ asset('public/admin_resource/assets/images/'.$settings->favicon) }}">
 		<link rel="shortcut icon" type="image/x-icon" href="{{ asset('public/admin_resource/assets/images/'.$settings->favicon) }}">
@@ -41,9 +41,7 @@
 		<script src="{{ asset('public/admin_resource/')}}/assets/vendor/modernizr/modernizr.js"></script>
 		<script src="{{ asset('public/admin_resource/assets/vendor/jquery/jquery.js') }}"></script>
 		<script src="{{ asset('public/admin_resource/assets/vendor/bootstrap/js/bootstrap.js') }}"></script>
-		<!-- jQuery Validation -->
-		<script src="https://cdn.jsdelivr.net/jquery.validation/1.19.3/jquery.validate.min.js"></script>
-		<script src="https://cdn.jsdelivr.net/jquery.validation/1.19.3/additional-methods.min.js"></script>
+		<!-- Note: jQuery Validation removed - using custom validation instead -->
 		
 		<!-- Select2 JS -->
 		<script src="{{ asset('public/admin_resource/')}}/assets/vendor/select2/select2.js"></script>

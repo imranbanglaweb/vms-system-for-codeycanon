@@ -15,7 +15,7 @@
         <div class="card" style="background-color: #f8f9fa; border: 1px solid #ddd;">
             <div class="card-body">
                 <div class="row align-items-end">
-                    <div class="col-md-3">
+                    <div class="col-md-4">
                         <label class="form-label fw-bold">User Type</label>
                         <select id="user_type_filter" class="form-control form-control-sm select2">
                             <option value="">All User Types</option>
@@ -24,7 +24,7 @@
                             @endforeach
                         </select>
                     </div>
-                    <div class="col-md-3">
+                    <div class="col-md-4">
                         <label class="form-label fw-bold">Role</label>
                         <select id="role_filter" class="form-control form-control-sm select2">
                             <option value="">All Roles</option>
@@ -33,7 +33,7 @@
                             @endforeach
                         </select>
                     </div>
-                    <div class="col-md-2">
+                    <div class="col-md-3">
                         <label class="form-label fw-bold">Status</label>
                         <select id="status_filter" class="form-control form-control-sm select2">
                             <option value="">All Status</option>
@@ -56,7 +56,7 @@
 <div class="row">
     <div class="col-md-12 text-right">
         <div class="btn-group">
-            <a class="btn btn-success" href="{{ route('users.create') }}">
+            <a class="btn btn-success" href="{{ route('admin.users.create') }}">
                 <i class="fa fa-plus"></i> Add User
             </a>
         </div>
@@ -73,20 +73,17 @@
 <div class="card mt-3 p-2">
     <table class="table table-bordered table-hover" id="myTable" style="width:100%;">
         <thead>
-            <tr>
-                <th></th>
-                <th>User Name</th>
-                <th>Name</th>
-                <th>Email</th>
-                <th>Company</th>
-                <th>Employee</th>
-                <th>User Type</th>
-                <th>Roles</th>
-                <th>Department</th>
-                <th>Status</th>
-                <th>Image</th>
-                <th width="150px">Action</th>
-            </tr>
+                            <tr>
+                                <th></th>
+                                <th>User Name</th>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>User Type</th>
+                                <th>Roles</th>
+                                <th>Status</th>
+                                <th>Image</th>
+                                <th width="150px">Action</th>
+                            </tr>
         </thead>
     </table>
 </div>
@@ -144,11 +141,8 @@ $(document).ready(function() {
             { data: 'user_name', searchable: false },
             { data: 'name', searchable: false },
             { data: 'email', searchable: false },
-            { data: 'company', searchable: false },
-            { data: 'employee', searchable: false },
             { data: 'user_type' },
             { data: 'roles', searchable: false },
-            { data: 'department', searchable: false },
             { data: 'status', searchable: false },
             { data: 'user_image', orderable: false, searchable: false },
             { data: 'action', orderable: false, searchable: false }
@@ -190,7 +184,7 @@ $(document).ready(function() {
         }).then((result) => {
             if (result.isConfirmed) {
                 $.ajax({
-                    url: '{{ route("users.destroy", ":id") }}'.replace(':id', id),
+                    url: '{{ route("admin.users.destroy", ":id") }}'.replace(':id', id),
                     type: 'DELETE',
                     headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
                     success: function(response) {

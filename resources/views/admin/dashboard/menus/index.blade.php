@@ -80,13 +80,15 @@
             <table class="table table-bordered table-striped" id="menuTable">
                 <thead>
                     <tr>
-                        <th style="display:none;">Order</th>
-                        <th>No</th>
+                        <th class="text-center">#</th>
                         <th>Name</th>
-                        <th>Menu Type</th>
-                        <th>Menu Icon</th>
-                        <th>Menu URL</th>
-                        <th>Action</th>
+                        <th class="text-center">Type</th>
+                        <th class="text-center">Icon</th>
+                        <th>URL</th>
+                        <th>Permission</th>
+                        <th>Parent</th>
+                        <th class="text-center">Created</th>
+                        <th class="text-center">Action</th>
                     </tr>
                 </thead>
             </table>
@@ -136,23 +138,34 @@ $(document).ready(function() {
     }, 3000);
 
     try {
+        var menuData = @json($menuData);
+
         var table = $('#menuTable').DataTable({
-            processing: true,
-            serverSide: true,
-            ajax: '{{ route("menus.index") }}',
+            data: menuData,
             columns: [
-                { data: 'menu_order', visible: false },
-                { data: 'DT_RowIndex', orderable: false, searchable: false },
+                { data: 'DT_RowIndex', orderable: false, searchable: false, className: 'text-center' },
                 { data: 'menu_name' },
-                { data: 'menu_type' },
+                { data: 'menu_type', className: 'text-center' },
                 { data: 'menu_icon', orderable: false, searchable: false, className: 'text-center' },
                 { data: 'menu_url' },
-                { data: 'action', orderable: false, searchable: false }
+                { data: 'menu_permission' },
+                { data: 'parent_name' },
+                { data: 'created_at', className: 'text-center' },
+                { data: 'action', orderable: false, searchable: false, className: 'text-center' }
             ],
-            rowReorder: {
-                dataSrc: 'menu_order'
-            },
-            order: [[0, 'asc']]
+            pageLength: 25,
+            responsive: true,
+            language: {
+                search: "Search menus:",
+                lengthMenu: "Show _MENU_ entries",
+                info: "Showing _START_ to _END_ of _TOTAL_ menus",
+                paginate: {
+                    first: "First",
+                    last: "Last",
+                    next: "Next",
+                    previous: "Previous"
+                }
+            }
         });
 
         // Row reorder AJAX

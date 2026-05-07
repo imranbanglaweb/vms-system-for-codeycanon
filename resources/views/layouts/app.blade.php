@@ -5,7 +5,7 @@
      <meta name="viewport" content="width=device-width, initial-scale=1">
      <!-- CSRF Token -->
      <meta name="csrf-token" content="{{ csrf_token() }}">
-     <title>Ticketing System</title>
+      <title>Next Digi Home - Admin Dashboard</title>
      @php
          $settings = \Illuminate\Support\Facades\DB::table('settings')->where('id', 1)->first();
      @endphp
@@ -48,12 +48,12 @@
                     <ul class="navbar-nav ml-auto">
                         <!-- Authentication Links -->
                         @guest
-                            <li><a class="nav-link" style="text-align: center;" href="{{ route('login') }}">{{ __('Ticketing System') }}</a></li>
+                            <li><a class="nav-link" style="text-align: center;" href="{{ route('login') }}">{{ __('Next Digi Home') }}</a></li>
                             {{-- <li><a class="nav-link" href="{{ route('register') }}">{{ __('Register') }}</a></li> --}}
                         @else
                             <li><a class="nav-link" href="{{ route('users.index') }}">Manage Users</a></li>
-                            <li><a class="nav-link" href="{{ route('roles.index') }}">Manage Role</a></li>
-                            <li><a class="nav-link" href="{{ route('products.index') }}">Manage Product</a></li>
+                            <li><a class="nav-link" href="{{ route('roles.index') }}">Manage Roles</a></li>
+                            <li><a class="nav-link" href="#">Manage Products</a></li>
                             <li class="nav-item dropdown">
                                 <a id="navbarDropdown" class="nav-link dropdown-toggle" href="#" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" v-pre>
                                     {{ Auth::user()->name }} <span class="caret"></span>

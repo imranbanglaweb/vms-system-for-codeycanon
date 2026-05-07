@@ -17,12 +17,12 @@ class SettingSeeder extends Seeder
         Setting::updateOrCreate(
             ['id' => 1],
             [
-                'site_title' => 'গাড়িবন্ধু ৩৬০',
-                'site_description' => 'গাড়িবন্ধু ৩৬০',
-                'admin_title' => 'গাড়িবন্ধু ৩৬০',
-                'admin_description' => 'All-in-One Fleet & Transport Automation System',
+                'site_title' => 'Next Digi Home',
+                'site_description' => 'Next Digi Home',
+                'admin_title' => 'Next Digi Home',
+                'admin_description' => 'Bangladesh Largest Digital Products Marketplace for Sale Premium Products',    
                 'site_logo' => 'logo.png',
-                'site_copyright_text' => '© 2026 Transport Management System. All rights reserved.',
+                'site_copyright_text' => '© 2026 Next Digi Home. All rights reserved.',
                 'admin_logo' => 'logo.png',
                 'status' => 1,
                 'created_by' => 1,
@@ -37,8 +37,8 @@ class SettingSeeder extends Seeder
                 'mail_username' => null,
                 'mail_password' => null,
                 'mail_encryption' => 'tls',
-                'mail_from_address' => 'noreply@example.com',
-                'mail_from_name' => 'TMS',
+                'mail_from_address' => 'noreply@nextdigihome.com',
+                'mail_from_name' => 'Next Digi Home',
             ]
         );
     }

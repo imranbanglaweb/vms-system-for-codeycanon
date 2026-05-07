@@ -2,22 +2,18 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use App\Models\Requisition;
-use App\Models\MaintenanceRequisition;
-use App\Models\Menu;
-use App\Models\Contact;
-use App\Models\Employee;
-use App\Models\Document;
+use App\Models\Category;
 use App\Models\Notification;
-use App\Models\Vehicle;
-Use \Carbon\Carbon;
-use DB;
-use Auth;
+use App\Models\Payment;
+use App\Models\Product;
+use App\Models\Purchase;
 use App\Models\User;
-use App\Models\Department;
-// use Illuminate\Support\Facades\DB;
 use App\Services\TranslationService;
+use Auth;
+use Carbon\Carbon;
+use DB;
+// use Illuminate\Support\Facades\DB;
+use Illuminate\Http\Request;
 
 class HomeController extends Controller
 {
@@ -27,11 +23,11 @@ class HomeController extends Controller
     {
         $this->middleware('auth');
         $this->translationService = $translationService;
-        
+
         // Ensure dashboard translations exist
         $this->ensureDashboardTranslations();
     }
-    
+
     private function ensureDashboardTranslations()
     {
         $languages = available_languages();
@@ -39,31 +35,34 @@ class HomeController extends Controller
             'total' => 'Total',
             'pending' => 'Pending',
             'approved' => 'Approved',
-            'rejected' => 'Rejected',
             'completed' => 'Completed',
             'cancelled' => 'Cancelled',
-            'latest_requisitions' => 'Latest Requisitions',
-            'employee' => 'Employee',
+            'latest_orders' => 'Latest Orders',
+            'customer' => 'Customer',
             'date' => 'Date',
             'status' => 'Status',
-            'requisitions' => 'Requisitions',
-            'departments' => 'Departments',
-            'top_users' => 'Top Users',
-            'monthly_requisitions' => 'Monthly Requisitions',
+            'orders' => 'Orders',
+            'products' => 'Products',
+            'sales' => 'Sales',
+            'revenue' => 'Revenue',
+            'customers' => 'Customers',
+            'categories' => 'Categories',
+            'top_products' => 'Top Products',
+            'monthly_sales' => 'Monthly Sales',
             'dashboard_overview' => 'Dashboard Overview',
             'status_progress' => 'Status Progress',
-            'department_wise_requests' => 'Department-wise Requests',
+            'product_wise_sales' => 'Product-wise Sales',
             'status_ratio' => 'Status Ratio',
-            'top_active_users' => 'Top Active Users',
-            'recent_workflow_activity' => 'Recent Workflow Activity',
+            'top_selling_products' => 'Top Selling Products',
+            'recent_order_activity' => 'Recent Order Activity',
         ];
-        
+
         foreach ($translations as $key => $default) {
             $existing = \DB::table('translations')
                 ->where('group', 'backend')
                 ->where('key', $key)
                 ->first();
-            if (!$existing) {
+            if (! $existing) {
                 foreach ($languages as $language) {
                     $this->translationService->set($key, $default, 'backend', $language->code);
                 }
@@ -79,18 +78,18 @@ class HomeController extends Controller
     public function index()
     {
         $user = Auth::user();
-        
+
         // Check if user has Driver role - redirect to driver dashboard
         $isDriver = $user->hasRole('Driver');
-        if (!$isDriver) {
+        if (! $isDriver) {
             $userRole = $user->role ?? '';
             $isDriver = ($userRole === 'driver');
         }
-        
+
         if ($isDriver) {
             return redirect()->route('driver.dashboard');
         }
-        
+
         // Debug: Log user info
         \Log::info('Dashboard Access', [
             'user_id' => $user->id,
@@ -99,165 +98,149 @@ class HomeController extends Controller
             'user_role_column' => $user->role,
             'user_roles' => $user->getRoleNames()->toArray(),
         ]);
-        
+
         // Determine role-based query base using Spatie's hasRole method
-        $isAdmin = $user->hasRole('Super Admin') || $user->hasRole('Admin');
-        $isManager = $user->hasRole('Department Head') || $user->hasRole('Manager');
-        $isTransport = $user->hasRole('Transport');
-        $isEmployee = $user->hasRole('Employee');
-        $isDriver = $user->hasRole('Driver');
-        
+        $isSuperAdmin = $user->hasRole('Super Admin');
+        $isAdmin = $user->hasRole('Admin');
+        $isSeller = $user->hasRole('Seller') || $user->hasRole('Creator');
+        $isCustomer = $user->hasRole('Customer') || $user->hasRole('User');
+
         // Debug: Log role detection
         \Log::info('Role Detection', [
+            'isSuperAdmin' => $isSuperAdmin,
             'isAdmin' => $isAdmin,
-            'isManager' => $isManager,
-            'isTransport' => $isTransport,
-            'isEmployee' => $isEmployee,
-            'isDriver' => $isDriver,
+            'isSeller' => $isSeller,
+            'isCustomer' => $isCustomer,
             'user_roles' => $user->getRoleNames()->toArray(),
         ]);
-        
+
         // Fallback to 'role' column if no Spatie role is assigned
-        if (!$isAdmin && !$isManager && !$isTransport && !$isEmployee && !$isDriver) {
-            $userRole = $user->role ?? 'employee';
+        if (! $isSuperAdmin && ! $isAdmin && ! $isSeller && ! $isCustomer) {
+            $userRole = $user->role ?? 'customer';
+            $isSuperAdmin = ($userRole === 'super_admin');
             $isAdmin = ($userRole === 'admin');
-            $isManager = ($userRole === 'manager');
-            $isTransport = ($userRole === 'transport');
-            $isEmployee = ($userRole === 'employee');
-            $isDriver = ($userRole === 'driver');
+            $isSeller = ($userRole === 'seller');
+            $isCustomer = ($userRole === 'customer');
             \Log::info('Fallback to role column', ['userRole' => $userRole]);
         }
-        
-        // Force employee flag for regular users without specific roles
-        if (!$isAdmin && !$isManager && !$isTransport && !$isDriver) {
-            $isEmployee = true;
+
+        // Default to customer for regular users
+        if (! $isSuperAdmin && ! $isAdmin && ! $isSeller) {
+            $isCustomer = true;
         }
-        
+
         // Debug: Log final role detection
         \Log::info('Final Role Detection', [
+            'isSuperAdmin' => $isSuperAdmin,
             'isAdmin' => $isAdmin,
-            'isManager' => $isManager,
-            'isTransport' => $isTransport,
-            'isEmployee' => $isEmployee,
-            'isDriver' => $isDriver,
+            'isSeller' => $isSeller,
+            'isCustomer' => $isCustomer,
             'user_roles' => $user->getRoleNames()->toArray(),
         ]);
-        
-        // Build base query based on role
-        $baseQuery = Requisition::withoutGlobalScopes();
 
-        if ($isEmployee) {
-            $requisitions = Requisition::withoutGlobalScopes()->where('created_by', $user->id)->latest()->get();
-            // dd($requisitions);
-        } elseif ($isTransport) {
-            // Transport sees pending transport approval (department_status = Approved, transport_status = Pending)
-            $requisitions = Requisition::withoutGlobalScopes()->where('department_status', 'Approved')
-                ->where('transport_status', 'Pending')
-                ->latest()->get();
-        } elseif ($isManager) {
-            // Manager sees pending department approval
-            $requisitions = Requisition::withoutGlobalScopes()->where('department_status', 'Pending')
-                ->where('requested_by', $user->id)
-                ->latest()->get();
-        } else {
-            // Admin/Super Admin sees all
-            $requisitions = Requisition::withoutGlobalScopes()->latest()->get();
+        // Set admin flag for routing compatibility
+        $isAdmin = $isSuperAdmin || $isAdmin;
+
+        // Fallback to 'role' column if no Spatie role is assigned
+        if (! $isSuperAdmin && ! $isAdmin && ! $isSeller && ! $isCustomer) {
+            $userRole = $user->role ?? 'customer';
+            $isSuperAdmin = ($userRole === 'super_admin');
+            $isAdmin = ($userRole === 'admin');
+            $isSeller = ($userRole === 'seller');
+            $isCustomer = ($userRole === 'customer');
+            \Log::info('Fallback to role column', ['userRole' => $userRole]);
         }
 
-        // Dashboard counters (role-based)
-        if ($isAdmin) {
-            $transportPending = Requisition::withoutGlobalScopes()->where('transport_status', 'Pending')->count();
-            $transportApproved = Requisition::withoutGlobalScopes()->where('transport_status', 'Approved')->count();
-            $transportRejected = Requisition::withoutGlobalScopes()->where('transport_status', 'Rejected')->count();
-            $adminPending = 0;
-            $adminApproved = 0;
-            $adminRejected = 0;
-        } elseif ($isTransport) {
-            $transportPending = Requisition::withoutGlobalScopes()->where('department_status', 'Approved')
-                ->where('transport_status', 'Pending')->count();
-            $transportApproved = Requisition::withoutGlobalScopes()->where('transport_status', 'Approved')->count();
-            $transportRejected = Requisition::withoutGlobalScopes()->where('transport_status', 'Rejected')->count();
-            $adminPending = 0;
-            $adminApproved = 0;
-            $adminRejected = 0;
-        } elseif ($isManager) {
-            $transportPending = 0;
-            $transportApproved = 0;
-            $transportRejected = 0;
-            $adminPending = 0;
-            $adminApproved = 0;
-            $adminRejected = 0;
-        } else {
-            $transportPending = 0;
-            $transportApproved = 0;
-            $transportRejected = 0;
-            $adminPending = 0;
-            $adminApproved = 0;
-            $adminRejected = 0;
+        // Default to customer for regular users without specific roles
+        if (! $isSuperAdmin && ! $isAdmin && ! $isSeller) {
+            $isCustomer = true;
         }
 
-        // Dashboard counters (overall with role-based filtering)
-        $statusQuery = Requisition::withoutGlobalScopes();
-        
-        // For employees, always filter by requested_by
-        // This ensures employees see their own data even if role is not assigned
-        if ($isEmployee) {
-            $statusQuery->where('created_by', $user->id);
-        }
-        // If not admin/manager/transport, treat as employee and filter by requested_by
-        elseif (!$isAdmin && !$isManager && !$isTransport) {
-            $statusQuery->where('created_by', $user->id);
-        }
-        // For managers, filter by department
-        elseif ($isManager && $user->department_id) {
-            $statusQuery->where('department_id', $user->department_id);
-         
-           
-        }
-        // Note: Transport users see all requisitions for counting purposes
-        
-        // Use clone to prevent query modification between counts
-        $totalQuery = clone $statusQuery;
-        $deptApprovedQuery = clone $statusQuery;
-        $pendingQuery = clone $statusQuery;
-        
-        // Debug: Check actual department_status values
-        \Log::info('Department Status Check', [
-            'total_records' => $totalQuery->count(),
-            'distinct_statuses' => Requisition::withoutGlobalScopes()->select('department_status')->distinct()->pluck('department_status')->toArray(),
+        // Debug: Log final role detection
+        \Log::info('Final Role Detection', [
+            'isSuperAdmin' => $isSuperAdmin,
             'isAdmin' => $isAdmin,
-            'isEmployee' => $isEmployee,
-            'isManager' => $isManager,
-            'isTransport' => $isTransport,
-            'user_id' => $user->id,
+            'isSeller' => $isSeller,
+            'isCustomer' => $isCustomer,
+            'user_roles' => $user->getRoleNames()->toArray(),
         ]);
-        
-        // Overall counts (using cloned queries)
-        $total = $totalQuery->count();
-        $deptApproved = $deptApprovedQuery->where('department_status', 'Approved')->count();
-        // dd($deptApproved);
-        $pending = $pendingQuery->where('department_status', 'Pending')->count();
-        
-        $transportPendingCount = (clone $statusQuery)->where('department_status', 'Approved')->where('transport_status', 'Pending')->count();
-        $transportApproved = $statusQuery->where('transport_status', 'Approved')->count();
-        $rejected = $statusQuery->where(function($q) {
-            $q->where('department_status', 'Rejected')->orWhere('transport_status', 'Rejected');
-        })->count();
-        $completed = $statusQuery->where('status', 'Completed')->count();
-        $cancelled = $statusQuery->where('status', 'Cancelled')->count();
 
-        // Latest requisitions (role-based)
-        $latestQuery = Requisition::withoutGlobalScopes()->with(['employee', 'vehicleType']);
-        if ($isEmployee) {
-            $latestQuery->where('created_by', $user->id);
-        } elseif (!$isAdmin && !$isManager && !$isTransport) {
-            $latestQuery->where('created_by', $user->id);
-        } elseif ($isManager && $user->department_id) {
-            $latestQuery->where('department_id', $user->department_id);
+        // Build queries based on role for marketplace data
+        $productQuery = Product::query();
+        $purchaseQuery = Purchase::query();
+        $paymentQuery = Payment::query();
+
+        if ($isSeller) {
+            // Sellers see their own products and related purchases
+            $products = Product::where('created_by', $user->id)->latest()->get();
+            $purchases = Purchase::whereHas('product', function ($q) use ($user) {
+                $q->where('created_by', $user->id);
+            })->latest()->get();
+        } elseif ($isCustomer) {
+            // Customers see their purchases
+            $purchases = Purchase::where('user_id', $user->id)->latest()->get();
+            $products = Product::where('active', true)->latest()->take(10)->get();
+        } else {
+            // Admin/Super Admin sees all marketplace data
+            $products = Product::latest()->get();
+            $purchases = Purchase::latest()->get();
         }
-        $latest = $latestQuery->orderBy('created_at', 'desc')->take(10)->get();
 
-        // Monthly requisitions for last 12 months (chart 1) - role-based
+        // Dashboard counters (marketplace metrics)
+        if ($isSuperAdmin || $isAdmin) {
+            // Admin sees all marketplace data
+            $totalProducts = Product::count();
+            $totalPurchases = Purchase::count();
+            $totalRevenue = Payment::where('status', 'completed')->sum('amount');
+            $activeProducts = Product::where('active', true)->count();
+            $featuredProducts = Product::where('featured', true)->count();
+            $totalCustomers = User::whereHas('roles', function ($q) {
+                $q->where('name', 'Customer');
+            })->count();
+        } elseif ($isSeller) {
+            // Sellers see their own metrics
+            $totalProducts = Product::where('created_by', $user->id)->count();
+            $totalPurchases = Purchase::whereHas('product', function ($q) use ($user) {
+                $q->where('created_by', $user->id);
+            })->count();
+            $totalRevenue = Payment::whereHas('purchase.product', function ($q) use ($user) {
+                $q->where('created_by', $user->id);
+            })->where('status', 'completed')->sum('amount');
+            $activeProducts = Product::where('created_by', $user->id)->where('active', true)->count();
+            $featuredProducts = Product::where('created_by', $user->id)->where('featured', true)->count();
+            $totalCustomers = 0; // Sellers don't see customer count
+        } else {
+            // Customers see basic marketplace info
+            $totalProducts = Product::where('active', true)->count();
+            $totalPurchases = Purchase::where('user_id', $user->id)->count();
+            $totalRevenue = 0; // Customers don't see revenue
+            $activeProducts = Product::where('active', true)->count();
+            $featuredProducts = Product::where('featured', true)->count();
+            $totalCustomers = 0;
+        }
+
+        // Overall marketplace stats
+        $total = $totalProducts;
+        $pending = Product::where('active', false)->count(); // Inactive products as "pending"
+        $approved = $activeProducts;
+        $completed = $totalPurchases;
+        $rejected = Product::onlyTrashed()->count(); // Soft deleted products
+
+        // Latest products/purchases (role-based)
+        if ($isSuperAdmin || $isAdmin) {
+            $latestProducts = Product::orderBy('created_at', 'desc')->take(5)->get();
+            $latestPurchases = Purchase::with(['user', 'product'])->orderBy('created_at', 'desc')->take(5)->get();
+        } elseif ($isSeller) {
+            $latestProducts = Product::where('created_by', $user->id)->orderBy('created_at', 'desc')->take(5)->get();
+            $latestPurchases = Purchase::whereHas('product', function ($q) use ($user) {
+                $q->where('created_by', $user->id);
+            })->with(['user', 'product'])->orderBy('created_at', 'desc')->take(5)->get();
+        } else {
+            $latestProducts = Product::where('active', true)->orderBy('created_at', 'desc')->take(5)->get();
+            $latestPurchases = Purchase::where('user_id', $user->id)->with(['product'])->orderBy('created_at', 'desc')->take(5)->get();
+        }
+
+        // Monthly sales/products for last 12 months (chart 1) - role-based
         $months = collect();
         $monthLabels = [];
         $monthlyData = [];
@@ -268,95 +251,79 @@ class HomeController extends Controller
             $months->push($dt->format('Y-m'));
         }
 
-        $monthlyQuery = Requisition::withoutGlobalScopes()->select(
-                DB::raw("DATE_FORMAT(travel_date, '%Y-%m') as ym"),
-                DB::raw('count(*) as total')
-            )
-            ->whereBetween('travel_date', [Carbon::now()->subMonths(11)->startOfMonth(), Carbon::now()->endOfMonth()]);
-        
-        if ($isEmployee) {
+        $monthlyQuery = Product::select(
+            DB::raw("DATE_FORMAT(created_at, '%Y-%m') as ym"),
+            DB::raw('count(*) as total')
+        )
+            ->whereBetween('created_at', [Carbon::now()->subMonths(11)->startOfMonth(), Carbon::now()->endOfMonth()]);
+
+        if ($isSeller) {
             $monthlyQuery->where('created_by', $user->id);
-        } elseif (!$isAdmin && !$isManager && !$isTransport) {
-            $monthlyQuery->where('created_by', $user->id);
-        } elseif ($isManager && $user->department_id) {
-            $monthlyQuery->where('department_id', $user->department_id);
         }
-        
+
         $monthlyCounts = $monthlyQuery
             ->groupBy('ym')
-            ->pluck('total','ym')
+            ->pluck('total', 'ym')
             ->toArray();
 
         foreach ($months as $m) {
-            $monthlyData[] = isset($monthlyCounts[$m]) ? (int)$monthlyCounts[$m] : 0;
+            $monthlyData[] = isset($monthlyCounts[$m]) ? (int) $monthlyCounts[$m] : 0;
         }
 
-        // Department-wise requests (pie) (chart 2) - role-based
-        $deptQuery = Requisition::withoutGlobalScopes()->select('departments.department_name as label', DB::raw('count(*) as value'))
-            ->join('departments', 'requisitions.department_id', '=', 'departments.id');
-        
-        if ($isEmployee) {
-            $deptQuery->where('requisitions.created_by', $user->id);
-            $deptData = $deptQuery->groupBy('departments.department_name')->orderBy('value','desc')->limit(10)->get();
-        } elseif (!$isAdmin && !$isManager && !$isTransport) {
-            $deptQuery->where('requisitions.created_by', $user->id);
-            $deptData = $deptQuery->groupBy('departments.department_name')->orderBy('value','desc')->limit(10)->get();
-        } elseif ($isManager && $user->department_id) {
-            $deptQuery->where('requisitions.department_id', $user->department_id);
-            $deptData = collect([['label' => $user->department->department_name ?? 'Department', 'value' => $total]]);
+        // Category-wise products (pie) (chart 2) - role-based
+        $categoryQuery = Product::select('categories.category_name as label', DB::raw('count(*) as value'))
+            ->join('categories', 'products.category', '=', 'categories.id');
+
+        if ($isSeller) {
+            $categoryQuery->where('products.created_by', $user->id);
+            $deptData = $categoryQuery->groupBy('categories.category_name')->orderBy('value', 'desc')->limit(10)->get();
+        } elseif ($isSuperAdmin || $isAdmin) {
+            $deptData = $categoryQuery->groupBy('categories.category_name')->orderBy('value', 'desc')->limit(10)->get();
         } else {
-            $deptData = $deptQuery->groupBy('departments.department_name')->orderBy('value','desc')->limit(10)->get();
+            // For customers, show all categories
+            $deptData = $categoryQuery->groupBy('categories.category_name')->orderBy('value', 'desc')->limit(10)->get();
         }
 
-        // Status ratio (doughnut) (chart 3)
+        // Product status ratio (doughnut) (chart 3)
         $statusCounts = collect([
-            'Pending' => $pending,
-            'Dept Approved' => $deptApproved,
-            'Transport Pending' => $transportPendingCount,
-            'Transport Approved' => $transportApproved,
-            'Rejected' => $rejected,
-            'Completed' => $completed
+            'Active Products' => $activeProducts,
+            'Pending Products' => $pending,
+            'Total Sales' => $approved,
+            'Total Revenue' => $totalRevenue,
         ]);
 
-        // Top active users (chart 4) - role-based
-        $topUsersQuery = Requisition::withoutGlobalScopes()->select('created_by', DB::raw('count(*) as total'))
-            ->groupBy('created_by')
-            ->orderBy('total','desc')
-            ->with('requestedBy')
+        // Top selling products (chart 4) - role-based
+        $topProductsQuery = Purchase::select('product_id', DB::raw('count(*) as total'))
+            ->groupBy('product_id')
+            ->orderBy('total', 'desc')
+            ->with('product')
             ->limit(8);
-        
-        if ($isEmployee) {
-            $topUsersQuery->where('created_by', $user->id);
-        } elseif (!$isAdmin && !$isManager && !$isTransport) {
-            $topUsersQuery->where('created_by', $user->id);
-        } elseif ($isManager && $user->department_id) {
-            $topUsersQuery->where('department_id', $user->department_id);
+
+        if ($isSeller) {
+            $topProductsQuery->whereHas('product', function ($q) use ($user) {
+                $q->where('created_by', $user->id);
+            });
         }
-        
-        $topUsers = $topUsersQuery->get()
-            ->map(function($r){
+
+        $topUsers = $topProductsQuery->get()
+            ->map(function ($p) {
                 return [
-                    'name' => optional($r->requestedBy)->name ?? 'User '.$r->created_by,
-                    'total' => (int) $r->total
+                    'name' => optional($p->product)->name ?? 'Product '.$p->product_id,
+                    'total' => (int) $p->total,
                 ];
             });
 
-        // Recent workflow logs (timeline) - role-based
-        $timelineQuery = DB::table('requisition_loghistories')
-            ->join('users', 'requisition_loghistories.created_by', '=', 'users.id')
-            ->select('requisition_loghistories.*', 'users.name as user_name')
-            ->orderBy('requisition_loghistories.created_at', 'desc')
+        // Recent marketplace activity (timeline) - role-based
+        $timelineQuery = DB::table('log_histories')
+            ->join('users', 'log_histories.user_id', '=', 'users.id')
+            ->select('log_histories.*', 'users.name as user_name')
+            ->orderBy('log_histories.created_at', 'desc')
             ->limit(10);
-        
-        if ($isEmployee) {
-            $timelineQuery->where('requisition_loghistories.created_by', $user->id);
-        } elseif (!$isAdmin && !$isManager && !$isTransport) {
-            $timelineQuery->where('requisition_loghistories.created_by', $user->id);
-        } elseif ($isManager && $user->department_id) {
-            $timelineQuery->join('requisitions', 'requisition_loghistories.requisition_id', '=', 'requisitions.id')
-                ->where('requisitions.department_id', $user->department_id);
+
+        if ($isSeller) {
+            $timelineQuery->where('log_histories.user_id', $user->id);
         }
-        
+
         $timeline = $timelineQuery->get();
 
         // Recent notifications - role-based
@@ -365,161 +332,52 @@ class HomeController extends Controller
             ->limit(5);
         $notifications = $notificationsQuery->get();
 
-        // Top vehicles by usage (for Admin/Transport only)
-        if ($isAdmin || $isTransport) {
-            $topVehicles = Vehicle::withCount('requisitions')
-                ->orderBy('requisitions_count', 'desc')
-                ->limit(5)
-                ->get();
-        } else {
-            $topVehicles = collect();
-        }
-
-        // =============================================
-        // MAINTENANCE REQUISITION DATA FOR EMPLOYEES
-        // =============================================
-        $maintenanceStats = [];
-        $latestMaintenance = collect();
-        $departmentEmployeeCount = 0;
-        $departmentMaintenanceStats = [];
-        $latestDepartmentMaintenance = collect();
-        
-        if ($isManager && $user->department_id) {
-            // Department Head: Get department employees and their maintenance requisitions
-            $departmentEmployeeCount = Employee::where('department_id', $user->department_id)->count();
-            
-            // Get employee IDs in this department
-            $departmentEmployeeIds = Employee::where('department_id', $user->department_id)->pluck('id');
-            
-            // Department maintenance requisitions (from employees in this department)
-            $deptMaintenanceQuery = MaintenanceRequisition::whereIn('employee_id', $departmentEmployeeIds);
-            
-            $departmentMaintenanceStats['total'] = (clone $deptMaintenanceQuery)->count();
-            $departmentMaintenanceStats['pending'] = (clone $deptMaintenanceQuery)->where('status', 'Pending')->count();
-            $departmentMaintenanceStats['pending_approval'] = (clone $deptMaintenanceQuery)->where('status', 'Pending Approval')->count();
-            $departmentMaintenanceStats['approved'] = (clone $deptMaintenanceQuery)->where('status', 'Approved')->count();
-            $departmentMaintenanceStats['rejected'] = (clone $deptMaintenanceQuery)->where('status', 'Rejected')->count();
-            $departmentMaintenanceStats['completed'] = (clone $deptMaintenanceQuery)->where('status', 'Completed')->count();
-            
-            // Get latest department maintenance requisitions pending approval
-            $latestDepartmentMaintenance = MaintenanceRequisition::with(['vehicle', 'maintenanceType', 'employee'])
-                ->whereIn('employee_id', $departmentEmployeeIds)
-                ->whereIn('status', ['Pending', 'Pending Approval'])
-                ->orderBy('created_at', 'desc')
-                ->limit(5)
-                ->get();
-            
-            // Also get personal maintenance stats
-            $employeeId = $user->employee_id ?? null;
-            if ($employeeId) {
-                $maintenanceQuery = MaintenanceRequisition::where('employee_id', $employeeId);
-                
-                $maintenanceStats['total'] = (clone $maintenanceQuery)->count();
-                $maintenanceStats['pending'] = (clone $maintenanceQuery)->where('status', 'Pending')->count();
-                $maintenanceStats['pending_approval'] = (clone $maintenanceQuery)->where('status', 'Pending Approval')->count();
-                $maintenanceStats['approved'] = (clone $maintenanceQuery)->where('status', 'Approved')->count();
-                $maintenanceStats['rejected'] = (clone $maintenanceQuery)->where('status', 'Rejected')->count();
-                $maintenanceStats['completed'] = (clone $maintenanceQuery)->where('status', 'Completed')->count();
-                
-                $latestMaintenance = MaintenanceRequisition::with(['vehicle', 'maintenanceType'])
-                    ->where('employee_id', $employeeId)
-                    ->orderBy('created_at', 'desc')
-                    ->limit(5)
-                    ->get();
-            }
-        } elseif ($isEmployee || (!$isAdmin && !$isManager)) {
-            // Get employee's maintenance requisitions
-            $employeeId = $user->employee_id ?? null;
-            
-            if ($employeeId) {
-                $maintenanceQuery = MaintenanceRequisition::where('employee_id', $employeeId);
-                
-                $maintenanceStats['total'] = (clone $maintenanceQuery)->count();
-                $maintenanceStats['pending'] = (clone $maintenanceQuery)->where('status', 'Pending')->count();
-                $maintenanceStats['pending_approval'] = (clone $maintenanceQuery)->where('status', 'Pending Approval')->count();
-                $maintenanceStats['approved'] = (clone $maintenanceQuery)->where('status', 'Approved')->count();
-                $maintenanceStats['rejected'] = (clone $maintenanceQuery)->where('status', 'Rejected')->count();
-                $maintenanceStats['completed'] = (clone $maintenanceQuery)->where('status', 'Completed')->count();
-                
-                // Get latest maintenance requisitions
-                $latestMaintenance = MaintenanceRequisition::with(['vehicle', 'maintenanceType'])
-                    ->where('employee_id', $employeeId)
-                    ->orderBy('created_at', 'desc')
-                    ->limit(5)
-                    ->get();
-            }
-        } elseif ($isAdmin) {
-            // Admin sees all maintenance requisitions
-            $maintenanceQuery = MaintenanceRequisition::query();
-            
-            $maintenanceStats['total'] = (clone $maintenanceQuery)->count();
-            $maintenanceStats['pending'] = (clone $maintenanceQuery)->where('status', 'Pending')->count();
-            $maintenanceStats['pending_approval'] = (clone $maintenanceQuery)->where('status', 'Pending Approval')->count();
-            $maintenanceStats['approved'] = (clone $maintenanceQuery)->where('status', 'Approved')->count();
-            $maintenanceStats['rejected'] = (clone $maintenanceQuery)->where('status', 'Rejected')->count();
-            $maintenanceStats['completed'] = (clone $maintenanceQuery)->where('status', 'Completed')->count();
-            
-            // Get latest maintenance requisitions
-            $latestMaintenance = MaintenanceRequisition::with(['vehicle', 'maintenanceType'])
-                ->orderBy('created_at', 'desc')
-                ->limit(5)
-                ->get();
-        }
-
         // Build payload for view
         $cards = [
-            ['key' => 'total', 'label' => $this->translationService->get('total', 'backend'), 'value' => $total, 'color' => '#0d6efd', 'icon' => 'fa-layer-group'],
-            ['key' => 'pending', 'label' => $this->translationService->get('pending', 'backend'), 'value' => $pending, 'color' => '#ffc107', 'icon' => 'fa-hourglass-half'],
-            ['key' => 'dept_approved', 'label' => 'Dept Approved', 'value' => $deptApproved, 'color' => '#17a2b8', 'icon' => 'fa-building'],
-            ['key' => 'transport_pending', 'label' => 'Transport Pending', 'value' => $transportPendingCount, 'color' => '#fd7e14', 'icon' => 'fa-truck'],
-            ['key' => 'transport_approved', 'label' => 'Transport Approved', 'value' => $transportApproved, 'color' => '#20c997', 'icon' => 'fa-check-circle'],
-            ['key' => 'rejected', 'label' => $this->translationService->get('rejected', 'backend'), 'value' => $rejected, 'color' => '#dc3545', 'icon' => 'fa-times-circle'],
-            ['key' => 'completed', 'label' => $this->translationService->get('completed', 'backend'), 'value' => $completed, 'color' => '#28a745', 'icon' => 'fa-flag-checkered'],
+            ['key' => 'total_products', 'label' => 'Total Products', 'value' => $totalProducts, 'color' => '#0d6efd', 'icon' => 'fa-box'],
+            ['key' => 'active_products', 'label' => 'Active Products', 'value' => $activeProducts, 'color' => '#28a745', 'icon' => 'fa-check-circle'],
+            ['key' => 'total_sales', 'label' => 'Total Sales', 'value' => $totalPurchases, 'color' => '#20c997', 'icon' => 'fa-shopping-cart'],
+            ['key' => 'total_revenue', 'label' => 'Total Revenue', 'value' => '$'.number_format($totalRevenue, 2), 'color' => '#ffc107', 'icon' => 'fa-dollar-sign'],
+            ['key' => 'featured_products', 'label' => 'Featured Products', 'value' => $featuredProducts, 'color' => '#fd7e14', 'icon' => 'fa-star'],
+            ['key' => 'total_customers', 'label' => 'Total Customers', 'value' => $totalCustomers, 'color' => '#17a2b8', 'icon' => 'fa-users'],
         ];
 
         // Stats array for view compatibility
         $stats = [
-            'total' => $total,
+            'total' => $totalProducts,
             'pending' => $pending,
-            'approved' => $transportApproved + $deptApproved,
-            'rejected' => $rejected,
-            'dept_approved' => $deptApproved,
-            'transport_pending' => $transportPendingCount,
-            'transport_approved' => $transportApproved,
-            'completed' => $completed,
-            'cancelled' => $cancelled,
+            'approved' => $activeProducts,
+            'completed' => $totalPurchases,
+            'revenue' => $totalRevenue,
+            'customers' => $totalCustomers,
         ];
-        
+
         // Debug: Log stats
         \Log::info('Dashboard Stats', [
-            'isEmployee' => $isEmployee,
             'user_id' => $user->id,
             'total' => $total,
             'pending' => $pending,
-            'approved' => $transportApproved + $deptApproved,
         ]);
 
         // Sparkline data (dummy for last 7 days)
         $sparklineLabels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
         $sparklineData = [
-            'total' => [rand(10,100), rand(10,100), rand(10,100), rand(10,100), rand(10,100), rand(10,100), rand(10,100)],
-            'pending' => [rand(5,50), rand(5,50), rand(5,50), rand(5,50), rand(5,50), rand(5,50), rand(5,50)],
-            'approved' => [rand(0,20), rand(0,20), rand(0,20), rand(0,20), rand(0,20), rand(0,20), rand(0,20)],
-            'rejected' => [rand(0,10), rand(0,10), rand(0,10), rand(0,10), rand(0,10), rand(0,10), rand(0,10)],
-            'completed' => [rand(0,30), rand(0,30), rand(0,30), rand(0,30), rand(0,30), rand(0,30), rand(0,30)],
-            'cancelled' => [rand(0,5), rand(0,5), rand(0,5), rand(0,5), rand(0,5), rand(0,5), rand(0,5)],
+            'total' => [rand(10, 100), rand(10, 100), rand(10, 100), rand(10, 100), rand(10, 100), rand(10, 100), rand(10, 100)],
+            'pending' => [rand(5, 50), rand(5, 50), rand(5, 50), rand(5, 50), rand(5, 50), rand(5, 50), rand(5, 50)],
+            'approved' => [rand(0, 20), rand(0, 20), rand(0, 20), rand(0, 20), rand(0, 20), rand(0, 20), rand(0, 20)],
+            'rejected' => [rand(0, 10), rand(0, 10), rand(0, 10), rand(0, 10), rand(0, 10), rand(0, 10), rand(0, 10)],
+            'completed' => [rand(0, 30), rand(0, 30), rand(0, 30), rand(0, 30), rand(0, 30), rand(0, 30), rand(0, 30)],
+            'cancelled' => [rand(0, 5), rand(0, 5), rand(0, 5), rand(0, 5), rand(0, 5), rand(0, 5), rand(0, 5)],
         ];
 
+        $approved = $activeProducts; // Approved products
+
         $payload = [
-            'total' => $total,
+            'total' => $totalProducts,
             'pending' => $pending,
-            'deptApproved' => $deptApproved,
-            'transportPending' => $transportPendingCount,
-            'transportApproved' => $transportApproved,
-            'rejected' => $rejected,
-            'completed' => $completed,
-            'cancelled' => $cancelled,
-            'latest' => $latest,
+            'approved' => $approved,
+            'completed' => $totalPurchases,
+            'latest' => $latestPurchases ?? $latestProducts,
             'monthLabels' => $monthLabels,
             'monthlyData' => $monthlyData,
             'deptData' => $deptData,
@@ -530,133 +388,104 @@ class HomeController extends Controller
             'stats' => $stats,
             'sparklineLabels' => $sparklineLabels,
             'sparklineData' => $sparklineData,
-            'transportPendingCount' => $transportPending,
-            'transportApprovedCount' => $transportApproved,
-            'transportRejectedCount' => $transportRejected,
+            'isSuperAdmin' => $isSuperAdmin,
             'isAdmin' => $isAdmin,
-            'isManager' => $isManager,
-            'isTransport' => $isTransport,
-            'isEmployee' => $isEmployee,
-            'isDriver' => $isDriver,
+            'isSeller' => $isSeller,
+            'isCustomer' => $isCustomer,
+            'isEmployee' => false, // Not used in marketplace
             'user' => $user,
             'notifications' => $notifications,
-            'topVehicles' => $topVehicles,
-            'maintenanceStats' => $maintenanceStats,
-            'latestMaintenance' => $latestMaintenance,
-            'departmentEmployeeCount' => $departmentEmployeeCount,
-            'departmentMaintenanceStats' => $departmentMaintenanceStats,
-            'latestDepartmentMaintenance' => $latestDepartmentMaintenance,
+            'totalProducts' => $totalProducts,
+            'totalPurchases' => $totalPurchases,
+            'totalRevenue' => $totalRevenue,
+            'totalCustomers' => $totalCustomers,
+            'latestProducts' => $latestProducts ?? collect(),
+            'latestPurchases' => $latestPurchases ?? collect(),
         ];
 
         // Route to appropriate dashboard based on role
-        if ($isAdmin) {
+        if ($isSuperAdmin || $isAdmin) {
             return view('admin.dashboard.admin.dashboard', $payload);
-        } elseif ($isTransport) {
-            return view('admin.dashboard.transport_head.dashboard', $payload);
-        } elseif ($isManager) {
-            return view('admin.dashboard.department_head.dashboard', $payload);
-        } elseif ($isDriver) {
-            // Driver uses separate driver dashboard
-            return view('admin.dashboard.driver.dashboard', $payload);
+        } elseif ($isSeller) {
+            return view('admin.dashboard.admin.dashboard', $payload); // Sellers also see admin dashboard for now
         } else {
-            // Default to employee dashboard
-            return view('admin.dashboard.employee.dashboard', $payload);
+            // Default to customer/marketplace dashboard
+            return view('admin.dashboard.admin.dashboard', $payload);
         }
-    } 
+    }
 
-     /**
+    /**
      * Endpoint for live AJAX refresh (cards + latest table + charts data)
      */
     public function data(Request $request)
     {
         $user = Auth::user();
-        
-        // Determine role-based query base using Spatie's hasRole method
-        $isAdmin = $user->hasRole('Super Admin') || $user->hasRole('Admin');
-        $isManager = $user->hasRole('Department Head') || $user->hasRole('Manager');
-        $isTransport = $user->hasRole('Transport');
-        $isEmployee = $user->hasRole('Employee');
-        
+
+        // Determine role-based query base
+        $isSuperAdmin = $user->hasRole('Super Admin');
+        $isAdmin = $user->hasRole('Admin');
+        $isSeller = $user->hasRole('Seller') || $user->hasRole('Creator');
+        $isCustomer = $user->hasRole('Customer') || $user->hasRole('User');
+
         // Fallback to 'role' column if no Spatie role is assigned
-        if (!$isAdmin && !$isManager && !$isTransport && !$isEmployee) {
-            $userRole = $user->role ?? 'employee';
+        if (! $isSuperAdmin && ! $isAdmin && ! $isSeller && ! $isCustomer) {
+            $userRole = $user->role ?? 'customer';
+            $isSuperAdmin = ($userRole === 'super_admin');
             $isAdmin = ($userRole === 'admin');
-            $isManager = ($userRole === 'manager');
-            $isTransport = ($userRole === 'transport');
-            $isEmployee = ($userRole === 'employee');
+            $isSeller = ($userRole === 'seller');
+            $isCustomer = ($userRole === 'customer');
         }
-        
-        // Build base query based on role
-        $baseQuery = Requisition::query();
-        
-        if ($isManager && $user->department_id) {
-            $baseQuery->where('department_id', $user->department_id);
-        } elseif ($isEmployee) {
-            $baseQuery->where('created_by', $user->id);
-        }
-        // Note: Transport users see all requisitions for counting purposes
-        
-        $total = (clone $baseQuery)->count();
-        $pending = (clone $baseQuery)->where(function($q) {
-            $q->where('department_status', 'Pending')
-              ->orWhere('status', 'Pending');
-        })->count();
-        $deptApproved = (clone $baseQuery)->where(function($q) {
-            $q->where('department_status', 'Approved')
-              ->orWhere('status', 'Approved');
-        })->count();
-        $transportPending = (clone $baseQuery)->where('department_status', 'Approved')->where('transport_status', 'Pending')->count();
-        $transportApproved = (clone $baseQuery)->where('transport_status', 'Approved')->count();
-        $rejected = (clone $baseQuery)->where(function($q) {
-            $q->where('department_status', 'Rejected')->orWhere('transport_status', 'Rejected');
-        })->count();
-        $completed = (clone $baseQuery)->where('status', 'Completed')->count();
 
-        $latestQuery = Requisition::with(['employee']);
-        if ($isManager && $user->department_id) {
-            $latestQuery->where('department_id', $user->department_id);
-        } elseif ($isEmployee) {
-            $latestQuery->where('created_by', $user->id);
-        } elseif ($isTransport) {
-            $latestQuery->where('department_status', 'Approved')->where('transport_status', 'Pending');
-        }
-        $latest = $latestQuery->orderBy('created_at', 'desc')->take(10)->get();
-
-        // Department breakdown (role-based)
-        $deptQuery = Requisition::select('departments.department_name as label', DB::raw('count(*) as value'))
-            ->join('departments', 'requisitions.department_id', '=', 'departments.id');
-        
-        if ($isManager && $user->department_id) {
-            $deptData = collect([['label' => $user->department->department_name ?? 'Department', 'value' => $total]]);
-        } elseif ($isEmployee) {
-            $deptQuery->where('requisitions.created_by', $user->id);
-            $deptData = $deptQuery->groupBy('departments.department_name')->orderBy('value','desc')->limit(10)->get();
-        } elseif ($isTransport) {
-            // Transport users see all departments for counting purposes
-            $deptData = $deptQuery->groupBy('departments.department_name')->orderBy('value','desc')->limit(10)->get();
+        // Get marketplace data based on role
+        if ($isSuperAdmin || $isAdmin) {
+            $totalProducts = Product::count();
+            $totalPurchases = Purchase::count();
+            $totalRevenue = Payment::where('status', 'completed')->sum('amount');
+        } elseif ($isSeller) {
+            $totalProducts = Product::where('created_by', $user->id)->count();
+            $totalPurchases = Purchase::whereHas('product', function ($q) use ($user) {
+                $q->where('created_by', $user->id);
+            })->count();
+            $totalRevenue = Payment::whereHas('purchase.product', function ($q) use ($user) {
+                $q->where('created_by', $user->id);
+            })->where('status', 'completed')->sum('amount');
         } else {
-            $deptData = $deptQuery->groupBy('departments.department_name')->orderBy('value','desc')->limit(10)->get();
+            $totalProducts = Product::where('active', true)->count();
+            $totalPurchases = Purchase::where('user_id', $user->id)->count();
+            $totalRevenue = 0;
         }
+
+        // Latest items
+        if ($isSuperAdmin || $isAdmin) {
+            $latest = Purchase::with(['user', 'product'])->orderBy('created_at', 'desc')->take(10)->get();
+        } elseif ($isSeller) {
+            $latest = Purchase::whereHas('product', function ($q) use ($user) {
+                $q->where('created_by', $user->id);
+            })->with(['user', 'product'])->orderBy('created_at', 'desc')->take(10)->get();
+        } else {
+            $latest = Purchase::where('user_id', $user->id)->with(['product'])->orderBy('created_at', 'desc')->take(10)->get();
+        }
+
+        // Category breakdown
+        $categoryQuery = Product::select('categories.category_name as label', DB::raw('count(*) as value'))
+            ->join('categories', 'products.category', '=', 'categories.id');
+
+        if ($isSeller) {
+            $categoryQuery->where('products.created_by', $user->id);
+        }
+
+        $deptData = $categoryQuery->groupBy('categories.category_name')->orderBy('value', 'desc')->limit(10)->get();
 
         return response()->json([
-            'total' => $total,
-            'pending' => $pending,
-            'deptApproved' => $deptApproved,
-            'transportPending' => $transportPending,
-            'transportApproved' => $transportApproved,
-            'rejected' => $rejected,
-            'completed' => $completed,
+            'total' => $totalProducts,
+            'pending' => $totalPurchases,
+            'completed' => $totalPurchases,
+            'revenue' => $totalRevenue,
             'latest' => $latest,
             'deptData' => $deptData,
-            'isAdmin' => $isAdmin,
-            'isManager' => $isManager,
-            'isTransport' => $isTransport,
-            'isEmployee' => $isEmployee,
+            'isAdmin' => $isSuperAdmin || $isAdmin,
+            'isSeller' => $isSeller,
+            'isCustomer' => $isCustomer,
         ]);
     }
-
-
-    
-
-   
 }

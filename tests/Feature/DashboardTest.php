@@ -2,11 +2,10 @@
 
 namespace Tests\Feature;
 
+use App\Models\RequisitionLoghistory;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
-use App\Models\User;
-use App\Models\RequisitionLoghistory;
-use Illuminate\Support\Facades\DB;
 
 class DashboardTest extends TestCase
 {
@@ -32,7 +31,7 @@ class DashboardTest extends TestCase
         $response->assertStatus(200);
 
         // Assert that the rendered view is the dashboard
-        $response->assertViewIs('admin.dashboard.dashboard');
+        $response->assertViewIs('admin.dashboard.admin.dashboard');
 
         // Assert that the timeline data is passed and contains the 'action_type'
         $response->assertViewHas('timeline', function ($timeline) {

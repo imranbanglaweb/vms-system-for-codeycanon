@@ -24,16 +24,11 @@ class User extends Authenticatable
         'email',
         'user_image',
         'password',
-        'role_id',
+        'role',
         'user_type',
         'user_name',
-        'employee_id',
         'cell_phone',
-        'unit_id',
-        'company_id',
         'push_subscription',
-        'department_id',
-        'location_id',
         'subscription_plan_id',
     ];
   
@@ -85,29 +80,8 @@ class User extends Authenticatable
         return $this->hasMany(\NotificationChannels\WebPush\PushSubscription::class);
     }
   
-    public function company()
-    {
-        return $this->belongsTo(Company::class);
-    }
-  
-    public function employee()
-    {
-        return $this->belongsTo(Employee::class, 'employee_id');
-    }
-  
-    public function department()
-    {
-        return $this->belongsTo(Department::class, 'department_id');
-    }
-  
-    public function unit()
-    {
-        return $this->belongsTo(Unit::class, 'unit_id');
-    }
-  
-    public function location()
-    {
-        return $this->belongsTo(Location::class, 'location_id');
-    }
+    // Digital marketplace specific relationships can be added here if needed
+    // Removed company, employee, department, unit, location relationships
+    // as they're not relevant for a digital marketplace
   
 }

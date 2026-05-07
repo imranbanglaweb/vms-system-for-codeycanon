@@ -1,5 +1,7 @@
 <?php
+
 namespace App\Models;
+
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -11,28 +13,94 @@ class Company extends Model
     protected $fillable = [
         'company_name',
         'company_code',
-        'unit_id',
-        'address',
-        'contact_number',
         'email',
-        'remarks',
+        'phone',
+        'contact_number',
+        'address',
+        'logo',
         'status',
         'stripe_customer_id',
-        'onboarding_completed',
-        'settings_configured',
         'created_by',
-        'updated_by'
+        'updated_by',
     ];
 
-    public function unit() { return $this->belongsTo(Unit::class, 'unit_id'); }
-    public function departments() { return $this->hasMany(Department::class); }
-    public function employees() { return $this->hasMany(Employee::class); }
-    public function vehicles() { return $this->hasMany(Vehicle::class); }
-    public function users(){ return $this->hasMany(User::class);}
-    public function drivers(){ return $this->hasMany(Driver::class);}
-    public function subscription(){ return $this->hasOne(Subscription::class);}
-    public function aiReports(){ return $this->hasMany(AIReport::class); }
-    public function aiMaintenanceAlerts(){ return $this->hasMany(AIMaintenanceAlert::class); }
-    public function requisitions(){ return $this->hasMany(\App\Models\Requisition::class); }
+    protected $casts = [
+        'status' => 'boolean',
+        'is_trial' => 'boolean',
+        'is_popular' => 'boolean',
+        'is_active' => 'boolean',
+        'features' => 'array',
+    ];
 
+    /**
+     * Get the users for the company.
+     */
+    public function users()
+    {
+        return $this->hasMany(User::class);
+    }
+
+    /**
+     * Get the units for the company.
+     */
+    public function units()
+    {
+        return $this->hasMany(Unit::class);
+    }
+
+    /**
+     * Get the departments for the company.
+     */
+    public function departments()
+    {
+        return $this->hasMany(Department::class);
+    }
+
+    /**
+     * Get the locations for the company.
+     */
+    public function locations()
+    {
+        return $this->hasMany(Location::class);
+    }
+
+    /**
+     * Get the drivers for the company.
+     */
+    public function drivers()
+    {
+        return $this->hasMany(Driver::class);
+    }
+
+    /**
+     * Get the vehicles for the company (assuming a Vehicle model exists).
+     */
+    public function vehicles()
+    {
+        return $this->hasMany(Vehicle::class);
+    }
+
+    /**
+     * Get the subscription for the company.
+     */
+    public function subscription()
+    {
+        return $this->hasOne(Subscription::class);
+    }
+
+    /**
+     * Get the AI reports for the company.
+     */
+    public function aiReports()
+    {
+        return $this->hasMany(AIReport::class);
+    }
+
+    /**
+     * Get the AI maintenance alerts for the company.
+     */
+    public function aiMaintenanceAlerts()
+    {
+        return $this->hasMany(AIMaintenanceAlert::class);
+    }
 }

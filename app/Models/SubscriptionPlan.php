@@ -1,56 +1,56 @@
 <?php
+
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class SubscriptionPlan extends Model
 {
+    use HasFactory;
+
     protected $fillable = [
-        'name', 'slug', 'price', 'billing_cycle',
-        'vehicle_limit', 'user_limit', 'driver_limit',
-        'monthly_reports', 'monthly_alerts',
-        'features', 'is_trial', 'trial_days',
-        'is_popular', 'is_active', 'last_updated_at',
-        'recommended_for', 'display_order'
+        'name',
+        'slug',
+        'price',
+        'billing_cycle',
+        'vehicle_limit',
+        'user_limit',
+        'driver_limit',
+        'monthly_reports',
+        'monthly_alerts',
+        'features',
+        'is_trial',
+        'trial_days',
+        'is_popular',
+        'is_active',
+        'recommended_for',
+        'display_order',
+        'last_updated_at',
+        'description',
     ];
 
     protected $casts = [
-        'features' => 'array',
-        'is_active' => 'boolean',
-        'is_popular' => 'boolean',
-        'is_trial' => 'boolean',
-        'trial_days' => 'integer',
+        'price' => 'decimal:2',
         'vehicle_limit' => 'integer',
         'user_limit' => 'integer',
         'driver_limit' => 'integer',
         'monthly_reports' => 'integer',
         'monthly_alerts' => 'integer',
-        'last_updated_at' => 'datetime',
+        'features' => 'array',
+        'is_trial' => 'boolean',
+        'is_popular' => 'boolean',
+        'is_active' => 'boolean',
         'display_order' => 'integer',
+        'trial_days' => 'integer',
+        'last_updated_at' => 'datetime',
     ];
 
+    /**
+     * Get the subscriptions for the plan.
+     */
     public function subscriptions()
     {
-        return $this->hasMany(Subscription::class, 'plan_id');
-    }
-
-    public function getFeaturesAttribute($value)
-    {
-        if (empty($value)) {
-            return [];
-        }
-        
-        if (is_array($value)) {
-            return $value;
-        }
-        
-        if (is_string($value)) {
-            $decoded = json_decode($value, true);
-            if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
-                return $decoded;
-            }
-        }
-        
-        return [];
+        return $this->hasMany(Subscription::class);
     }
 }

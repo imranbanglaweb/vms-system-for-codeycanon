@@ -2,367 +2,217 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use App\Http\Controllers\Controller;
 use App\Models\Menu;
-use App\Models\Page;
-use App\Models\Permission;
-use Spatie\Permission\Models\Role;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Support\Collection;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Validation\Rule;
-use Notification;
-use GuzzleHttp\Client;
-use App\Services\MenuService;
-use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Validator;
-use Yajra\DataTables\Facades\DataTables;
-use \DateTime;
-use Maatwebsite\Excel\Facades\Excel;
-use App\Exports\ReportExport;
-use App\Exports\ExportLandinventory;
-Use \Carbon\Carbon;
-Use Redirect;
-Use Session;
+use Illuminate\Support\Str;
 
 class MenuController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('permission:system-configure')->except(['index', 'show']);
+    }
     /**
      * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
      */
-        public function __construct()
+    public function index()
     {
-        $this->middleware('auth');
+        // For client-side DataTables, we'll load all menus with relationships
+        $menus = Menu::with(['parent', 'children', 'creator', 'updater'])
+            ->orderBy('menu_order')
+            ->get();
+
+        // Prepare data for DataTables
+        $menuData = $menus->map(function($menu, $index) {
+            return [
+                'DT_RowIndex' => $index + 1,
+                'menu_name' => $menu->menu_name,
+                'menu_type' => $menu->menu_parent == 0 ? 'Parent' : 'Child',
+                'menu_icon' => $menu->menu_icon ? '<i class="fa ' . $menu->menu_icon . '"></i>' : '-',
+                'menu_url' => $menu->menu_url ?: '-',
+                'menu_permission' => $menu->menu_permission ?: '-',
+                'parent_name' => $menu->parent ? $menu->parent->menu_name : '-',
+                'created_at' => $menu->created_at->format('M d, Y'),
+                'action' => view('admin.dashboard.menus.partials.actions', compact('menu'))->render()
+            ];
+        });
+
+        return view('admin.dashboard.menus.index', compact('menus', 'menuData'));
     }
-  
-    
-        public function index(Request $request)
-        {
-        if ($request->ajax()) {
-        $menus = Menu::select(['id', 'menu_name', 'menu_type', 'menu_icon', 'menu_url', 'menu_permission','menu_order','menu_color']);
-            return DataTables::of($menus)
-                ->addIndexColumn() // adds DT_RowIndex for row number
-                ->addColumn('menu_icon', function($row) {
-                    $color = $row->menu_color ?? '#000000';
-                    return '<i class="fa '.$row->menu_icon.'" style="color:'.$color.'; font-size:20px;"></i>';
-                })
-                ->addColumn('action', function($row){
-                    $btn = '';
-                    if(auth()->user()->can('menu-edit')) {
-                        $btn .= '<a href="'.route('menus.edit', $row->id).'" class="btn btn-primary btn-sm me-1">
-                                    <i class="fa fa-edit"></i>
-                                </a>';
-                    }
-                    if(auth()->user()->can('menu-delete')) {
-                        $btn .= '<button class="btn btn-danger btn-sm deleteUser" data-menuid="'.$row->id.'">
-                                    <i class="fa fa-minus-circle"></i>
-                                </button>';
-                    }
-                    return $btn;
-                })
-                ->rawColumns(['menu_icon','action']) // render HTML
-                ->make(true);
-        }
-        return view('admin.dashboard.menus.index');
 
-        }
-
-
+    /**
+     * Show the form for creating a new resource.
+     */
     public function create()
     {
-         // $menus = Menu::get();
-        $menus = Menu::orderBy('id','DESC')->get();
-    $permission_lists = Permission::orderBy('id','ASC')->get();
-        return view('admin.dashboard.menus.create',compact('menus','permission_lists'));
+        $parentMenus = Menu::where('menu_parent', 0)
+            ->orderBy('menu_order')
+            ->get();
+
+        return view('admin.dashboard.menus.create', compact('parentMenus'));
     }
 
     /**
      * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
      */
     public function store(Request $request)
     {
-     
-
         $validator = Validator::make($request->all(), [
-                    "menu_name" => "required",
-                    "menu_type" => "required",
-                    "menu_permission" => "required",
+            'menu_name' => 'required|string|max:255',
+            'menu_slug' => 'nullable|string|max:255|unique:menus',
+            'menu_icon' => 'nullable|string|max:255',
+            'menu_url' => 'nullable|string|max:255',
+            'menu_permission' => 'nullable|string|max:255',
+            'menu_parent' => 'nullable|integer|exists:menus,id',
+            'menu_order' => 'nullable|integer|min:0',
         ]);
 
         if ($validator->fails()) {
-            if ($request->ajax()) {
-                return response()->json(['status' => 'error', 'errors' => $validator->errors()], 422);
-            }
-              return redirect()->back()->withErrors($validator->errors());
-            // return response()->json(['errors' => $validator->errors()->all()], 400);
+            return redirect()->back()
+                ->withErrors($validator)
+                ->withInput();
         }
-        try {
 
-            DB::beginTransaction();
-            $user = Auth::user();
-            $menu_name = $request->menu_name;
-           
-            if (!empty($menu_name)) {
-            // dd($request);
+        // Generate slug if not provided
+        $slug = $request->menu_slug ?: Str::slug($request->menu_name);
 
-            // Menu entry
-
-            $menu = new Menu();
-            $menu->menu_name     = $request->menu_name;
-            $menu->menu_parent     = $request->menu_parent;
-            $menu->menu_slug     = \Str::slug($request->menu_name);
-            $menu->menu_type     =  $request->menu_type;
-            $menu->menu_location =  $request->menu_location;
-            $menu->menu_icon     =  $request->menu_icon;
-            $menu->menu_url     =  $request->menu_url;
-            $menu->menu_permission     =  $request->menu_permission;
-            $menu->menu_color    =  $request->menu_color;
-            $menu->status        =  $request->status;
-            $menu->created_by    = $user->id;
-            $menu->save();
-
-            }
-           
-            DB::commit();
-             MenuService::clear();
-
-            if ($request->ajax()) {
-                return response()->json(['status' => 'success', 'message' => 'Menu Added Successfully', 'redirect_url' => route('menus.index')]);
-            }
-
-        } catch (\Throwable $exception) {
-            DB::rollback();
-            if ($request->ajax()) {
-                return response()->json(['status' => 'error', 'message' => $exception->getMessage()], 500);
-            }
-            return response()->json(['errors' => array($exception->getMessage().__('voyager::generic.try_again'))], 422);
+        // Ensure slug is unique
+        $originalSlug = $slug;
+        $counter = 1;
+        while (Menu::where('menu_slug', $slug)->exists()) {
+            $slug = $originalSlug . '-' . $counter;
+            $counter++;
         }
-   
+
+        // Get the next menu order
+        $menuOrder = $request->menu_order ?: Menu::where('menu_parent', $request->menu_parent ?: 0)->max('menu_order') + 1;
+
+        Menu::create([
+            'menu_name' => $request->menu_name,
+            'menu_slug' => $slug,
+            'menu_icon' => $request->menu_icon,
+            'menu_url' => $request->menu_url,
+            'menu_permission' => $request->menu_permission,
+            'menu_parent' => $request->menu_parent ?: 0,
+            'menu_order' => $menuOrder,
+            'created_by' => Auth::id(),
+            'updated_by' => Auth::id(),
+        ]);
+
         return redirect()->route('menus.index')
-                        ->with('success','Menu Added Successfully');
+            ->with('success', 'Menu created successfully.');
     }
-
-
-
 
     /**
      * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show(Menu $menu)
     {
-        //
+        $menu->load('parent', 'children');
+        return view('admin.dashboard.menus.show', compact('menu'));
     }
 
     /**
      * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
      */
-    public function edit($id)
+    public function edit(Menu $menu)
     {
-//    $pages = Page::orderBy('id','ASC')->get();
-   $permission_lists = Permission::orderBy('id','ASC')->get();
-        $menu_edit = DB::table('menus')->where('id',$id)->first();
-        $menus = Menu::get();
+        $parentMenus = Menu::where('menu_parent', 0)
+            ->where('id', '!=', $menu->id)
+            ->orderBy('menu_order')
+            ->get();
 
-             return view('admin.dashboard.menus.edit',compact('menu_edit','menus','permission_lists'));
+        return view('admin.dashboard.menus.edit', compact('menu', 'parentMenus'));
     }
 
     /**
      * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, Menu $menu)
     {
-        
-
-         $validator = Validator::make($request->all(), [
-                    "menu_name" => "required",
-                    "menu_type" => "required",
-                    "menu_permission" => "required",
+        $validator = Validator::make($request->all(), [
+            'menu_name' => 'required|string|max:255',
+            'menu_slug' => 'nullable|string|max:255|unique:menus,menu_slug,' . $menu->id,
+            'menu_icon' => 'nullable|string|max:255',
+            'menu_url' => 'nullable|string|max:255',
+            'menu_permission' => 'nullable|string|max:255',
+            'menu_parent' => 'nullable|integer|exists:menus,id',
+            'menu_order' => 'nullable|integer|min:0',
         ]);
 
         if ($validator->fails()) {
-            if ($request->ajax()) {
-                return response()->json(['status' => 'error', 'errors' => $validator->errors()], 422);
-            }
-              return redirect()->back()->withErrors($validator->errors());
-            // return response()->json(['errors' => $validator->errors()->all()], 400);
+            return redirect()->back()
+                ->withErrors($validator)
+                ->withInput();
         }
-        try {
 
-            DB::beginTransaction();
-            $user = Auth::user();
-            $menu_name = $request->menu_name;
-           
-            if (!empty($menu_name)) {
-            // dd($request);
+        // Generate slug if not provided
+        $slug = $request->menu_slug ?: Str::slug($request->menu_name);
 
-            // Menu entry
-
-            $menu = Menu::find($id);
-            $menu->menu_name     = $request->menu_name;
-            $menu->menu_parent     = $request->menu_parent;
-            $menu->menu_slug     = \Str::slug($request->menu_name);
-            $menu->menu_type     =  $request->menu_type;
-            $menu->menu_permission =  $request->menu_permission;
-            $menu->menu_location =  $request->menu_location;
-            $menu->menu_icon     =  $request->menu_icon;
-            $menu->menu_url     =  $request->menu_url;
-            $menu->menu_color    =  $request->menu_color;
-            $menu->status        =  $request->status;
-            $menu->updated_by    = $user->id;
-            $menu->save();
-
-            }
-           
-            DB::commit();
-
-            if ($request->ajax()) {
-                return response()->json(['status' => 'success', 'message' => 'Menu Updated Successfully', 'redirect_url' => route('menus.index')]);
-            }
-
-        } catch (\Throwable $exception) {
-            DB::rollback();
-            if ($request->ajax()) {
-                return response()->json(['status' => 'error', 'message' => $exception->getMessage()], 500);
-            }
-            return response()->json(['errors' => array($exception->getMessage().__('voyager::generic.try_again'))], 422);
+        // Ensure slug is unique (excluding current menu)
+        $originalSlug = $slug;
+        $counter = 1;
+        while (Menu::where('menu_slug', $slug)->where('id', '!=', $menu->id)->exists()) {
+            $slug = $originalSlug . '-' . $counter;
+            $counter++;
         }
-   
+
+        $menu->update([
+            'menu_name' => $request->menu_name,
+            'menu_slug' => $slug,
+            'menu_icon' => $request->menu_icon,
+            'menu_url' => $request->menu_url,
+            'menu_permission' => $request->menu_permission,
+            'menu_parent' => $request->menu_parent ?: 0,
+            'menu_order' => $request->menu_order ?: $menu->menu_order,
+            'updated_by' => Auth::id(),
+        ]);
+
         return redirect()->route('menus.index')
-                        ->with('success','Menu Updated Successfully');
-
-
+            ->with('success', 'Menu updated successfully.');
     }
 
     /**
      * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
      */
-    public function destroy(Request $request,$id)
+    public function destroy(Menu $menu)
     {
+        // Check if menu has children
+        if ($menu->children()->count() > 0) {
+            return redirect()->back()
+                ->with('error', 'Cannot delete menu with child menus. Please delete child menus first.');
+        }
 
-        $menu_id = $request->menu_id;
-// return dd($menu_id);
-         Menu::find($menu_id)->delete();
+        $menu->delete();
+
         return redirect()->route('menus.index')
-                        ->with('danger','Menu Deleted successfully');
+            ->with('success', 'Menu deleted successfully.');
     }
 
-
- public function menuoder(Request $request)
-    {
-        \Log::info('Menu reorder request:', $request->all());
-        
-        try {
-            $itemID = $request->itemID;
-            $itemIndex = $request->itemIndex;
-
-            \Log::info('Updating menu order:', [
-                'itemID' => $itemID,
-                'itemIndex' => $itemIndex
-            ]);
-
-            // Update the current menu item's order
-            $affected = DB::table('menus')
-                ->where('id', $itemID)
-                ->update(['menu_order' => $itemIndex]);
-
-            // Reorder other menu items
-            $menus = DB::table('menus')
-                ->where('id', '!=', $itemID)
-                ->orderBy('menu_order', 'ASC')
-                ->get();
-
-            $order = 1;
-            foreach ($menus as $menu) {
-                if ($order == $itemIndex) {
-                    $order++;
-                }
-                DB::table('menus')
-                    ->where('id', $menu->id)
-                    ->update(['menu_order' => $order]);
-                $order++;
-            }
-
-            \Log::info('Menu order updated successfully');
-            
-            return response()->json([
-                'success' => true,
-                'message' => 'Menu order updated successfully'
-            ]);
-        } catch (\Exception $e) {
-            \Log::error('Error updating menu order: ' . $e->getMessage());
-            
-            return response()->json([
-                'success' => false,
-                'message' => 'Error updating menu order: ' . $e->getMessage()
-            ], 500);
-        }
-    }
-    
-
+    /**
+     * Reorder menus.
+     */
     public function reorder(Request $request)
-{
-    DB::beginTransaction();
-
-    try {
-        foreach ($request->order as $item) {
-            Menu::where('id', $item['id'])
-                ->update(['menu_order' => $item['newPosition']]);
-        }
-
-        DB::commit();
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Menu order updated successfully'
-        ]);
-    } catch (\Exception $e) {
-        DB::rollBack();
-
-        return response()->json([
-            'success' => false,
-            'message' => $e->getMessage()
-        ], 500);
-    }
-}
-
-
-    private function updateMenuOrder($items, $parentId = null)
     {
-        foreach ($items as $index => $item) {
-            $menu = Menu::findOrFail($item['id']);
-            $menu->update([
-                'menu_parent' => $parentId,
-                'menu_order' => $index + 1
-            ]);
+        $validator = Validator::make($request->all(), [
+            'menus' => 'required|array',
+            'menus.*.id' => 'required|integer|exists:menus,id',
+            'menus.*.order' => 'required|integer|min:0',
+        ]);
 
-            if (isset($item['children'])) {
-                $this->updateMenuOrder($item['children'], $menu->id);
-            }
+        if ($validator->fails()) {
+            return response()->json(['error' => 'Invalid data provided'], 422);
         }
-    }
 
-  
+        foreach ($request->menus as $menuData) {
+            Menu::where('id', $menuData['id'])->update([
+                'menu_order' => $menuData['order'],
+                'updated_by' => Auth::id(),
+            ]);
+        }
+
+        return response()->json(['success' => 'Menu order updated successfully']);
+    }
 }

@@ -25,6 +25,40 @@ class PermissionSeeder extends Seeder
             'menu-reorder',
             'menu-list',
 
+            // ================= MARKETPLACE (NEXT DIGI HOME) =================
+            'product-manage',
+            'product-create',
+            'product-edit',
+            'product-delete',
+            'product-view',
+            'product-publish',
+            'product-category-manage',
+            'content-manage',
+            'content-create',
+            'content-edit',
+            'content-delete',
+            'order-manage',
+            'order-view',
+            'order-create',
+            'order-edit',
+            'order-fulfill',
+            'order-cancel',
+            'order-refund',
+            'customer-manage',
+            'customer-view',
+            'customer-create',
+            'customer-edit',
+            'customer-delete',
+            'customer-support',
+            'analytics-dashboard',
+            'marketing-manage',
+            'marketing-email',
+            'marketing-promotion',
+            'seo-manage',
+            'my-orders',
+            'my-products',
+            'my-support',
+
             // ================= REQUISITIONS =================
             'requisition-create',
             'requisition-view',
@@ -181,6 +215,11 @@ class PermissionSeeder extends Seeder
             'trip-end',
             'trip-export',
 
+            // ================= FUEL MANAGEMENT =================
+            'fuel-manage',
+            'fuel-log-entry',
+            'fuel-history-view',
+
             // ================= REPORTS =================
             'report-requisition',
             'report-requisition-own',
@@ -214,6 +253,10 @@ class PermissionSeeder extends Seeder
 
             // ================= SUBSCRIPTION & PAYMENTS =================
             'subscription-plan-manage',
+            'subscription-plan-create',
+            'subscription-plan-edit',
+            'subscription-plan-delete',
+            'subscription-plan-view',
             'subscription-purchase',
             'subscription-approve',
             'subscription-view',
@@ -222,6 +265,26 @@ class PermissionSeeder extends Seeder
             'payment-approve',
             'payment-reject',
             'payment-invoice',
+
+            // ================= SAAS / TENANT MANAGEMENT =================
+            'tenant-manage',
+            'tenant-activate',
+            'tenant-deactivate',
+            'tenant-data-export',
+            'tenant-statistics-view',
+
+            // ================= BILLING =================
+            'billing-manage',
+            'billing-view',
+            'invoice-manage',
+            'invoice-view',
+
+            // ================= USAGE & ANALYTICS =================
+            'usage-view',
+            'analytics-view',
+            'system-configure',
+            'report-tenant-usage',
+            'report-billing',
 
             // ================= SUPPORT =================
             'support-manage',
@@ -283,6 +346,7 @@ class PermissionSeeder extends Seeder
         $employee   = Role::firstOrCreate(['name' => 'Employee', 'guard_name' => 'web']);
         $deptHead   = Role::firstOrCreate(['name' => 'Department Head', 'guard_name' => 'web']);
         $manager    = Role::firstOrCreate(['name' => 'Manager', 'guard_name' => 'web']);
+        $driver     = Role::firstOrCreate(['name' => 'Driver', 'guard_name' => 'web']);
 
         // Super Admin gets everything
         $superAdmin->syncPermissions(Permission::all());
@@ -420,6 +484,25 @@ class PermissionSeeder extends Seeder
             'report-trip-fuel',
             'report-vehicle-utilization',
             'report-driver-performance',
+        ]);
+
+        // Driver permissions
+        $driver->syncPermissions([
+            'driver-access',
+            'driver-schedule-view',
+            'driver-schedule-own',
+            'driver-availability-view',
+            'driver-availability-update',
+            'driver-availability-own',
+            'driver-vehicle',
+            'driver-performance-view',
+            'driver-document-view',
+            'driver-document-upload',
+            'trip-fuel-log',
+            'trip-fuel-own',
+            'trip-fuel-view',
+            'notification-view',
+            'gps-tracking-view',
         ]);
 
         $this->command->info('Permission seeder completed successfully!');

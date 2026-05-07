@@ -143,37 +143,8 @@ class UserController extends Controller
                     return '<span class="text-muted">No Role</span>';
                 })
 
-                ->addColumn('employee', function ($row) {
-                    $isDeptHead = $row->employee && $row->employee->department && $row->employee->department->head_employee_id == $row->employee_id;
-                    $deptHeadBadge = $isDeptHead ? '<span class="badge bg-primary ms-1" style="font-size: 9px;"><i class="fa fa-user-tie"></i> HOD</span>' : '';
-                    return $row->employee ? $row->employee->name . ' (' . $row->employee->employee_code . ')' . $deptHeadBadge : 'N/A';
-                })
-
                 ->addColumn('email', function ($row) {
-                    $emailMatch = $row->employee && $row->employee->email && $row->email == $row->employee->email;
-                    $emailBadge = $emailMatch ? '<span class="badge bg-success ms-1" style="font-size: 9px;" title="Email matches employee email"><i class="fa fa-check"></i></span>' : '<span class="badge bg-warning ms-1" style="font-size: 9px;" title="Email does not match employee email"><i class="fa fa-exclamation"></i></span>';
-                    return $row->email . $emailBadge;
-                })
-
-                ->addColumn('company', function ($row) {
-                    return $row->company ? '<span class="badge bg-info">'.$row->company->company_name.'</span>' : '<span class="text-muted">N/A</span>';
-                })
-
-                ->addColumn('department', function ($row) {
-                    // Try user department first, then employee department
-                    $dept = $row->department;
-                    if (!$dept && $row->employee && $row->employee->department) {
-                        $dept = $row->employee->department;
-                    }
-                    return $dept ? '<span class="badge bg-warning">'.$dept->department_name.'</span>' : '<span class="text-muted">N/A</span>';
-                })
-
-                ->addColumn('unit', function ($row) {
-                    return $row->unit ? $row->unit->unit_name : 'N/A';
-                })
-
-                ->addColumn('location', function ($row) {
-                    return $row->location ? $row->location->location_name : 'N/A';
+                    return $row->email;
                 })
 
                 ->addColumn('status', function ($row) {
@@ -194,7 +165,7 @@ class UserController extends Controller
                     ';
                 })
 
-                ->rawColumns(['user_image','action','status','employee','email','user_type','roles','company','department'])
+                ->rawColumns(['user_image','action','status','email','user_type','roles'])
                 ->make(true);
         }
 
@@ -204,15 +175,10 @@ class UserController extends Controller
     ------------------------------------------------------------------ */
     public function create()
     {
-        $roles = Role::orderBy('id', 'DESC')->get();
-        $employees = Employee::orderBy('employee_order', 'ASC')->get();
-        $companies = Company::orderBy('id', 'DESC')->get();
-        $departments = Department::all();
-        $units = Unit::all();
-        $locations = Location::all();
+        $roles = Role::orderBy('name', 'ASC')->get();
         $plans = SubscriptionPlan::where('is_active', 1)->orderBy('display_order')->get();
 
-        return view('admin.dashboard.users.create', compact('roles','employees','companies','departments','units','locations','plans'));
+        return view('admin.dashboard.users.create', compact('roles', 'plans'));
     }
 
     /* ------------------------------------------------------------------
@@ -221,8 +187,6 @@ class UserController extends Controller
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'employee_id' => 'required',
-            'company_id'  => 'required',
             'user_type'   => 'required',
             'user_name'   => 'required',
             'email'       => 'required|email|unique:users,email',
@@ -237,19 +201,13 @@ class UserController extends Controller
 
         DB::beginTransaction();
         try {
-            $employee = Employee::find($request->employee_id);
-
             $userData = [
                 'name'          => $request->user_name,
-                'employee_id'   => $request->employee_id,
-                'company_id'    => $request->company_id,
-                'user_name'     => $employee->employee_code,
+                'user_name'     => $request->user_name,
                 'email'         => $request->email,
                 'password'      => Hash::make($request->password),
                 'user_type'     => $request->user_type,
-                'department_id' => $request->department_id ?: $employee->department_id,
-                'unit_id'       => $request->unit_id ?: $employee->unit_id,
-                'location_id'   => $request->location_id,
+                'role'          => $request->user_type, // Use user_type as role for simplicity
                 'created_by'    => Auth::id(),
             ];
 

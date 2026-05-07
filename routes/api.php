@@ -1,6 +1,7 @@
 <?php
 
 // routes/api.php
+use App\Http\Controllers\Api\ProductController;
 use App\Http\Controllers\Api\PublicApiController;
 use App\Http\Controllers\DepartmentHeadController;
 use Illuminate\Support\Facades\Auth;
@@ -12,13 +13,50 @@ use NotificationChannels\WebPush\PushSubscription;
 // PUBLIC API ROUTES (For External Subscription System)
 // ============================================================================
 
-Route::middleware(['cors', 'api'])->group(function () {
+Route::middleware(['api'])->group(function () {
     Route::post('/register', [PublicApiController::class, 'register']);
     Route::post('/login', [PublicApiController::class, 'login']);
     Route::post('/subscribe', [PublicApiController::class, 'subscribe']);
     Route::post('/submit-payment', [PublicApiController::class, 'submitPayment']);
     Route::get('/packages', [PublicApiController::class, 'packages']);
     Route::get('/packages/{id}', [PublicApiController::class, 'packageById']);
+});
+
+// Product API Routes
+Route::middleware(['api'])->group(function () {
+    Route::apiResource('products', ProductController::class);
+});
+
+// Content Management API Routes
+Route::middleware(['api'])->group(function () {
+    // Hero Sliders
+    Route::apiResource('hero-sliders', App\Http\Controllers\Api\HeroSliderController::class);
+
+    // Page Content
+    Route::apiResource('page-content', App\Http\Controllers\Api\PageContentController::class);
+    Route::get('page-content/page/{page}', [App\Http\Controllers\Api\PageContentController::class, 'getByPage']);
+    Route::get('page-content/page/{page}/{section}', [App\Http\Controllers\Api\PageContentController::class, 'getBySection']);
+
+    // Stats
+    Route::apiResource('stats', App\Http\Controllers\Api\StatsController::class);
+
+    // Testimonials
+    Route::apiResource('testimonials', App\Http\Controllers\Api\TestimonialsController::class);
+
+    // Team Members
+    Route::apiResource('team-members', App\Http\Controllers\Api\TeamController::class);
+
+    // Contact Info
+    Route::apiResource('contact-info', App\Http\Controllers\Api\ContactInfoController::class);
+    Route::get('contact-info/type/{type}', [App\Http\Controllers\Api\ContactInfoController::class, 'getByType']);
+
+    // Content Management (for frontend)
+    Route::get('content/home', [App\Http\Controllers\Api\ContentManagementController::class, 'getHomeContent']);
+    Route::get('content/about', [App\Http\Controllers\Api\ContentManagementController::class, 'getAboutContent']);
+    Route::get('content/contact', [App\Http\Controllers\Api\ContentManagementController::class, 'getContactContent']);
+    Route::get('content/privacy', [App\Http\Controllers\Api\ContentManagementController::class, 'getPrivacyContent']);
+    Route::get('content/terms', [App\Http\Controllers\Api\ContentManagementController::class, 'getTermsContent']);
+    Route::get('content/all', [App\Http\Controllers\Api\ContentManagementController::class, 'getAllContent']);
 });
 
 // ============================================================================
@@ -42,12 +80,6 @@ Route::prefix('gps')->group(function () {
 
     // Get live tracking for all vehicles
     Route::get('/live', 'GpsTrackingController@getLiveTracking');
-
-    // Get single vehicle tracking
-    Route::get('/vehicle/{id}', 'GpsTrackingController@getVehicleTracking');
-
-    // Get tracking history
-    Route::get('/history/{vehicleId}', 'GpsTrackingController@getTrackingHistory');
 
     // Get active trips with live tracking
     Route::get('/active-trips', 'GpsTrackingController@getActiveTrips');
@@ -152,10 +184,6 @@ Route::prefix('driver')->middleware('auth:api')->group(function () {
     // Fuel Log
     Route::get('/fuel-log', [App\Http\Controllers\DriverController::class, 'driverFuelLog']);
     Route::post('/fuel-log', [App\Http\Controllers\DriverController::class, 'storeFuelLog']);
-    Route::get('/fuel-log/vehicle-data', [App\Http\Controllers\DriverController::class, 'getVehicleFuelData']);
-
-    // Vehicle
-    Route::get('/vehicle', [App\Http\Controllers\DriverController::class, 'driverVehicle']);
 
     // Availability
     Route::get('/availability', [App\Http\Controllers\DriverController::class, 'driverAvailability']);
@@ -185,7 +213,7 @@ Route::get('/settings', function () {
 
     return response()->json([
         'logo_url' => $logoUrl,
-        'title' => $settings->admin_title ?? 'গাড়িবন্ধু ৩৬০',
+        'title' => $settings->admin_title ?? '��-��_�ݭ�ݬ�ݨ�ݪ��"�?���? �c����',
         'description' => $settings->admin_description ?? 'Fleet Management Solution',
     ]);
 });
