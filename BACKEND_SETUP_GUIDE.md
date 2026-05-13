@@ -237,9 +237,9 @@ class ContentSeeder extends Seeder
 
         // Team Members
         TeamMember::create([
-            'name' => 'Alex Johnson',
-            'position' => 'CEO & Founder',
-            'bio' => 'Visionary leader with 15+ years in digital innovation',
+            'name' => 'Imran Rahman',
+            'position' => 'CEO',
+            'bio' => 'Visionary leader driving digital innovation and business growth',
             'sort_order' => 1,
             'is_active' => true,
         ]);

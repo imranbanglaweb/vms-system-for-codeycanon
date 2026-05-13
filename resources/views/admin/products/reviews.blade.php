@@ -154,7 +154,7 @@
                                     @php
                                         $reviews = [
                                             [
-                                                'customer' => 'John Doe',
+                                                'customer' => 'Mohammad Ali',
                                                 'product' => 'Complete Digital Marketing Masterclass',
                                                 'rating' => 5,
                                                 'review' => 'Excellent course! Very comprehensive and practical. Learned so much about digital marketing strategies.',
@@ -163,7 +163,7 @@
                                                 'status_class' => 'success'
                                             ],
                                             [
-                                                'customer' => 'Jane Smith',
+                                                'customer' => 'Fatema Begum',
                                                 'product' => 'SEO Toolkit Pro',
                                                 'rating' => 4,
                                                 'review' => 'Great toolkit with lots of useful features. The keyword research tool is particularly helpful.',
@@ -172,7 +172,7 @@
                                                 'status_class' => 'success'
                                             ],
                                             [
-                                                'customer' => 'Mike Johnson',
+                                                'customer' => 'Rahim Hossain',
                                                 'product' => 'React Admin Dashboard',
                                                 'rating' => 5,
                                                 'review' => 'Perfect for my project! Clean code, well documented, and easy to customize.',
@@ -181,7 +181,7 @@
                                                 'status_class' => 'success'
                                             ],
                                             [
-                                                'customer' => 'Sarah Wilson',
+                                                'customer' => 'Nasrin Akter',
                                                 'product' => 'Brand Identity Kit',
                                                 'rating' => 3,
                                                 'review' => 'Good quality files, but could use more color variations in the templates.',
@@ -190,7 +190,7 @@
                                                 'status_class' => 'warning'
                                             ],
                                             [
-                                                'customer' => 'Tom Brown',
+                                                'customer' => 'Karim Mia',
                                                 'product' => 'Python Programming Course',
                                                 'rating' => 2,
                                                 'review' => 'Content is outdated and some examples don\'t work with current Python versions.',

@@ -32,7 +32,7 @@
                         </h5>
                     </div>
                     <div class="card-body">
-                        <form id="exportForm" method="POST" action="{{ route('admin.exports.process') }}">
+                        <form id="exportForm" method="POST" action="{{ route('reports.export.process') }}">
                             @csrf
                             <div class="row g-3">
                                 <div class="col-md-3">

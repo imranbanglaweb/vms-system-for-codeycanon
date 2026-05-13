@@ -3,20 +3,29 @@
 @section('main_content')
 
 <style>
-    #menuTable td {
-        cursor: move;
+    .parent-menu {
+        background-color: #f8f9fa;
+        font-weight: bold;
     }
-    
+
+    .child-menu {
+        background-color: #ffffff;
+    }
+
+    .child-menu td {
+        border-left: 3px solid #007bff;
+    }
+
     /* Modal Styles */
     .modal-backdrop {
         background-color: rgba(0, 0, 0, 0.5);
     }
-    
+
     .modal-content {
         border-radius: 8px;
         box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
     }
-    
+
     .modal-header {
         background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%);
         color: white;
@@ -24,7 +33,7 @@
         border-top-right-radius: 8px;
         padding: 15px 20px;
     }
-    
+
     .modal-header .close {
         color: white;
         opacity: 0.8;
@@ -32,19 +41,19 @@
         font-weight: bold;
         text-shadow: none;
     }
-    
+
     .modal-header .close:hover {
         opacity: 1;
     }
-    
+
     .modal-title {
         font-weight: 600;
     }
-    
+
     .modal-body {
         padding: 30px 20px;
     }
-    
+
     .modal-footer {
         border-top: 1px solid #e9ecef;
         padding: 15px 20px;
@@ -77,21 +86,60 @@
             <h4>Menu List</h4>
         </header>
         <div class="panel-body">
-            <table class="table table-bordered table-striped" id="menuTable">
-                <thead>
-                    <tr>
-                        <th class="text-center">#</th>
-                        <th>Name</th>
-                        <th class="text-center">Type</th>
-                        <th class="text-center">Icon</th>
-                        <th>URL</th>
-                        <th>Permission</th>
-                        <th>Parent</th>
-                        <th class="text-center">Created</th>
-                        <th class="text-center">Action</th>
-                    </tr>
-                </thead>
-            </table>
+            <div class="table-responsive">
+                <table class="table table-bordered table-striped">
+                    <thead>
+                        <tr>
+                            <th class="text-center">#</th>
+                            <th>Name</th>
+                            <th class="text-center">Type</th>
+                            <th class="text-center">Icon</th>
+                            <th>URL</th>
+                            <th>Permission</th>
+                            <th class="text-center">Order</th>
+                            <th class="text-center">Created</th>
+                            <th class="text-center">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach($hierarchicalMenus as $index => $menu)
+                        <tr class="{{ $menu->level > 0 ? 'child-menu' : 'parent-menu' }}">
+                            <td class="text-center">{{ $index + 1 }}</td>
+                            <td>
+                                <div style="padding-left: {{ $menu->level * 30 }}px;">
+                                    @if($menu->level > 0)
+                                        <i class="fas fa-angle-right text-muted mr-2"></i>
+                                    @endif
+                                    <strong>{{ $menu->menu_name }}</strong>
+                                    @if($menu->has_children)
+                                        <span class="badge badge-info ml-2">Parent</span>
+                                    @endif
+                                </div>
+                            </td>
+                            <td class="text-center">
+                                <span class="badge {{ $menu->menu_parent == 0 ? 'badge-success' : 'badge-primary' }}">
+                                    {{ $menu->menu_parent == 0 ? 'Parent' : 'Child' }}
+                                </span>
+                            </td>
+                            <td class="text-center">
+                                @if($menu->menu_icon)
+                                    <i class="fa {{ $menu->menu_icon }}"></i>
+                                @else
+                                    -
+                                @endif
+                            </td>
+                            <td>{{ $menu->menu_url ?: '-' }}</td>
+                            <td>{{ $menu->menu_permission ?: '-' }}</td>
+                            <td class="text-center">{{ $menu->menu_order }}</td>
+                            <td class="text-center">{{ $menu->created_at->format('M d, Y') }}</td>
+                            <td class="text-center">
+                                @include('admin.dashboard.menus.partials.actions', ['menu' => $menu])
+                            </td>
+                        </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
         </div>
     </section>
 
@@ -132,94 +180,23 @@
 
 <script>
 $(document).ready(function() {
-    
     setTimeout(function() {
         $('#successMessage').fadeOut('fast');
     }, 3000);
 
-    try {
-        var menuData = @json($menuData);
-
-        var table = $('#menuTable').DataTable({
-            data: menuData,
-            columns: [
-                { data: 'DT_RowIndex', orderable: false, searchable: false, className: 'text-center' },
-                { data: 'menu_name' },
-                { data: 'menu_type', className: 'text-center' },
-                { data: 'menu_icon', orderable: false, searchable: false, className: 'text-center' },
-                { data: 'menu_url' },
-                { data: 'menu_permission' },
-                { data: 'parent_name' },
-                { data: 'created_at', className: 'text-center' },
-                { data: 'action', orderable: false, searchable: false, className: 'text-center' }
-            ],
-            pageLength: 25,
-            responsive: true,
-            language: {
-                search: "Search menus:",
-                lengthMenu: "Show _MENU_ entries",
-                info: "Showing _START_ to _END_ of _TOTAL_ menus",
-                paginate: {
-                    first: "First",
-                    last: "Last",
-                    next: "Next",
-                    previous: "Previous"
-                }
-            }
+    // Delete menu
+    $(document).on('click', '.deleteUser', function(e) {
+        e.preventDefault();
+        var menu_id = $(this).data('menuid');
+        let deleteRoute = "{{ route('menus.destroy', ':id') }}";
+        deleteRoute = deleteRoute.replace(':id', menu_id);
+        $('#menu_id').val(menu_id);
+        $('#deleteForm').attr('action', deleteRoute);
+        $('#applicantDeleteModal').modal({
+            backdrop: 'static',
+            keyboard: false
         });
-
-        // Row reorder AJAX
-        table.on('row-reorder', function(e, diff, edit) {
-            var orderedData = table.rows().data();
-            var reorderData = [];
-
-            orderedData.each(function(row, index) {
-                reorderData.push({
-                    id: row.id,
-                    newPosition: index + 1
-                });
-            });
-
-            $.ajax({
-                url: '{{ route("menus.reorder") }}',
-                type: 'POST',
-                data: {
-                    _token: '{{ csrf_token() }}',
-                    order: reorderData
-                },
-                success: function(response) {
-                    if(response.success) {
-                        toastr.success('Menu order updated successfully!');
-                        table.ajax.reload(null, false);
-                    } else {
-                        toastr.error(response.message || 'Error updating order');
-                    }
-                },
-                error: function(xhr) {
-                    console.error(xhr);
-                    toastr.error('Error updating order');
-                }
-            });
-        });
-
-        // Delete menu
-        $(document).on('click', '.deleteUser', function(e) {
-            e.preventDefault();
-            var menu_id = $(this).data('menuid');
-            let deleteRoute = "{{ route('menus.destroy', ':id') }}";
-                deleteRoute = deleteRoute.replace(':id', menu_id);
-            $('#menu_id').val(menu_id);
-            $('#deleteForm').attr('action', deleteRoute);
-            $('#applicantDeleteModal').modal({
-                backdrop: 'static',
-                keyboard: false
-            });
-        });
-        
-    } catch (error) {
-        console.error('Error initializing DataTable:', error);
-        document.getElementById('menuTable').innerHTML = '<tr><td colspan="7" class="text-center text-danger">Error initializing DataTable: ' + error.message + '</td></tr>';
-    }
+    });
 });
 </script>
 @endsection

@@ -13,7 +13,7 @@ class ContactInfoSeeder extends Seeder
             [
                 'type' => 'email',
                 'title' => 'Email Us',
-                'value' => 'support@digitalhub.com',
+                'value' => 'info@nextdigihome.com',
                 'description' => 'We respond within 24 hours',
                 'icon' => 'envelope',
                 'sort_order' => 1,
@@ -22,7 +22,7 @@ class ContactInfoSeeder extends Seeder
             [
                 'type' => 'phone',
                 'title' => 'Call Us',
-                'value' => '+1 (555) 123-4567',
+                'value' => '01918329829',
                 'description' => 'Mon-Fri 9AM-6PM EST',
                 'icon' => 'phone',
                 'sort_order' => 2,
@@ -48,7 +48,10 @@ class ContactInfoSeeder extends Seeder
         ];
 
         foreach ($contacts as $contact) {
-            ContactInfo::create($contact);
+            ContactInfo::updateOrCreate(
+                ['type' => $contact['type']],
+                $contact
+            );
         }
     }
 }

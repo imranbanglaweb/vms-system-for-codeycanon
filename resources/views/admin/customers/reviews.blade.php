@@ -110,10 +110,10 @@
                                 <label class="form-label fw-bold">Filter by Customer</label>
                                 <select class="form-control form-control-sm">
                                     <option>All Customers</option>
-                                    <option>John Doe</option>
-                                    <option>Jane Smith</option>
-                                    <option>Mike Johnson</option>
-                                    <option>Sarah Wilson</option>
+                                    <option>Mohammad Ali</option>
+                                    <option>Fatema Begum</option>
+                                    <option>Rahim Hossain</option>
+                                    <option>Nasrin Akter</option>
                                 </select>
                             </div>
                             <div class="col-md-3 mb-3">
@@ -165,7 +165,7 @@
                                     @php
                                         $customerReviews = [
                                             [
-                                                'customer' => 'John Doe',
+                                                'customer' => 'Mohammad Ali',
                                                 'email' => 'john@example.com',
                                                 'review' => 'Excellent customer service! The support team was very helpful and resolved my issue quickly. Highly recommend this service.',
                                                 'rating' => 5,
@@ -176,7 +176,7 @@
                                                 'helpful' => 12
                                             ],
                                             [
-                                                'customer' => 'Jane Smith',
+                                                'customer' => 'Fatema Begum',
                                                 'email' => 'jane@example.com',
                                                 'review' => 'Good product overall, but the setup process could be simpler. The documentation needs improvement.',
                                                 'rating' => 3,
@@ -187,7 +187,7 @@
                                                 'helpful' => 8
                                             ],
                                             [
-                                                'customer' => 'Mike Johnson',
+                                                'customer' => 'Rahim Hossain',
                                                 'email' => 'mike@example.com',
                                                 'review' => 'Outstanding experience! The team went above and beyond to ensure everything worked perfectly. Will definitely use again.',
                                                 'rating' => 5,
@@ -198,7 +198,7 @@
                                                 'helpful' => 15
                                             ],
                                             [
-                                                'customer' => 'Sarah Wilson',
+                                                'customer' => 'Nasrin Akter',
                                                 'email' => 'sarah@example.com',
                                                 'review' => 'The product works as advertised, but I\'m waiting for a response to my feature request from last week.',
                                                 'rating' => 4,
@@ -209,7 +209,7 @@
                                                 'helpful' => 3
                                             ],
                                             [
-                                                'customer' => 'Tom Brown',
+                                                'customer' => 'Karim Mia',
                                                 'email' => 'tom@example.com',
                                                 'review' => 'Very disappointed with the recent update. It broke several features I rely on. Please fix this urgently.',
                                                 'rating' => 1,
@@ -220,7 +220,7 @@
                                                 'helpful' => 6
                                             ],
                                             [
-                                                'customer' => 'Lisa Davis',
+                                                'customer' => 'Rina Sultana',
                                                 'email' => 'lisa@example.com',
                                                 'review' => 'Great value for money! The quality exceeded my expectations and the delivery was prompt.',
                                                 'rating' => 5,
@@ -434,19 +434,19 @@
                         <div class="form-check mb-2">
                             <input class="form-check-input bulk-review-checkbox" type="checkbox" value="1" id="review1">
                             <label class="form-check-label" for="review1">
-                                <strong>John Doe</strong> - 5★ - "Excellent customer service!"
+                                <strong>Mohammad Ali</strong> - 5★ - "Excellent customer service!"
                             </label>
                         </div>
                         <div class="form-check mb-2">
                             <input class="form-check-input bulk-review-checkbox" type="checkbox" value="2" id="review2">
                             <label class="form-check-label" for="review2">
-                                <strong>Jane Smith</strong> - 3★ - "Good product, needs improvement"
+                                <strong>Fatema Begum</strong> - 3★ - "Good product, needs improvement"
                             </label>
                         </div>
                         <div class="form-check mb-2">
                             <input class="form-check-input bulk-review-checkbox" type="checkbox" value="3" id="review3">
                             <label class="form-check-label" for="review3">
-                                <strong>Mike Johnson</strong> - 5★ - "Outstanding experience!"
+                                <strong>Rahim Hossain</strong> - 5★ - "Outstanding experience!"
                             </label>
                         </div>
                     </div>

@@ -48,9 +48,9 @@ class HeroSliderController extends Controller
 
         // Handle image upload
         if ($request->hasFile('image')) {
-            $imageName = time() . '.' . $request->image->extension();
+            $imageName = time().'.'.$request->image->extension();
             $request->image->move(public_path('images/hero-sliders'), $imageName);
-            $data['image'] = 'images/hero-sliders/' . $imageName;
+            $data['image'] = 'images/hero-sliders/'.$imageName;
         }
 
         HeroSlider::create($data);
@@ -101,9 +101,9 @@ class HeroSliderController extends Controller
                 unlink(public_path($heroSlider->image));
             }
 
-            $imageName = time() . '.' . $request->image->extension();
+            $imageName = time().'.'.$request->image->extension();
             $request->image->move(public_path('images/hero-sliders'), $imageName);
-            $data['image'] = 'images/hero-sliders/' . $imageName;
+            $data['image'] = 'images/hero-sliders/'.$imageName;
         }
 
         $heroSlider->update($data);
@@ -131,7 +131,7 @@ class HeroSliderController extends Controller
      */
     public function toggleStatus(HeroSlider $heroSlider)
     {
-        $heroSlider->update(['is_active' => !$heroSlider->is_active]);
+        $heroSlider->update(['is_active' => ! $heroSlider->is_active]);
 
         return redirect()->back()->with('success', 'Status updated successfully.');
     }

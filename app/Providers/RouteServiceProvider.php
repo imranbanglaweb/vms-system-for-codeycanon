@@ -14,10 +14,21 @@ class RouteServiceProvider extends ServiceProvider
      * The path to the "home" route for your application.
      *
      * This is used by Laravel authentication to redirect users after login.
+     * Users will be redirected to /home which then redirects to frontend dashboard.
      *
      * @var string
      */
     public const HOME = '/home';
+
+    /**
+     * Get the frontend redirect URL for authentication.
+     *
+     * @return string
+     */
+    public static function getFrontendRedirectUrl(): string
+    {
+        return env('FRONTEND_URL', 'http://localhost:3000') . '/dashboard';
+    }
 
     /**
      * The controller namespace for the application.

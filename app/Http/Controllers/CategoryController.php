@@ -92,14 +92,17 @@ $user_type_department_head = DB::table('users')->select('user_type','id')
     if (!empty($user_type_admin)) {
 
         $data = Category::select(
-               [
-                 'categories.id',
-                 'categories.category_name',
-                 'categories.unit_id',
-                 'categories.department_id',
-                 'categories.location_id',
-                ]
-            )
+                [
+                  'categories.id',
+                  'categories.category_name',
+                  'categories.category_slug',
+                  'categories.status',
+                  'categories.created_at',
+                  'categories.unit_id',
+                  'categories.department_id',
+                  'categories.location_id',
+                 ]
+             )
 // return dd('yah');
             // ->where('assign_task_status',Auth::id())
             ->orderBy('categories.id','desc')
@@ -165,21 +168,21 @@ $user_type_department_head = DB::table('users')->select('user_type','id')
 
 
               
-                ->addColumn('action', function($row){
-                    $btn = '<a href="javascript:void(0)" class="btn btn-primary btn-sm">Edit</a>';
-                    return $btn;
-                })
+                ->addColumn('actions', function($row){
+                     $btn = '<a href="javascript:void(0)" class="btn btn-primary btn-sm">Edit</a>';
+                     return $btn;
+                 })
 
                  // ->addColumn('department_name', function (Category $categories) {
                  //         return $categories->departmentName->department_name;
                  //    })
               
                   
-                ->rawColumns(['action','changed_status','view','created_by','department_name'])
+                ->rawColumns(['actions','changed_status','view','created_by','department_name'])
                 ->make(true);
         }
 
-        return view('admin.dashboard.category.index',
+        return view('admin.categories.index',
           compact('location_lists','department_lists')
               );
     }

@@ -11,7 +11,7 @@ class TestimonialsSeeder extends Seeder
     {
         $testimonials = [
             [
-                'name' => 'Sarah Mitchell',
+                'name' => 'Fatima Rahman',
                 'position' => 'CEO',
                 'company' => 'TechStart Inc.',
                 'content' => 'The website templates saved us months of development time. Professional quality and easy to customize. Our conversion rate increased by 40%!',
@@ -20,7 +20,7 @@ class TestimonialsSeeder extends Seeder
                 'is_active' => true,
             ],
             [
-                'name' => 'Marcus Rodriguez',
+                'name' => 'Ahmed Rahman',
                 'position' => 'Marketing Director',
                 'company' => 'GrowthCo',
                 'content' => 'Outstanding automation tools! We automated our entire lead generation process and saw a 300% increase in qualified leads within 2 months.',
@@ -29,7 +29,7 @@ class TestimonialsSeeder extends Seeder
                 'is_active' => true,
             ],
             [
-                'name' => 'Jennifer Liu',
+                'name' => 'Ayesha Begum',
                 'position' => 'Founder',
                 'company' => 'DesignStudio',
                 'content' => 'The customer support is exceptional. Every product comes with detailed documentation and the team responds within hours, not days.',

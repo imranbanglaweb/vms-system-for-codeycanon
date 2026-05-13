@@ -37,5 +37,9 @@ class Setting extends Model
         'mail_encryption',
         'mail_from_address',
         'mail_from_name',
+        // Email Templates
+        'welcome_email_template',
+        'order_confirmation_template',
+        'password_reset_template',
     ];
 }

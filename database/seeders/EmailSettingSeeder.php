@@ -39,12 +39,12 @@ class EmailSettingSeeder extends Seeder
         Setting::updateOrCreate(
             ['id' => 1],
             array_merge([
-                'site_title' => 'গাড়িবন্ধু ৩৬০',
-                'site_description' => 'গাড়িবন্ধু ৩৬০',
-                'admin_title' => 'গাড়িবন্ধু ৩৬০',
+                'site_title' => 'next Digi Home',
+                'site_description' => 'Next Digi Home Bd',
+                'admin_title' => 'Next Digi Home Bd',
                 'admin_description' => 'All-in-One Fleet & Transport Automation System',
                 'site_logo' => null,
-                'site_copyright_text' => '© 2026 Transport Management System. All rights reserved.',
+                'site_copyright_text' => '© 2026 Next Digi Home. All rights reserved.',
                 'admin_logo' => null,
                 'status' => 1,
                 'created_by' => 1,

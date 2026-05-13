@@ -66,9 +66,20 @@ class ContentManagementController extends Controller
 
     public function getContactContent()
     {
+        $contactInfo = ContactInfo::active()->ordered()->get()->map(function ($info) {
+            return [
+                'id' => $info->id,
+                'type' => $info->type,
+                'label' => $info->title,
+                'value' => $info->value,
+                'description' => $info->description,
+                'icon' => $info->icon,
+            ];
+        });
+
         $data = [
             'hero' => PageContent::page('contact')->section('hero')->active()->first(),
-            'contact_info' => ContactInfo::active()->ordered()->get(),
+            'contact_info' => $contactInfo,
             'faq' => PageContent::page('contact')->section('faq')->active()->ordered()->get(),
         ];
 

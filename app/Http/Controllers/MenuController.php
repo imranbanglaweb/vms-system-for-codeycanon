@@ -14,32 +14,43 @@ class MenuController extends Controller
     {
         $this->middleware('permission:system-configure')->except(['index', 'show']);
     }
+
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-        // For client-side DataTables, we'll load all menus with relationships
+        // Load all menus with relationships
         $menus = Menu::with(['parent', 'children', 'creator', 'updater'])
             ->orderBy('menu_order')
             ->get();
 
-        // Prepare data for DataTables
-        $menuData = $menus->map(function($menu, $index) {
-            return [
-                'DT_RowIndex' => $index + 1,
-                'menu_name' => $menu->menu_name,
-                'menu_type' => $menu->menu_parent == 0 ? 'Parent' : 'Child',
-                'menu_icon' => $menu->menu_icon ? '<i class="fa ' . $menu->menu_icon . '"></i>' : '-',
-                'menu_url' => $menu->menu_url ?: '-',
-                'menu_permission' => $menu->menu_permission ?: '-',
-                'parent_name' => $menu->parent ? $menu->parent->menu_name : '-',
-                'created_at' => $menu->created_at->format('M d, Y'),
-                'action' => view('admin.dashboard.menus.partials.actions', compact('menu'))->render()
-            ];
-        });
+        // Build hierarchical structure
+        $hierarchicalMenus = $this->buildMenuHierarchy($menus);
 
-        return view('admin.dashboard.menus.index', compact('menus', 'menuData'));
+        return view('admin.dashboard.menus.index', compact('hierarchicalMenus', 'menus'));
+    }
+
+    /**
+     * Build hierarchical menu structure
+     */
+    private function buildMenuHierarchy($menus, $parentId = 0, $level = 0)
+    {
+        $hierarchy = [];
+
+        foreach ($menus as $menu) {
+            if ($menu->menu_parent == $parentId) {
+                $menu->level = $level;
+                $menu->has_children = $menu->children->count() > 0;
+                $hierarchy[] = $menu;
+
+                // Recursively get children
+                $children = $this->buildMenuHierarchy($menus, $menu->id, $level + 1);
+                $hierarchy = array_merge($hierarchy, $children);
+            }
+        }
+
+        return $hierarchy;
     }
 
     /**
@@ -82,7 +93,7 @@ class MenuController extends Controller
         $originalSlug = $slug;
         $counter = 1;
         while (Menu::where('menu_slug', $slug)->exists()) {
-            $slug = $originalSlug . '-' . $counter;
+            $slug = $originalSlug.'-'.$counter;
             $counter++;
         }
 
@@ -111,6 +122,7 @@ class MenuController extends Controller
     public function show(Menu $menu)
     {
         $menu->load('parent', 'children');
+
         return view('admin.dashboard.menus.show', compact('menu'));
     }
 
@@ -134,7 +146,7 @@ class MenuController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'menu_name' => 'required|string|max:255',
-            'menu_slug' => 'nullable|string|max:255|unique:menus,menu_slug,' . $menu->id,
+            'menu_slug' => 'nullable|string|max:255|unique:menus,menu_slug,'.$menu->id,
             'menu_icon' => 'nullable|string|max:255',
             'menu_url' => 'nullable|string|max:255',
             'menu_permission' => 'nullable|string|max:255',
@@ -155,7 +167,7 @@ class MenuController extends Controller
         $originalSlug = $slug;
         $counter = 1;
         while (Menu::where('menu_slug', $slug)->where('id', '!=', $menu->id)->exists()) {
-            $slug = $originalSlug . '-' . $counter;
+            $slug = $originalSlug.'-'.$counter;
             $counter++;
         }
 

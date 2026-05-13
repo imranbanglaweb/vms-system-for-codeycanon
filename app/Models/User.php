@@ -30,6 +30,9 @@ class User extends Authenticatable
         'cell_phone',
         'push_subscription',
         'subscription_plan_id',
+        'social_provider',
+        'social_id',
+        'email_verified_at',
     ];
   
     /**

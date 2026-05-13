@@ -16,6 +16,7 @@ use App\Http\Controllers\Admin\ContactInfoController;
 use App\Http\Controllers\Admin\ReportsController;
 use App\Http\Controllers\Admin\SystemController;
 use App\Http\Controllers\Admin\ProductController;
+use App\Http\Controllers\Admin\OrderController;
 
 // Vehicle & Transport
 use App\Http\Controllers\AIMaintenanceAlertController;
@@ -29,8 +30,8 @@ use App\Http\Controllers\DepartmentEmployeeController;
 use App\Http\Controllers\DepartmentHeadController;
 use App\Http\Controllers\DriverController;
 // Maintenance
-use App\Http\Controllers\EmailLogController;
-use App\Http\Controllers\EmailTemplateController;
+// use App\Http\Controllers\EmailLogController;
+// use App\Http\Controllers\EmailTemplateController;
 use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\GpsDeviceController;
 use App\Http\Controllers\GpsTrackingController;
@@ -62,7 +63,7 @@ use App\Http\Controllers\RequisitionApprovalController;
 use App\Http\Controllers\RequisitionController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\SettingController;
-use App\Http\Controllers\TestEmailController;
+// use App\Http\Controllers\TestEmailController;
 use App\Http\Controllers\TranslationController;
 use App\Http\Controllers\TransportApprovalController;
 use App\Http\Controllers\TripSheetController;
@@ -74,27 +75,27 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
 // ============================================================================
-// EMAIL LOGS ROUTES
+// EMAIL LOGS ROUTES - DISABLED (Controller missing)
 // ============================================================================
-Route::middleware(['auth'])->group(function () {
-    Route::post('emaillogs/{id}/resend', [EmailLogController::class, 'resend'])->name('emaillogs.resend');
-    Route::resource('emaillogs', EmailLogController::class);
-});
+// Route::middleware(['auth'])->group(function () {
+//     Route::post('emaillogs/{id}/resend', [EmailLogController::class, 'resend'])->name('emaillogs.resend');
+//     Route::resource('emaillogs', EmailLogController::class);
+// });
 
 // ============================================================================
-// EMAIL TEMPLATES ROUTES
+// EMAIL TEMPLATES ROUTES - DISABLED (Controllers missing)
 // ============================================================================
-Route::middleware(['auth'])->group(function () {
-    Route::resource('email-templates', EmailTemplateController::class);
-    Route::post('email-templates/toggle-status', [EmailTemplateController::class, 'toggleStatus'])->name('email-templates.toggle-status');
-    Route::post('email-templates/{id}/restore', [EmailTemplateController::class, 'restore'])->name('email-templates.restore');
-    Route::get('email-templates/{id}/preview', [EmailTemplateController::class, 'preview'])->name('email-templates.preview');
+// Route::middleware(['auth'])->group(function () {
+//     Route::resource('email-templates', EmailTemplateController::class);
+//     Route::post('email-templates/toggle-status', [EmailTemplateController::class, 'toggleStatus'])->name('email-templates.toggle-status');
+//     Route::post('email-templates/{id}/restore', [EmailTemplateController::class, 'restore'])->name('email-templates.restore');
+//     Route::get('email-templates/{id}/preview', [EmailTemplateController::class, 'preview'])->name('email-templates.preview');
 
-    // Test Email Routes
-    Route::get('email/test', [TestEmailController::class, 'index'])->name('admin.email.test');
-    Route::post('email/test/preview', [TestEmailController::class, 'preview'])->name('admin.email.test.preview');
-    Route::post('email/test/send', [TestEmailController::class, 'send'])->name('admin.email.test.send');
-});
+//     // Test Email Routes
+//     Route::get('email/test', [TestEmailController::class, 'index'])->name('admin.email.test');
+//     Route::post('email/test/preview', [TestEmailController::class, 'preview'])->name('admin.email.test.preview');
+//     Route::post('email/test/send', [TestEmailController::class, 'send'])->name('admin.email.test.send');
+// });
 
 // ============================================================================
 // 1. AUTHENTICATION ROUTES
@@ -122,10 +123,16 @@ Route::get('/service-worker.js', function () {
 Route::middleware('web')->post('/api/push/subscribe', [PushSubscriptionController::class, 'store']);
 
 Route::middleware(['auth'])->group(function () {
-    Route::redirect('/', 'login');
-
-    // Home & Dashboard
+    // Home route - show backend dashboard for authenticated users
     Route::get('/home', [HomeController::class, 'index'])->name('home');
+
+    // Root path - redirect to home
+    Route::get('/', function () {
+        return redirect()->route('home');
+    });
+
+    // Admin dashboard
+    Route::get('/admin/dashboard', [HomeController::class, 'index'])->name('admin.dashboard');
 
     // AJAX endpoints for dashboard
     Route::get('/admin/dashboard/data', [HomeController::class, 'data'])->name('admin.dashboard.data');
@@ -413,12 +420,16 @@ Route::middleware(['auth'])->prefix('admin')->as('admin.')->group(function () {
 
     // Orders management
     Route::get('orders', [OrderController::class, 'index'])->name('orders.index');
+    Route::get('orders/data', [OrderController::class, 'data'])->name('orders.data');
     Route::get('orders/pending', [OrderController::class, 'pending'])->name('orders.pending');
     Route::get('orders/processing', [OrderController::class, 'processing'])->name('orders.processing');
     Route::get('orders/shipped', [OrderController::class, 'shipped'])->name('orders.shipped');
     Route::get('orders/delivered', [OrderController::class, 'delivered'])->name('orders.delivered');
     Route::get('orders/refunds', [OrderController::class, 'refunds'])->name('orders.refunds');
     Route::get('orders/exports', [OrderController::class, 'exports'])->name('orders.exports');
+    Route::get('orders/{order}', [OrderController::class, 'show'])->name('orders.show');
+    Route::post('orders/{order}/approve', [OrderController::class, 'approve'])->name('orders.approve');
+    Route::post('orders/{order}/reject', [OrderController::class, 'reject'])->name('orders.reject');
 
     // Customers management
     Route::resource('customers', CustomerController::class)->except(['show']);
@@ -488,8 +499,37 @@ Route::middleware(['auth'])->prefix('admin')->as('admin.')->group(function () {
     Route::post('settings/security/update', [App\Http\Controllers\Admin\SettingsController::class, 'updateSecurity'])->name('settings.security.update');
     Route::resource('purchases', PurchaseController::class);
     Route::resource('categories', CategoryController::class);
+    Route::get('categories-data', [CategoryController::class, 'getData'])->name('categories.getData')->withoutMiddleware(['auth']);
+    Route::post('categories/{id}/toggle-status', [CategoryController::class, 'toggleStatus'])->name('categories.toggle-status');
     Route::resource('payments', \App\Http\Controllers\Admin\AdminPaymentController::class);
     Route::resource('users', \App\Http\Controllers\UserController::class);
+
+    // ============================================================================
+    // CONTENT MANAGEMENT (Pages, Hero Sliders, Testimonials, Team Members, Contact Info)
+    // ============================================================================
+    
+    // Pages
+    Route::resource('pages', PageContentController::class);
+    Route::get('pages/data', [PageContentController::class, 'getData'])->name('pages.data');
+    
+    // Hero Sliders
+    Route::resource('hero-sliders', HeroSliderController::class);
+    Route::get('hero-sliders/data', [HeroSliderController::class, 'getData'])->name('hero-sliders.data');
+    Route::post('hero-sliders/{id}/toggle-status', [HeroSliderController::class, 'toggleStatus'])->name('hero-sliders.toggle-status');
+    
+    // Testimonials
+    Route::resource('testimonials', TestimonialsController::class);
+    Route::get('testimonials/data', [TestimonialsController::class, 'getData'])->name('testimonials.data');
+    Route::post('testimonials/{id}/toggle-status', [TestimonialsController::class, 'toggleStatus'])->name('testimonials.toggle-status');
+    
+    // Team Members
+    Route::resource('team-members', TeamMembersController::class);
+    Route::get('team-members/data', [TeamMembersController::class, 'getData'])->name('team-members.data');
+    Route::post('team-members/{id}/toggle-status', [TeamMembersController::class, 'toggleStatus'])->name('team-members.toggle-status');
+    
+    // Contact Info
+    Route::resource('contact-info', ContactInfoController::class);
+    Route::get('contact-info/data', [ContactInfoController::class, 'getData'])->name('contact-info.data');
 });
 
 // Pricing page (accessible without auth)

@@ -701,4 +701,79 @@ class EmailService
             'admin_logo_url' => $adminLogoUrl,
         ];
     }
+
+    /**
+     * Send product purchase confirmation email
+     */
+    public function sendProductPurchaseConfirmation($purchase): bool
+    {
+        $recipients = [$purchase->customer_email];
+
+        if (empty($recipients)) {
+            return false;
+        }
+
+        $data = $this->prepareProductPurchaseData($purchase);
+
+        return $this->sendTemplatedEmail(
+            'product_purchase_confirmation',
+            $recipients,
+            $data
+        );
+    }
+
+    /**
+     * Send product delivery email with download link
+     */
+    public function sendProductDelivery($purchase): bool
+    {
+        $recipients = [$purchase->customer_email];
+
+        if (empty($recipients)) {
+            return false;
+        }
+
+        $data = $this->prepareProductPurchaseData($purchase);
+        $data['download_url'] = route('download', ['token' => $purchase->download_token]);
+
+        return $this->sendTemplatedEmail(
+            'product_delivery',
+            $recipients,
+            $data
+        );
+    }
+
+    /**
+     * Prepare template data for product purchase
+     */
+    protected function prepareProductPurchaseData($purchase): array
+    {
+        $product = $purchase->product;
+        $adminSettings = DB::table('settings')->where('id', 1)->first();
+        $baseUrl = config('app.url', 'http://localhost');
+        $adminLogoUrl = ! empty($adminSettings->admin_logo)
+            ? $baseUrl.'/public/admin_resource/assets/images/'.$adminSettings->admin_logo
+            : $baseUrl.'/public/admin_resource/assets/images/default.png';
+
+        // Generate download URL (route not named, so construct manually)
+        $downloadUrl = $baseUrl . '/api/download?token=' . $purchase->download_token;
+
+        return [
+            'customer_name' => $purchase->customer_name,
+            'customer_email' => $purchase->customer_email,
+            'transaction_id' => $purchase->transaction_id,
+            'product_name' => $product->name,
+            'product_price' => $purchase->price,
+            'quantity' => $purchase->quantity,
+            'total' => $purchase->total,
+            'status' => ucfirst($purchase->status),
+            'download_token' => $purchase->download_token,
+            'download_url' => $downloadUrl,
+            'company_name' => config('app.name', 'Digital Products Store'),
+            'year' => date('Y'),
+            'admin_title' => $adminSettings->admin_title ?? 'Digital Products Store',
+            'admin_description' => $adminSettings->admin_description ?? 'Digital Products Store',
+            'admin_logo_url' => $adminLogoUrl,
+        ];
+    }
 }

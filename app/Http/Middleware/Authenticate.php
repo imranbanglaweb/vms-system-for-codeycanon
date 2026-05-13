@@ -18,4 +18,25 @@ class Authenticate extends Middleware
             return route('login');
         }
     }
+
+    /**
+     * Handle an unauthenticated user.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  array  $guards
+     * @return void
+     *
+     * @throws \Illuminate\Auth\AuthenticationException
+     */
+    protected function unauthenticated($request, array $guards)
+    {
+        if ($request->expectsJson() || $request->is('api/*')) {
+            abort(response()->json([
+                'message' => 'Unauthenticated.',
+                'error' => 'Invalid or expired token'
+            ], 401));
+        }
+
+        parent::unauthenticated($request, $guards);
+    }
 }

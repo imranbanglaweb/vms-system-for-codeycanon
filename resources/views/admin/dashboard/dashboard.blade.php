@@ -760,12 +760,56 @@
             <div class="premium-team-grid">
                 <div class="premium-team-member">
                     <div class="member-avatar" style="background: linear-gradient(135deg, #00d4aa 0%, #8b5cf6 100%);">
-                        <span>AJ</span>
+                        <span>IR</span>
                         <div class="status-dot online"></div>
                     </div>
                     <div class="member-info">
-                        <div class="member-name">Alex Johnson</div>
-                        <div class="member-role">Product Manager</div>
+                        <div class="member-name">Imran Rahman</div>
+                        <div class="member-role">CEO</div>
+                    </div>
+                    <div class="member-stats">
+                        <div class="stat">
+                            <span className="stat-value">24</span>
+                            <span className="stat-label">Products</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="premium-team-member">
+                    <div class="member-avatar" style="background: linear-gradient(135deg, #8b5cf6 0%, #00d4aa 100%);">
+                        <span>BA</span>
+                        <div class="status-dot online"></div>
+                    </div>
+                    <div class="member-info">
+                        <div class="member-name">Bristy Akter</div>
+                        <div class="member-role">Operations Manager</div>
+                    </div>
+                    <div class="member-stats">
+                        <div class="stat">
+                            <span className="stat-value">156</span>
+                            <span className="stat-label">Tasks</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="premium-team-member">
+                    <div class="member-avatar" style="background: linear-gradient(135deg, #ff6b6b 0%, #4ecdc4 100%);">
+                        <span>I</span>
+                        <div class="status-dot online"></div>
+                    </div>
+                    <div class="member-info">
+                        <div class="member-name">Inaya</div>
+                        <div class="member-role">Marketing Specialist</div>
+                    </div>
+                    <div class="member-stats">
+                        <div class="stat">
+                            <span className="stat-value">89</span>
+                            <span className="stat-label">Campaigns</span>
+                        </div>
+                    </div>
+                    <div class="member-info">
+                        <div class="member-name">Imran Rahman</div>
+                        <div class="member-role">CEO</div>
                     </div>
                     <div class="member-stats">
                         <div class="stat">
@@ -777,34 +821,34 @@
 
                 <div class="premium-team-member">
                     <div class="member-avatar" style="background: linear-gradient(135deg, #8b5cf6 0%, #00d4aa 100%);">
-                        <span>SC</span>
+                        <span>BA</span>
                         <div class="status-dot online"></div>
                     </div>
                     <div class="member-info">
-                        <div class="member-name">Sarah Chen</div>
-                        <div class="member-role">Content Creator</div>
+                        <div class="member-name">Bristy Akter</div>
+                        <div class="member-role">Operations Manager</div>
                     </div>
                     <div class="member-stats">
                         <div class="stat">
                             <span class="stat-value">156</span>
-                            <span class="stat-label">Articles</span>
+                            <span class="stat-label">Tasks</span>
                         </div>
                     </div>
                 </div>
 
                 <div class="premium-team-member">
                     <div class="member-avatar" style="background: linear-gradient(135deg, #ff6b6b 0%, #4ecdc4 100%);">
-                        <span>MR</span>
-                        <div class="status-dot away"></div>
+                        <span>I</span>
+                        <div class="status-dot online"></div>
                     </div>
                     <div class="member-info">
-                        <div class="member-name">Marcus Rodriguez</div>
-                        <div class="member-role">DevOps Engineer</div>
+                        <div class="member-name">Inaya</div>
+                        <div class="member-role">Marketing Specialist</div>
                     </div>
                     <div class="member-stats">
                         <div class="stat">
-                            <span class="stat-value">99.9%</span>
-                            <span class="stat-label">Uptime</span>
+                            <span class="stat-value">89</span>
+                            <span class="stat-label">Campaigns</span>
                         </div>
                     </div>
                 </div>

@@ -138,16 +138,15 @@ class ReportsController extends Controller
         // Product categories performance
         $categoryReports = DB::table('product_purchases')
             ->join('products', 'product_purchases.product_id', '=', 'products.id')
-            ->leftJoin('categories', 'products.category_id', '=', 'categories.id')
             ->select(
-                DB::raw('COALESCE(categories.category_name, "Uncategorized") as category_name'),
+                DB::raw('COALESCE(products.category, "Uncategorized") as category_name'),
                 DB::raw('SUM(product_purchases.quantity) as total_units'),
                 DB::raw('SUM(product_purchases.total) as total_revenue'),
                 DB::raw('COUNT(DISTINCT products.id) as products_count')
             )
             ->where('product_purchases.status', 'delivered')
             ->whereBetween('product_purchases.created_at', [$startDate, $endDate])
-            ->groupBy('categories.id', 'categories.category_name')
+            ->groupBy('products.category')
             ->orderBy('total_revenue', 'desc')
             ->get();
 

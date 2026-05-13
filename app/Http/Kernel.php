@@ -72,5 +72,6 @@ class Kernel extends HttpKernel
         'subscription.active' => \App\Http\Middleware\EnsureActiveSubscription::class,
         'quota' => \App\Http\Middleware\CheckQuota::class,
         'LanguageSwitcher' => \App\Http\Middleware\LanguageSwitcher::class,
+        'cors' => \Fruitcake\Cors\HandleCors::class,
     ];
 }

@@ -12,6 +12,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Http;
 
 class PublicApiController extends Controller
 {
@@ -228,5 +229,211 @@ class PublicApiController extends Controller
                 'transaction_id' => $payment->transaction_id
             ]
         ], 201);
+    }
+
+    // Google OAuth
+    public function redirectToGoogle()
+    {
+        $clientId = env('GOOGLE_CLIENT_ID');
+        $redirectUri = env('GOOGLE_REDIRECT_URI', url('/api/auth/google/callback'));
+
+        if (!$clientId) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Google OAuth not configured. Please add GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET to your .env file.'
+            ], 500);
+        }
+
+        $googleAuthUrl = 'https://accounts.google.com/o/oauth2/v2/auth?' . http_build_query([
+            'client_id' => $clientId,
+            'redirect_uri' => $redirectUri,
+            'scope' => 'openid profile email',
+            'response_type' => 'code',
+            'state' => csrf_token(),
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'redirect_url' => $googleAuthUrl
+        ]);
+    }
+
+    public function handleGoogleCallback(Request $request)
+    {
+        $code = $request->get('code');
+        if (!$code) {
+            return redirect(env('FRONTEND_URL', 'http://localhost:3000') . '/signin?error=google_auth_failed');
+        }
+
+        try {
+            $clientId = env('GOOGLE_CLIENT_ID');
+            $clientSecret = env('GOOGLE_CLIENT_SECRET');
+            $redirectUri = env('GOOGLE_REDIRECT_URI', url('/api/auth/google/callback'));
+
+            // Exchange code for access token
+            $tokenResponse = Http::post('https://oauth2.googleapis.com/token', [
+                'client_id' => $clientId,
+                'client_secret' => $clientSecret,
+                'code' => $code,
+                'grant_type' => 'authorization_code',
+                'redirect_uri' => $redirectUri,
+            ]);
+
+            if (!$tokenResponse->successful()) {
+                throw new \Exception('Failed to get access token');
+            }
+
+            $tokenData = $tokenResponse->json();
+            $accessToken = $tokenData['access_token'];
+
+            // Get user info
+            $userResponse = Http::withToken($accessToken)->get('https://www.googleapis.com/oauth2/v2/userinfo');
+
+            if (!$userResponse->successful()) {
+                throw new \Exception('Failed to get user info');
+            }
+
+            $googleUser = $userResponse->json();
+
+            // Find or create user
+            $user = User::where('email', $googleUser['email'])->first();
+
+            if (!$user) {
+                $user = User::create([
+                    'name' => $googleUser['name'],
+                    'email' => $googleUser['email'],
+                    'password' => Hash::make(Str::random(16)),
+                    'email_verified_at' => now(),
+                    'social_provider' => 'google',
+                    'social_id' => $googleUser['id'],
+                ]);
+            } else {
+                // Update social info if not set
+                if (!$user->social_provider) {
+                    $user->update([
+                        'social_provider' => 'google',
+                        'social_id' => $googleUser['id'],
+                    ]);
+                }
+            }
+
+            $token = $user->createToken('api-token')->plainTextToken;
+
+            // Redirect to frontend with success
+            $frontendUrl = env('FRONTEND_URL', 'http://localhost:3000');
+            return redirect($frontendUrl . '/signin?success=google_login&token=' . $token . '&user=' . urlencode(json_encode([
+                'id' => $user->id,
+                'name' => $user->name,
+                'email' => $user->email,
+            ])));
+
+        } catch (\Exception $e) {
+            $frontendUrl = env('FRONTEND_URL', 'http://localhost:3000');
+            return redirect($frontendUrl . '/signin?error=google_auth_failed');
+        }
+    }
+
+    // Facebook OAuth
+    public function redirectToFacebook()
+    {
+        $appId = env('FACEBOOK_APP_ID');
+        $redirectUri = env('FACEBOOK_REDIRECT_URI', url('/api/auth/facebook/callback'));
+
+        if (!$appId) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Facebook OAuth not configured. Please add FACEBOOK_APP_ID and FACEBOOK_APP_SECRET to your .env file.'
+            ], 500);
+        }
+
+        $facebookAuthUrl = 'https://www.facebook.com/v18.0/dialog/oauth?' . http_build_query([
+            'client_id' => $appId,
+            'redirect_uri' => $redirectUri,
+            'scope' => 'email,public_profile',
+            'response_type' => 'code',
+            'state' => csrf_token(),
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'redirect_url' => $facebookAuthUrl
+        ]);
+    }
+
+    public function handleFacebookCallback(Request $request)
+    {
+        $code = $request->get('code');
+        if (!$code) {
+            return redirect(env('FRONTEND_URL', 'http://localhost:3000') . '/signin?error=facebook_auth_failed');
+        }
+
+        try {
+            $appId = env('FACEBOOK_APP_ID');
+            $appSecret = env('FACEBOOK_APP_SECRET');
+            $redirectUri = env('FACEBOOK_REDIRECT_URI', url('/api/auth/facebook/callback'));
+
+            // Exchange code for access token
+            $tokenResponse = Http::get('https://graph.facebook.com/v18.0/oauth/access_token', [
+                'client_id' => $appId,
+                'client_secret' => $appSecret,
+                'code' => $code,
+                'redirect_uri' => $redirectUri,
+            ]);
+
+            if (!$tokenResponse->successful()) {
+                throw new \Exception('Failed to get access token');
+            }
+
+            $tokenData = $tokenResponse->json();
+            $accessToken = $tokenData['access_token'];
+
+            // Get user info
+            $userResponse = Http::get('https://graph.facebook.com/me', [
+                'fields' => 'id,name,email,picture',
+                'access_token' => $accessToken,
+            ]);
+
+            if (!$userResponse->successful()) {
+                throw new \Exception('Failed to get user info');
+            }
+
+            $facebookUser = $userResponse->json();
+
+            // Find or create user
+            $user = User::where('email', $facebookUser['email'])->first();
+
+            if (!$user) {
+                $user = User::create([
+                    'name' => $facebookUser['name'],
+                    'email' => $facebookUser['email'],
+                    'password' => Hash::make(Str::random(16)),
+                    'email_verified_at' => now(),
+                    'social_provider' => 'facebook',
+                    'social_id' => $facebookUser['id'],
+                ]);
+            } else {
+                // Update social info if not set
+                if (!$user->social_provider) {
+                    $user->update([
+                        'social_provider' => 'facebook',
+                        'social_id' => $facebookUser['id'],
+                    ]);
+                }
+            }
+
+            $token = $user->createToken('api-token')->plainTextToken;
+
+            // Redirect to frontend with success
+            $frontendUrl = env('FRONTEND_URL', 'http://localhost:3000');
+            return redirect($frontendUrl . '/signin?success=facebook_login&token=' . $token . '&user=' . urlencode(json_encode([
+                'id' => $user->id,
+                'name' => $user->name,
+                'email' => $user->email,
+            ])));
+
+        } catch (\Exception $e) {
+            $frontendUrl = env('FRONTEND_URL', 'http://localhost:3000');
+            return redirect($frontendUrl . '/signin?error=facebook_auth_failed');
+        }
     }
 }

@@ -38,4 +38,9 @@ class Product extends Model
         'active' => 'boolean',
         'digital' => 'boolean'
     ];
+
+    public function purchases()
+    {
+        return $this->hasMany(ProductPurchase::class);
+    }
 }

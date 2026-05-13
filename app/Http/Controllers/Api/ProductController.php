@@ -38,6 +38,21 @@ class ProductController extends Controller
     }
 
     /**
+     * Get all product categories.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function categories()
+    {
+        $categories = \App\Models\Category::select('id', 'category_name', 'category_slug as slug')
+            ->where('status', 1)
+            ->orderBy('category_name')
+            ->get();
+
+        return response()->json($categories);
+    }
+
+    /**
      * Store a newly created resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
@@ -85,7 +100,10 @@ class ProductController extends Controller
      */
     public function show($id)
     {
-        $product = Product::find($id);
+        // Try numeric ID first, then slug
+        $product = Product::where('id', $id)
+            ->orWhere('slug', $id)
+            ->first();
 
         if (!$product) {
             return response()->json([
