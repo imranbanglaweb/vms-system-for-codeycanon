@@ -223,7 +223,7 @@
                     <div class="col-md-6">
                         <label class="form-label"><strong>Product Thumbnail</strong></label>
                         <div class="text-center mb-3">
-                            <img id="thumbnailPreview" src="{{ $product->thumbnail ? asset('storage/' . $product->thumbnail) : 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTUwIiBoZWlnaHQ9IjE1MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjhmOWZhIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxNiIgZmlsbD0iIzk5YTNhZiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPk5vIEltYWdlPC90ZXh0Pjwvc3ZnPg==' }}" class="img-thumbnail" style="width: 150px; height: 150px; object-fit: cover; border: 2px dashed #dee2e6;">
+                            <img id="thumbnailPreview" src="{{ $product->thumbnail ? asset('public/storage/products/thumbnails/' . $product->thumbnail) : 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTUwIiBoZWlnaHQ9IjE1MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjhmOWZhIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxNiIgZmlsbD0iIzk5YTNhZiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPk5vIEltYWdlPC90ZXh0Pjwvc3ZnPg==' }}" class="img-thumbnail" style="width: 150px; height: 150px; object-fit: cover; border: 2px dashed #dee2e6;">
                         </div>
                         <input type="file" class="form-control" id="thumbnail" name="thumbnail" accept="image/*" onchange="previewThumbnail(this);">
                         <small class="form-text text-muted">
@@ -239,13 +239,16 @@
                         <small class="form-text text-muted">
                             Multiple images allowed. Leave empty to keep current images (Max: 5MB each)
                         </small>
-                        @if($product->images && is_array(json_decode($product->images)))
-                            <div class="mt-2">
-                                <small class="text-muted">Current images:</small>
-                                <div class="d-flex flex-wrap">
-                                    @foreach(json_decode($product->images) as $image)
-                                        <img src="{{ asset('storage/' . $image) }}" class="img-thumbnail me-2 mb-2" style="width: 60px; height: 60px; object-fit: cover;">
-                                    @endforeach
+                         @php
+                             $images = is_string($product->images) ? json_decode($product->images, true) : $product->images;
+                         @endphp
+                         @if($images && is_array($images))
+                             <div class="mt-2">
+                                 <small class="text-muted">Current images:</small>
+                                 <div class="d-flex flex-wrap">
+                                     @foreach($images as $image)
+                                        <img src="{{ asset('public/storage/' . $image) }}" class="img-thumbnail me-2 mb-2" style="width: 60px; height: 60px; object-fit: cover;">
+                                     @endforeach
                                 </div>
                             </div>
                         @endif

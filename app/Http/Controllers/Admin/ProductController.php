@@ -79,12 +79,16 @@ class ProductController extends Controller
             foreach ($request->file('images') as $image) {
                 $images[] = $image->store('products/images', 'public');
             }
-            $data['images'] = json_encode($images);
+            $data['images'] = $images;
         }
 
         Product::create($data);
 
-        return response()->json(['success' => true, 'message' => 'Product created successfully.']);
+        if ($request->ajax() || $request->wantsJson()) {
+            return response()->json(['success' => true, 'message' => 'Product created successfully.']);
+        } else {
+            return redirect()->route('admin.products.index')->with('success', 'Product created successfully.');
+        }
     }
 
     /**
@@ -164,8 +168,8 @@ class ProductController extends Controller
         // Handle images upload
         if ($request->hasFile('images')) {
             // Delete old images
-            if ($product->images) {
-                foreach (json_decode($product->images) as $oldImage) {
+            if ($product->images && is_array($product->images)) {
+                foreach ($product->images as $oldImage) {
                     if (Storage::disk('public')->exists($oldImage)) {
                         Storage::disk('public')->delete($oldImage);
                     }
@@ -175,12 +179,16 @@ class ProductController extends Controller
             foreach ($request->file('images') as $image) {
                 $images[] = $image->store('products/images', 'public');
             }
-            $data['images'] = json_encode($images);
+            $data['images'] = $images;
         }
 
         $product->update($data);
 
-        return response()->json(['success' => true, 'message' => 'Product updated successfully.']);
+        if ($request->ajax() || $request->wantsJson()) {
+            return response()->json(['success' => true, 'message' => 'Product updated successfully.']);
+        } else {
+            return redirect()->route('admin.products.index')->with('success', 'Product updated successfully.');
+        }
     }
 
     /**
@@ -192,7 +200,7 @@ class ProductController extends Controller
 
         $data = [];
         foreach ($products as $product) {
-            $thumbnail = $product->thumbnail ? '<img src="' . asset('storage/' . $product->thumbnail) . '" alt="' . $product->name . '" class="img-thumbnail" style="width: 50px; height: 50px; object-fit: cover;">' : '<div class="bg-light text-center" style="width: 50px; height: 50px; line-height: 50px;"><i class="fas fa-image text-muted"></i></div>';
+            $thumbnail = $product->thumbnail ? '<img src="' . asset('public/storage/' . $product->thumbnail) . '" alt="' . $product->name . '" class="img-thumbnail" style="width: 50px; height: 50px; object-fit: cover;">' : '<div class="bg-light text-center" style="width: 50px; height: 50px; line-height: 50px;"><i class="fas fa-image text-muted"></i></div>';
 
             $price = '$' . number_format($product->price, 2);
             if ($product->compare_price) {
@@ -282,9 +290,12 @@ class ProductController extends Controller
             Storage::disk('public')->delete($product->thumbnail);
         }
         if ($product->images) {
-            foreach (json_decode($product->images) as $image) {
-                if (Storage::disk('public')->exists($image)) {
-                    Storage::disk('public')->delete($image);
+            $images = is_string($product->images) ? json_decode($product->images, true) : $product->images;
+            if (is_array($images)) {
+                foreach ($images as $image) {
+                    if (Storage::disk('public')->exists($image)) {
+                        Storage::disk('public')->delete($image);
+                    }
                 }
             }
         }

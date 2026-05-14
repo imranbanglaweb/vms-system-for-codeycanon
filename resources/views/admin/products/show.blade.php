@@ -25,7 +25,7 @@
                 </div>
                 <div class="card-body text-center">
                     @if($product->thumbnail)
-                        <img src="{{ asset('storage/' . $product->thumbnail) }}" alt="{{ $product->name }}" class="img-fluid rounded shadow mb-3" style="max-height: 300px;">
+                        <img src="{{ asset('public/storage/' . $product->thumbnail) }}" alt="{{ $product->name }}" class="img-fluid rounded shadow mb-3" style="max-height: 300px;">
                     @else
                         <div class="bg-light rounded p-4 mb-3">
                             <i class="fa fa-image fa-3x text-muted"></i>
@@ -33,11 +33,14 @@
                         </div>
                     @endif
 
-                    @if($product->images && is_array(json_decode($product->images)) && count(json_decode($product->images)) > 0)
+                    @php
+                        $galleryImages = is_string($product->images) ? json_decode($product->images, true) : $product->images;
+                    @endphp
+                    @if($galleryImages && is_array($galleryImages) && count($galleryImages) > 0)
                         <h6 class="text-muted mb-2">Gallery Images</h6>
                         <div class="d-flex flex-wrap justify-content-center">
-                            @foreach(json_decode($product->images) as $image)
-                                <img src="{{ asset('storage/' . $image) }}" alt="Gallery" class="img-thumbnail me-2 mb-2" style="width: 80px; height: 80px; object-fit: cover;">
+                            @foreach($galleryImages as $image)
+                                <img src="{{ asset('public/storage/' . $image) }}" alt="Gallery" class="img-thumbnail me-2 mb-2" style="width: 80px; height: 80px; object-fit: cover;">
                             @endforeach
                         </div>
                     @endif
